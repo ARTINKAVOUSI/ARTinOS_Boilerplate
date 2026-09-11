@@ -1,0 +1,2 @@
+import { Effect, type EffectProps } from './effect'
+export function LensFlare({id='lensflare',enabled=true,order=500,threshold=.5,ghostSamples=4,ghostSpacing=.25,ghostAttenuationFactor=25,downSampleRatio=4}:EffectProps&{threshold?:number;ghostSamples?:number;ghostSpacing?:number;ghostAttenuationFactor?:number;downSampleRatio?:number}){return <Effect id={id} type="lensflare" enabled={enabled} order={order} params={{threshold,ghostSamples,ghostSpacing,ghostAttenuationFactor,downSampleRatio}}/>}

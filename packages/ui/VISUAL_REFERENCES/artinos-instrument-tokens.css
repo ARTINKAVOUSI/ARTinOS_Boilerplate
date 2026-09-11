@@ -1,0 +1,242 @@
+/* ARTINOS Instrument — token layer
+   Drop-in replacement for the token blocks in packages/ui/src/theme.css.
+   Load BEFORE theme.css, then delete the :root and .plate-workspace token
+   declarations from theme.css so components resolve against these roles only.
+
+   Three layers, strictly ordered:
+     1. primitives  — raw values, never referenced by components
+     2. roles       — the only thing components may reference
+     3. themes      — reassign roles; never re-declare a component rule
+   ------------------------------------------------------------------------ */
+
+/* 1 — PRIMITIVES ---------------------------------------------------------- */
+:root {
+  /* graphite */
+  --ink-void:#08090A;
+  --ink-stage:#0D0F10;
+  --ink-surface:#121516;
+  --ink-raised:#171A1B;
+  --ink-edge:#1E2223;
+
+  --paper-void:#EDEFEE;
+  --paper-stage:#DDE2E1;
+  --paper-surface:#F5F7F6;
+  --paper-raised:#FFFFFF;
+  --paper-edge:#E2E6E5;
+
+  --chalk-hi:#F2F5F4;
+  --chalk-mid:#B9C2BF;
+  --chalk-low:#8A9491;
+  --chalk-faint:#616B69;
+  --chalk-ghost:#4E5856;
+
+  --slate-hi:#101716;
+  --slate-mid:#28312F;
+  --slate-low:#5A6664;
+  --slate-faint:#8B9694;
+
+  /* signal */
+  --teal-500:#2FB39C;
+  --teal-300:#7FE3D4;
+  --teal-700:#0B7A69;
+  --amber-500:#E0A34E;
+  --rose-500:#F2606F;
+  --azure-500:#8FB8D9;
+
+  /* type */
+  --font-ui:Chivo,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-num:"Chivo Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+
+  --type-display:700 30px/1.1 var(--font-ui);
+  --type-title:600 18px/1.25 var(--font-ui);
+  --type-body:400 13px/1.6 var(--font-ui);
+  --type-label:400 11px/1.35 var(--font-ui);
+  --type-value:400 11px/1.2 var(--font-num);
+  --type-readout:500 12px/1.1 var(--font-num);
+  --type-hero:400 32px/1 var(--font-num);
+  --type-panel:700 10px/1 var(--font-num);
+  --type-section:700 9.5px/1 var(--font-num);
+
+  --track-caps:.16em;
+  --track-panel:.18em;
+
+  /* space — 2px base */
+  --space-1:2px;  --space-2:4px;  --space-3:6px;  --space-4:8px;
+  --space-5:12px; --space-6:16px; --space-7:24px; --space-8:32px;
+
+  /* metrics */
+  --control-h:28px;
+  --control-h-sm:24px;
+  --control-h-lg:32px;
+  --row-gap:6px;
+  --panel-header-h:36px;
+  --command-bar-h:44px;
+  --tab-strip-h:34px;
+  --safe-area:24px;
+
+  --radius-control:5px;
+  --radius-card:8px;
+  --radius-panel:12px;
+  --radius-shell:16px;
+
+  /* motion */
+  --dur-value:70ms;
+  --dur-state:130ms;
+  --dur-surface:220ms;
+  --dur-layout:380ms;
+  --ease-std:cubic-bezier(.2,.7,.2,1);
+  --ease-enter:cubic-bezier(.16,1,.3,1);
+}
+
+/* 2 — ROLES (dark default) ---------------------------------------------- */
+:root {
+  --bg-app:var(--ink-void);
+  --bg-stage:var(--ink-stage);
+  --bg-surface:var(--ink-surface);
+  --bg-raised:var(--ink-raised);
+  --bg-hover:rgba(255,255,255,.05);
+  --bg-active:rgba(255,255,255,.09);
+  --bg-well:rgba(0,0,0,.34);
+  --bg-float:rgba(23,26,27,.86);
+  --bg-scrim:rgba(8,9,10,.6);
+
+  --text-hi:var(--chalk-hi);
+  --text-mid:var(--chalk-mid);
+  --text-low:var(--chalk-low);
+  --text-faint:var(--chalk-faint);
+  --text-ghost:var(--chalk-ghost);
+
+  --line-subtle:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.09);
+  --line-strong:rgba(255,255,255,.14);
+
+  --sig-live:var(--teal-500);
+  --sig-live-hi:var(--teal-300);
+  --sig-live-wash:rgba(47,179,156,.16);
+  --sig-live-line:rgba(47,179,156,.5);
+  --sig-warn:var(--amber-500);
+  --sig-warn-wash:rgba(224,163,78,.14);
+  --sig-fault:var(--rose-500);
+  --sig-fault-wash:rgba(242,96,111,.12);
+  --sig-bind:var(--azure-500);
+  --sig-bind-wash:rgba(143,184,217,.14);
+  --sig-neutral:var(--chalk-ghost);
+
+  --fill-track:rgba(255,255,255,.05);
+  --fill-track-hover:rgba(255,255,255,.08);
+  --tick:rgba(255,255,255,.2);
+
+  /* elevation — one meaning each */
+  --e0-well:inset 0 1px 2px rgba(0,0,0,.6), inset 0 0 0 1px var(--line-subtle);
+  --e1-surface:inset 0 0 0 1px var(--line-subtle);
+  --e2-dock:inset 0 0 0 1px var(--line), inset 0 1px 0 rgba(255,255,255,.07), 0 24px 60px -20px rgba(0,0,0,.9);
+  --e3-float:inset 0 0 0 1px var(--line-strong), 0 28px 64px -18px rgba(0,0,0,.9);
+
+  /* Frost is the dock material in EVERY mode — only the tint changes.
+     Apply as: background:var(--frost-sheen),var(--frost-tint);
+               backdrop-filter:var(--blur-frost); */
+  --frost-tint:rgba(18,21,22,.62);
+  --frost-sheen:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.01) 30%,transparent);
+  --blur-frost:blur(38px) saturate(106%);
+  --blur-float:blur(32px) saturate(105%);
+
+  --focus-ring:0 0 0 1px var(--sig-live-hi), 0 0 0 3px rgba(127,227,212,.16);
+
+  color-scheme:dark;
+}
+
+/* 3 — THEMES ------------------------------------------------------------- */
+
+/* GLASS — clear: no tint at all, blur only; text always over a local scrim */
+[data-theme="glass"]{
+  --frost-tint:rgba(255,255,255,.02);
+  --frost-sheen:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.015) 32%,transparent);
+  --blur-frost:blur(52px) saturate(96%);
+  --bg-surface:rgba(255,255,255,.045);
+  --bg-raised:rgba(255,255,255,.06);
+  --bg-well:rgba(0,0,0,.3);
+  --bg-float:rgba(255,255,255,.07);
+  --line-subtle:rgba(255,255,255,.08);
+  --line:rgba(255,255,255,.12);
+  --line-strong:rgba(255,255,255,.18);
+  --text-mid:#DDE4E2;
+  --text-low:#A7B1AE;
+  --e1-surface:inset 0 0 0 1px var(--line-subtle);
+  --e2-dock:inset 0 0 0 1px var(--line), 0 20px 54px -22px rgba(0,0,0,.7);
+}
+
+/* DARK — frost with a deeper tint; default for long sessions and capture */
+[data-theme="dark"]{
+  --bg-surface:var(--ink-surface);
+  --bg-raised:var(--ink-raised);
+  --bg-float:rgba(20,23,24,.8);
+  --frost-tint:rgba(14,17,18,.74);
+}
+
+/* AUTO — bright canvas behind chrome: deepen the tint, keep the frost */
+[data-theme="auto"][data-backdrop="bright"]{
+  --bg-surface:#101314;
+  --bg-raised:#161A1B;
+  --bg-well:rgba(0,0,0,.42);
+  --line:rgba(255,255,255,.1);
+  --frost-tint:rgba(14,17,18,.7);
+}
+/* AUTO — dark canvas: lift the tint so chrome stays discernible */
+[data-theme="auto"][data-backdrop="dark"]{
+  --bg-surface:#191D1E;
+  --bg-raised:#1F2425;
+  --bg-well:rgba(0,0,0,.3);
+  --line:rgba(255,255,255,.12);
+  --frost-tint:rgba(46,52,53,.5);
+}
+/* Contrast is pinned while a pointer interaction is live — set this attribute
+   on the workspace root for the duration of a drag. */
+[data-interacting="true"]{ --bg-surface:#131718; --bg-raised:#191D1E; }
+
+/* LIGHT — daylight desks and printed reviews */
+[data-theme="light"]{
+  --bg-app:var(--paper-void);
+  --bg-stage:var(--paper-stage);
+  --bg-surface:var(--paper-surface);
+  --bg-raised:var(--paper-raised);
+  --bg-hover:rgba(20,30,28,.05);
+  --bg-active:rgba(20,30,28,.1);
+  --bg-well:rgba(30,40,38,.08);
+  --bg-float:rgba(255,255,255,.9);
+  --bg-scrim:rgba(255,255,255,.7);
+
+  /* frost lightens rather than darkens */
+  --frost-tint:rgba(238,241,240,.66);
+  --frost-sheen:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.2) 32%,transparent);
+  --blur-frost:blur(40px) saturate(112%);
+  --e2-dock:inset 0 0 0 1px var(--line), inset 0 1px 0 rgba(255,255,255,.7), 0 18px 44px -22px rgba(26,34,33,.28);
+
+  --text-hi:var(--slate-hi);
+  --text-mid:var(--slate-mid);
+  --text-low:var(--slate-low);
+  --text-faint:var(--slate-faint);
+  --text-ghost:#A5AEAC;
+
+  --line-subtle:rgba(20,30,28,.09);
+  --line:rgba(20,30,28,.14);
+  --line-strong:rgba(20,30,28,.22);
+
+  --sig-live:var(--teal-700);
+  --sig-live-hi:#0B7A69;
+  --sig-live-wash:rgba(11,122,105,.12);
+  --sig-live-line:rgba(11,122,105,.45);
+
+  --fill-track:rgba(20,30,28,.08);
+  --fill-track-hover:rgba(20,30,28,.13);
+  --tick:rgba(20,30,28,.3);
+
+  --e0-well:inset 0 1px 2px rgba(26,34,33,.14), inset 0 0 0 1px var(--line-subtle);
+  --e3-float:inset 0 0 0 1px var(--line-strong), 0 24px 56px -20px rgba(26,34,33,.32);
+
+  color-scheme:light;
+}
+
+/* Accessibility floor: nothing below 10px, motion opt-out honoured. */
+@media (prefers-reduced-motion:reduce){
+  :root{ --dur-value:0ms; --dur-state:0ms; --dur-surface:0ms; --dur-layout:0ms; }
+}

@@ -1,0 +1,2431 @@
+/* ARTINOS Instrument — component layer
+   ==========================================================================
+   Reference-exact component anatomy, transcribed from
+   "ARTINOS System Reference v2" (sections 05 Components, 06 Patterns).
+
+   This is the TARGET layer. It loads after theme.css so it wins, and legacy
+   .artinos-* rules are deleted into it component by component. Every value
+   here resolves through a role from tokens.css — no primitives, no literals.
+
+   Plate references (PL.xx / AS.xx) map to the reference sheet's own labels.
+   ========================================================================== */
+
+/* ── PL.03  SCRUB CELL ─────────────────────────────────────────────────────
+   One row carries label, binding, value, unit and the drag surface itself.
+   The fill IS the value; the hairline is its exact position. */
+
+.plate-workspace .artinos-scrub-cell {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 84px;
+  align-items: center;
+  width: 100%;
+  height: var(--control-h-sm);
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--bg-row);
+  box-shadow: none;
+  color: var(--text-mid);
+  cursor: ew-resize;
+  user-select: none;
+  touch-action: none;
+  overflow: hidden;
+  transition: background-color var(--dur-state) var(--ease-std), box-shadow var(--dur-state) var(--ease-std);
+}
+
+/* fill — the value. Width comes from --control-t, which the kernel writes
+   directly to the element during a drag, so the gesture repaints without a
+   React render (locked decision 4). */
+.plate-workspace .artinos-scrub-cell > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--control-t, 0) * 100%);
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--bg-row), var(--fill-track));
+  box-shadow: none;
+  pointer-events: none;
+}
+
+/* tick — the exact-value hairline */
+.plate-workspace .artinos-scrub-cell > b {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--control-t, 0) * 100%);
+  width: 1px;
+  border-radius: 0;
+  background: var(--tick);
+  box-shadow: none;
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* detent — appears during the interaction it belongs to, not permanently */
+.plate-workspace .artinos-scrub-detent {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 5px;
+  margin-top: -2.5px;
+  background: var(--line-strong);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-scrub-cell:hover .artinos-scrub-detent,
+.plate-workspace .artinos-scrub-cell[data-state='dragging'] .artinos-scrub-detent { opacity: 1; }
+.plate-workspace .artinos-scrub-cell[data-snapping] .artinos-scrub-detent { background: var(--sig-live-hi); }
+
+.plate-workspace .artinos-scrub-cell > span {
+  position: relative;
+  font: var(--type-label);
+  color: var(--text-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* binding source rides the label — state is never colour alone */
+.plate-workspace .artinos-scrub-cell > span em {
+  margin-left: var(--space-4);
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0.14em;
+  color: var(--sig-live-hi);
+}
+
+.plate-workspace .artinos-scrub-cell > output,
+.plate-workspace .artinos-scrub-cell > input {
+  position: relative;
+  font: var(--type-value);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-hi);
+  text-align: right;
+  background: none;
+  border: 0;
+  outline: none;
+  width: 100%;
+  padding: 0;
+}
+
+/* the unit is always a separate, quieter element (rule 05) */
+.plate-workspace .artinos-scrub-cell > output em {
+  margin-left: var(--space-2);
+  font-size: 8.5px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+
+.plate-workspace .artinos-scrub-cell:hover {
+  background: var(--bg-hover);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+}
+.plate-workspace .artinos-scrub-cell:hover > i {
+  background: linear-gradient(90deg, var(--bg-hover), var(--fill-track-hover));
+}
+.plate-workspace .artinos-scrub-cell:hover > b { background: var(--tick); opacity: 0.7; }
+
+/* DRAG — the mechanical state: signal fill, signal tick, two-ring focus */
+.plate-workspace .artinos-scrub-cell.is-scrubbing,
+.plate-workspace .artinos-scrub-cell[data-state='dragging'] {
+  background: var(--bg-hover);
+  box-shadow: var(--focus-ring);
+}
+.plate-workspace .artinos-scrub-cell.is-scrubbing > i,
+.plate-workspace .artinos-scrub-cell[data-state='dragging'] > i {
+  background: linear-gradient(90deg, var(--sig-live-wash), var(--sig-live-line));
+}
+.plate-workspace .artinos-scrub-cell.is-scrubbing > b,
+.plate-workspace .artinos-scrub-cell[data-state='dragging'] > b { background: var(--sig-live-hi); }
+.plate-workspace .artinos-scrub-cell.is-scrubbing > output,
+.plate-workspace .artinos-scrub-cell[data-state='dragging'] > output { color: var(--sig-live-hi); }
+
+.plate-workspace .artinos-scrub-cell:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* BOUND — externally driven (MIDI, OSC, expression) */
+.plate-workspace .artinos-scrub-cell[data-state='bound'] { background: var(--sig-bind-wash); }
+.plate-workspace .artinos-scrub-cell[data-state='bound'] > i {
+  background: linear-gradient(90deg, var(--sig-bind-wash), var(--sig-bind));
+}
+.plate-workspace .artinos-scrub-cell[data-state='bound'] > b { background: var(--sig-bind); }
+.plate-workspace .artinos-scrub-cell[data-state='bound'] > output { color: var(--sig-bind); }
+
+/* WARN — degraded but proceeding */
+.plate-workspace .artinos-scrub-cell[data-state='warn'] { background: var(--sig-warn-wash); }
+.plate-workspace .artinos-scrub-cell[data-state='warn'] > i {
+  background: linear-gradient(90deg, var(--sig-warn-wash), var(--sig-warn));
+}
+.plate-workspace .artinos-scrub-cell[data-state='warn'] > b,
+.plate-workspace .artinos-scrub-cell[data-state='warn'] > output { color: var(--sig-warn); background: var(--sig-warn); }
+.plate-workspace .artinos-scrub-cell[data-state='warn'] > output { background: none; }
+
+/* FAULT — stopped, invalid. Carries text, never colour alone. */
+.plate-workspace .artinos-scrub-cell[data-state='fault'] {
+  background: var(--sig-fault-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-fault);
+}
+.plate-workspace .artinos-scrub-cell[data-state='fault'] > i { background: transparent; }
+.plate-workspace .artinos-scrub-cell[data-state='fault'] > b { background: transparent; }
+.plate-workspace .artinos-scrub-cell[data-state='fault'] > output { color: var(--sig-fault); }
+
+.plate-workspace .artinos-scrub-cell.is-disabled,
+.plate-workspace .artinos-scrub-cell[data-disabled] {
+  cursor: default;
+  background: var(--bg-row);
+  color: var(--text-ghost);
+}
+.plate-workspace .artinos-scrub-cell.is-disabled > output { color: var(--text-ghost); }
+
+/* ── AS.01  PANEL CARD ─────────────────────────────────────────────────────
+   Inset card. Hairline inside, never between two of them (rule 04).
+
+   The header runs on --control-h (28px), not --panel-header-h (36px): at 36
+   it read as dead weight over a name and a collapse glyph. 28 is still one
+   of the three token heights (rule 06), just the smaller of them. */
+
+.plate-workspace .artinos-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--control-h);
+  min-height: var(--control-h);
+  padding: 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--line-subtle);
+  background: transparent;
+}
+.plate-workspace .artinos-panel-header > button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: var(--type-panel);
+  letter-spacing: var(--track-panel);
+  text-transform: uppercase;
+  color: var(--text-hi);
+  text-align: left;
+}
+.plate-workspace .artinos-panel-header > button:hover { background: transparent; color: var(--text-hi); }
+/* the count rides the name, quieter */
+.plate-workspace .artinos-panel-header > button span:last-child {
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+}
+
+.plate-workspace .artinos-panel-body {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-5) var(--space-5) 13px;
+  background: transparent;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+/* section label + its rule */
+.plate-workspace .artinos-section { padding: 0; }
+.plate-workspace .artinos-section + .artinos-section { margin-top: var(--space-5); border-top: 0; }
+.plate-workspace .artinos-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  font: var(--type-section);
+  letter-spacing: var(--track-panel);
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.plate-workspace .artinos-section-title b { font-weight: 500; }
+.plate-workspace .artinos-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), transparent);
+}
+.plate-workspace .artinos-section-title small {
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: none;
+  color: var(--text-faint);
+}
+.plate-workspace .artinos-stack { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* ── PropertyRow ──────────────────────────────────────────────────────────
+   One consistent relationship between label, control, unit, status and actions.
+   The scrub cell already carries its own label and value, so in the default
+   density the row is a pass-through and the control spans it. */
+
+.plate-workspace .artinos-property-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.plate-workspace .artinos-property-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-h-sm);
+}
+.plate-workspace .artinos-property-control { flex: 1; min-width: 0; }
+
+/* The control owns the label in default density; the row's own label is for
+   compact and multiline, where the control has no room for one. */
+.plate-workspace .artinos-property-row[data-density='default'] > .artinos-property-main > .artinos-property-label {
+  display: none;
+}
+.plate-workspace .artinos-property-label {
+  flex: 0 0 96px;
+  font: var(--type-label);
+  color: var(--text-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plate-workspace .artinos-property-binding {
+  margin-left: var(--space-3);
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0.14em;
+  color: var(--sig-bind);
+}
+.plate-workspace .artinos-property-unit {
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+.plate-workspace .artinos-property-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  opacity: 0;
+  transition: opacity var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-property-row:hover .artinos-property-actions,
+.plate-workspace .artinos-property-row:focus-within .artinos-property-actions { opacity: 1; }
+.plate-workspace .artinos-property-reset {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-low);
+  font-size: 10px;
+}
+.plate-workspace .artinos-property-reset:hover { background: var(--bg-hover); color: var(--text-hi); }
+.plate-workspace .artinos-property-reset:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Faults carry text — state is never colour alone. */
+.plate-workspace .artinos-property-message {
+  margin: 0 0 0 10px;
+  font: var(--type-label);
+  font-size: 10px;
+  color: var(--text-low);
+}
+.plate-workspace .artinos-property-row[data-state='fault'] .artinos-property-message { color: var(--sig-fault); }
+.plate-workspace .artinos-property-row[data-state='warn'] .artinos-property-message { color: var(--sig-warn); }
+.plate-workspace .artinos-property-row[data-disabled] { opacity: 0.55; pointer-events: none; }
+
+.plate-workspace .artinos-property-row[data-density='multiline'] > .artinos-property-main { flex-wrap: wrap; }
+.plate-workspace .artinos-property-row[data-density='multiline'] .artinos-property-label { flex: 1 0 100%; }
+.plate-workspace .artinos-property-row[data-density='micro'] .artinos-property-label { display: none; }
+
+/* toggle caption — the ON/OFF that keeps state off colour alone */
+.plate-workspace .artinos-toggle-state {
+  margin-left: var(--space-3);
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  color: var(--text-low);
+}
+.plate-workspace .artinos-toggle[data-state='checked'] .artinos-toggle-state { color: var(--sig-live-hi); }
+
+/* ── PL.01  BUTTON ────────────────────────────────────────────────────────
+   Three heights cover the surface. Mono caps, wide tracking. */
+
+.plate-workspace .artinos-button,
+.plate-workspace .artinos-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  height: var(--control-h);
+  padding: 0 13px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--bg-hover);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  transition: background-color var(--dur-state) var(--ease-std), box-shadow var(--dur-state) var(--ease-std),
+    color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-icon-button {
+  width: var(--control-h);
+  padding: 0;
+  letter-spacing: 0;
+}
+.plate-workspace .artinos-button:hover,
+.plate-workspace .artinos-icon-button:hover {
+  background: var(--bg-active);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text-hi);
+}
+/* armed / active — signal, not decoration */
+.plate-workspace .artinos-button.is-active,
+.plate-workspace .artinos-icon-button.is-active {
+  background: var(--sig-live-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-live-line);
+  color: var(--sig-live-hi);
+}
+.plate-workspace .artinos-button:focus-visible,
+.plate-workspace .artinos-icon-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.plate-workspace .artinos-button:disabled,
+.plate-workspace .artinos-icon-button:disabled {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+  color: var(--text-ghost);
+  opacity: 1;
+}
+.plate-workspace .artinos-button.is-danger {
+  background: var(--sig-fault-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-fault);
+  color: var(--sig-fault);
+}
+.plate-workspace .artinos-button.is-ghost { background: transparent; box-shadow: none; color: var(--text-low); }
+.plate-workspace .artinos-button.is-small { height: var(--control-h-sm); padding: 0 11px; font-size: 8.5px; }
+.plate-workspace .artinos-button.is-large { height: var(--control-h-lg); padding: 0 var(--space-6); font-size: 10.5px; }
+
+/* ── PL.02  SEGMENTED · TABS ──────────────────────────────────────────────
+   Recessed well; the active item carries an inset accent bar, never a border. */
+
+.plate-workspace .artinos-segmented,
+.plate-workspace .artinos-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+  /* A tab row longer than its panel scrolls rather than pushing the panel wide.
+     inline-flex would size to content and overflow the card. */
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.plate-workspace .artinos-segmented::-webkit-scrollbar,
+.plate-workspace .artinos-tabs::-webkit-scrollbar { display: none; }
+.plate-workspace .artinos-segmented button,
+.plate-workspace .artinos-tabs button { flex: 0 0 auto; }
+.plate-workspace .artinos-segmented button,
+.plate-workspace .artinos-tabs button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 26px;
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+  transition: background-color var(--dur-state) var(--ease-std), color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-segmented button + button,
+.plate-workspace .artinos-tabs button + button { border-left: 1px solid var(--line-subtle); }
+.plate-workspace .artinos-segmented button:hover,
+.plate-workspace .artinos-tabs button:hover { background: var(--bg-hover); color: var(--text-mid); }
+.plate-workspace .artinos-segmented button.is-active,
+.plate-workspace .artinos-tabs button.is-active {
+  background: var(--bg-hover);
+  box-shadow: none;
+  color: var(--text-hi);
+  font-weight: 500;
+}
+.plate-workspace .artinos-segmented button.is-active::after,
+.plate-workspace .artinos-tabs button.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--sig-live);
+}
+
+/* ── PL.05  FIELDS ────────────────────────────────────────────────────────
+   Recessed means editable (rule 02). */
+
+.plate-workspace .artinos-search,
+.plate-workspace .artinos-control input:not([type='range']):not([type='checkbox']):not([type='color']),
+.plate-workspace .artinos-control select,
+.plate-workspace .artinos-number,
+.plate-workspace .artinos-vector input {
+  height: var(--control-h);
+  padding: 0 11px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 300;
+  color: var(--text-hi);
+  outline: none;
+  transition: box-shadow var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-number,
+.plate-workspace .artinos-vector input {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.plate-workspace .artinos-search::placeholder,
+.plate-workspace input::placeholder { color: var(--text-low); }
+.plate-workspace .artinos-search:focus,
+.plate-workspace .artinos-control input:focus,
+.plate-workspace .artinos-control select:focus,
+.plate-workspace .artinos-number:focus,
+.plate-workspace .artinos-vector input:focus {
+  box-shadow: var(--e0-well), var(--focus-ring);
+}
+.plate-workspace .artinos-control select { text-transform: none; }
+
+/* toggle — recessed track, square knob */
+.plate-workspace .artinos-toggle i {
+  position: relative;
+  width: 34px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+  transition: box-shadow var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-toggle i::after {
+  content: '';
+  position: absolute;
+  left: 1.5px;
+  top: 1.5px;
+  bottom: 1.5px;
+  width: 15px;
+  border-radius: 2px;
+  background: var(--bg-active);
+  transition: left var(--dur-state) var(--ease-std), background-color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-toggle input:checked + i { box-shadow: var(--e0-well), inset 0 0 0 1px var(--sig-live-line); }
+.plate-workspace .artinos-toggle input:checked + i::after { left: 17.5px; background: var(--sig-live); }
+
+/* checkbox — the inline-flag idiom: a 14px square, not a track */
+.plate-workspace .artinos-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 300;
+  color: var(--text-mid);
+  cursor: pointer;
+}
+.plate-workspace .artinos-checkbox[data-disabled] { color: var(--text-ghost); cursor: default; }
+.plate-workspace .artinos-checkbox input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.plate-workspace .artinos-checkbox i {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background: var(--bg-well);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  transition: box-shadow var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-checkbox i::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--sig-live);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity var(--dur-state) var(--ease-std), transform var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-checkbox input:checked + i { box-shadow: inset 0 0 0 1px var(--sig-live-line); }
+.plate-workspace .artinos-checkbox input:checked + i::after { opacity: 1; transform: none; }
+.plate-workspace .artinos-checkbox input:focus-visible + i { box-shadow: var(--focus-ring); }
+
+/* ── PL.06  STATUS · CHIP · KEY ───────────────────────────────────────────
+   One hue per state, with a 2px source bar on the leading edge. */
+
+.plate-workspace .artinos-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px 0 12px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--bg-hover);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+  overflow: hidden;
+}
+.plate-workspace .artinos-badge::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--sig-neutral);
+}
+.plate-workspace .artinos-badge.is-live,
+.plate-workspace .artinos-badge.is-ok {
+  background: var(--sig-live-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-live-line);
+  color: var(--sig-live-hi);
+}
+.plate-workspace .artinos-badge.is-live::before,
+.plate-workspace .artinos-badge.is-ok::before { background: var(--sig-live); }
+.plate-workspace .artinos-badge.is-warn {
+  background: var(--sig-warn-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-warn);
+  color: var(--sig-warn);
+}
+.plate-workspace .artinos-badge.is-warn::before { background: var(--sig-warn); }
+.plate-workspace .artinos-badge.is-error,
+.plate-workspace .artinos-badge.is-fault {
+  background: var(--sig-fault-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-fault);
+  color: var(--sig-fault);
+}
+.plate-workspace .artinos-badge.is-error::before,
+.plate-workspace .artinos-badge.is-fault::before { background: var(--sig-fault); }
+
+/* ── PL.07  PROGRESS · METER ──────────────────────────────────────────────
+   3px rail, signal fill. */
+
+.plate-workspace .artinos-meter > div,
+.plate-workspace .artinos-progress {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--fill-track);
+  overflow: hidden;
+}
+.plate-workspace .artinos-meter i,
+.plate-workspace .artinos-progress i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--sig-live-line), var(--sig-live));
+}
+.plate-workspace .artinos-meter output,
+.plate-workspace .artinos-row output,
+.plate-workspace .artinos-keyvalue output {
+  font: var(--type-value);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-hi);
+  text-align: right;
+}
+
+/* ── Instrument controls: knob · XY pad · scope · envelope · gradient ─────*/
+
+.plate-workspace .artinos-knob {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+.plate-workspace .artinos-knob-dial {
+  position: relative;
+  width: var(--control-h-lg);
+  height: var(--control-h-lg);
+  border-radius: 50%;
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+  cursor: ns-resize;
+  touch-action: none;
+}
+.plate-workspace .artinos-knob-dial:focus-visible { outline: none; box-shadow: var(--e0-well), var(--focus-ring); }
+/* the pointer is the value; the arc behind it is the travel */
+.plate-workspace .artinos-knob-dial > i {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  width: 2px;
+  height: 38%;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--sig-live-hi);
+  transform-origin: 50% 100%;
+}
+.plate-workspace .artinos-knob-dial[data-state='dragging'] > i { box-shadow: 0 0 8px var(--sig-live-line); }
+
+.plate-workspace .artinos-xypad {
+  position: relative;
+  height: 100px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background:
+    linear-gradient(var(--line-subtle) 1px, transparent 1px) 0 0 / 100% 25%,
+    linear-gradient(90deg, var(--line-subtle) 1px, transparent 1px) 0 0 / 25% 100%,
+    var(--bg-well);
+  box-shadow: var(--e0-well);
+  touch-action: none;
+}
+.plate-workspace .artinos-xypad > i {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--sig-live);
+  box-shadow: 0 0 0 1px var(--bg-app), 0 0 10px var(--sig-live-line);
+}
+.plate-workspace .artinos-xypad[data-state='dragging'] { box-shadow: var(--e0-well), var(--focus-ring); }
+
+.plate-workspace .artinos-waveform,
+.plate-workspace .artinos-envelope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.plate-workspace .artinos-waveform svg,
+.plate-workspace .artinos-envelope svg {
+  width: 100%;
+  height: 46px;
+  border-radius: var(--radius-control);
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+}
+.plate-workspace .artinos-waveform polyline,
+.plate-workspace .artinos-envelope path {
+  stroke: var(--sig-live);
+  stroke-width: 1;
+}
+.plate-workspace .artinos-envelope circle { fill: var(--sig-live-hi); }
+.plate-workspace .artinos-waveform[data-state='warn'] polyline { stroke: var(--sig-warn); }
+.plate-workspace .artinos-waveform[data-state='fault'] polyline { stroke: var(--sig-fault); }
+
+.plate-workspace .artinos-gradient-bar {
+  position: relative;
+  height: 18px;
+  border-radius: var(--radius-control);
+  box-shadow: var(--e1-surface);
+}
+.plate-workspace .artinos-gradient-bar > i {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text-hi);
+  box-shadow: 0 0 0 1px var(--bg-app);
+}
+
+/* ── PL.08  MENU · TOOLTIP · TOAST ────────────────────────────────────────
+   Floating layer: strong edge, tightest shadow. */
+
+.plate-workspace .artinos-panel-menu,
+.plate-workspace .artinos-menu,
+.plate-workspace .artinos-popover {
+  padding: 5px;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--bg-float);
+  box-shadow: var(--e3-float);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+}
+.plate-workspace .artinos-panel-menu button,
+.plate-workspace .artinos-menu button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  height: 27px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  font: var(--type-label);
+  font-size: 11.5px;
+  color: var(--text-mid);
+  text-align: left;
+}
+.plate-workspace .artinos-panel-menu button:hover,
+.plate-workspace .artinos-menu button:hover { background: var(--bg-hover); color: var(--text-hi); }
+
+/* ── PL.09  OUTLINER · TABLE ──────────────────────────────────────────────*/
+
+.plate-workspace .artinos-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--control-h-sm);
+  padding: 0 10px;
+  border-radius: var(--radius-control);
+  font: var(--type-label);
+  color: var(--text-mid);
+}
+.plate-workspace .artinos-row:hover { background: var(--bg-hover); }
+.plate-workspace .artinos-row.is-active,
+.plate-workspace .artinos-row.is-selected { background: var(--bg-active); color: var(--text-hi); }
+
+/* the scene tree is the same outliner: a recessed well, 25px rows, no per-row
+   border — the reference divides rows with background, never a line. */
+.plate-workspace .artinos-scene-tree {
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg-well) 58%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+  overflow: hidden auto;
+  max-height: 320px;
+}
+.plate-workspace .artinos-scene-tree button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  height: 25px;
+  min-height: 25px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--text-mid);
+  text-align: left;
+}
+.plate-workspace .artinos-scene-tree button:hover { background: var(--bg-hover); }
+.plate-workspace .artinos-scene-tree button.is-selected {
+  background: var(--sig-live-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-live-line);
+}
+.plate-workspace .artinos-scene-tree b {
+  font-weight: 300;
+  color: var(--text-hi);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plate-workspace .artinos-scene-tree small {
+  margin-left: auto;
+  font: var(--type-section);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-ghost);
+}
+
+/* ── SHELL: rail, tab strip, status line ─────────────────────────────────
+   Vertical tabs when the dock sits at the leading edge. The accent bar is
+   inset, never a border. */
+
+.plate-workspace .plate-panel-rail button {
+  position: relative;
+  border-radius: 3px;
+  background: transparent;
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.plate-workspace .plate-panel-rail button.is-active {
+  background: var(--bg-hover);
+  color: var(--text-hi);
+  box-shadow: none;
+}
+.plate-workspace .plate-panel-rail button.is-active::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  background: var(--sig-live);
+}
+
+/* SH.01 — the dock is one frosted card, inset from the shell edges. */
+.plate-workspace > .artinos-dock {
+  border-radius: var(--radius-panel);
+  background: var(--frost-sheen), var(--frost-tint);
+  backdrop-filter: var(--blur-frost);
+  -webkit-backdrop-filter: var(--blur-frost);
+  box-shadow: var(--e2-dock);
+  overflow: hidden;
+}
+
+.plate-workspace .plate-dock-toolbar {
+  height: var(--tab-strip-h);
+  min-height: var(--tab-strip-h);
+  /* Matches .plate-dock-content's inset. At 13px the strip sat 7px inboard of
+     the panel column beneath it, so the tab strip and the first panel edge
+     disagreed about where the dock starts. */
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--line-subtle);
+  background: transparent;
+}
+/* AS.01 — a docked panel is a group card, not a window: drag-to-move and
+   float chrome belong to a floating panel, where there is actually a window
+   to reposition. Close stays — hiding a panel is not a windowing action,
+   it's how you get the space back, and that's needed docked or not. */
+.plate-workspace .artinos-dock .artinos-panel-float,
+.plate-workspace .artinos-dock .artinos-panel-float-move {
+  display: none !important;
+}
+.plate-workspace .artinos-panel.artinos-panel-float .artinos-panel-close,
+.plate-workspace .artinos-panel.artinos-panel-float .artinos-panel-float,
+.plate-workspace .artinos-panel.artinos-panel-float .artinos-panel-float-move {
+  display: grid !important;
+}
+
+/* ── MONITOR BAR ──────────────────────────────────────────────────────────
+   The strip's status cluster: backend, fps, load, micrograph, quality. The
+   frame-time readout is dropped — fps already says the same thing, and the
+   reference's cluster carries backend · fps · sparkline · load, not a
+   millisecond figure. */
+.plate-workspace .plate-toolbar-status .artinos-hud-readout.hud-frame { display: none; }
+
+.plate-workspace .plate-toolbar-status .artinos-hud {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-summary {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  height: 27px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--bg-row);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-backend {
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--sig-live-hi);
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-readout {
+  font-family: var(--font-num);
+  font-size: 11.5px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-hi);
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-readout small,
+.plate-workspace .plate-toolbar-status .artinos-hud-load small {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+
+/* Brand chip — the mark and the name. Nothing after it: the tab strip already
+   says which panel is showing (reference SH.01). */
+.plate-workspace .plate-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.plate-workspace .plate-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-control);
+  background: var(--sig-live);
+  color: var(--bg-app);
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 700;
+}
+.plate-workspace .plate-brand b {
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  color: var(--text-hi);
+}
+
+/* ── CONSOLE TOAST ────────────────────────────────────────────────────────
+   The console has something to say only when something happens, so it floats
+   bottom-right beneath the dock and fades out when activity stops. */
+
+.plate-workspace .plate-console-toast {
+  position: absolute;
+  right: var(--space-8);
+  bottom: calc(var(--bottom-height, 276px) + var(--space-7));
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 420px;
+  padding: 9px 11px;
+  border-radius: 3px;
+  background: var(--bg-float);
+  box-shadow: var(--e3-float);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+  font: var(--type-label);
+  color: var(--text-mid);
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity var(--dur-surface) var(--ease-enter), transform var(--dur-surface) var(--ease-enter);
+}
+.plate-workspace .plate-console-toast[data-visible] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.plate-workspace .plate-console-toast > i {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--sig-live);
+}
+.plate-workspace .plate-console-toast[data-level='warn'] > i { background: var(--sig-warn); }
+.plate-workspace .plate-console-toast[data-level='error'] > i { background: var(--sig-fault); }
+.plate-workspace .plate-console-toast-message {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plate-workspace .plate-console-toast-open {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 3px;
+  padding: 2px 6px;
+  background: transparent;
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+.plate-workspace .plate-console-toast-open:hover { background: var(--bg-hover); color: var(--text-hi); }
+.plate-workspace .plate-console-toast-open:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ── AS.03  DIALOG OVER SCRIM ─────────────────────────────────────────────
+   Portaled into `.plate-workspace` (not <body>) so it stays inside the
+   cascade `[data-theme]` reassigns — rule 01: components read roles, never
+   primitives, or the dialog renders dark-only regardless of theme. */
+
+.plate-workspace .plate-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: var(--bg-scrim);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: plate-dialog-fade var(--dur-surface) var(--ease-enter);
+}
+@keyframes plate-dialog-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.plate-workspace .plate-dialog {
+  width: 286px;
+  border-radius: 13px;
+  overflow: hidden;
+  background: var(--bg-float);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+  box-shadow: var(--e3-float);
+  animation: plate-dialog-up var(--dur-surface) var(--ease-enter);
+}
+@keyframes plate-dialog-up {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plate-workspace .plate-dialog-scrim, .plate-workspace .plate-dialog { animation: none; }
+}
+
+.plate-workspace .plate-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 16px 16px 14px;
+}
+.plate-workspace .plate-dialog-body b {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+}
+.plate-workspace .plate-dialog-body span {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--text-low);
+}
+
+.plate-workspace .plate-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 11px 16px;
+  background: color-mix(in srgb, var(--bg-well) 65%, transparent);
+  border-top: 1px solid var(--line-subtle);
+}
+.plate-workspace .plate-dialog-actions button {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--text-mid);
+  cursor: pointer;
+}
+.plate-workspace .plate-dialog-actions button:hover { background: var(--bg-hover); }
+.plate-workspace .plate-dialog-actions button.is-danger {
+  background: var(--sig-fault-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-fault);
+  color: var(--sig-fault);
+}
+.plate-workspace .plate-dialog-actions button.is-danger:hover {
+  background: color-mix(in srgb, var(--sig-fault) 18%, transparent);
+}
+.plate-workspace .plate-dialog-actions button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ── SH.01  TAB STRIP ─────────────────────────────────────────────────────
+   Flush text on a shared hairline (reference PL.02 `tabsA`), not pills. Every
+   open panel is bright with an underline; the rest sit dim on the same line.
+   No background, no per-tab border — a filled pill per open panel is what
+   made three simultaneously-open tabs read as noise. */
+
+.plate-workspace .plate-dock-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-7);
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.plate-workspace .plate-dock-tabs::-webkit-scrollbar { display: none; }
+
+.plate-workspace .plate-dock-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .plate-dock-tabs button:hover { color: var(--text-mid); }
+.plate-workspace .plate-dock-tabs button.is-active {
+  color: var(--text-hi);
+  font-weight: 500;
+}
+.plate-workspace .plate-dock-tabs button em {
+  font-style: normal;
+  font-weight: 300;
+  color: var(--text-faint);
+}
+.plate-workspace .plate-dock-tabs button.is-active em { color: var(--text-low); }
+.plate-workspace .plate-dock-tabs button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* strip regions: tabs yield first, search shrinks to a floor, the cluster holds */
+.plate-workspace .plate-dock-toolbar { gap: var(--space-5); min-width: 0; }
+.plate-workspace .plate-search-entry { flex: 1 1 180px; min-width: 108px; max-width: 272px; }
+.plate-workspace .plate-toolbar-cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* ── SH.01  BRAND CHIP ────────────────────────────────────────────────────
+   Floats over the canvas, top-left. Not part of the dock: the strip is for
+   panel selection, search and controls. */
+
+.plate-workspace .plate-brand-chip {
+  position: absolute;
+  left: var(--space-8);
+  top: 22px;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  height: var(--control-h-lg);
+  padding: 0 13px;
+  border-radius: var(--radius-card);
+  background: var(--frost-sheen), var(--frost-tint);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+  box-shadow: inset 0 0 0 1px var(--line), inset 0 1px 0 var(--line-subtle);
+  pointer-events: none;
+}
+.plate-workspace .plate-brand-chip .plate-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-control);
+  background: var(--sig-live);
+  color: var(--bg-app);
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 700;
+}
+.plate-workspace .plate-brand-chip b {
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  color: var(--text-hi);
+}
+.plate-workspace .plate-brand-chip > i {
+  width: 1px;
+  height: 11px;
+  background: var(--line);
+}
+.plate-workspace .plate-brand-chip .plate-brand-context {
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+
+/* ── THREE INSPECTOR ──────────────────────────────────────────────────────
+   Sanctioned third-party UI (AGENTS.md rule 2). We do not restyle its markup;
+   we feed it our roles through the variables it already exposes, and we pin it
+   inside its panel so its `position-bottom` mode cannot span the shell. */
+
+.plate-workspace .three-inspector,
+.plate-workspace .artinos-three-inspector-embedded {
+  --font-family: var(--font-ui);
+  --font-mono: var(--font-num);
+
+  --profiler-background: transparent;
+  --profiler-header-background: transparent;
+  --profiler-header: var(--text-hi);
+  --profiler-border: var(--line-subtle);
+
+  --color-accent: var(--sig-live);
+  --color-green: var(--sig-live);
+  --color-yellow: var(--sig-warn);
+  --color-red: var(--sig-fault);
+  --color-fps: var(--sig-live-hi);
+}
+
+/* its panels are absolutely positioned; keep them in the card that hosts them */
+.plate-workspace .artinos-panel .three-inspector,
+.plate-workspace .artinos-panel .profiler-panel {
+  position: absolute;
+  inset: 0;
+  max-width: 100%;
+  overflow: auto;
+}
+/* the floating toggle and mini-panel are ours to suppress — the panel *is* the surface */
+.plate-workspace .profiler-toggle,
+.plate-workspace .profiler-mini-panel {
+  display: none !important;
+}
+
+.plate-workspace .three-inspector .tab-btn {
+  border-radius: 3px;
+  font-family: var(--font-num);
+  font-size: 9px;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.plate-workspace .three-inspector .tab-btn.active,
+.plate-workspace .three-inspector .tab-btn[aria-selected='true'] {
+  background: var(--bg-active);
+  color: var(--text-hi);
+}
+
+/* ── COMMAND PALETTE  (reference: dialog over scrim) ──────────────────────
+   The scrim is a modal layer: fixed, out of flow. As a static block it took
+   199px of body height and displaced the whole workspace upward. */
+
+.artinos-palette-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: start center;
+  padding-top: 12vh;
+  background: var(--bg-scrim);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.artinos-palette {
+  width: min(680px, calc(100vw - var(--space-8) * 2));
+  max-height: 62vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+  background: var(--bg-float);
+  box-shadow: var(--e3-float);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+  animation: artinos-palette-in var(--dur-surface) var(--ease-enter);
+}
+@keyframes artinos-palette-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .artinos-palette { animation: none; }
+}
+
+.artinos-palette-input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--command-bar-h);
+  padding: 0 var(--space-5);
+  border-bottom: 1px solid var(--line-subtle);
+  color: var(--text-low);
+}
+.artinos-palette-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text-hi);
+}
+.artinos-palette-input kbd {
+  font-family: var(--font-num);
+  font-size: 9px;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+
+
+/* results: sections of a header plus buttons, no classes of their own */
+.artinos-palette-results {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: var(--space-2);
+}
+.artinos-palette-results section { display: flex; flex-direction: column; }
+.artinos-palette-results header {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  font: var(--type-section);
+  letter-spacing: var(--track-panel);
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.artinos-palette-results button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: var(--control-h-lg);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  font: var(--type-label);
+  color: var(--text-mid);
+  text-align: left;
+}
+/* the row is name · detail · action; the detail and action stay quieter */
+.artinos-palette-results button > span:not(:first-of-type),
+.artinos-palette-results button small,
+.artinos-palette-results button em {
+  font-size: 10px;
+  font-style: normal;
+  color: var(--text-faint);
+}
+.artinos-palette-results button em { margin-left: auto; }
+.artinos-palette-results button:hover { background: var(--bg-hover); color: var(--text-hi); }
+.artinos-palette-results button.is-active {
+  background: var(--sig-live-wash);
+  box-shadow: inset 0 0 0 1px var(--sig-live-line);
+  color: var(--text-hi);
+}
+.artinos-palette-results button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* --text-faint is reserved for units, counts and timestamps. These three are
+   none of those: a collapse affordance, a zoom control and empty-state prose.
+   Interactive glyphs and instructions must stay legible. */
+.plate-workspace .artinos-panel-header .artinos-panel-drag > span { color: var(--text-low); }
+.plate-workspace .artinos-gzoom button { color: var(--text-low); }
+.plate-workspace .artinos-gzoom button:hover { color: var(--text-hi); }
+.plate-workspace .artinos-section-title small { color: var(--text-low); }
+
+/* ── SH.01  SEARCH ────────────────────────────────────────────────────────
+   Fixed 272×27 with a 20px lead gap, exactly as the reference's command bar.
+   It does not stretch: a search field that resizes with the window reads as
+   layout, not as a control. */
+.plate-workspace .plate-search-entry {
+  flex: 0 0 auto;
+  width: 272px;
+  min-width: 0;
+  max-width: none;
+  height: 27px;
+  margin-left: var(--space-7);
+  padding: 0 11px;
+  border-radius: 11px;
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+  color: var(--text-low);
+  transition: box-shadow var(--dur-state) var(--ease-std), color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .plate-search-entry:hover { color: var(--text-mid); }
+.plate-workspace .plate-search-entry:active { box-shadow: var(--e0-well), inset 0 0 0 1px var(--sig-live-line); }
+.plate-workspace .plate-search-entry:focus-visible,
+.plate-workspace .plate-search-entry:focus {
+  outline: none;
+  box-shadow: var(--e0-well), var(--focus-ring);
+  color: var(--text-hi);
+}
+@media (max-width: 1100px) {
+  .plate-workspace .plate-search-entry { width: 180px; margin-left: var(--space-5); }
+}
+
+/* ── RESIZE HANDLES ───────────────────────────────────────────────────────
+   The dock clips its content to keep the card's radius, which was hiding the
+   resizers — they sit just outside the dock edge. Bring them inside the bounds
+   and give them a visible grip. */
+.plate-workspace > .artinos-dock { overflow: visible; }
+.plate-workspace > .artinos-dock > .plate-dock-content { border-radius: inherit; }
+
+.plate-workspace .artinos-dock-bottom > .artinos-resizer {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+  z-index: 12;
+}
+.plate-workspace .artinos-dock-left > .artinos-resizer {
+  right: 0; left: auto; top: 0; bottom: 0; width: 8px; cursor: ew-resize; z-index: 12;
+}
+.plate-workspace .artinos-dock-right > .artinos-resizer {
+  left: 0; right: auto; top: 0; bottom: 0; width: 8px; cursor: ew-resize; z-index: 12;
+}
+
+/* the grip: a short bar that brightens on hover, like a real handle */
+.plate-workspace .artinos-resizer::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  background: var(--line-strong);
+  opacity: 0;
+  transition: opacity var(--dur-state) var(--ease-std), background-color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-dock-bottom > .artinos-resizer::after {
+  left: 50%; transform: translateX(-50%); top: 3px; width: 48px; height: 2px;
+}
+.plate-workspace .artinos-dock-left > .artinos-resizer::after,
+.plate-workspace .artinos-dock-right > .artinos-resizer::after {
+  top: 50%; transform: translateY(-50%); left: 3px; width: 2px; height: 48px;
+}
+.plate-workspace .artinos-resizer:hover::after { opacity: 1; }
+.plate-workspace .artinos-resizer:active::after { opacity: 1; background: var(--sig-live); }
+
+/* the split handle between two panels */
+.plate-workspace .artinos-panel-split-resizer {
+  position: relative;
+  flex: 0 0 var(--space-5);
+  align-self: stretch;
+  cursor: ew-resize;
+  z-index: 6;
+}
+.plate-workspace .artinos-panel-split-resizer.split-left,
+.plate-workspace .artinos-panel-split-resizer.split-right { cursor: ns-resize; }
+.plate-workspace .artinos-panel-split-resizer::after {
+  content: '';
+  position: absolute;
+  inset: 20% 50% 20% 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 999px;
+  background: var(--line);
+  opacity: 0;
+  transition: opacity var(--dur-state) var(--ease-std), background-color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-panel-split-resizer:hover::after { opacity: 1; }
+.plate-workspace .artinos-panel-split-resizer:active::after { opacity: 1; background: var(--sig-live); }
+
+
+/* ── WORKSPACE CONTROLS ───────────────────────────────────────────────────
+   Trigger is the `⋯` in the status cluster. The popup opens upward so it sits
+   above the dock instead of covering the panels it acts on. */
+
+.plate-workspace .plate-dock-controls { position: relative; display: flex; align-items: center; }
+
+.plate-workspace .plate-dock-controls-trigger {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-num);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-low);
+  transition: color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .plate-dock-controls-trigger:hover { color: var(--text-hi); }
+.plate-workspace .plate-dock-controls-trigger.is-open { color: var(--sig-live-hi); }
+.plate-workspace .plate-dock-controls-trigger:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.plate-workspace .plate-dock-popup {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-5));   /* upward: above the dock */
+  z-index: 60;
+  width: 232px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--frost-sheen), var(--frost-tint);
+  backdrop-filter: var(--blur-frost);
+  -webkit-backdrop-filter: var(--blur-frost);
+  box-shadow: var(--frost-edge), 0 28px 64px -18px var(--shadow-deep);
+  transform-origin: bottom right;
+  animation: plate-popup-up var(--dur-surface) var(--ease-enter);
+}
+@keyframes plate-popup-up {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .plate-workspace .plate-dock-popup { animation: none; } }
+
+/* In the bottom dock the trigger sits near the bottom of the screen, so
+   opening upward lands the popup in open space above the dock. In a side
+   dock the same trigger sits in a 40px toolbar at the TOP of the column —
+   opening upward pushed it 180px off the top of the viewport, fully
+   invisible. Side docks open downward instead, into the room below. */
+.plate-workspace .artinos-dock-left .plate-dock-popup,
+.plate-workspace .artinos-dock-right .plate-dock-popup {
+  top: calc(100% + var(--space-5));
+  bottom: auto;
+  transform-origin: top right;
+  animation-name: plate-popup-down;
+}
+.plate-workspace .artinos-dock-left .plate-dock-popup { right: auto; left: 0; transform-origin: top left; }
+@keyframes plate-popup-down {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.plate-workspace .plate-dock-popup section { display: flex; flex-direction: column; gap: var(--space-3); }
+.plate-workspace .plate-dock-popup header {
+  font: var(--type-section);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+
+/* PL.02 segmented — the same control the panels use */
+.plate-workspace .plate-seg {
+  display: flex;
+  border-radius: var(--radius-control);
+  overflow: hidden;
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+}
+.plate-workspace .plate-seg button {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 400;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+  white-space: nowrap;
+  transition: background-color var(--dur-state) var(--ease-std), color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .plate-seg button + button { border-left: 1px solid var(--line-subtle); }
+.plate-workspace .plate-seg button:hover { background: var(--bg-hover); color: var(--text-mid); }
+.plate-workspace .plate-seg button.is-active {
+  background: var(--bg-active);
+  color: var(--text-hi);
+  font-weight: 500;
+}
+.plate-workspace .plate-seg button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.plate-workspace .plate-dock-popup-reset {
+  height: var(--control-h-sm);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+  transition: background-color var(--dur-state) var(--ease-std), color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .plate-dock-popup-reset:hover { background: var(--bg-hover); color: var(--text-hi); }
+.plate-workspace .plate-dock-popup-reset:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* AS.01 — the panel card's footer line */
+.plate-workspace .artinos-panel-footer {
+  margin-top: auto;
+  padding: var(--space-4) 11px 0;
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ── TAB SLOT INDICATOR ───────────────────────────────────────────────────
+   The rule sits *on* the tab's bottom edge at hairline weight — the same 1px
+   as a border — and thickens by exactly 1px when a segment is live or aimed at.
+   No glow, no scaling: the only thing that changes is the weight, so the strip
+   stays quiet and the change still reads. */
+
+.plate-workspace .plate-dock-tabs button { position: relative; }
+
+.plate-workspace .plate-tab-slots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  height: 2px;              /* box only; the segments draw themselves */
+  align-items: end;
+  pointer-events: none;
+}
+.plate-workspace .plate-tab-slots i {
+  display: block;
+  height: 1px;              /* border weight */
+  background: var(--line-subtle);
+  transition: height var(--dur-state) var(--ease-std), background-color var(--dur-state) var(--ease-std);
+}
+/* where this panel is now — one step heavier */
+.plate-workspace .plate-tab-slots i[data-here] { height: 2px; background: var(--sig-live); }
+/* where a click would send it */
+.plate-workspace .plate-tab-slots i[data-target] { height: 2px; background: var(--sig-live-hi); }
+
+/* ── THIRD-PARTY CONSOLE ──────────────────────────────────────────────────
+   The Three Inspector renders its own console markup inside our panel with no
+   layout of its own, so the rows collapsed onto each other. Give it flow. */
+
+.plate-workspace .console-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  font-family: var(--font-num);
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+.plate-workspace .console-log > * {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 18px;
+  padding: 2px var(--space-2);
+  border-radius: 3px;
+  color: var(--text-mid);
+  word-break: break-word;
+}
+.plate-workspace .log-message { flex: 1; min-width: 0; }
+.plate-workspace .log-icon { flex: 0 0 auto; opacity: 0.75; }
+.plate-workspace .log-count-badge {
+  flex: 0 0 auto;
+  min-height: 0;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--bg-active);
+  font-size: 8.5px;
+  color: var(--text-low);
+}
+.plate-workspace .log-message.info { color: var(--text-mid); }
+.plate-workspace .log-message.warn { color: var(--sig-warn); }
+.plate-workspace .log-message.error { color: var(--sig-fault); }
+
+/* ── EXIT MOTION ──────────────────────────────────────────────────────────
+   Arriving decelerates; leaving accelerates away in less time. Applied to the
+   layers that come and go. */
+.plate-workspace .plate-console-toast {
+  transition: opacity var(--dur-exit) var(--ease-exit), transform var(--dur-exit) var(--ease-exit);
+}
+.plate-workspace .plate-console-toast[data-visible] {
+  transition: opacity var(--dur-surface) var(--ease-enter), transform var(--dur-surface) var(--ease-enter);
+}
+.plate-workspace .artinos-property-actions { transition: opacity var(--dur-exit) var(--ease-exit); }
+.plate-workspace .artinos-property-row:hover .artinos-property-actions,
+.plate-workspace .artinos-property-row:focus-within .artinos-property-actions {
+  transition: opacity var(--dur-state) var(--ease-enter);
+}
+.plate-workspace .artinos-scrub-detent { transition: opacity var(--dur-exit) var(--ease-exit); }
+.plate-workspace .artinos-scrub-cell:hover .artinos-scrub-detent,
+.plate-workspace .artinos-scrub-cell[data-state='dragging'] .artinos-scrub-detent {
+  transition: opacity var(--dur-state) var(--ease-enter);
+}
+.plate-workspace .artinos-resizer::after { transition: opacity var(--dur-exit) var(--ease-exit); }
+.plate-workspace .artinos-resizer:hover::after { transition: opacity var(--dur-state) var(--ease-enter); }
+
+/* ── SH.01  STATUS CLUSTER ────────────────────────────────────────────────
+   Transcribed from the reference's command bar: one quiet pill holding
+   backend · fps · sparkline · load · ⋯ on a single baseline at 13px gaps.
+
+   The reference keeps every figure calm — the backend name is the only teal,
+   fps is plain, and the load reads as one dim string rather than four coloured
+   values. A status bar that shouts has nothing left for an actual fault. */
+
+.plate-workspace .plate-toolbar-cluster {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  height: 27px;
+  padding: 0 12px;
+  margin-left: auto;
+  border-radius: var(--radius-control);
+  background: var(--bg-well);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+}
+.plate-workspace .plate-toolbar-status { display: flex; align-items: center; }
+
+.plate-workspace .plate-toolbar-status .artinos-hud { background: none; border: 0; box-shadow: none; padding: 0; }
+.plate-workspace .plate-toolbar-status .artinos-hud-summary {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  height: 27px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-variant-numeric: tabular-nums;
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-summary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* A legacy rule pills backend/fps/quality (24px, padded) while load, the
+   micrograph and the chevron stay flush — three of seven items floating at
+   a different rhythm than the rest. Every item here is plain text: none of
+   them carry a pill. */
+.plate-workspace .plate-toolbar-status .artinos-hud-backend,
+.plate-workspace .plate-toolbar-status .artinos-hud-readout,
+.plate-workspace .plate-toolbar-status .artinos-hud-quality {
+  height: auto;
+  padding: 0;
+}
+
+/* backend — the one teal element */
+.plate-workspace .artinos-hud-backend { display: flex; align-items: center; gap: var(--space-3); }
+.plate-workspace .artinos-hud-backend i {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--sig-live);
+  box-shadow: 0 0 6px var(--sig-live-line);
+}
+.plate-workspace .artinos-hud-backend b {
+  font: 500 8.5px/1 var(--font-num);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sig-live-hi);
+}
+
+/* fps — plain, whatever the heat says; the dot carries health */
+.plate-workspace .artinos-hud-readout { display: flex; align-items: baseline; gap: 4px; }
+.plate-workspace .artinos-hud-readout strong {
+  font: 300 11.5px/1 var(--font-num) !important;
+  color: var(--text-hi) !important;
+}
+.plate-workspace .artinos-hud-readout small {
+  font: 300 8.5px/1 var(--font-num);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* load — one dim string: CPU 41 · GPU 63 */
+.plate-workspace .artinos-hud-load { display: flex; align-items: baseline; gap: 4px; padding: 0; }
+.plate-workspace .artinos-hud-load small,
+.plate-workspace .artinos-hud-load b {
+  font: 300 8.5px/1 var(--font-num) !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: var(--text-low) !important;
+}
+.plate-workspace .artinos-hud-load b + small::before {
+  content: '·';
+  margin-right: 5px;
+  color: var(--text-ghost);
+}
+
+.plate-workspace .artinos-hud-micrograph { width: 48px; height: 13px; opacity: 0.9; }
+.plate-workspace .artinos-hud-micrograph .is-cpu { stroke: var(--sig-live); stroke-width: 0.9; }
+.plate-workspace .artinos-hud-micrograph .is-gpu { stroke: var(--sig-bind); stroke-width: 0.9; opacity: 0.8; }
+
+.plate-workspace .artinos-hud-quality {
+  display: flex; align-items: baseline; gap: 5px;
+  font: 300 8.5px/1 var(--font-num);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.plate-workspace .artinos-hud-quality b { font-weight: 500; color: var(--text-mid); }
+.plate-workspace .artinos-hud-chevron { color: var(--text-faint); }
+
+/* the ⋯ lives inside the cluster, as in the reference */
+.plate-workspace .plate-toolbar-cluster .plate-dock-controls-trigger {
+  width: 16px; height: 22px;
+  color: var(--text-low);
+}
+
+/* reference gap between the tab strip and the search field */
+.plate-workspace .plate-search-entry { margin-left: 20px; }
+
+/* ── SH.01 CORRECTIONS ────────────────────────────────────────────────────
+   Measured against the reference's command bar. --bg-well is a .42 recess,
+   but the strip's own wells are far lighter: the status cluster sits at .14
+   and the search at .2. Using the full well made both read as holes. */
+
+.plate-workspace .plate-toolbar-cluster {
+  background: color-mix(in srgb, var(--bg-well) 40%, transparent);   /* ≈ .14 */
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+  border-radius: 6px;
+}
+.plate-workspace .plate-search-entry {
+  background: color-mix(in srgb, var(--bg-well) 58%, transparent);   /* ≈ .2  */
+  box-shadow: inset 0 1px 2px var(--shadow-well), inset 0 0 0 1px var(--line-subtle);
+  font-size: 11px;
+  color: var(--text-low);
+}
+.plate-workspace .plate-search-entry span { font-size: 11px; }
+.plate-workspace .plate-search-entry kbd { font-size: 9px; letter-spacing: 0.08em; color: var(--text-faint); }
+
+/* the three-column floor: 280px clamped the third and flattened the ratio */
+.plate-workspace .artinos-dock-bottom .artinos-panel { min-width: 232px; }
+
+/* ── SH.02  DOCK LEFT / RIGHT ───────────────────────────────────────────────
+   The same dock stood on its side: a two-column grid, the column of chrome
+   plus a 54px rail spanning the full height beside it. The tab strip becomes
+   the rail, panel cards stack instead of sitting side by side dividing the
+   height by grow factors 1.2 / 1 / .85, and the status line keeps the foot. */
+
+.plate-workspace > .artinos-dock-left,
+.plate-workspace > .artinos-dock-right {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px;
+  grid-template-rows: var(--tab-strip-h) minmax(0, 1fr);
+  padding: 0;
+  gap: 0;
+}
+.plate-workspace > .artinos-dock-left { grid-template-columns: 54px minmax(0, 1fr); }
+
+.plate-workspace > .artinos-dock-left > .plate-dock-toolbar,
+.plate-workspace > .artinos-dock-right > .plate-dock-toolbar { grid-row: 1; }
+.plate-workspace > .artinos-dock-left > .plate-dock-content,
+.plate-workspace > .artinos-dock-right > .plate-dock-content { grid-row: 2; }
+.plate-workspace > .artinos-dock-right > .plate-dock-toolbar,
+.plate-workspace > .artinos-dock-right > .plate-dock-content { grid-column: 1; }
+.plate-workspace > .artinos-dock-left > .plate-dock-toolbar,
+.plate-workspace > .artinos-dock-left > .plate-dock-content { grid-column: 2; }
+
+/* rail spans the full column, on the leading edge */
+.plate-workspace > .artinos-dock-left > .plate-panel-rail,
+.plate-workspace > .artinos-dock-right > .plate-panel-rail {
+  grid-row: 1 / -1;
+  width: 54px;
+  min-width: 54px;
+  height: auto;
+  align-self: stretch;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
+  background: var(--bg-well);
+  overflow: auto;
+  scrollbar-width: none;
+  position: static;
+  inset: auto;
+}
+.plate-workspace > .artinos-dock-right > .plate-panel-rail { grid-column: 2; border-left: 1px solid var(--line-subtle); }
+.plate-workspace > .artinos-dock-left > .plate-panel-rail { grid-column: 1; border-right: 1px solid var(--line-subtle); }
+.plate-workspace .plate-panel-rail::-webkit-scrollbar { display: none; }
+
+/* 54px rail buttons, vertical labels, 2px inset accent on the active one */
+.plate-workspace .artinos-dock-left .plate-panel-rail button,
+.plate-workspace .artinos-dock-right .plate-panel-rail button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+.plate-workspace .artinos-dock-left .plate-panel-rail button.is-active,
+.plate-workspace .artinos-dock-right .plate-panel-rail button.is-active {
+  background: var(--bg-hover);
+  color: var(--text-hi);
+}
+.plate-workspace .artinos-dock-left .plate-panel-rail button.is-active::after,
+.plate-workspace .artinos-dock-right .plate-panel-rail button.is-active::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  background: var(--sig-live);
+}
+
+/* the command bar stacks: status cluster only, the rail is the selector */
+.plate-workspace .artinos-dock-left .plate-dock-toolbar,
+.plate-workspace .artinos-dock-right .plate-dock-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--tab-strip-h);
+  min-height: var(--tab-strip-h);
+  padding: 0 var(--space-3);
+}
+.plate-workspace .artinos-dock-left .plate-dock-tabs,
+.plate-workspace .artinos-dock-right .plate-dock-tabs,
+.plate-workspace .artinos-dock-left .plate-search-entry,
+.plate-workspace .artinos-dock-right .plate-search-entry { display: none; }
+.plate-workspace .artinos-dock-left .plate-toolbar-cluster,
+.plate-workspace .artinos-dock-right .plate-toolbar-cluster { margin: 0; width: 100%; justify-content: space-between; }
+.plate-workspace .artinos-dock-left .artinos-hud-micrograph,
+.plate-workspace .artinos-dock-right .artinos-hud-micrograph { width: 34px; }
+
+/* the content column: cards stacked, dividing height by their grow factors */
+.plate-workspace .artinos-dock-left .plate-dock-content,
+.plate-workspace .artinos-dock-right .plate-dock-content {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  min-height: 0;
+}
+.plate-workspace .artinos-dock-left .artinos-panel,
+.plate-workspace .artinos-dock-right .artinos-panel {
+  flex: var(--panel-weight, 1) 1 0;
+  width: 100%;
+  min-width: 0;
+  min-height: 96px;
+  height: auto;
+}
+.plate-workspace .artinos-dock-left .artinos-panel[data-sized],
+.plate-workspace .artinos-dock-right .artinos-panel[data-sized] { flex: 0 0 var(--panel-basis); height: var(--panel-basis); }
+
+/* the console keeps the foot */
+.plate-workspace .artinos-dock-left .plate-console-toast,
+.plate-workspace .artinos-dock-right .plate-console-toast { display: none; }
+
+/* ── DOCKED PANEL HEADER — DISSOLVED ──────────────────────────────────────
+   A docked panel had a full-width bar spending 28px of vertical space on a
+   name the tab strip already shows and two glyphs. It was the most expensive
+   row on the surface and carried the least.
+
+   So it stops being a row. The affordances lift out of the flow into the
+   card's own top-right corner and stay invisible until the pointer is in the
+   card — the content starts at the top edge, and the chrome costs nothing
+   until it is wanted. Identity comes from the strip, the content itself, and
+   the foot line; the name returns on hover for confirmation. */
+
+.plate-workspace .artinos-dock .artinos-panel > .artinos-panel-header {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: auto;
+  z-index: 4;
+  width: auto;
+  height: 22px;
+  min-height: 0;
+  gap: var(--space-1);
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border: 0;
+  border-bottom-left-radius: var(--radius-card);
+  /* Reads as the card's own corner, not a chip floating over it: a flat fill
+     in the panel's colour with a hairline on the two inboard edges only. */
+  background: var(--bg-raised);
+  box-shadow: inset 1px -1px 0 var(--line-subtle);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-dock .artinos-panel:hover > .artinos-panel-header,
+.plate-workspace .artinos-dock .artinos-panel:focus-within > .artinos-panel-header {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* the title button shrinks to its label — no flex:1 pushing a full-width bar */
+.plate-workspace .artinos-dock .artinos-panel > .artinos-panel-header > .artinos-panel-drag {
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  color: var(--text-low);
+}
+.plate-workspace .artinos-dock .artinos-panel > .artinos-panel-header > .artinos-panel-drag svg { display: none; }
+.plate-workspace .artinos-dock .artinos-panel > .artinos-panel-header .artinos-panel-close {
+  width: 18px;
+  flex: 0 0 18px;
+  height: 18px;
+}
+
+/* Collapsed, the header is the only thing left — it has to stay in the flow
+   and stay visible, or there is no way to open the panel again. */
+.plate-workspace .artinos-dock .artinos-panel.is-closed > .artinos-panel-header {
+  position: static;
+  width: auto;
+  height: var(--control-h);
+  padding: 0 var(--space-2) 0 10px;
+  border-radius: 0;
+  background: transparent;
+  opacity: 1;
+  pointer-events: auto;
+}
+.plate-workspace .artinos-dock .artinos-panel.is-closed > .artinos-panel-header > .artinos-panel-drag {
+  flex: 1;
+  font: var(--type-panel);
+  letter-spacing: var(--track-panel);
+  color: var(--text-hi);
+}
+.plate-workspace .artinos-dock .artinos-panel.is-closed > .artinos-panel-header > .artinos-panel-drag svg { display: block; }
+
+/* the content now owns the top edge */
+.plate-workspace .artinos-dock .artinos-panel > .artinos-panel-body { padding-top: var(--space-4); }
+
+/* Collapsing gives the space back. A collapsed panel kept its full grow
+   weight, so folding one left a column of dead air instead of widening its
+   neighbours — collapse has to be worth doing. It shrinks to its header and
+   the siblings take the remainder. */
+.plate-workspace .artinos-dock-bottom .artinos-panel.is-closed {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+}
+.plate-workspace .artinos-dock-left .artinos-panel.is-closed,
+.plate-workspace .artinos-dock-right .artinos-panel.is-closed {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+}
+
+/* ── PANEL DENSITY ────────────────────────────────────────────────────────
+   A bottom dock hands a panel ~190px of height. A control that stacks its
+   label over its input spends 48–62px, so six parameters fill the window and
+   everything else falls below the fold — which is why the surface read as
+   crowded while showing very little.
+
+   The reference's row is one 26px line carrying label, value and unit
+   (PL.03). Same information, a third of the height, and the section's two
+   columns then hold ~12 parameters in the space that held 3. */
+
+.plate-workspace .artinos-control {
+  grid-template-columns: minmax(52px, 1fr) minmax(0, 1.25fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 26px;
+}
+.plate-workspace .artinos-control > span {
+  font-size: 11px;
+  line-height: 1.2;
+}
+.plate-workspace .artinos-control > span small { display: none; }
+
+/* The legacy rule spanned every input to the row end (grid-column: 2/5), so
+   a control with two inputs — colour + hex, value + unit — always wrapped. */
+.plate-workspace .artinos-control select,
+.plate-workspace .artinos-control input:not([type='range']):not([type='checkbox']):not([type='color']) {
+  grid-column: auto;
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  min-height: 24px;
+  padding: 0 7px;
+}
+.plate-workspace .artinos-control input[type='color'] {
+  width: 22px;
+  min-width: 22px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+}
+.plate-workspace .artinos-control input[type='range'] { height: 3px; }
+
+/* rows sit closer together — the gutter was tuned for stacked controls */
+.plate-workspace .artinos-section { row-gap: var(--space-2); }
+.plate-workspace .artinos-parameter-control { min-width: 0; }
+
+/* Sections flow to the shape the dock gives them. The legacy threshold only
+   split into columns past ~700px, so a 542px panel — the common bottom-dock
+   width — stacked one narrow column and scrolled. The panel is its own
+   container, so the same rule serves the sidebar without a media query:
+   wide and short takes three columns, a side dock takes one. */
+@container (min-width: 440px) {
+  .plate-workspace .artinos-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    align-content: start;
+  }
+  .plate-workspace .artinos-section > .artinos-section-title { grid-column: 1 / -1; }
+}
+@container (min-width: 880px) {
+  .plate-workspace .artinos-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Sidebar shape: one column, and the label yields first because the value is
+   the thing being read. */
+@container (max-width: 340px) {
+  .plate-workspace .artinos-control { grid-template-columns: minmax(44px, 1fr) minmax(0, 1.1fr) auto; }
+}
+
+/* ── PANEL INFORMATION ORDER ──────────────────────────────────────────────
+   Presets are a jump-list, not the subject. Wrapped into a three-row block
+   they spent ~90px at the top of the Scene panel and pushed every actual
+   parameter below the fold — the panel looked busy while showing almost
+   nothing you could change.
+
+   One scrolling row keeps them where they are useful (top, one click) at a
+   quarter of the height, so the parameters they set are visible at the same
+   time as the presets that set them. */
+
+.plate-workspace .artinos-preset-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.plate-workspace .artinos-preset-grid::-webkit-scrollbar { display: none; }
+.plate-workspace .artinos-preset-grid > .artinos-button {
+  flex: 0 0 auto;
+  height: 22px;
+  min-height: 22px;
+  padding: 0 9px;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+}
+
+/* the toolbar was a band around the preset row; it only needs to be the row */
+.plate-workspace .artinos-scene-layout > .artinos-toolbar {
+  min-height: 0;
+  padding: 0;
+  margin-bottom: var(--space-3);
+  border: 0;
+  background: transparent;
+}
+
+/* Section titles are signposts, not headings — they were costing a full row
+   each in a 190px window. */
+.plate-workspace .artinos-section-title {
+  min-height: 0;
+  margin-bottom: var(--space-1);
+}
+
+/* ── POSTFX STACK ─────────────────────────────────────────────────────────
+   44 effects in a single 669px-wide column inside a 190px window: a 12x
+   overflow, and the panel's own width doing nothing. The stack is a list of
+   independent cards of varying height, which is what multi-column flow is
+   for — it packs them instead of leaving ragged rows the way a grid would,
+   and the column count follows the width, so the same rule serves a wide
+   bottom dock and a narrow side dock. */
+
+.plate-workspace .artinos-postfx-grid {
+  display: block;
+  columns: 300px;
+  column-gap: var(--space-5);
+}
+.plate-workspace .artinos-postfx-column { display: contents; }
+.plate-workspace .artinos-effect {
+  break-inside: avoid;
+  margin: 0 0 var(--space-2);
+}
+
+/* A disabled effect is a line in a catalogue, not a card — it only needs to
+   say its name and that it is off. */
+.plate-workspace .artinos-effect-head {
+  min-height: 26px;
+  padding: 0 var(--space-3);
+}
+.plate-workspace .artinos-effect:not(.is-enabled) .artinos-effect-head { min-height: 24px; }
+.plate-workspace .artinos-effect-head b { font-size: 10px; }
+.plate-workspace .artinos-effect-head small,
+.plate-workspace .artinos-effect-cost { font-size: 8.5px; }
+
+/* ── PANEL POLISH ─────────────────────────────────────────────────────────
+   The density pass bought the space; this spends a little of it back so the
+   result reads as a designed surface rather than a packed one. Controls get
+   the reference's row treatment (PL.03): a rest wash, a radius and real
+   horizontal padding, so a parameter is an object you can point at instead
+   of text lying on the card. */
+
+.plate-workspace .artinos-panel-body { padding: 10px 12px 12px; }
+.plate-workspace .artinos-dock .artinos-panel > .artinos-panel-body { padding-top: 10px; }
+
+.plate-workspace .artinos-section { row-gap: 3px; column-gap: 18px; }
+
+.plate-workspace .artinos-control {
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--bg-row);
+}
+.plate-workspace .artinos-control:hover { background: var(--bg-hover); }
+/* toggles and checkboxes are rows too, but the switch carries the state */
+.plate-workspace .artinos-control.artinos-toggle { background: var(--bg-row); }
+
+/* the section signpost needs air above it, not below */
+.plate-workspace .artinos-section-title {
+  margin: var(--space-3) 0 var(--space-2);
+  color: var(--text-faint);
+}
+.plate-workspace .artinos-section > .artinos-section-title:first-child { margin-top: 0; }
+
+/* Scene shipped its presets twice: an unlabelled button row in the toolbar
+   and the same list again as the "Scene Preset" parameter inside the grid.
+   The labelled one lives with the settings it changes, so it is the one that
+   stays. */
+
+/* panels breathe from each other, and from the dock */
+.plate-workspace .plate-dock-content { gap: var(--space-4); }
+
+/* ── STRIP EDGE FIXES ─────────────────────────────────────────────────────
+   The status cluster drew its edge twice: a legacy 0.8px transparent border
+   on top of the inset 1px ring it already had. Two edges a fraction of a
+   pixel apart on a 6px radius is the doubled, fuzzy corner — one ring only. */
+.plate-workspace .plate-toolbar-cluster { border: 0; }
+
+/* The HUD and its summary carried their own radii inside that pill, so the
+   corner was drawn three times over. The cluster is the only box here. */
+.plate-workspace .plate-toolbar-status .artinos-hud,
+.plate-workspace .plate-toolbar-status .artinos-hud-summary {
+  border-radius: 0;
+  border: 0;
+  /* The legacy standalone `.artinos-hud` (a floating pill elsewhere) carries
+     backdrop-filter: blur(18px). Its own background was already zeroed here,
+     but the blur was never included in that reset, so it stayed live with
+     nothing behind it to blur — a stray filter drawing a visible seam under
+     the readout, distinct from the dock's own frost. Embedded in the toolbar
+     the HUD isn't its own glass surface; the dock already is. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* The strip's first tab sat hard against the dock edge. 12px gives it the
+   same air the panels have, and the content inset follows so the tab strip
+   and the first panel still start on the same line. */
+.plate-workspace .plate-dock-toolbar { padding: 0 12px; }
+.plate-workspace .artinos-dock-bottom > .plate-dock-content { padding: 6px 12px 8px; }
+
+/* ── THE DOCK SURFACE (single source of truth) ────────────────────────────
+   This block previously declared `.artinos-dock .artinos-panel` three times
+   over, each patch undoing the last, which is why the surface kept changing
+   character without ever improving. One definition each, here.
+
+   Why it read flat: the dock's only elevation cue was a BLACK drop shadow,
+   and the canvas behind it is black — a black shadow on black is invisible,
+   so nothing lifted the dock off the scene. On a dark ground the rim has to
+   do the work a shadow does on a light one. */
+
+.plate-workspace > .artinos-dock {
+  background: var(--frost-sheen), var(--frost-tint);
+  /* Thickness comes from `--frost-edge` so every frosted surface shares one
+     edge treatment; the dock adds only its own ambient shadow. */
+  box-shadow: var(--frost-edge), 0 24px 60px -20px var(--shadow-deep);
+}
+
+/* the status cluster is a group of readouts, not a container */
+.plate-workspace .plate-toolbar-cluster {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+.plate-workspace .plate-dock-toolbar { border-bottom: 0; }
+
+/* A panel is a region of the dock, not a card on it: no fill of its own, so
+   the frost reads straight through, and a hairline to bound the region.
+   Reference rule 04 — gutters separate, strokes only weight. It also runs no
+   backdrop-filter; nesting one inside the dock's re-blurs an already-blurred
+   surface and leaves a seam at every panel edge. */
+.plate-workspace .artinos-dock .artinos-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+}
+.plate-workspace .artinos-dock .artinos-panel,
+.plate-workspace .artinos-dock .artinos-panel-body {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.plate-workspace .artinos-dock .artinos-panel > .artinos-panel-header {
+  background: transparent;
+  box-shadow: none;
+}
+.plate-workspace .artinos-panel-footer {
+  border-top: 0;
+  background: transparent;
+}
+
+/* ── SIDE RAIL FIXES ──────────────────────────────────────────────────────
+   Two faults made the rail read as broken.
+
+   The buttons carried flex:1, so eight of them divided the full dock height
+   and each came out 151px tall instead of 56 — a sparse ladder with the
+   labels marooned in the middle of their cells. They size to their content
+   and pack from the top.
+
+   And the label span reset writing-mode to horizontal-tb inside a button
+   that is vertical-rl + rotate(180deg). Horizontal text in a 180-degree box
+   renders upside down, which is the mirrored lettering. The span inherits the
+   vertical mode instead.
+
+   The rail carries no icon — the label is the only content, so nothing needs
+   to counter-rotate against the button's flip. */
+
+.plate-workspace .artinos-dock-left .plate-panel-rail button,
+.plate-workspace .artinos-dock-right .plate-panel-rail button {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+  padding: 12px 0;
+  align-content: center;
+}
+.plate-workspace .artinos-dock-left .plate-panel-rail button > span,
+.plate-workspace .artinos-dock-right .plate-panel-rail button > span {
+  writing-mode: inherit;
+  text-orientation: mixed;
+  transform: none;
+}
+.plate-workspace .artinos-dock-left .plate-panel-rail,
+.plate-workspace .artinos-dock-right .plate-panel-rail {
+  justify-content: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+}
+/* Accessible overlay and collection primitives --------------------------- */
+.artinos-overlay-trigger{border:0;background:transparent;color:inherit;padding:0}
+.artinos-popover,.artinos-context-menu,.artinos-menu{z-index:var(--layer-overlay,60);min-width:180px;padding:var(--space-3);border:1px solid var(--line-strong);border-radius:var(--radius-card);background:var(--bg-float);backdrop-filter:var(--blur-float);box-shadow:var(--e3-float)}
+.artinos-popover[data-placement^='top']{transform:translateY(-100%)}
+.artinos-popover[data-placement$='end']{transform:translateX(-100%)}
+.artinos-popover[data-placement^='top'][data-placement$='end']{transform:translate(-100%,-100%)}
+.artinos-tooltip-anchor{position:relative;display:inline-flex}.artinos-tooltip{position:absolute;z-index:var(--layer-overlay,60);left:50%;bottom:calc(100% + var(--space-3));transform:translateX(-50%);padding:var(--space-2) var(--space-3);border-radius:var(--radius-control);background:var(--bg-float);box-shadow:var(--e3-float);color:var(--text-hi);font:var(--type-label);white-space:nowrap}
+.artinos-menu{display:flex;flex-direction:column;gap:var(--space-1);padding:var(--space-2)}.artinos-menu>button{display:flex;justify-content:space-between;gap:var(--space-6);min-height:var(--control-h);padding:0 var(--space-3);border:0;border-radius:var(--radius-control);background:transparent;color:var(--text-mid);text-align:left}.artinos-menu>button:hover,.artinos-menu>button:focus-visible{background:var(--bg-hover);color:var(--text-hi);box-shadow:var(--focus-ring)}.artinos-menu>button[data-danger]{color:var(--sig-fault)}.artinos-menu kbd{color:var(--text-faint);font:var(--type-value)}
+.artinos-dialog-scrim{position:fixed;inset:0;z-index:var(--layer-modal,100);display:grid;place-items:center;padding:var(--space-7);background:var(--bg-scrim)}.artinos-dialog,.artinos-drawer{display:flex;flex-direction:column;width:min(560px,100%);max-height:min(760px,calc(100vh - 48px));overflow:auto;border:1px solid var(--line-strong);border-radius:var(--radius-panel);background:var(--bg-float);backdrop-filter:var(--blur-float);box-shadow:var(--e3-float)}.artinos-dialog>header,.artinos-drawer>header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-5);border-bottom:1px solid var(--line-subtle)}.artinos-dialog h2,.artinos-drawer h2{margin:0;font:var(--type-title)}.artinos-dialog-content{padding:var(--space-5)}.artinos-dialog>footer,.artinos-drawer>footer{display:flex;justify-content:flex-end;gap:var(--space-3);padding:var(--space-5);border-top:1px solid var(--line-subtle)}
+.artinos-drawer{position:absolute;border-radius:0}.artinos-drawer[data-side='right']{inset:0 0 0 auto}.artinos-drawer[data-side='left']{inset:0 auto 0 0}.artinos-drawer[data-side='top']{inset:0 0 auto;width:100%;max-width:none}.artinos-drawer[data-side='bottom']{inset:auto 0 0;width:100%;max-width:none}
+.artinos-radio-group{display:flex;flex-direction:column;gap:var(--space-2);border:0;padding:0}.artinos-radio-group label{display:flex;align-items:flex-start;gap:var(--space-3)}.artinos-radio-group span{display:flex;flex-direction:column}.artinos-radio-group small{color:var(--text-low)}
+.artinos-accordion>section{border-bottom:1px solid var(--line-subtle)}.artinos-accordion>section>button{display:flex;width:100%;min-height:var(--control-h-lg);align-items:center;border:0;background:transparent;color:var(--text-hi);text-align:left}.artinos-accordion>section>div{padding:0 0 var(--space-4)}
+.artinos-combobox{position:relative;display:flex;flex-direction:column;gap:var(--space-2)}.artinos-combobox>[role='listbox']{position:absolute;z-index:var(--layer-overlay,60);top:100%;left:0;right:0;display:flex;flex-direction:column;max-height:240px;overflow:auto;padding:var(--space-2);background:var(--bg-float);box-shadow:var(--e3-float)}.artinos-combobox [role='option']{min-height:var(--control-h);border:0;background:transparent;color:var(--text-mid);text-align:left}.artinos-combobox [role='option'][aria-selected='true']{background:var(--selection-surface);color:var(--text-hi)}
+
+/* Semantic color and gradient instruments -------------------------------- */
+.artinos-color-control{display:grid;gap:var(--space-3)}.artinos-color-area-wrap,.artinos-color-slider-wrap{display:grid;gap:var(--space-2);color:var(--text-mid);font:var(--type-label)}
+.artinos-color-area{position:relative;min-height:140px;border-radius:var(--radius-card);background:linear-gradient(0deg,transparent,var(--bg-app)),linear-gradient(90deg,var(--text-hi),hsl(var(--color-hue) 100% 50%));box-shadow:var(--e0-well);touch-action:none}.artinos-color-area>i{position:absolute;width:12px;height:12px;transform:translate(-50%,-50%);border:2px solid var(--text-hi);border-radius:50%;box-shadow:0 0 0 1px var(--shadow-deep);pointer-events:none}
+.artinos-color-slider{position:relative;height:var(--control-h-sm);border-radius:var(--radius-control);background:var(--color-gradient,linear-gradient(90deg,transparent,var(--text-hi)));box-shadow:var(--e0-well);touch-action:none}.artinos-color-slider>i{position:absolute;top:50%;left:calc(var(--control-t,0) * 100%);width:3px;height:calc(100% + 6px);transform:translate(-50%,-50%);border:1px solid var(--text-hi);border-radius:2px;background:var(--bg-stage);pointer-events:none}
+.artinos-color-swatches{display:flex;flex-wrap:wrap;gap:var(--space-2);border:0;padding:0}.artinos-color-swatches legend{width:100%;color:var(--text-mid);font:var(--type-label)}.artinos-color-swatches button{width:28px;height:28px;border:1px solid var(--line-strong);border-radius:var(--radius-control)}.artinos-color-swatches button[aria-pressed='true']{box-shadow:var(--focus-ring)}
+.artinos-gradient-editor{display:grid;gap:var(--space-3)}.artinos-gradient-editor__rail{position:relative;height:32px;margin-bottom:12px;border-radius:var(--radius-control);box-shadow:var(--e0-well);touch-action:none}.artinos-gradient-editor__rail>button{position:absolute;top:100%;width:14px;height:18px;transform:translate(-50%,2px);border:1px solid var(--line-strong);border-radius:2px 2px 7px 7px;background:var(--stop-color);box-shadow:var(--e1-surface)}.artinos-gradient-editor__rail>button[aria-pressed='true']{box-shadow:var(--focus-ring)}
+
+/* Editable curve, envelope, and graph family ----------------------------- */
+.artinos-curve-control,.artinos-envelope-editor,.artinos-graph-editor{display:grid;gap:var(--space-3)}.artinos-curve-control>header{display:flex;align-items:center;justify-content:space-between;color:var(--text-mid);font:var(--type-label)}.artinos-curve-control>svg{width:100%;min-height:140px;overflow:visible;border-radius:var(--radius-card);background:var(--bg-well);box-shadow:var(--e0-well);touch-action:none}.artinos-curve-control path{fill:none;stroke:var(--sig-live);stroke-width:1.2;vector-effect:non-scaling-stroke}.artinos-curve-control circle{fill:var(--bg-raised);stroke:var(--text-mid);stroke-width:1;vector-effect:non-scaling-stroke;cursor:move}.artinos-curve-control circle[data-selected]{fill:var(--sig-live);stroke:var(--sig-live-hi)}.artinos-curve-control circle:focus-visible{outline:none;filter:drop-shadow(0 0 2px var(--sig-live))}
+.artinos-envelope-editor>strong{color:var(--text-hi);font:var(--type-section)}.artinos-graph-editor{padding:var(--space-3);border-radius:var(--radius-card);background:var(--bg-row)}
+
+/* Asset, table, and semantic display family ------------------------------ */
+.artinos-asset-dropzone{display:grid;place-items:center;min-block-size:96px;border:1px dashed var(--line-strong);border-radius:var(--radius-card);background:var(--bg-well);color:var(--text-mid)}
+.artinos-virtual-table__header,.artinos-virtual-table__row{display:grid;align-items:center;gap:var(--space-2);padding-inline:var(--space-2)}.artinos-virtual-table__header{min-block-size:28px;color:var(--text-mid);border-block-end:1px solid var(--line-soft)}.artinos-virtual-table__row{block-size:100%;border-block-end:1px solid var(--line-soft)}
+.artinos-value-readout,.artinos-status-display{display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:var(--space-2);font-variant-numeric:tabular-nums}.artinos-value-readout strong{font-size:var(--font-size-lg);font-weight:560}.artinos-value-readout em{color:var(--text-mid);font-style:normal}
+.artinos-level-meter>div{display:flex;gap:3px;block-size:72px}.artinos-level-meter i{position:relative;overflow:hidden;inline-size:10px;background:var(--bg-well);border-radius:var(--radius-control)}.artinos-level-meter b{position:absolute;inset:0;background:var(--sig-live);transform-origin:bottom}.artinos-level-meter u{position:absolute;inset-inline:0;block-size:1px;background:var(--text-hi)}
+.artinos-status-display[data-state='live'] strong{color:var(--sig-live)}.artinos-status-display[data-state='warn'] strong{color:var(--sig-warn)}.artinos-status-display[data-state='fault'] strong{color:var(--sig-danger)}
+.artinos-matrix-control{border:0;padding:0}.artinos-matrix-control>div{display:grid;gap:2px}.artinos-matrix-control label{display:grid;gap:1px}.artinos-matrix-control small{font-size:8px;color:var(--text-low)}.artinos-object-reference{display:grid;gap:var(--space-1)}.artinos-object-reference code{color:var(--text-low)}

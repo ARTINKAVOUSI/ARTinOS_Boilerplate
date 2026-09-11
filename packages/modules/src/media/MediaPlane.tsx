@@ -1,0 +1,4 @@
+import { useEffect, useMemo } from 'react'
+import { VideoTexture, SRGBColorSpace } from 'three'
+import { useArtinosRuntime, useResource } from '@artinos/runtime'
+export function MediaPlane({video,width=3.2,height=1.8,opacity=1,mirror=true,position=[0,0,0]}:{video?:HTMLVideoElement;width?:number;height?:number;opacity?:number;mirror?:boolean;position?:[number,number,number]}){const runtime=useArtinosRuntime(),shared=useResource<HTMLVideoElement>('media.vision.video'),source=video??shared;const texture=useMemo(()=>{if(!source)return null;const t=new VideoTexture(source);t.colorSpace=SRGBColorSpace;t.flipY=false;return t},[source]);useEffect(()=>()=>texture?.dispose(),[texture]);if(!texture)return null;return <mesh position={position} scale-x={mirror?-1:1}><planeGeometry args={[width,height]}/><meshBasicMaterial map={texture} transparent opacity={opacity} toneMapped={false}/></mesh>}

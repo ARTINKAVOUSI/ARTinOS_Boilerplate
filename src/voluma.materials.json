@@ -1,0 +1,32 @@
+{
+  "carriers": [
+    { "id": "clear-water", "name": "Clear Water", "density0": 1.0, "viscosity0": 0.16, "damping": 0.012, "turbulenceScale": 1.0, "ior": 1.333, "absorption": [0.002, 0.001, 0.001], "scattering": [0.001, 0.002, 0.003] },
+    { "id": "viscous-water", "name": "Viscous Water", "density0": 1.0, "viscosity0": 0.34, "damping": 0.028, "turbulenceScale": 0.72, "ior": 1.34, "absorption": [0.003, 0.002, 0.002], "scattering": [0.003, 0.004, 0.005] },
+    { "id": "oil-bath", "name": "Oil Bath", "density0": 0.91, "viscosity0": 0.48, "damping": 0.04, "turbulenceScale": 0.58, "ior": 1.47, "absorption": [0.01, 0.006, 0.002], "scattering": [0.005, 0.004, 0.002] },
+    { "id": "gel", "name": "Soft Gel", "density0": 1.04, "viscosity0": 0.72, "damping": 0.08, "turbulenceScale": 0.28, "ior": 1.41, "absorption": [0.004, 0.003, 0.003], "scattering": [0.012, 0.015, 0.016] },
+    { "id": "thin-mist", "name": "Thin Mist", "density0": 0.08, "viscosity0": 0.04, "damping": 0.02, "turbulenceScale": 1.35, "ior": 1.002, "absorption": [0.008, 0.009, 0.012], "scattering": [0.04, 0.045, 0.052] },
+    { "id": "dense-fog", "name": "Dense Fog", "density0": 0.12, "viscosity0": 0.08, "damping": 0.035, "turbulenceScale": 1.18, "ior": 1.003, "absorption": [0.018, 0.02, 0.023], "scattering": [0.12, 0.135, 0.15] },
+    { "id": "smoke-air", "name": "Smoke Air", "density0": 0.04, "viscosity0": 0.03, "damping": 0.018, "turbulenceScale": 1.62, "ior": 1.001, "absorption": [0.015, 0.017, 0.02], "scattering": [0.06, 0.065, 0.07] },
+    { "id": "resin-slow", "name": "Slow Resin", "density0": 1.08, "viscosity0": 0.94, "damping": 0.11, "turbulenceScale": 0.16, "ior": 1.49, "absorption": [0.012, 0.008, 0.004], "scattering": [0.01, 0.012, 0.014] },
+    { "id": "custom", "name": "Custom Medium", "density0": 1.0, "viscosity0": 0.22, "damping": 0.022, "turbulenceScale": 0.9, "ior": 1.36, "absorption": [0.004, 0.004, 0.005], "scattering": [0.006, 0.007, 0.009] }
+  ],
+  "species": [
+    { "id": "cyan-ink", "name": "Aegean Ink", "density": 1.06, "viscosityDelta": 0.02, "diffusion": 0.008, "dissipation": 0.001, "surfaceTension": 0.02, "absorption": [0.15, 1.2, 1.45], "scattering": [0.08, 0.18, 0.22], "phaseG": 0.16, "opacityClass": "translucent", "emission": [0.0, 0.02, 0.025], "albedoMode": "dye", "previewColor": "#12bbc9" },
+    { "id": "magenta-dye", "name": "Orchid Dye", "density": 1.02, "viscosityDelta": 0.01, "diffusion": 0.024, "dissipation": 0.002, "surfaceTension": 0.01, "absorption": [0.2, 1.25, 0.38], "scattering": [0.2, 0.06, 0.16], "phaseG": 0.12, "opacityClass": "translucent", "emission": [0.02, 0.0, 0.01], "albedoMode": "dye", "previewColor": "#be3b8c" },
+    { "id": "milk", "name": "Pearl Milk", "density": 1.03, "viscosityDelta": 0.14, "diffusion": 0.012, "dissipation": 0.001, "surfaceTension": 0.03, "absorption": [0.08, 0.07, 0.06], "scattering": [1.25, 1.35, 1.3], "phaseG": 0.72, "opacityClass": "cloudy", "emission": [0, 0, 0], "albedoMode": "paint-km-lite", "previewColor": "#e1ebe7" },
+    { "id": "oil-gold", "name": "Molten Ochre", "density": 0.91, "viscosityDelta": 0.44, "diffusion": 0.001, "dissipation": 0.0, "surfaceTension": 0.72, "absorption": [0.18, 0.72, 1.4], "scattering": [0.42, 0.26, 0.08], "phaseG": 0.38, "opacityClass": "opaque", "emission": [0.008, 0.003, 0], "albedoMode": "metallic", "flakeAmount": 0.38, "previewColor": "#c68732" },
+    { "id": "neon-orchid", "name": "Neon Orchid", "density": 1.01, "viscosityDelta": 0.01, "diffusion": 0.018, "dissipation": 0.008, "surfaceTension": 0.01, "absorption": [0.16, 0.62, 0.18], "scattering": [0.2, 0.08, 0.28], "phaseG": 0.24, "opacityClass": "translucent", "emission": [0.68, 0.16, 1.0], "albedoMode": "dye", "previewColor": "#9a62ff" },
+    { "id": "watercolor", "name": "Saffron Wash", "density": 1.01, "viscosityDelta": 0.0, "diffusion": 0.038, "dissipation": 0.001, "surfaceTension": 0.0, "absorption": [0.28, 0.72, 1.18], "scattering": [0.08, 0.1, 0.06], "phaseG": 0.1, "opacityClass": "translucent", "emission": [0, 0, 0], "albedoMode": "dye", "previewColor": "#dd8f39" },
+    { "id": "dense-paint", "name": "Titan Paint", "density": 1.24, "viscosityDelta": 0.68, "diffusion": 0.001, "dissipation": 0.0, "surfaceTension": 0.18, "absorption": [1.1, 1.0, 0.82], "scattering": [0.74, 0.7, 0.62], "phaseG": 0.48, "opacityClass": "opaque", "emission": [0, 0, 0], "albedoMode": "paint-km-lite", "previewColor": "#e6d7be" },
+    { "id": "acrylic", "name": "Lagoon Acrylic", "density": 1.12, "viscosityDelta": 0.5, "diffusion": 0.004, "dissipation": 0.0, "surfaceTension": 0.12, "absorption": [0.42, 0.14, 0.56], "scattering": [0.28, 0.44, 0.36], "phaseG": 0.34, "opacityClass": "opaque", "emission": [0, 0.004, 0.003], "albedoMode": "paint-km-lite", "previewColor": "#3dbaa8" },
+    { "id": "smoke", "name": "Silver Smoke", "density": 0.68, "viscosityDelta": -0.02, "diffusion": 0.045, "dissipation": 0.018, "surfaceTension": 0.0, "absorption": [0.18, 0.2, 0.22], "scattering": [0.52, 0.55, 0.58], "phaseG": 0.58, "opacityClass": "cloudy", "emission": [0, 0, 0], "albedoMode": "dye", "previewColor": "#9ba8aa" },
+    { "id": "pearl-lacquer", "name": "Pearl Lacquer", "density": 0.94, "viscosityDelta": 0.58, "diffusion": 0.001, "dissipation": 0.0, "surfaceTension": 0.82, "absorption": [0.2, 0.28, 0.22], "scattering": [0.5, 0.38, 0.46], "phaseG": 0.44, "opacityClass": "opaque", "emission": [0.01, 0.006, 0.012], "albedoMode": "pearlescent", "flakeAmount": 0.72, "previewColor": "#d8b7ca" }
+  ],
+  "miscibility": {
+    "cyan-ink": { "cyan-ink": 1, "magenta-dye": 1, "milk": 0.82, "oil-gold": 0.04, "neon-orchid": 1 },
+    "magenta-dye": { "cyan-ink": 1, "magenta-dye": 1, "milk": 0.88, "oil-gold": 0.03, "neon-orchid": 1 },
+    "milk": { "cyan-ink": 0.82, "magenta-dye": 0.88, "milk": 1, "oil-gold": 0.08, "neon-orchid": 0.8 },
+    "oil-gold": { "cyan-ink": 0.04, "magenta-dye": 0.03, "milk": 0.08, "oil-gold": 1, "neon-orchid": 0.06 },
+    "neon-orchid": { "cyan-ink": 1, "magenta-dye": 1, "milk": 0.8, "oil-gold": 0.06, "neon-orchid": 1 }
+  }
+}

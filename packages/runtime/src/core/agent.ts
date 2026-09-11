@@ -1,0 +1,28 @@
+import type { ArtinosRuntime } from './runtime'
+export function createAgentAPI(runtime:ArtinosRuntime){return{
+  parameters:{
+    list:()=>runtime.parameters.list().map(s=>runtime.parameters.describe(s.definition.id)),
+    get:(id:string)=>runtime.parameters.describe(id),
+    describe:(id:string)=>runtime.parameters.describe(id),
+    types:()=>runtime.parameterTypes.list().map(type=>({id:type.id,presentations:[...type.presentations]})),
+    drivers:(id:string)=>runtime.parameters.sources(id),
+    set:(id:string,value:any)=>runtime.setParameter(id,value,'Agent parameter change',{source:'agent'}),
+    setMany:(values:Record<string,any>,label='Agent parameter changes')=>runtime.setParameters(values,label,{source:'agent'}),
+  },
+  signals:{list:()=>runtime.signals.list(),get:(id:string)=>runtime.signals.sample(id)},
+  bindings:{list:()=>runtime.bindings.list(),add:(def:any)=>runtime.bindings.add(def),remove:(id:string)=>runtime.bindings.remove(id)},
+  presets:{list:(group?:string)=>runtime.presets.list(group),apply:(id:string)=>runtime.presets.apply(id),capture:(id:string,label:string,ids?:string[],group?:string)=>runtime.presets.capture(id,label,ids,group),remove:(id:string)=>runtime.presets.remove(id)},
+  automation:{list:()=>runtime.automation.list(),add:(track:any)=>runtime.automation.add(track),remove:(id:string)=>runtime.automation.remove(id)},
+  commands:{list:()=>runtime.commands.list().map(({execute:_execute,...command})=>command),execute:(id:string,context?:any)=>runtime.commands.execute(id,context)},
+  actions:{list:()=>runtime.actions.list(),add:(action:any)=>runtime.actions.add(action),remove:(id:string)=>runtime.actions.remove(id)},
+  signalPipelines:{list:()=>runtime.signalProcessor.list(),add:(pipeline:any)=>runtime.signalProcessor.add(pipeline),remove:(id:string)=>runtime.signalProcessor.remove(id)},
+  projectState:{get:(id:string)=>runtime.projectState.get(id),set:(id:string,value:unknown)=>runtime.projectState.set(id,value),list:()=>runtime.projectState.snapshot()},
+  modules:{list:()=>runtime.modules.list(),search:(q:string)=>runtime.modules.search(q),get:(id:string)=>runtime.modules.get(id)},
+  resources:{list:()=>runtime.resources.list(),get:(id:string)=>runtime.resources.get(id)},
+  telemetry:{list:()=>runtime.telemetry.list(),get:(id:string)=>runtime.telemetry.get(id)},
+  quality:{get:()=>runtime.quality.getState(),set:(patch:any)=>runtime.quality.setState(patch),consumers:()=>runtime.quality.listConsumers()},
+  logs:{list:()=>runtime.logger.list(),clear:()=>runtime.logger.clear()},
+  persistence:{save:()=>runtime.persistence.save(),load:()=>runtime.persistence.load(),clear:()=>runtime.persistence.clear(),export:()=>runtime.persistence.export(),import:(raw:string)=>runtime.persistence.import(raw)},
+  snapshot:()=>runtime.snapshot(),restore:(snapshot:any)=>runtime.restore(snapshot),
+  describe:()=>runtime.describe(),
+}}

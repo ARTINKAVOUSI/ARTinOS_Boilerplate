@@ -1,0 +1,19 @@
+{
+  "name": "@artinos/r3f",
+  "version": "1.3.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@artinos/graph": "file:../graph",
+    "@artinos/inputflow": "file:../inputflow",
+    "@artinos/modules": "file:../modules",
+    "@artinos/runtime": "file:../runtime",
+    "@artinos/ui": "file:../ui",
+    "react": "19.2.0"
+  }
+}

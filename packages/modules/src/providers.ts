@@ -1,0 +1,6 @@
+export type ProviderName='drei'|'three-stdlib'
+export interface ProviderExport{provider:ProviderName;name:string;kind:string}
+export async function loadProvider(provider:ProviderName):Promise<Record<string,unknown>>{return provider==='drei'?await import('@react-three/drei') as any:await import('three-stdlib') as any}
+export async function listProviderExports(provider:ProviderName):Promise<ProviderExport[]>{const ns=await loadProvider(provider);return Object.keys(ns).sort().map(name=>({provider,name,kind:classify(name)}))}
+export async function searchProviderExports(query:string,provider?:ProviderName){const providers=provider?[provider]:['drei','three-stdlib'] as ProviderName[];const all=(await Promise.all(providers.map(listProviderExports))).flat(),q=query.toLowerCase();return all.filter(item=>`${item.name} ${item.kind}`.toLowerCase().includes(q))}
+const classify=(name:string)=>/Loader|Decoder/.test(name)?'loader':/Controls/.test(name)?'controls':/Geometry/.test(name)?'geometry':/Pass|Effect|Shader/.test(name)?'postfx':/Camera/.test(name)?'camera':/Light|Environment|Sky|Stars|Stage/.test(name)?'environment':/Text|Html|Image|Svg/.test(name)?'content':/Exporter/.test(name)?'exporter':/Helper/.test(name)?'helper':/Material/.test(name)?'material':'utility'

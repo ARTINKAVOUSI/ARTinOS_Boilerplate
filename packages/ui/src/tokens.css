@@ -1,0 +1,488 @@
+/* ARTINOS Instrument — token layer
+   ==========================================================================
+   Source of truth: "ARTINOS System Reference v2" (Claude Design handoff, Aug 2026)
+     Design system premium refinement-handoff/design-system-premium-refinement/project/
+       ARTINOS System Reference v2.dc.html   — the reference sheet
+       artinos-instrument-tokens.css         — the shipped token layer
+
+   Three layers, strictly ordered. The ordering IS the contract:
+
+     1. primitives  raw values. Private to this file — a component rule that
+                    names one of these is a bug (Reference, rule 01).
+     2. roles       the only thing components may reference.
+     3. themes      reassign roles. A theme never re-declares a component rule.
+
+   `theme.css` imports this file first, so every component rule below it
+   resolves against roles only. Keep it that way: adding a raw hex to a
+   component rule pins that component to one theme.
+
+   Where the reference sheet and the shipped token file disagree, the sheet
+   wins on direct contradictions (the type scale) and the token file wins on
+   ranges it already resolved (radius, tab strip, safe area).
+   ========================================================================== */
+
+/* 1 — PRIMITIVES ---------------------------------------------------------- */
+:root {
+  /* graphite — dark-mode ground. Five steps, never interpolated between.
+     Neutral by construction: the ramp used to carry a cyan bias (blue 4–5
+     points above red), which composited through the frost into a blue cast
+     over every surface. Grey is the ground; hue belongs to the signal ramp. */
+  --ink-void: #090909;
+  --ink-stage: #0e0e0e;
+  --ink-surface: #141414;
+  --ink-raised: #191919;
+  --ink-edge: #212121;
+
+  /* paper — light-mode ground, for daylight desks and printed reviews. */
+  --paper-void: #eeeeee;
+  --paper-stage: #e0e0e0;
+  --paper-surface: #f6f6f6;
+  --paper-raised: #ffffff;
+  --paper-edge: #e4e4e4;
+
+  /* chalk — text on graphite. Five steps of recession, hi to ghost. */
+  --chalk-hi: #f4f4f4;
+  --chalk-mid: #bfbfbf;
+  --chalk-low: #919191;
+  --chalk-faint: #686868;
+  --chalk-ghost: #555555;
+
+  /* slate — text on paper. */
+  --slate-hi: #131313;
+  --slate-mid: #2e2e2e;
+  --slate-low: #616161;
+  --slate-faint: #919191;
+
+  /* signal — meaning, never decoration. One hue per state. */
+  --teal-500: #2fb39c;
+  --teal-300: #7fe3d4;
+  --teal-700: #0b7a69;
+  --amber-500: #e0a34e;
+  --rose-500: #f2606f;
+  --azure-500: #8fb8d9;
+
+  /* type */
+  --font-ui: Chivo, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-num: 'Chivo Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  /* Weights follow the reference sheet's type table: 200 display, 300 body and
+     value, 500 mono caps. Numerals are always mono and tabular so a digit
+     change cannot shift a column (rule 05). */
+  --type-display: 200 64px/1.02 var(--font-ui);
+  --type-title: 300 30px/1.15 var(--font-ui);
+  --type-hero: 200 40px/1 var(--font-num);
+  --type-panel: 500 9px/1 var(--font-num);
+  --type-section: 500 8.5px/1 var(--font-num);
+  --type-body: 300 13px/1.75 var(--font-ui);
+  --type-label: 300 11px/1.35 var(--font-ui);
+  --type-value: 300 11px/1.2 var(--font-num);
+  --type-readout: 300 11.5px/1.1 var(--font-num);
+
+  --track-display: -0.035em;
+  --track-title: -0.022em;
+  --track-caps: 0.2em;
+  --track-panel: 0.22em;
+
+  /* space — 2px base, 8 steps */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 24px;
+  --space-8: 32px;
+
+  /* metrics — three control heights cover the whole surface (rule 06) */
+  --control-h-sm: 24px;
+  --control-h: 28px;
+  --control-h-lg: 32px;
+  --row-gap: 6px;
+  --panel-header-h: 36px;
+  --command-bar-h: 44px;
+  --tab-strip-h: 40px;   /* shellSpecs resolves the 34-40 range at 40 */
+  --safe-area: 32px;     /* DOCK INSET 32 / 20 */
+
+  --radius-control: 5px;
+  --radius-card: 8px;
+  --radius-panel: 12px;
+  --radius-shell: 16px;
+
+  /* motion — named by what moves, not by duration */
+  --dur-value: 70ms;
+  --dur-state: 130ms;
+  --dur-surface: 220ms;
+  --dur-layout: 380ms;
+  /* Entering and leaving are not the same gesture. Something arriving decelerates
+     into place; something leaving accelerates away and should take less time, so
+     dismissal never feels like waiting. */
+  --ease-std: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --dur-exit: 90ms;
+  --shadow-deep: rgba(0, 0, 0, 0.9);
+  --shadow-well: rgba(0, 0, 0, 0.3);
+}
+
+/* 2 — ROLES (dark default) ------------------------------------------------ */
+:root {
+  --bg-app: var(--ink-void);
+  --bg-stage: var(--ink-stage);
+  --bg-surface: var(--ink-surface);
+  --bg-raised: var(--ink-raised);
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --bg-active: rgba(255, 255, 255, 0.09);
+  --bg-well: rgba(0, 0, 0, 0.34);
+  --bg-float: rgba(25, 25, 25, 0.86);
+  --bg-scrim: rgba(9, 9, 9, 0.6);
+
+  --text-hi: var(--chalk-hi);
+  --text-mid: var(--chalk-mid);
+  --text-low: var(--chalk-low);
+  --text-faint: var(--chalk-faint);
+  --text-ghost: var(--chalk-ghost);
+
+  --line-subtle: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  --sig-live: var(--teal-500);
+  --sig-live-hi: var(--teal-300);
+  --sig-live-wash: rgba(47, 179, 156, 0.16);
+  --sig-live-line: rgba(47, 179, 156, 0.5);
+  --sig-warn: var(--amber-500);
+  --sig-warn-wash: rgba(224, 163, 78, 0.14);
+  --sig-fault: var(--rose-500);
+  --sig-fault-wash: rgba(242, 96, 111, 0.12);
+  --sig-bind: var(--azure-500);
+  --sig-bind-wash: rgba(143, 184, 217, 0.14);
+  --sig-neutral: var(--chalk-ghost);
+
+  --fill-track: rgba(255, 255, 255, 0.05);
+  --fill-track-hover: rgba(255, 255, 255, 0.08);
+  --tick: rgba(255, 255, 255, 0.2);
+
+  /* Row rest wash. The reference sheet does not name this as a role, but its scrub
+     cell and outliner both rest on rgba(255,255,255,.024) — a step below --bg-hover,
+     which is where the row goes on pointer-over. Named here so rows can stop
+     carrying the literal (rule 01). */
+  --bg-row: rgba(255, 255, 255, 0.024);
+
+  /* elevation — one meaning each (rule 02).
+     e0 recessed means editable; e2 frost means floating chrome. A card that is
+     both raised and recessed is two components wearing one shell. */
+  --e0-well: inset 0 1px 2px rgba(0, 0, 0, 0.6), inset 0 0 0 1px var(--line-subtle);
+  --e1-surface: inset 0 0 0 1px var(--line-subtle);
+  --e2-dock: inset 0 0 0 1px var(--line), inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 24px 60px -20px rgba(0, 0, 0, 0.9);
+  --e3-float: inset 0 0 0 1px var(--line-strong), 0 28px 64px -18px rgba(0, 0, 0, 0.9);
+
+  /* ── FROST ────────────────────────────────────────────────────────────
+     The dock material in every mode; only the tint changes.
+
+         background: var(--frost-sheen), var(--frost-tint);
+         backdrop-filter: var(--blur-frost);
+         box-shadow: var(--frost-edge);
+
+     Grain was tried and removed. Noise is a per-pixel effect that also lifts
+     the MEAN, so any amount strong enough to see read as fog across a pane
+     this large, and any amount subtle enough not to fog was invisible. There
+     is no useful window between those. Real glass is smooth — what makes it
+     read as glass is how it handles LIGHT, not surface texture.
+
+     So the material is built from optics instead:
+
+       diffusion   a wide blur with a saturation lift, because scattered light
+                   through glass comes back slightly richer, not greyer
+       body        a tint bright enough to hold the pane against a dark scene
+       specular    a raking highlight band, brightest where light enters and
+                   falling to a dark edge where it leaves
+       thickness   the edges — a lit top rim, a hairline all round, and an
+                   inner falloff along the bottom
+
+     One caveat worth keeping: a translucent pane over a BLACK region is a
+     flat dark slab no matter how it is tuned. That is physics. Glass only
+     reads as glass where there is light behind it to diffuse. */
+
+  --frost-tint: rgba(28, 28, 28, 0.74);
+
+  /* Specular. Two bright stops close together make an edge of light rather
+     than a wash — a single ramp reads as haze, a band reads as a surface
+     catching a source. */
+  --frost-sheen: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.13) 0%,
+    rgba(255, 255, 255, 0.07) 12%,
+    rgba(255, 255, 255, 0.02) 34%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+
+  /* Thickness. Kept as a token so every frosted surface gets the same edge
+     rather than each one inventing its own. */
+  --frost-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 -20px 34px -26px rgba(0, 0, 0, 0.5);
+
+  --blur-frost: blur(44px) saturate(135%) brightness(104%);
+  --blur-float: blur(36px) saturate(128%) brightness(103%);
+
+  /* Focus is a two-ring token. Never removed, only restyled. */
+  --focus-ring: 0 0 0 1px var(--sig-live-hi), 0 0 0 3px rgba(127, 227, 212, 0.16);
+
+  color-scheme: dark;
+}
+
+/* 3 — THEMES -------------------------------------------------------------- */
+
+/* GLASS — the default, and the clearest read of the material: the scene shows
+   through and the tint only lifts the pane far enough to keep text legible.
+   Every other theme is this surface with more tint. A frosted pane is lit from
+   the front, so it is a whisper of WHITE over the scene, never a dark scrim
+   laid on top of it. */
+[data-theme='glass'] {
+  /* White at 7% over a black scene composites to ~18 — a flat slab. The pane
+     needs enough body to read as lifted, and a raking specular so one corner
+     catches light and the opposite falls away. That directional structure is
+     what separates clean frost from milky fog: a uniform lift reads as haze,
+     a lit one reads as a material. */
+  --frost-tint: rgba(255, 255, 255, 0.11);
+  --frost-sheen: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.12) 11%,
+    rgba(255, 255, 255, 0.035) 32%,
+    rgba(255, 255, 255, 0) 56%,
+    rgba(0, 0, 0, 0.07) 100%
+  );
+  --frost-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 -22px 38px -26px rgba(0, 0, 0, 0.42);
+  /* A wider blur and a stronger colour lift: this is the theme where the scene
+     is meant to be visible through the chrome, so the diffusion does the work. */
+  --blur-frost: blur(64px) saturate(150%) brightness(106%);
+  --bg-surface: rgba(255, 255, 255, 0.045);
+  --bg-raised: rgba(255, 255, 255, 0.06);
+  --bg-well: rgba(0, 0, 0, 0.3);
+  --bg-float: rgba(255, 255, 255, 0.07);
+  --line-subtle: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.18);
+  --bg-row: rgba(255, 255, 255, 0.04);
+  --text-mid: #dde4e2;
+  --text-low: #a7b1ae;
+  /* The glass pane sits ~20 points above the other themes' ground, so the two
+     recessed steps have to rise with it or the relationship inverts: held at
+     the dark-theme values they fell to 2.7:1 on this surface, below even the
+     units-and-counts allowance. Same recession, measured against the surface
+     they actually land on. */
+  --text-faint: #8a8a8a;
+  --text-ghost: #6f6f6f;
+  --e1-surface: inset 0 0 0 1px var(--line-subtle);
+  --e2-dock: inset 0 0 0 1px var(--line), 0 20px 54px -22px rgba(0, 0, 0, 0.7);
+}
+
+/* DARK — frost with a deeper tint. Default for long sessions and capture. */
+[data-theme='dark'] {
+  --bg-surface: var(--ink-surface);
+  --bg-raised: var(--ink-raised);
+  --bg-float: rgba(22, 22, 22, 0.8);
+  --frost-tint: rgba(24, 24, 24, 0.8);
+}
+
+/* AUTO — bright canvas behind chrome: deepen the tint, keep the frost. */
+[data-theme='auto'][data-backdrop='bright'] {
+  --bg-surface: #121212;
+  --bg-raised: #191919;
+  --bg-well: rgba(0, 0, 0, 0.42);
+  --line: rgba(255, 255, 255, 0.1);
+  --frost-tint: rgba(22, 22, 22, 0.78);
+}
+
+/* AUTO — dark canvas: lift the tint so chrome stays discernible. */
+[data-theme='auto'][data-backdrop='dark'] {
+  --bg-surface: #1c1c1c;
+  --bg-raised: #232323;
+  --bg-well: rgba(0, 0, 0, 0.3);
+  --line: rgba(255, 255, 255, 0.12);
+  --frost-tint: rgba(40, 40, 40, 0.6);
+}
+
+/* Contrast is pinned while a pointer interaction is live, so a dragged value
+   never loses legibility against a moving canvas. Set on the workspace root
+   for the duration of a drag. */
+[data-interacting='true'] {
+  --bg-surface: #161616;
+  --bg-raised: #1c1c1c;
+}
+
+/* LIGHT — daylight desks and printed reviews. Frost lightens, not darkens. */
+[data-theme='light'] {
+  --bg-app: var(--paper-void);
+  --bg-stage: var(--paper-stage);
+  --bg-surface: var(--paper-surface);
+  --bg-raised: var(--paper-raised);
+  --bg-hover: rgba(24, 24, 24, 0.05);
+  --bg-active: rgba(24, 24, 24, 0.1);
+  --bg-well: rgba(32, 32, 32, 0.08);
+  --bg-float: rgba(255, 255, 255, 0.9);
+  --bg-scrim: rgba(255, 255, 255, 0.7);
+
+  --frost-tint: rgba(242, 242, 242, 0.64);
+  --frost-sheen: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0.16) 30%,
+    transparent 58%,
+    rgba(0, 0, 0, 0.015)
+  );
+  --blur-frost: blur(40px) saturate(115%);
+  --e2-dock: inset 0 0 0 1px var(--line), inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 18px 44px -22px rgba(28, 28, 28, 0.28);
+
+  --text-hi: var(--slate-hi);
+  --text-mid: var(--slate-mid);
+  /* slate-low (#5A6664) measures 3.9–4.5:1 on our composited paper surfaces,
+     which are washes rather than the flat --bg-surface the ramp was specified
+     against. Darkened just enough to clear 4.5:1 while staying clearly recessed
+     from --text-mid. */
+  --text-low: #4d4d4d;
+  /* The slate ramp is shifted up one step relative to the reference's listing.
+     Slate has four steps to chalk's five, and our surfaces are lighter washes
+     than the flat --bg-surface it was specified against, so slate-faint lands
+     near 1.7:1 — well under even the units-and-counts allowance. Recession is
+     preserved; only the floor moves. */
+  --text-faint: var(--slate-low);
+  --text-ghost: var(--slate-faint);
+
+  --line-subtle: rgba(24, 24, 24, 0.09);
+  --line: rgba(24, 24, 24, 0.14);
+  --line-strong: rgba(24, 24, 24, 0.22);
+
+  /* teal-700 reads 3.5–4.4:1 as *text* on paper. The fill stays teal-700 (it is
+     a surface, judged at 3:1); the text-bearing roles darken one step so armed
+     labels and ON captions clear 4.5:1. */
+  --sig-live: #075a4d;
+  --sig-live-hi: #064a40;
+  --sig-live-wash: rgba(11, 122, 105, 0.12);
+  --sig-live-line: rgba(11, 122, 105, 0.45);
+
+  /* On paper a panel lifts off the ground; it does not darken into it. Darkening
+     the row stacked with the dock well composited ~35 points below the flat
+     --bg-surface the light ramp was specified against, which pushed --text-low
+     under 4.5:1 across the board. */
+  --bg-row: rgba(255, 255, 255, 0.55);
+  --fill-track: rgba(24, 24, 24, 0.08);
+  --fill-track-hover: rgba(24, 24, 24, 0.13);
+  --tick: rgba(24, 24, 24, 0.3);
+
+  --e0-well: inset 0 1px 2px rgba(28, 28, 28, 0.14), inset 0 0 0 1px var(--line-subtle);
+  --e3-float: inset 0 0 0 1px var(--line-strong), 0 24px 56px -20px rgba(28, 28, 28, 0.32);
+
+  color-scheme: light;
+}
+
+/* Motion is never load-bearing: reduced motion zeroes all four durations. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-value: 0ms;
+    --dur-state: 0ms;
+    --dur-surface: 0ms;
+    --dur-layout: 0ms;
+    --dur-exit: 0ms;
+  }
+}
+
+/* Canonical theme and context completion --------------------------------- */
+[data-theme='studio'] {
+  --bg-app: #0b0b0b;
+  --bg-stage: #101010;
+  --bg-surface: #151515;
+  --bg-raised: #1b1b1b;
+  --frost-tint: rgba(22, 22, 22, 0.78);
+  --blur-frost: blur(48px) saturate(112%);
+  --control-h-sm: 22px;
+  --control-h: 26px;
+  --control-h-lg: 30px;
+  color-scheme: dark;
+}
+
+[data-theme='minimal'] {
+  --frost-tint: transparent;
+  --frost-sheen: none;
+  --frost-edge: none;
+  --blur-frost: none;
+  --blur-float: none;
+  --e1-surface: none;
+  --e2-dock: none;
+  --e3-float: none;
+}
+
+[data-theme='high-contrast'] {
+  --bg-app: #000;
+  --bg-stage: #000;
+  --bg-surface: #000;
+  --bg-raised: #111;
+  --bg-hover: #1c1c1c;
+  --bg-active: #292929;
+  --bg-well: #000;
+  --text-hi: #fff;
+  --text-mid: #fff;
+  --text-low: #d7d7d7;
+  --text-faint: #bdbdbd;
+  --line-subtle: rgba(255,255,255,.45);
+  --line: rgba(255,255,255,.7);
+  --line-strong: #fff;
+  --frost-tint: #000;
+  --frost-sheen: none;
+  --blur-frost: none;
+  --blur-float: none;
+  --focus-ring: 0 0 0 2px #fff, 0 0 0 5px #000;
+  color-scheme: dark;
+}
+
+[data-context~='compact'],
+[data-density='compact'] {
+  --control-h-sm: 22px;
+  --control-h: 24px;
+  --control-h-lg: 28px;
+  --row-gap: 4px;
+}
+
+[data-context~='touch'] {
+  --control-h-sm: 40px;
+  --control-h: 44px;
+  --control-h-lg: 48px;
+  --row-gap: 8px;
+}
+
+[data-context~='canvas-overlay'] {
+  --frost-tint: transparent;
+  --blur-frost: blur(64px) saturate(112%);
+}
+
+[dir='rtl'] {
+  --inline-direction: -1;
+}
+
+@media (forced-colors: active) {
+  :root {
+    --bg-app: Canvas;
+    --bg-stage: Canvas;
+    --bg-surface: Canvas;
+    --bg-raised: Canvas;
+    --text-hi: CanvasText;
+    --text-mid: CanvasText;
+    --text-low: GrayText;
+    --line-subtle: ButtonBorder;
+    --line: ButtonBorder;
+    --line-strong: CanvasText;
+    --sig-live: Highlight;
+    --focus-ring: 0 0 0 2px Highlight;
+    --frost-tint: Canvas;
+    --frost-sheen: none;
+    --blur-frost: none;
+  }
+}

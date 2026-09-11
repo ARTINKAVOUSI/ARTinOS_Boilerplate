@@ -1,0 +1,4 @@
+import type { ReactNode } from 'react'
+import { Billboard, Html, Image, Text, Text3D } from '@react-three/drei/legacy'
+export type ContentMode='text'|'text3d'|'html'|'image'|'billboard'
+export function Content({mode='text',children,src,fontSize=.35,color='white',position=[0,0,0],center=true}:{mode?:ContentMode;children?:ReactNode;src?:string;fontSize?:number;color?:string;position?:[number,number,number];center?:boolean}){if(mode==='html')return <Html position={position} center={center}>{children}</Html>;if(mode==='image'&&src)return <Image url={src} position={position}/>;if(mode==='billboard')return <Billboard position={position}>{children}</Billboard>;if(mode==='text3d')return <Text3D font="/fonts/inter.json" position={position}>{String(children??'ARTINOS')}<meshStandardMaterial color={color}/></Text3D>;return <Text position={position} fontSize={fontSize} color={color} anchorX={center?'center':'left'} anchorY="middle">{String(children??'ARTINOS')}</Text>}

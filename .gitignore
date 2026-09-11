@@ -1,0 +1,13 @@
+node_modules
+.upgrade-backup/
+dist
+.vite
+.env
+*.local
+*.log
+*.tsbuildinfo
+qa-*.png
+*.zip
+.DS_Store
+.design-ref/
+Design system premium refinement-handoff/

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "presets": [
+    { "id": "single-drop-ink", "carrier": "clear-water", "species": ["cyan-ink"], "emitter": { "type": "vortex-ring", "position": [0, 1.24, 0], "axis": [0, -1, 0], "mass": 1.1, "radius": 0.48, "circulation": 2.2 }, "lighting": "backlit-studio" },
+    { "id": "twin-braid", "carrier": "clear-water", "species": ["cyan-ink", "magenta-dye"], "emitters": [{ "type": "jet", "position": [-0.4, 1.1, 0] }, { "type": "jet", "position": [0.4, 1.1, 0] }], "lighting": "backlit-studio" },
+    { "id": "milk-in-water", "carrier": "viscous-water", "species": ["milk"], "emitter": { "type": "volume", "mass": 1.35, "radius": 0.68 }, "lighting": "soft-gallery" },
+    { "id": "oil-lenses", "carrier": "clear-water", "species": ["oil-gold", "cyan-ink"], "emitter": { "type": "burst", "mass": 0.72, "radius": 0.22 }, "interaction": { "miscibility": 0.04, "surfaceTension": 0.72 }, "lighting": "dark-key" },
+    { "id": "downward-mushrooms", "carrier": "clear-water", "species": ["cyan-ink"], "emitter": { "type": "vortex-ring", "audio": "bass", "axis": [0, -1, 0] }, "lighting": "backlit-studio" },
+    { "id": "neon-vapor", "carrier": "thin-mist", "species": ["neon-orchid"], "emitter": { "type": "spiral", "audio": "mid" }, "lighting": "neon-club" },
+    { "id": "pearlescent-ribbon", "carrier": "gel", "species": ["oil-gold"], "emitter": { "type": "sheet", "velocity": [0.2, -0.3, 0] }, "lighting": "rim-gallery" },
+    { "id": "av-sculpture", "carrier": "thin-mist", "species": ["cyan-ink", "magenta-dye", "neon-orchid"], "emitters": [{ "type": "vortex-ring", "audio": "bass" }, { "type": "orbit", "audio": "mid" }, { "type": "spectrum-ring", "audio": "bins", "bands": 32 }], "lighting": "neon-club" },
+    { "id": "fog-tank", "carrier": "thin-mist", "species": ["cyan-ink"], "emitter": { "type": "stream", "mass": 0.22 }, "lighting": "god-ray" },
+    { "id": "macro-tendril", "carrier": "clear-water", "species": ["cyan-ink"], "emitter": { "type": "vortex-ring", "radius": 0.25, "circulation": 3.1 }, "camera": "macro-hero", "lighting": "backlit-studio" }
+  ]
+}

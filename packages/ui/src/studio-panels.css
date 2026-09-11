@@ -1,0 +1,202 @@
+/* Shared studio panel language. Scoped to preserve standalone primitives and demos. */
+.artinos-workbench{container:workbench / inline-size;display:flex;flex-direction:column;flex:1 0 auto;width:100%;min-width:0;min-height:100%;color:var(--text-hi);font-size:12px;--workbench-card:color-mix(in srgb,var(--bg-surface) 92%,transparent)}
+.plate-workspace .artinos-panel-body:has(>.artinos-workbench){display:block;overflow:auto!important;padding:0;min-height:0}
+
+
+
+
+
+
+
+
+.artinos-workbench-content{padding:6px 8px;min-width:0;flex:1}
+.artinos-workbench :is(button,input,select,textarea):focus-visible{outline:2px solid var(--sig-live);outline-offset:3px}
+.artinos-workbench :is(button,select){cursor:pointer}.artinos-workbench button:disabled{cursor:not-allowed;opacity:.4}
+.artinos-workbench :is(input,select,textarea){font-size:12px;min-width:0;max-width:100%;color:var(--text-hi)}
+.artinos-workbench :is(input:not([type=checkbox]):not([type=range]):not([type=color]),select){min-height:26px;border-radius:6px}
+.artinos-workbench .artinos-button{min-height:26px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:10px;padding:4px 8px;letter-spacing:.04em;border-radius:6px;white-space:nowrap}
+.artinos-workbench .artinos-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 6px;padding:0;overflow:visible}
+.artinos-workbench .artinos-toolbar>.artinos-search{flex:1 1 200px;min-width:120px;width:auto}
+.artinos-workbench .artinos-toolbar>.artinos-control{flex:0 1 auto;min-width:0;display:flex;align-items:center;gap:9px;width:auto}
+.artinos-workbench .artinos-toolbar>.artinos-control select{width:auto;min-width:100px}
+.artinos-workbench .artinos-control{min-height:28px;font-size:11px;gap:8px}
+.artinos-workbench .artinos-control>span{font-size:11px;line-height:1.4}
+.artinos-workbench .artinos-tabs{display:flex;flex-wrap:wrap;gap:4px;border:0;padding:4px;background:var(--bg-well);border-radius:8px;width:fit-content;max-width:100%;margin-bottom:6px}
+.artinos-workbench .artinos-tabs button{padding:4px 8px;min-height:26px;font-size:11px;text-transform:capitalize;letter-spacing:0;border:0;border-radius:5px;color:var(--text-mid)}
+.artinos-workbench .artinos-tabs button.is-active{background:var(--sig-live-wash);color:var(--sig-live-hi);box-shadow:inset 0 0 0 1px var(--sig-live-line)}
+.artinos-workbench .artinos-section{border:1px solid var(--line-subtle);border-radius:5px;padding:8px;background:var(--workbench-card);margin:0;min-width:0}
+.artinos-workbench .artinos-section-title{position:static!important;backdrop-filter:none!important;display:flex;align-items:flex-start;flex-direction:column;gap:5px;margin-bottom:4px;padding:0 0 4px;background:transparent;border-bottom:1px solid var(--line-subtle)}
+.artinos-workbench .artinos-section-title b{font-size:11px;letter-spacing:.06em;color:var(--text-hi)}
+.artinos-workbench .artinos-section-title small{font:11px/1.6 var(--font-ui);text-align:left;white-space:normal;color:var(--text-mid)}
+.artinos-workbench .artinos-stack{gap:9px}.artinos-workbench .artinos-button-row{display:flex;gap:8px;flex-wrap:wrap}
+.artinos-panel-summary{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:10px var(--font-num);color:var(--text-low);margin:0 0 12px}
+.artinos-parameter-cards{columns:260px;column-gap:8px}
+.artinos-parameter-card{break-inside:avoid;display:inline-block;width:100%;margin:0 0 6px;min-width:0;border:1px solid var(--line-subtle);border-radius:9px;background:var(--workbench-card);overflow:hidden;}
+.artinos-parameter-card-head{display:flex;align-items:center;gap:8px;width:100%;border:0;border-bottom:1px solid var(--line-subtle);padding:5px 6px;text-align:left;background:var(--bg-row);color:var(--text-hi)}
+.artinos-parameter-card-head b{flex:1;font-size:11px;font-weight:500;letter-spacing:.03em}.artinos-parameter-card-head small{font:10px var(--font-num);padding:2px 6px;border-radius:4px;background:var(--bg-well);color:var(--text-mid)}
+.artinos-parameter-card-body{padding:3px 5px;display:grid;gap:2px}
+.artinos-workbench .artinos-property-main{display:flex!important;flex-wrap:nowrap;gap:3px;min-width:0}
+.artinos-workbench .artinos-property-label{display:none}.artinos-workbench .artinos-property-control{flex:1 1 auto;min-width:0}
+.artinos-workbench .artinos-property-actions{display:flex;gap:3px;margin-left:auto;opacity:1;position:relative;transform:none;flex-shrink:0}
+.artinos-workbench .artinos-property-row:focus-within .artinos-property-actions,.artinos-workbench .artinos-property-row:hover .artinos-property-actions{opacity:1}
+.artinos-workbench .artinos-icon-button{min-width:24px;min-height:24px;display:inline-grid;place-items:center;border-radius:4px}
+.artinos-workbench .artinos-property-row{height:auto;min-height:0;padding:1px 0;border-bottom:1px solid var(--line-subtle)}
+.artinos-workbench .artinos-property-row:last-child{border-bottom:0}.artinos-workbench .artinos-property-row[data-visibility-state=revealed]{outline:1px solid var(--sig-live);border-radius:6px}
+.artinos-workbench .artinos-property-row[data-density=multiline] .artinos-property-control{width:100%}
+.artinos-inspector-presets{display:flex;flex-wrap:wrap;gap:12px;align-items:center;border:1px solid var(--line-subtle);background:var(--bg-well);border-radius:8px;padding:12px;margin-bottom:6px}
+.artinos-inspector-presets>.artinos-control{display:flex;gap:10px;flex:1 1 220px}
+.artinos-workbench .artinos-scene-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:8px;align-items:start}
+.artinos-workbench .artinos-scene-grid>.artinos-section:first-child{display:grid;gap:8px}
+.artinos-workbench .artinos-scene-layout>.artinos-tabs{justify-content:flex-start;overflow:visible}
+.artinos-workbench .artinos-inputflow-content{display:block}.artinos-workbench .artinos-inputflow-switch{margin-bottom:6px}
+.artinos-input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:8px;align-items:start}
+.artinos-workbench .artinos-device{display:flex;justify-content:space-between;align-items:center;padding:10px 0;gap:12px;border-bottom:1px solid var(--line-subtle);min-height:48px}
+.artinos-workbench .artinos-device>span{display:grid;gap:5px}.artinos-workbench .artinos-device b{font-size:11px;font-weight:500}.artinos-workbench .artinos-device small{font-size:10px}.artinos-workbench .artinos-device .state-on{color:var(--sig-live)}
+.artinos-device-note{font-size:11px;color:var(--text-mid);line-height:1.6;margin:8px 0}
+.artinos-panel-notice{padding:10px 12px;border:1px solid var(--sig-live-line);background:var(--sig-live-wash);border-radius:7px;margin-bottom:12px;color:var(--text-hi);font-size:12px;line-height:1.6}
+.artinos-panel-notice.is-error{border-color:var(--sig-fault);color:var(--sig-fault)}
+.artinos-workbench-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:150px;padding:24px;color:var(--text-mid);border:1px dashed var(--line);border-radius:9px;gap:10px}
+.artinos-workbench-empty h3{margin:0;font-size:15px;font-weight:500;color:var(--text-hi)}.artinos-workbench-empty p{max-width:460px;margin:0 0 4px;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+.artinos-workbench .artinos-postfx-commandbar{display:flex;flex-wrap:wrap;gap:10px;padding:0 0 12px}.artinos-workbench .artinos-postfx-commandbar .artinos-search{flex:1 1 200px}
+.artinos-workbench .artinos-postfx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:8px;align-items:start}
+.artinos-workbench .artinos-effect{border-radius:8px;overflow:hidden}.artinos-workbench .artinos-effect-head{min-height:54px;padding:10px 12px;gap:10px}.artinos-workbench .artinos-effect-name b{font-size:12px}.artinos-workbench .artinos-effect-name small{font-size:10px}
+.artinos-workbench .artinos-effect-body{padding:12px;display:grid;gap:9px}.artinos-workbench .artinos-effect-cost{font-size:9px;white-space:nowrap}
+.artinos-workbench .artinos-effect.is-enabled{border-color:var(--sig-live-line)}
+.artinos-workbench .artinos-effect-power{width:28px;height:28px}.artinos-workbench .artinos-effect-status{font-size:11px;line-height:1.6}
+.artinos-console-entries{display:grid;gap:6px;max-height:480px;overflow:auto}.artinos-console-entry{border:1px solid var(--line-subtle);border-left:2px solid var(--text-low);border-radius:6px;background:var(--bg-well)}
+.artinos-console-entry.log-error{border-left-color:var(--sig-fault)}.artinos-console-entry.log-warn{border-left-color:var(--sig-warn)}
+.artinos-console-entry summary{display:grid;grid-template-columns:60px 48px 100px minmax(0,1fr);gap:12px;padding:10px 12px;font-size:11px;cursor:pointer;align-items:center}
+.artinos-console-entry summary span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artinos-console-entry summary b{font:9px var(--font-num);text-transform:uppercase;color:var(--text-mid)}.artinos-console-entry time{color:var(--text-low);font:10px var(--font-num)}
+.artinos-console-entry pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;padding:0 14px 14px;font:11px/1.7 var(--font-num)}
+.artinos-asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:12px}.artinos-asset-card{display:grid;gap:10px;min-width:0;padding:12px;border:1px solid var(--line-subtle);border-radius:8px;background:var(--bg-well)}
+.artinos-asset-preview{display:grid;place-items:center;height:100px;border-radius:6px;background:var(--bg-row);color:var(--sig-live)}.artinos-asset-preview img{width:100%;height:100%;object-fit:contain}.artinos-asset-card b{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artinos-asset-card small{color:var(--text-mid);font-size:10px}
+.artinos-workbench .artinos-dropzone{padding:25px 18px;border-radius:9px;margin-bottom:16px;font-size:12px;line-height:1.6}
+.artinos-workbench .artinos-module-card{padding:7px 9px;border-radius:8px;gap:1px}.artinos-workbench .artinos-module-card p{font-size:11px;line-height:1.5}.artinos-workbench .artinos-module-head b{font-size:12px}
+.artinos-timeline-tracks{display:grid;gap:12px}.artinos-track{border:1px solid var(--line-subtle);border-radius:8px;padding:12px;background:var(--bg-well)}.artinos-track-head{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}.artinos-track-head b{font-size:12px}.artinos-track-settings{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0}.artinos-track-settings>.artinos-control{display:flex;gap:8px}
+.artinos-track-keys{display:grid;gap:8px;padding-top:12px}.artinos-track-key{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:center}.artinos-track-key .artinos-control{display:flex;flex-wrap:wrap}
+@container workbench (max-width:650px){.artinos-workbench-content{padding:6px}.artinos-workbench .artinos-toolbar>.artinos-search{flex-basis:140px}.artinos-console-entry summary{grid-template-columns:52px 40px 1fr}.artinos-console-entry summary>span:last-child{grid-column:1/-1}.artinos-track-key{grid-template-columns:1fr 1fr}.artinos-panel-summary>span:last-child{display:none}}
+@media(prefers-reduced-motion:reduce){.artinos-workbench *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.artinos-workbench .artinos-effect-expand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:0;background:none;color:inherit;text-align:left;padding:0;cursor:pointer}
+.artinos-workbench .artinos-effect-expand>.artinos-effect-name{flex:1;min-width:0}
+.artinos-workbench .artinos-effect-head{display:flex}
+.artinos-workbench .artinos-effect-expand[aria-expanded=true]>svg{transform:rotate(180deg)}
+.artinos-workbench .artinos-dropzone-browse{display:flex;margin:12px auto 0}
+.artinos-workbench .artinos-graph-studio{min-height:200px;height:calc(var(--panel-height, 500px) - 48px);max-height:760px;width:100%}
+.artinos-workbench .artinos-inspector-dock{min-height:200px;height:calc(var(--panel-height, 500px) - 48px);width:100%}
+.artinos-workbench .artinos-list-browser{min-height:320px}
+.artinos-workbench .artinos-signal-row{height:48px;padding:8px 10px;border-bottom:1px solid var(--line-subtle);font-size:11px}
+.artinos-workbench .artinos-signal-row small{display:block;font-size:10px;margin-top:4px}.artinos-workbench .artinos-signal-row output{font-size:11px;max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.artinos-workbench .artinos-signals-panel .artinos-virtual{height:calc(var(--panel-height, 420px) - 86px);max-height:none}
+.artinos-workbench .artinos-workbench-content>.artinos-section+.artinos-section{margin-top:14px}
+.artinos-metablock-shell .mb-group-footer{font:9px/1.5 var(--font-num);letter-spacing:.08em;color:var(--text-low);padding:5px 14px}
+.artinos-metablock-shell .plate-dock-tabs button{font-size:10px;min-height:36px;padding-inline:12px;letter-spacing:.06em}
+.artinos-workspace-expand{display:inline-grid;place-items:center;flex-shrink:0;width:30px;height:30px;border:1px solid var(--line);border-radius:5px;color:var(--text-mid);background:var(--bg-row);cursor:pointer}
+.artinos-workspace-expand:focus-visible{outline:2px solid var(--sig-live);outline-offset:2px}
+.artinos-workbench .artinos-vector{display:flex;flex-wrap:wrap;gap:8px}.artinos-workbench .artinos-vector>span{flex:1 0 100%;font-size:11px}.artinos-workbench .artinos-vector>div{display:flex;flex:1;gap:8px;min-width:0}.artinos-workbench .artinos-vector>div>label{display:flex;align-items:center;gap:4px;flex:1;min-width:0}.artinos-workbench .artinos-vector input{width:100%;min-width:0;text-align:left;padding:5px 7px}
+/* New panel structure owns its layout; legacy three-column section rules do not apply. */
+.plate-workspace .artinos-workbench .artinos-section{display:flex;flex-direction:column;gap:9px}
+.plate-workspace .artinos-workbench .artinos-section-title{align-items:flex-start;text-align:left;letter-spacing:.04em}
+.plate-workspace .artinos-workbench .artinos-section-title::after{display:none}
+.plate-workspace .artinos-workbench .artinos-scene-layout>.artinos-toolbar{display:flex}
+.plate-workspace .artinos-workbench .artinos-scene-grid>.artinos-section:first-child{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));align-content:start;gap:12px}
+.plate-workspace .artinos-workbench .artinos-scene-grid>.artinos-section:first-child>.artinos-section-title{grid-column:1/-1}
+.plate-workspace .artinos-workbench .artinos-list-browser{height:calc(var(--panel-height, 500px) - 70px);max-height:none}
+.plate-workspace .artinos-workbench .artinos-postfx-grid{display:grid;columns:auto}
+.plate-workspace .artinos-workbench .artinos-effect-head{min-height:54px}
+.artinos-metablock-shell:has(.mb-group[data-posture="maximized"][data-role="dock"])>.plate-brand-chip{display:none}
+
+/* One translucent surface; nested controls do not stack opaque fills.
+   Dark ink on clear glass never worked here: over a bright, high-contrast photograph a light sheet
+   has to be nearly opaque before small type holds, which is exactly the milky look we were trying
+   to lose. Light type on dark glass carries at a far lower fill, so the dock can stay genuinely
+   see-through — and it is the studio's own palette, not a second theme. */
+.plate-workspace.artinos-metablock-shell{
+  /* Barely-there fills: on clear glass a nested surface only needs to hint at grouping, so wells
+     and rows sit a few percent above the sheet rather than painting another opaque layer. */
+  --bg-surface:rgba(255,255,255,.025);--bg-row:rgba(255,255,255,.03);--bg-well:rgba(255,255,255,.045);--bg-hover:rgba(255,255,255,.10);--bg-active:rgba(255,255,255,.16);
+  --text-hi:#f2f6f7;--text-mid:#c5d2d6;--text-low:#9dadb2;--text-ghost:#7d8f95;--muted:#a7b7bc;
+  --line:rgba(255,255,255,.14);--line-subtle:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.24);
+  --sig-live:#3fe0cf;--sig-live-hi:#7cf0e3;--sig-live-line:rgba(63,224,207,.34);--sig-live-wash:rgba(63,224,207,.12);
+  --fill-track:rgba(63,224,207,.2);--fill-track-hover:rgba(63,224,207,.3);--sig-fault:#ff7a92;--sig-warn:#ffc861;
+  --control-h:28px;--control-h-sm:24px;--e0-well:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+/* Clear glass: a thin dark veil plus blur, so the garden's colour still reads through the dock. */
+.artinos-metablock-shell .mb-group:is([data-role="dock"],[data-posture="floating"],[data-posture="pinned"],[data-posture="auto-hide"]){background:rgba(9,13,14,.42);backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%);border:1px solid rgba(255,255,255,.13);box-shadow:inset 0 1px rgba(255,255,255,.08),0 20px 56px -28px rgba(0,0,0,.8);border-radius:8px}
+.artinos-metablock-shell .mb-group-footer{display:none}
+/* The chrome row sits over the busiest part of the picture, so it gets a slightly denser veil than
+   the body — still glass, just enough to hold small uppercase type. */
+.artinos-metablock-shell .plate-dock-toolbar{min-height:28px;padding:2px 6px;gap:6px;border-bottom:1px solid var(--line-subtle);background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.12))}
+.artinos-metablock-shell .plate-dock-tabs button{font-size:10px;min-height:28px;padding-inline:9px;letter-spacing:.02em;color:var(--text-mid)}
+.artinos-metablock-shell .plate-dock-tabs button[aria-selected=true]{color:var(--sig-live-hi)}
+.artinos-metablock-shell .artinos-panel-header{background:transparent}
+.artinos-workbench{--workbench-card:transparent}
+.artinos-workbench .artinos-section-title small{display:none}
+.artinos-workbench .artinos-section-title{border:0;gap:0}
+.artinos-workbench .artinos-section-title b{font-size:10px;text-transform:capitalize}
+.artinos-workbench .artinos-property-menu{position:relative}
+.artinos-property-menu>summary{display:grid;place-items:center;list-style:none;cursor:pointer;width:22px;height:26px;border-radius:3px;color:var(--text-low)}
+.artinos-property-menu>summary::-webkit-details-marker{display:none}
+.artinos-property-menu>div{position:absolute;right:0;top:100%;display:flex;gap:2px;z-index:20;padding:4px;background:rgba(16,21,23,.94);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:4px;box-shadow:0 4px 14px #1233}
+.artinos-property-menu[open]>summary{background:var(--bg-active)}
+.artinos-parameter-card{overflow:visible;border-radius:4px;border:0;border-top:1px solid var(--line)}
+.artinos-parameter-card-head{background:transparent;border:0}
+.artinos-parameter-card-head small{background:transparent;padding:0;font-size:9px}
+.artinos-workbench .artinos-property-row[data-density=multiline] .artinos-property-main{flex-wrap:nowrap}
+.artinos-workbench .artinos-vector{flex-wrap:nowrap;gap:6px}
+.artinos-workbench .artinos-vector>span{flex:0 0 58px;font-size:10px}
+.artinos-workbench .artinos-vector>div{gap:3px}
+.artinos-workbench .artinos-vector input{padding:3px;min-height:26px}
+.artinos-workbench .artinos-control{font-size:11px;gap:6px;min-height:28px}
+.artinos-workbench .artinos-control>span{font-size:10px}
+.artinos-workbench :is(.artinos-scrub-cell,.artinos-search){height:28px;min-height:28px}
+.artinos-workbench .artinos-property-reset{width:18px;min-width:18px;padding:0}
+.plate-workspace .artinos-workbench .artinos-section{gap:5px}
+.plate-workspace .artinos-workbench .artinos-scene-grid{grid-template-columns:minmax(0,1fr)}
+.plate-workspace .artinos-workbench .artinos-scene-grid>.artinos-section:first-child{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:5px 10px}
+.artinos-workbench .artinos-scene-grid>.artinos-section:first-child>.artinos-section-title{display:none}
+.artinos-workbench .artinos-postfx-commandbar{padding-bottom:6px;gap:6px}
+.plate-workspace .artinos-workbench .artinos-effect-head{min-height:36px;padding:5px 8px;gap:6px}
+.artinos-workbench .artinos-effect-body{padding:6px 8px;gap:5px}
+.artinos-workbench .artinos-effect-name small{font-size:9px}
+.artinos-workbench-empty{min-height:70px;padding:12px;gap:6px;border:0}
+.artinos-workbench-empty h3{font-size:12px}
+.artinos-workbench-empty p{font-size:11px;line-height:1.4}
+.artinos-workbench .artinos-dropzone{padding:10px;margin-bottom:8px}
+.artinos-workbench .artinos-dropzone-browse{margin-top:6px}
+.artinos-workbench .artinos-device{padding:5px 0;min-height:28px}
+.artinos-workbench .artinos-panel-notice{padding:5px 8px;margin-bottom:6px}
+.artinos-workbench .artinos-device-note{font-size:10px;line-height:1.4;margin:4px 0}
+.artinos-workbench .artinos-input-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr))}
+.artinos-workbench[data-layout=landscape] .artinos-parameter-cards{column-width:245px}
+.artinos-workbench[data-layout=landscape] .artinos-scene-grid{grid-template-columns:minmax(0,3fr) minmax(240px,1fr)}
+.artinos-workbench[data-layout=landscape] .artinos-scene-grid>.artinos-section:only-child{grid-column:1/-1}
+@container workbench (max-width:400px){.artinos-parameter-cards{columns:1}.artinos-workbench .artinos-toolbar{gap:4px}.artinos-workbench .artinos-toolbar>.artinos-search{flex-basis:120px}.artinos-workbench .artinos-toolbar>.artinos-control select{min-width:65px}.artinos-workbench .artinos-vector>span{flex-basis:48px}.artinos-workbench .artinos-tabs{gap:1px;padding:2px}.artinos-workbench .artinos-tabs button{padding:4px 6px}}
+
+/* Browser lists fill the panel instead of guessing a height: the old `calc(--panel-height - 70px)`
+   under-shot whatever the toolbar actually measured, leaving dead glass under the last row. */
+.plate-workspace .artinos-workbench:has(.artinos-list-browser)>.artinos-workbench-content{display:flex;flex-direction:column;min-height:0}
+.plate-workspace .artinos-workbench .artinos-list-browser{height:auto;flex:1 1 auto;min-height:180px;max-height:none}
+
+/* ---- Per-panel tint ---------------------------------------------------------------------------
+   Each panel gets its own hue at a few percent so you can tell at a glance which one you are in,
+   without any of them reading as a coloured surface. The dock itself stays clear glass. */
+.artinos-metablock-shell .artinos-panel{--panel-tint:transparent;background:var(--panel-tint)}
+.artinos-metablock-shell .artinos-panel-inspector{--panel-tint:hsl(188 70% 60% / .022)}
+.artinos-metablock-shell .artinos-panel-scene{--panel-tint:hsl(142 60% 55% / .022)}
+.artinos-metablock-shell .artinos-panel-postfx{--panel-tint:hsl(272 70% 66% / .022)}
+.artinos-metablock-shell .artinos-panel-inputflow{--panel-tint:hsl(32 85% 60% / .022)}
+.artinos-metablock-shell .artinos-panel-graph{--panel-tint:hsl(212 80% 62% / .022)}
+.artinos-metablock-shell .artinos-panel-timeline{--panel-tint:hsl(340 70% 62% / .022)}
+.artinos-metablock-shell .artinos-panel-assets{--panel-tint:hsl(48 80% 58% / .022)}
+.artinos-metablock-shell .artinos-panel-library{--panel-tint:hsl(168 60% 55% / .022)}
+.artinos-metablock-shell .artinos-panel-console{--panel-tint:hsl(220 20% 60% / .022)}
+.artinos-metablock-shell .artinos-panel-component-devtools{--panel-tint:hsl(300 50% 62% / .022)}
+.artinos-metablock-shell .artinos-panel-telemetry{--panel-tint:hsl(96 55% 55% / .022)}
+
+.artinos-glass-inspector{margin:6px 0 10px;padding:8px 10px;border:1px solid var(--border-subtle, #ffffff18);border-radius:8px;background:var(--surface-1, #ffffff03);color:var(--text-secondary, #b7c0c5)}
+.artinos-glass-inspector>summary{cursor:pointer;font-weight:600;font-size:11px}
+.artinos-glass-diagnostics{display:grid;grid-template-columns: minmax(200px,270px) repeat(2,minmax(220px,1fr));gap:16px;align-items:center}
+.artinos-glass-diagnostics figure{margin:0}.artinos-glass-diagnostics svg{display:block;width:100%;max-height:140px}.artinos-glass-diagnostics figcaption{font-size:10px;text-align:center;opacity:.7}
+.artinos-glass-diagnostics dl{display:grid;grid-template-columns:1fr auto;gap:9px 12px;font-size:11px}.artinos-glass-diagnostics dt{opacity:.75}.artinos-glass-diagnostics dd{margin:0;font-variant-numeric:tabular-nums}
+.artinos-glass-renderer{height:400px;min-width:0;margin-top:8px;overflow:auto}.artinos-glass-renderer .artinos-inspector-dock{height:100%!important}
+@container workbench (max-width:760px){.artinos-glass-diagnostics{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}

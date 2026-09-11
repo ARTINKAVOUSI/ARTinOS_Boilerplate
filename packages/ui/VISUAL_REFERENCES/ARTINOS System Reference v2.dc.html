@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@200;300;400;500;600;700&amp;family=Chivo+Mono:wght@200;300;400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#08090A;color:#F2F5F4;font-family:Chivo,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1}
+  .m{font-family:'Chivo Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  a{color:#B9C2BF;text-decoration:none;border-bottom:1px solid rgba(127,227,212,.35)}
+  a:hover{color:#F2F5F4;border-bottom-color:#7FE3D4}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  @keyframes indet{0%{transform:translateX(-100%)}100%{transform:translateX(320%)}}
+</style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; align-items: center; padding: 0 40px 120px; background: radial-gradient(1200px 600px at 50% -200px,rgba(47,179,156,.05),transparent 70%); position: relative">
+
+<div style="width:100%;max-width:1320px;display:flex;flex-direction:column">
+
+  <header style="padding:88px 0 56px;position:relative">
+    <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.014) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(600px 300px at 20% 40%,#000,transparent 80%);-webkit-mask-image:radial-gradient(600px 300px at 20% 40%,#000,transparent 80%);pointer-events:none"></div>
+    <div style="position:relative;display:flex;flex-direction:column;gap:34px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:#2FB39C;color:#04120F;font-family:'Chivo Mono',monospace;font-size:11px;font-weight:700">#</span>
+        <b class="m" style="font-size:10.5px;font-weight:300;letter-spacing:.34em;color:#F2F5F4">ARTINOS</b>
+        <i style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 70%,transparent)"></i>
+        <span class="m" style="font-size:9px;letter-spacing:.2em;color:#5F6B68">INSTRUMENT</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:64px;align-items:end">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <h1 style="margin:0;font-size:64px;font-weight:200;letter-spacing:-.035em;line-height:1.02;color:#F2F5F4">One shell.<br>One token layer.<br><span style="color:#8A9491">One control set.</span></h1>
+          <p style="margin:0;max-width:560px;font-size:14px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">The system in a single sheet: the canonical frame everything resolves to, every token in the three-layer stack, and every control with its variants and states. Components reference roles only — never primitives — so a theme swap never reaches a component rule.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0;padding-bottom:6px">
+          <sc-for list="{{ meta }}" as="m" hint-placeholder-count="5">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:9px 0;border-top:1px solid rgba(255,255,255,.06)">
+              <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">{{ m.k }}</span>
+              <span class="m" style="font-size:10.5px;font-weight:300;letter-spacing:.04em;color:#B9C2BF;text-align:right">{{ m.v }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:0;margin-top:14px;border-top:1px solid rgba(255,255,255,.08)">
+        <sc-for list="{{ index }}" as="s" hint-placeholder-count="8">
+          <a href="{{ s.href }}" style="display:flex;align-items:baseline;gap:9px;padding:14px 22px 14px 0;border-bottom:none;font-size:12.5px;font-weight:300;color:#B9C2BF">
+            <span class="m" style="font-size:8.5px;letter-spacing:.16em;color:#4E5856">{{ s.n }}</span>{{ s.label }}
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </header>
+
+  <section id="shell" style="display:grid;grid-template-columns:132px minmax(0,1fr);gap:0;padding:64px 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">00</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">THE SHELL</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">Every measurement in this frame is a token. Nothing here is set by hand.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:30px;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em;line-height:1.15">Gutters, not lines</h2>
+        <p style="margin:0;max-width:640px;font-size:13px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">Panels are inset cards separated by a 12px gutter, so hierarchy comes from width and surface rather than borders. The console gives up its column and becomes a single status line across the dock's foot.</p>
+      </div>
+
+      <div data-shell-fit="1" style="width:100%;aspect-ratio:1440/900;position:relative;overflow:hidden;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 40px 90px -40px rgba(0,0,0,.9)">
+        <div data-shell-frame="1" style="position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:top left;background:#080A0B">
+          <div style="position:absolute;inset:0;background:url('./chatgpt-image-aug-14-2026-09_04_27-am-mst7316u-miii.png') center/cover no-repeat"><div style="box-sizing: border-box; position: absolute; left: 1216px; top: 873px"><span class="m" style="font-size: 8.5px; font-weight: 500; letter-spacing: .2em; color: #7FE3D4; position: static">CONSOLE</span><span style="font-size: 11px; font-weight: 300; color: #B9C2BF; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: static; padding-right: 8px; padding-left: 20px">Bake complete — 2.14s</span></div><div style="box-sizing: border-box; position: absolute; left: 1261px; top: 479px; width: 136px; height: 130px"><div style="position: absolute; left: -39px; top: -77px; display: flex; align-items: center; gap: 1px; height: 188px; padding: 0 13px; border-radius: 9px; backdrop-filter: blur(20px) saturate(108%); -webkit-backdrop-filter: blur(20px) saturate(108%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.07); width: 156px; background-color: #12151600">
+            
+            
+            
+            
+          <span class="m" style="font-size: 9px; font-weight: 300; letter-spacing: .14em; color: #8A9491; padding-right: 8px; padding-left: 14px; text-align: right; position: static; padding-top: 1px; padding-bottom: 133px">SIZE&nbsp; &nbsp;&nbsp;</span><span class="m" style="font-size: 9px; font-weight: 300; letter-spacing: .14em; color: #8A9491; padding-right: 8px; padding-left: 11px; text-align: right; position: absolute; padding-top: 1px; padding-bottom: 31px">POSITION<br></span><div style="display: flex; gap: 5px; padding: 1px; border-radius: 6px; background: rgba(0,0,0,.34); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); position: absolute; left: 19px; top: 40px; justify-content: center; align-items: center">
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:rgba(255,255,255,.09);color:#F2F5F4;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">BOTTOM</button>
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">LEFT</button>
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">RIGHT</button>
+      </div>
+<div style="display: flex; gap: 5px; padding: 1px; border-radius: 6px; background: rgba(0,0,0,.34); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); position: absolute; left: 21px; top: 92px; justify-content: center; align-items: center">
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:rgba(255,255,255,.09);color:#F2F5F4;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">BOTTOM</button>
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">LEFT</button>
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">RIGHT</button>
+      </div><div style="display: flex; gap: 15px; padding: 1px; border-radius: 6px; background: rgba(0,0,0,.34); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); position: absolute; left: 71px; top: 127px; justify-content: center; align-items: center">
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:rgba(255,255,255,.09);color:#F2F5F4;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">GLASS</button>
+        
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">DARK</button>
+      </div><span class="m" style="font-size: 9px; font-weight: 300; letter-spacing: .14em; color: #8A9491; padding-right: 8px; padding-left: 11px; text-align: right; position: absolute; padding-top: 1px; padding-bottom: 0px; top: 130px">THEME</span></div><div style="display: flex; gap: 15px; padding: 1px; border-radius: 6px; background: rgba(0,0,0,.34); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); position: absolute; left: -23px; top: 80px; justify-content: center; align-items: center">
+        
+        
+        <button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">DARK</button><button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">LIGHT</button><button style="height:24px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.1em">AUTO</button>
+      </div></div></div>
+
+          <div style="position:absolute;left:50%;top:31%;transform:translate(-50%,-50%);width:280px;height:280px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#DFE9E6,#5D6B6B 42%,#1A2122 78%);box-shadow:0 60px 120px -30px rgba(0,0,0,.8)"></div>
+
+          <div style="position: absolute; left: 32px; top: 22px; display: flex; align-items: center; gap: 1px; height: 32px; padding: 0 13px; border-radius: 9px; background: rgba(18,21,22,.46); backdrop-filter: blur(20px) saturate(108%); -webkit-backdrop-filter: blur(20px) saturate(108%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.07)">
+            <span style="display:grid;place-items:center;width:18px;height:18px;border-radius:4px;background:#2FB39C;color:#04120F;font-family:'Chivo Mono',monospace;font-size:9.5px;font-weight:700">#</span>
+            <b class="m" style="font-size: 9.5px; font-weight: 300; letter-spacing: .24em; padding-right: 2px; padding-left: 10px">ARTIN</b>
+            
+            <span class="m" style="font-size: 9px; font-weight: 300; letter-spacing: .14em; color: #8A9491; padding-right: 0px; padding-left: 0px">OS</span>
+          </div>
+
+          <div style="position: absolute; left: 32px; right: 32px; bottom: 29px; height: 276px; display: flex; flex-direction: column; border-radius: 13px; overflow: hidden; background: linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012) 34%,transparent),rgba(20,24,25,.52); backdrop-filter: blur(44px) saturate(110%); -webkit-backdrop-filter: blur(44px) saturate(110%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.085),inset 0 1px 0 rgba(255,255,255,.1),0 34px 70px -14px rgba(0,0,0,.66)">
+            <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 13px;border-bottom:1px solid rgba(255,255,255,.06)">
+              <div style="display:flex;gap:2px">
+                <sc-for list="{{ tabsA }}" as="t" hint-placeholder-count="4">
+                  <span style="display:flex;align-items:center;gap:7px;height:25px;padding:0 11px;border-radius:6px;background:{{ t.pill }};color:{{ t.fg }};font-family:'Chivo Mono',monospace;font-size:9px;font-weight:{{ t.w }};letter-spacing:.17em;box-shadow:{{ t.ring }}">{{ t.label }}<em style="font-style:normal;font-weight:300;color:{{ t.cFg }}">{{ t.count }}</em></span>
+                </sc-for>
+              </div>
+              <span style="display: flex; align-items: center; gap: 8px; width: 272px; height: 27px; margin-left: 355px; padding: 0 11px; border-radius: 11px; box-shadow: inset 0 1px 2px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.055); color: #6E7876; font-size: 11px; font-weight: 300; background-color: #0000002D"><span style="font-size:11px">⌕</span><span>Search project controls</span><span class="m" style="margin-left:auto;font-size:9px;letter-spacing:.08em;color:#525B59">⌘K</span></span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:13px;height:27px;padding:0 12px;border-radius:6px;background:rgba(0,0,0,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.045)">
+                <span style="display:flex;align-items:center;gap:6px"><i style="width:4px;height:4px;border-radius:50%;background:#2FB39C;box-shadow:0 0 6px rgba(47,179,156,.8)"></i><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.18em;color:#7FE3D4">WEBGPU</span></span>
+                <span class="m" style="font-size:11.5px;font-weight:300;color:#F2F5F4">60<em style="font-style:normal;font-size:8.5px;letter-spacing:.1em;color:#5F6B68;margin-left:4px">FPS</em></span>
+                <svg viewBox="0 0 54 16" style="width:48px;height:13px;opacity:.9"><polyline points="0,13 6,12 12,13 18,11 24,12 30,10 36,12 42,11 48,12 54,10" fill="none" stroke="#4ED6BD" stroke-width=".9"></polyline><polyline points="0,11 6,9 12,10 18,7 24,8 30,6 36,9 42,7 48,8 54,6" fill="none" stroke="#91B9EB" stroke-width=".9" opacity=".8"></polyline></svg>
+                <span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.1em;color:#78827F">CPU 41 · GPU 63</span>
+                <span style="display:grid;place-items:center;width:16px;height:22px;color:#78827F;font-size:11px">[]</span><span style="display:grid;place-items:center;width:16px;height:22px;color:#78827F;font-size:11px">⋯</span>
+              </span>
+            </div>
+
+            
+
+            <div style="display: flex; gap: 4px; flex: 1; min-height: 0; padding: 12px; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px">
+              <sc-for list="{{ currentPanels }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;flex:{{ p.grow }} 1 0;min-width:0;border-radius:11px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 40%),rgba(0,0,0,.2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.045)">
+                  <div style="flex: 1; min-height: 0; padding: 11px 11px 10px; display: flex; flex-direction: column; gap: 10px">
+                    <div style="display:flex;align-items:center;gap:9px">
+                      <b class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#B9C2BF">{{ p.group }}</b>
+                      <i style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.09),transparent)"></i>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="4">
+                        <div style="position:relative;display:grid;grid-template-columns:1fr 76px;align-items:center;height:25px;padding:0 10px;border-radius:6px;background:rgba(255,255,255,.024);overflow:hidden">
+                          <i style="position:absolute;inset:0 auto 0 0;width:{{ r.fill }};background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.06));display:block"></i>
+                          <b style="position:absolute;top:0;bottom:0;left:{{ r.fill }};width:1px;background:{{ r.tickColor }};display:block"></b>
+                          <span style="position:relative;font-size:11px;font-weight:300;color:#BEC6C4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}<em style="font-style:normal;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.14em;color:#75E0CD;margin-left:8px">{{ r.bind }}</em></span>
+                          <span class="m" style="position:relative;font-size:11px;font-weight:300;color:{{ r.valueColor }};text-align:right">{{ r.value }}<em style="font-style:normal;font-size:8.5px;letter-spacing:.1em;color:#525B59;margin-left:4px">{{ r.unit }}</em></span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <span class="m" style="margin-top:auto;font-size:9px;font-weight:300;letter-spacing:.16em;color:#525B59">{{ p.footer }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div><div style="display: flex; align-items: center; gap: 6px; padding: 0 14px; border-top: 1px solid rgba(255,255,255,.05); background-color: #00000000; margin-left: 0px; padding-top: 3px; padding-right: 3px; padding-bottom: 3px; padding-left: 3px; top: 884px; position: absolute">
+              <span class="m" style="margin-left:auto;font-size:8.5px;font-weight:300;letter-spacing:.18em;color:#525B59">62 ENTRIES</span><span style="font-size: 10px; color: #78827F">▴</span><div style="box-sizing: border-box; display: flex; flex-direction: row; gap: 9px; justify-content: normal; align-items: center; margin-left: 843px; width: 304px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#7FE3D4">CONSOLE</span><span class="m" style="font-size:9.5px;font-weight:300;letter-spacing:.08em;color:#78827F">14:22:09</span><span style="font-size: 11px; font-weight: 300; color: #B9C2BFA5; padding-left: 0px">Bake complete — 2.14s · 1 warning</span></div>
+              
+              
+              
+              
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:rgba(255,255,255,.06)">
+        <sc-for list="{{ shellSpecs }}" as="s" hint-placeholder-count="8">
+          <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:#08090A">
+            <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#525B59">{{ s.label }}</span>
+            <span class="m" style="font-size:14px;font-weight:200;letter-spacing:-.01em;color:#F2F5F4">{{ s.value }}</span>
+            <span class="m" style="font-size:9px;font-weight:300;letter-spacing:.06em;color:#5C8C84">{{ s.token }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:26px">
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">DOCK LEFT</span>
+          <i style="flex:1;height:1px;background:rgba(255,255,255,.06)"></i>
+          <span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">SH.02</span>
+        </div>
+        <p style="margin:0;max-width:640px;font-size:13px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">The same dock stood on its side. The tab strip becomes the rail, panel cards stack instead of sitting side by side, and the status line keeps the foot. Nothing about the controls changes — only the axis.</p>
+      </div>
+
+      <div data-shell-fit="1" style="width:100%;aspect-ratio:1440/900;position:relative;overflow:hidden;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 40px 90px -40px rgba(0,0,0,.9)">
+        <div data-shell-frame="1" style="position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:top left;background:#080A0B">
+          <div style="position:absolute;inset:0;background:url('./chatgpt-image-aug-14-2026-09_04_27-am-mst7316u-miii.png') center/cover no-repeat"></div>
+          <div style="position:absolute;left:62%;top:44%;transform:translate(-50%,-50%);width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#DFE9E6,#5D6B6B 42%,#1A2122 78%);box-shadow:0 60px 120px -30px rgba(0,0,0,.8)"></div>
+
+          
+
+          <div style="position: absolute; left: 1080px; top: 20px; bottom: 20px; width: 341px; display: flex; border-radius: 13px; overflow: hidden; background: linear-gradient(180deg, rgba(255,255,255,.05), #13131338, #00000012, #00000008); backdrop-filter: blur(44px) saturate(110%); -webkit-backdrop-filter: blur(44px) saturate(110%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.085),inset 0 1px 0 rgba(255,255,255,.1),0 34px 70px -14px rgba(0,0,0,.66)">
+            
+
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+              <span style="margin-left: -1px; display: flex; align-items: center; gap: 13px; height: 0px; padding: 0 12px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.045); padding-top: 22px; padding-bottom: 22px">
+                <span style="display:flex;align-items:center;gap:6px"><i style="width:4px;height:4px;border-radius:50%;background:#2FB39C;box-shadow:0 0 6px rgba(47,179,156,.8)"></i><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.18em;color:#7FE3D4">WEBGPU</span></span>
+                <span class="m" style="font-size:11.5px;font-weight:300;color:#F2F5F4">60<em style="font-style:normal;font-size:8.5px;letter-spacing:.1em;color:#5F6B68;margin-left:4px">FPS</em></span>
+                <svg viewBox="0 0 54 16" style="width:48px;height:13px;opacity:.9"><polyline points="0,13 6,12 12,13 18,11 24,12 30,10 36,12 42,11 48,12 54,10" fill="none" stroke="#4ED6BD" stroke-width=".9"></polyline><polyline points="0,11 6,9 12,10 18,7 24,8 30,6 36,9 42,7 48,8 54,6" fill="none" stroke="#91B9EB" stroke-width=".9" opacity=".8"></polyline></svg>
+                <span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.1em;color:#78827F">CPU 41 · GPU 63</span>
+                
+              </span><div style="display: flex; align-items: center; gap: 10px; height: 28px; padding: 0 13px; border-bottom: 1px solid rgba(255,255,255,.06)">
+                <b class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;color:#F2F5F4">SCENE</b>
+                <span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#4E5856">12</span>
+                <span style="margin-left:auto;display:flex;gap:10px;color:#78827F;font-size:10px"><span>⌕</span><span>⋯</span></span>
+              </div>
+
+              <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 5px; padding: 12px; padding-top: 7px; padding-right: 7px; padding-bottom: 7px; padding-left: 7px">
+                <sc-for list="{{ currentPanels }}" as="p" hint-placeholder-count="3">
+                  <div style="display: flex; flex-direction: column; flex: {{ p.grow }} 1 0; min-height: 0; border-radius: 11px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.045); background-color: #0000000E">
+                    <div style="flex: 1; min-height: 0; padding: 11px 11px 10px; display: flex; flex-direction: column; gap: 10px; background-color: #00000024">
+                      <div style="display:flex;align-items:center;gap:9px">
+                        <b class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#B9C2BF">{{ p.group }}</b>
+                        <i style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.09),transparent)"></i>
+                        <span class="m" style="font-size: 8.5px; font-weight: 300; letter-spacing: .16em; color: #7B7B7B">{{ p.footer }}</span>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:4px">
+                        <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="4">
+                          <div style="position:relative;display:grid;grid-template-columns:1fr 76px;align-items:center;height:25px;padding:0 10px;border-radius:4px;background:rgba(255,255,255,.024);overflow:hidden">
+                            <i style="position:absolute;inset:0 auto 0 0;width:{{ r.fill }};background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.06));display:block"></i>
+                            <b style="position:absolute;top:0;bottom:0;left:{{ r.fill }};width:1px;background:{{ r.tickColor }};display:block"></b>
+                            <span style="position:relative;font-size:11px;font-weight:300;color:#BEC6C4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}<em style="font-style:normal;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.14em;color:#75E0CD;margin-left:8px">{{ r.bind }}</em></span>
+                            <span class="m" style="position:relative;font-size:11px;font-weight:300;color:{{ r.valueColor }};text-align:right">{{ r.value }}<em style="font-style:normal;font-size:8.5px;letter-spacing:.1em;color:#525B59;margin-left:4px">{{ r.unit }}</em></span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 11px; height: 31px; padding: 0 13px; border-top: 1px solid rgba(255,255,255,.05); background-color: #00000000">
+                <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#7FE3D4">CONSOLE</span>
+                <span style="font-size:11px;font-weight:300;color:#B9C2BF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Bake complete — 2.14s</span>
+                <span class="m" style="margin-left:auto;font-size:8.5px;font-weight:300;letter-spacing:.18em;color:#4E5856">62</span>
+                <span style="font-size:10px;color:#78827F">▸</span>
+              </div>
+            </div><div style="display: flex; flex-direction: column; gap: 31px; width: 42px; padding: 12px 0; border-right: 1px solid rgba(255,255,255,.055); background: rgba(0,0,0,.14); padding-top: 6px; padding-bottom: 6px">
+              <span style="display: grid; place-items: center; width: 100%; height: 33px; color: #2FB39C; font-family: 'Chivo Mono',monospace; font-size: 13px; font-weight: 700">#</span>
+              <sc-for list="{{ sideRail }}" as="t" hint-placeholder-count="5">
+                <span style="position: relative; display: grid; place-items: center; height: 64px; margin: 0 4px; border-radius: 3px; background: {{ t.bg }}; color: {{ t.fg }}; font-family: 'Chivo Mono',monospace; font-size: 8.5px; font-weight: 500; letter-spacing: .2em; writing-mode: vertical-rl; transform: rotate(180deg)">{{ t.label }}<i style="position: absolute; left: 34px; top: 2px; bottom: 0px; width: 2px; background: {{ t.accent }}; height: 60px"></i></span>
+              </sc-for>
+              <span style="display:grid;place-items:center;width:100%;height:32px;margin-top:auto;color:#525B59;font-size:12px">⋯</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="primitives" style="display:grid;grid-template-columns:132px minmax(0,1fr);padding:64px 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">01</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">PRIMITIVES</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">Layer one. Private to the token file — a component rule that names one of these is a bug.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:38px;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em">Raw values</h2>
+        <p style="margin:0;max-width:640px;font-size:13px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">Named for what they are, never for where they go. Five steps per family, never interpolated between.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:30px">
+        <sc-for list="{{ swatchGroups }}" as="g" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:180px minmax(0,1fr);gap:32px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <b class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;color:#B9C2BF">{{ g.name }}</b>
+              <span style="font-size:11px;font-weight:300;line-height:1.6;color:#6E7876;text-wrap:pretty">{{ g.note }}</span>
+              <div style="height:3px;border-radius:2px;margin-top:5px;background:{{ g.ramp }}"></div>
+            </div>
+            <div style="display:flex;gap:1px;background:rgba(255,255,255,.05)">
+              <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="5">
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;background:#08090A">
+                  <div style="height:78px;background:{{ c.hex }};box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)"></div>
+                  <div style="padding:9px 2px 0;display:flex;flex-direction:column;gap:3px">
+                    <span class="m" style="font-size:9px;font-weight:400;letter-spacing:.04em;color:#DDE4E2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.short }}</span>
+                    <span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.1em;color:#525B59">{{ c.hex }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:rgba(255,255,255,.06)">
+        <sc-for list="{{ scaleTables }}" as="t" hint-placeholder-count="4">
+          <div style="background:#08090A;padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+              <b class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;color:#B9C2BF">{{ t.name }}</b>
+              <span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#4E5856">{{ t.count }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ t.rows }}" as="r" hint-placeholder-count="6">
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <div style="display:flex;align-items:baseline;gap:10px">
+                    <span class="m" style="font-size:10px;font-weight:300;letter-spacing:.02em;color:#75E0CD;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.token }}</span>
+                    <i style="flex:1;height:1px;background:rgba(255,255,255,.055)"></i>
+                    <span class="m" style="font-size:10px;font-weight:300;color:#F2F5F4;white-space:nowrap">{{ r.value }}</span>
+                  </div>
+                  <span style="font-size:10.5px;font-weight:300;line-height:1.55;color:#6E7876">{{ r.use }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="type" style="display:grid;grid-template-columns:132px minmax(0,1fr);padding:64px 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">02</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">TYPE</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">Chivo carries language. Chivo Mono carries measurement.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:34px;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em">One superfamily, two voices</h2>
+        <p style="margin:0;max-width:640px;font-size:13px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">Anything the eye scans in a column is mono and tabular, so a digit change never shifts the column. Units are always a separate, quieter element.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ typeRows }}" as="t" hint-placeholder-count="9">
+          <div style="display:grid;grid-template-columns:180px 160px minmax(0,1fr);gap:28px;align-items:baseline;padding:18px 0;border-top:1px solid rgba(255,255,255,.055)">
+            <span class="m" style="font-size:10px;font-weight:300;letter-spacing:.02em;color:#75E0CD">{{ t.token }}</span>
+            <span class="m" style="font-size:9px;font-weight:300;letter-spacing:.14em;color:#5F6B68">{{ t.spec }}</span>
+            <span style="font-family:{{ t.family }};font-size:{{ t.size }};font-weight:{{ t.weight }};letter-spacing:{{ t.tracking }};text-transform:{{ t.transform }};color:{{ t.color }};line-height:1.25">{{ t.sample }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;background:rgba(255,255,255,.06)">
+        <div style="background:#08090A;padding:22px 24px 24px">
+          <div class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68;margin-bottom:20px">NUMERALS ARE CONTENT</div>
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:52px;font-weight:200;letter-spacing:-.035em">60</span><span class="m" style="font-size:10px;font-weight:300;letter-spacing:.16em;color:#78827F">FPS</span><span class="m" style="font-size:10px;font-weight:300;color:#7FE3D4;margin-left:4px">▲ 4</span></div>
+          <i style="display:block;height:1px;background:rgba(255,255,255,.06);margin:20px 0"></i>
+          <div class="m" style="font-size:11.5px;font-weight:300;line-height:2.1;letter-spacing:.06em;color:#B9C2BF">0123456789<br>0.008 · 262144 · 42.00<br>−135° · 1.24× · 98%</div>
+        </div>
+        <div style="background:#08090A;padding:22px 24px 24px">
+          <div class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68;margin-bottom:20px">TEXT ROLES ON SURFACE</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ textRoles }}" as="r" hint-placeholder-count="5">
+              <div style="display:flex;align-items:baseline;gap:14px">
+                <span class="m" style="width:104px;font-size:9.5px;font-weight:300;letter-spacing:.04em;color:#5F6B68">{{ r.token }}</span>
+                <span style="font-size:12.5px;font-weight:300;color:{{ r.hex }}">{{ r.sample }}</span>
+                <i style="flex:1;height:1px;background:rgba(255,255,255,.045)"></i>
+                <span class="m" style="font-size:9px;font-weight:300;letter-spacing:.1em;color:#4E5856">{{ r.contrast }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles" style="display:grid;grid-template-columns:132px minmax(0,1fr);padding:64px 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">03</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">ROLES &amp; THEMES</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">Layers two and three. The only surface a component may touch.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:34px;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em">Roles carry meaning, themes reassign them</h2>
+        <p style="margin:0;max-width:640px;font-size:13px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">A theme reassigns roles and nothing else — it never re-declares a component rule. Frost is the dock material in every mode; only the tint changes.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column">
+        <div style="display:grid;grid-template-columns:196px 132px 132px minmax(0,1fr);gap:20px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.1)">
+          <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">ROLE</span>
+          <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">DARK</span>
+          <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">LIGHT</span>
+          <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">MEANING</span>
+        </div>
+        <sc-for list="{{ roleRows }}" as="r" hint-placeholder-count="12">
+          <div style="display:grid;grid-template-columns:196px 132px 132px minmax(0,1fr);gap:20px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+            <span class="m" style="font-size:10px;font-weight:300;letter-spacing:.02em;color:#75E0CD">{{ r.token }}</span>
+            <span style="display:flex;align-items:center;gap:8px"><i style="width:14px;height:14px;border-radius:3px;background:{{ r.dark }};box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)"></i><span class="m" style="font-size:9px;font-weight:300;letter-spacing:.06em;color:#8A9491">{{ r.darkLabel }}</span></span>
+            <span style="display:flex;align-items:center;gap:8px"><i style="width:14px;height:14px;border-radius:3px;background:{{ r.light }};box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)"></i><span class="m" style="font-size:9px;font-weight:300;letter-spacing:.06em;color:#8A9491">{{ r.lightLabel }}</span></span>
+            <span style="font-size:11.5px;font-weight:300;color:#78827F">{{ r.use }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+        <sc-for list="{{ themes }}" as="t" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="height:136px;position:relative;border-radius:12px;overflow:hidden;background:{{ t.canvas }};box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)">
+              <div style="position:absolute;left:14px;right:14px;bottom:14px;height:74px;border-radius:10px;background:{{ t.sheen }},{{ t.tint }};backdrop-filter:blur(34px) saturate(108%);-webkit-backdrop-filter:blur(34px) saturate(108%);box-shadow:inset 0 0 0 1px {{ t.line }},inset 0 1px 0 rgba(255,255,255,.09),0 20px 44px -18px rgba(0,0,0,.8);padding:10px 12px;display:flex;flex-direction:column;gap:9px">
+                <span class="m" style="font-size:8px;font-weight:500;letter-spacing:.22em;color:{{ t.textHi }}">ENVIRONMENT</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;height:23px;padding:0 9px;border-radius:6px;background:{{ t.row }}"><span style="font-size:10.5px;font-weight:300;color:{{ t.textMid }}">Intensity</span><span class="m" style="font-size:10.5px;font-weight:300;color:{{ t.textHi }}">1.240</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <b class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;color:#F2F5F4">{{ t.name }}</b>
+              <span style="font-size:11px;font-weight:300;line-height:1.6;color:#6E7876;text-wrap:pretty">{{ t.use }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="material" style="display:grid;grid-template-columns:132px minmax(0,1fr);padding:64px 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">04</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">MATERIAL</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">One meaning per elevation. A surface that means two things is two surfaces.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:34px;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em">Elevation, frost, focus, motion</h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px">
+        <sc-for list="{{ elevations }}" as="e" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="height:96px;border-radius:11px;background:{{ e.bg }};box-shadow:{{ e.shadow }}"></div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <span class="m" style="font-size:10px;font-weight:300;letter-spacing:.02em;color:#75E0CD">{{ e.token }}</span>
+              <span style="font-size:11px;font-weight:300;line-height:1.6;color:#6E7876;text-wrap:pretty">{{ e.use }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;background:rgba(255,255,255,.06)">
+        <div style="background:#08090A;padding:22px 24px">
+          <div class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68;margin-bottom:18px">MOTION</div>
+          <div style="display:flex;flex-direction:column;gap:13px">
+            <sc-for list="{{ motionRows }}" as="m" hint-placeholder-count="6">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;align-items:baseline;gap:10px">
+                  <span class="m" style="font-size:10px;font-weight:300;color:#75E0CD">{{ m.token }}</span>
+                  <i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i>
+                  <span class="m" style="font-size:10px;font-weight:300;color:#F2F5F4">{{ m.dur }}</span>
+                </div>
+                <span style="font-size:10.5px;font-weight:300;line-height:1.55;color:#6E7876">{{ m.use }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#08090A;padding:22px 24px">
+          <div class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68;margin-bottom:18px">INTERACTION STATE</div>
+          <div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center">
+            <span style="display:grid;place-items:center;height:28px;padding:0 15px;border-radius:6px;background:rgba(255,255,255,.045);box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);font-size:11px;font-weight:300;color:#B9C2BF">Rest</span>
+            <span style="display:grid;place-items:center;height:28px;padding:0 15px;border-radius:6px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09);font-size:11px;font-weight:300;color:#F2F5F4">Hover</span>
+            <span style="display:grid;place-items:center;height:28px;padding:0 15px;border-radius:6px;background:rgba(255,255,255,.05);font-size:11px;font-weight:300;color:#F2F5F4;box-shadow:0 0 0 1px #7FE3D4,0 0 0 3px rgba(127,227,212,.15)">Focus</span>
+            <span style="display:grid;place-items:center;height:28px;padding:0 15px;border-radius:6px;background:rgba(0,0,0,.34);font-size:11px;font-weight:300;color:#F2F5F4;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)">Active</span>
+            <span style="display:grid;place-items:center;height:28px;padding:0 15px;border-radius:6px;background:rgba(255,255,255,.02);font-size:11px;font-weight:300;color:#4E5856">Disabled</span>
+          </div>
+          <p style="margin:18px 0 0;font-size:11px;font-weight:300;line-height:1.7;color:#78827F;text-wrap:pretty">Contrast is pinned while a pointer interaction is live: <span class="m" style="font-size:10px;color:#B9C2BF">[data-interacting="true"]</span> lifts surface and raised so a dragged value never loses legibility against a moving canvas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="controls" style="display:grid;grid-template-columns:132px minmax(0,1fr);padding:64px 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">05</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">COMPONENTS</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">Three control heights cover the whole surface: 24, 28, 32.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:34px;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em">The control set</h2>
+        <p style="margin:0;max-width:640px;font-size:13px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">Every control with its variants and every state it can hold. A one-off height is a sign the component is doing two jobs.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:1px;background:rgba(255,255,255,.06)">
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">BUTTON</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.01</span></div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+            <span style="position: relative; display: flex; align-items: center; height: 28px; padding: 0 14px 0 15px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(47,179,156,.34); color: #7FE3D4; font-family: 'Chivo Mono',monospace; font-size: 9.5px; font-weight: 500; letter-spacing: .18em; overflow: hidden; background-color: #35353577">RENDER</span>
+            <span style="display:flex;align-items:center;height:28px;padding:0 15px;border-radius:4px;background:rgba(255,255,255,.035);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#DDE4E2;font-family:'Chivo Mono',monospace;font-size:9.5px;font-weight:400;letter-spacing:.18em">PREVIEW</span>
+            <span style="display:flex;align-items:center;height:28px;padding:0 11px;border-radius:4px;color:#8A9491;font-family:'Chivo Mono',monospace;font-size:9.5px;font-weight:400;letter-spacing:.18em">CANCEL</span>
+            <span style="position:relative;display:flex;align-items:center;height:28px;padding:0 14px 0 15px;border-radius:4px;background:rgba(242,96,111,.08);box-shadow:inset 0 0 0 1px rgba(242,96,111,.3);color:#F2606F;font-family:'Chivo Mono',monospace;font-size:9.5px;font-weight:400;letter-spacing:.18em;overflow:hidden">DISCARD</span>
+            <span style="position:relative;display:flex;align-items:center;height:28px;padding:0 14px 0 15px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);color:#4E5856;font-family:'Chivo Mono',monospace;font-size:9.5px;font-weight:400;letter-spacing:.18em;overflow:hidden">BAKE<i style="position:absolute;left:0;top:0;bottom:0;width:2px;background:rgba(255,255,255,.07)"></i></span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">SIZE · 24 / 28 / 32</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i></div>
+          <div style="display:flex;gap:7px;align-items:center">
+            <span style="display:flex;align-items:center;height:24px;padding:0 11px;border-radius:4px;background:rgba(255,255,255,.035);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);color:#DDE4E2;font-family:'Chivo Mono',monospace;font-size:8.5px;font-weight:400;letter-spacing:.18em">SMALL</span>
+            <span style="display:flex;align-items:center;height:28px;padding:0 13px;border-radius:4px;background:rgba(255,255,255,.035);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);color:#DDE4E2;font-family:'Chivo Mono',monospace;font-size:9.5px;font-weight:400;letter-spacing:.18em">DEFAULT</span>
+            <span style="display:flex;align-items:center;height:32px;padding:0 16px;border-radius:4px;background:rgba(255,255,255,.035);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);color:#DDE4E2;font-family:'Chivo Mono',monospace;font-size:10.5px;font-weight:400;letter-spacing:.18em">LARGE</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">ICON · ARMED</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i></div>
+          <div style="display:flex;gap:7px;align-items:center">
+            <sc-for list="{{ iconButtons }}" as="b" hint-placeholder-count="5">
+              <span style="display:grid;place-items:center;width:28px;height:28px;border-radius:4px;background:{{ b.bg }};box-shadow:{{ b.ring }};color:{{ b.fg }};font-size:11px">{{ b.glyph }}</span>
+            </sc-for>
+            <span style="position:relative;display:flex;align-items:center;gap:8px;height:28px;padding:0 12px 0 14px;border-radius:4px;background:rgba(47,179,156,.11);box-shadow:inset 0 0 0 1px rgba(47,179,156,.34);color:#7FE3D4;font-family:'Chivo Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.2em;overflow:hidden">ARMED</span>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">SEGMENTED · TABS · RAIL</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.02</span></div>
+          <div style="display:inline-flex;border-radius:4px;overflow:hidden;background:rgba(0,0,0,.28);box-shadow:inset 0 1px 2px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.05);width:fit-content">
+            <span style="position:relative;display:grid;place-items:center;height:26px;padding:0 16px;background:rgba(255,255,255,.06);font-family:'Chivo Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.2em;color:#F2F5F4">SOLID<i style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#2FB39C"></i></span>
+            <span style="display:grid;place-items:center;height:26px;padding:0 16px;border-left:1px solid rgba(255,255,255,.05);font-family:'Chivo Mono',monospace;font-size:9px;font-weight:400;letter-spacing:.2em;color:#78827F">WIRE</span>
+            <span style="display:grid;place-items:center;height:26px;padding:0 16px;border-left:1px solid rgba(255,255,255,.05);font-family:'Chivo Mono',monospace;font-size:9px;font-weight:400;letter-spacing:.2em;color:#78827F">MATCAP</span>
+          </div>
+          <div style="display:flex;gap:22px;border-bottom:1px solid rgba(255,255,255,.07)">
+            <span style="position:relative;padding:0 0 11px;font-family:'Chivo Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.2em;color:#F2F5F4">SCENE<i style="position:absolute;left:0;right:0;bottom:-1px;height:1px;background:#2FB39C"></i><em style="font-style:normal;font-size:8px;color:#78827F;margin-left:7px">12</em></span>
+            <span style="padding:0 0 11px;font-family:'Chivo Mono',monospace;font-size:9px;font-weight:400;letter-spacing:.2em;color:#8A9491">MATERIAL<em style="font-style:normal;font-size:8px;color:#4E5856;margin-left:7px">8</em></span>
+            <span style="padding:0 0 11px;font-family:'Chivo Mono',monospace;font-size:9px;font-weight:400;letter-spacing:.2em;color:#8A9491">RENDER<em style="font-style:normal;font-size:8px;color:#4E5856;margin-left:7px">6</em></span>
+            <span style="padding:0 0 11px;font-family:'Chivo Mono',monospace;font-size:9px;font-weight:400;letter-spacing:.2em;color:#3B4442">BAKE</span>
+          </div>
+          <div style="display:flex;gap:16px">
+            <div style="display:flex;flex-direction:column;gap:2px;width:54px;padding:5px 0;border-radius:4px;background:rgba(0,0,0,.24);box-shadow:inset 0 0 0 1px rgba(255,255,255,.045)">
+              <sc-for list="{{ railTabs }}" as="t" hint-placeholder-count="3">
+                <span style="position:relative;display:grid;place-items:center;height:56px;border-radius:3px;background:{{ t.bg }};color:{{ t.fg }};font-family:'Chivo Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:.2em;writing-mode:vertical-rl;transform:rotate(180deg)">{{ t.label }}<i style="position:absolute;right:2px;top:9px;bottom:9px;width:2px;background:{{ t.accent }}"></i></span>
+              </sc-for>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:7px;justify-content:center">
+              <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">RAIL · 54PX · 2PX INSET ACCENT</span>
+              <span style="font-size:11px;font-weight:300;line-height:1.65;color:#6E7876;text-wrap:pretty">Vertical tabs when the dock sits at the leading edge. Counts ride the label; the accent bar is inset, never a border.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">SCRUB CELL</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.03</span></div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <sc-for list="{{ scrubStates }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span class="m" style="width:56px;font-size:8px;font-weight:500;letter-spacing:.18em;color:#3B4442">{{ s.state }}</span>
+                <div style="position:relative;flex:1;display:grid;grid-template-columns:1fr 84px;align-items:center;height:26px;padding:0 10px;border-radius:4px;background:{{ s.bg }};overflow:hidden;box-shadow:{{ s.ring }}">
+                  <i style="position:absolute;inset:0 auto 0 0;width:{{ s.fill }};background:{{ s.fillColor }};display:block"></i>
+                  <b style="position:absolute;top:0;bottom:0;left:{{ s.fill }};width:1px;background:{{ s.tickColor }};display:block"></b>
+                  <span style="position:relative;font-size:11px;font-weight:300;color:#BEC6C4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.label }}<em style="font-style:normal;font-family:'Chivo Mono',monospace;font-size:9px;letter-spacing:.14em;color:#75E0CD;margin-left:8px">{{ s.bind }}</em></span>
+                  <span class="m" style="position:relative;font-size:11px;font-weight:300;color:{{ s.valueColor }};text-align:right">{{ s.value }}<em style="font-style:normal;font-size:8.5px;letter-spacing:.1em;color:#525B59;margin-left:4px">{{ s.unit }}</em></span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <span style="font-size:11px;font-weight:300;line-height:1.7;color:#6E7876;text-wrap:pretty">One row carries label, binding, value, unit and the drag surface itself. The fill is the value; the hairline is its exact position.</span>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">SLIDER · RANGE · BIPOLAR · FADER</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.04</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;font-weight:300;color:#B9C2BF">Exposure</span><span class="m" style="font-size:11px;font-weight:300;color:#F2F5F4">1.240</span></div>
+            <div style="position:relative;height:3px;border-radius:2px;background:rgba(255,255,255,.055)"><i style="position:absolute;left:0;top:0;bottom:0;width:62%;border-radius:2px;background:linear-gradient(90deg,rgba(47,179,156,.5),#2FB39C);display:block"></i><b style="position:absolute;left:62%;top:-4.5px;width:2px;height:12px;border-radius:1px;background:#7FE3D4;box-shadow:0 0 8px rgba(127,227,212,.6);display:block"></b></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;font-weight:300;color:#B9C2BF">Clip range</span><span class="m" style="font-size:11px;font-weight:300;color:#F2F5F4">0.20 – 0.78</span></div>
+            <div style="position:relative;height:3px;border-radius:2px;background:rgba(255,255,255,.055)"><i style="position:absolute;left:20%;right:22%;top:0;bottom:0;border-radius:2px;background:rgba(47,179,156,.5);display:block"></i><b style="position:absolute;left:20%;top:-4.5px;width:2px;height:12px;border-radius:1px;background:#7FE3D4;display:block"></b><b style="position:absolute;left:78%;top:-4.5px;width:2px;height:12px;border-radius:1px;background:#7FE3D4;display:block"></b></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;font-weight:300;color:#B9C2BF">Bias</span><span class="m" style="font-size:11px;font-weight:300;color:#E0A34E">−0.34</span></div>
+            <div style="position:relative;height:3px;border-radius:2px;background:rgba(255,255,255,.055)"><i style="position:absolute;left:33%;right:50%;top:0;bottom:0;background:rgba(224,163,78,.55);display:block"></i><b style="position:absolute;left:50%;top:-5px;width:1px;height:13px;background:rgba(255,255,255,.18);display:block"></b></div>
+          </div>
+          <div style="display:flex;gap:1px;height:62px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.055)">
+            <sc-for list="{{ faders }}" as="f" hint-placeholder-count="6">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:7px 5px;background:rgba(16,19,20,.9)">
+                <span class="m" style="font-size:8.5px;font-weight:300;color:{{ f.valColor }};text-align:center">{{ f.val }}</span>
+                <i style="height:{{ f.h }};border-radius:2px;background:{{ f.bar }};margin-top:5px;display:block"></i>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">FIELDS</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.05</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;height:28px;padding:0 11px;border-radius:4px;background:rgba(0,0,0,.34);box-shadow:inset 0 1px 2px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.05);font-size:11.5px;font-weight:300;color:#F2F5F4">Studio Scene 04</div>
+            <div style="position:relative;display:flex;align-items:center;height:28px;padding:0 11px;border-radius:4px;background:rgba(0,0,0,.34);box-shadow:inset 0 1px 2px rgba(0,0,0,.55),inset 0 0 0 1px rgba(127,227,212,.4);font-size:11.5px;font-weight:300;color:#F2F5F4;overflow:hidden">Typing<i style="width:1px;height:13px;background:#7FE3D4;margin-left:2px;display:block"></i><b style="position:absolute;left:0;right:0;bottom:0;height:1px;background:#7FE3D4;display:block"></b></div>
+            <div style="position:relative;display:flex;align-items:center;justify-content:space-between;height:28px;padding:0 11px;border-radius:4px;background:rgba(0,0,0,.3);box-shadow:inset 0 1px 2px rgba(0,0,0,.5),inset 0 0 0 1px rgba(242,96,111,.32);font-size:11.5px;font-weight:300;color:#F2606F;overflow:hidden">Invalid path<span class="m" style="font-size:8.5px;letter-spacing:.18em">REQUIRED</span><i style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#F2606F"></i></div>
+            <div style="display:flex;align-items:center;gap:9px;height:28px;padding:0 11px;border-radius:4px;background:rgba(0,0,0,.24);box-shadow:inset 0 1px 2px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.05);color:#6E7876;font-size:11.5px;font-weight:300"><span>⌕</span><span>Search project controls</span><span class="m" style="margin-left:auto;font-size:9px;letter-spacing:.12em;color:#525B59">⌘K</span></div>
+            <div style="display:flex;gap:8px">
+              <div style="display:flex;align-items:stretch;flex:1;height:28px;border-radius:4px;overflow:hidden;background:rgba(0,0,0,.34);box-shadow:inset 0 1px 2px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.05)"><span style="display:flex;align-items:center;flex:1;padding:0 11px;font-family:'Chivo Mono',monospace;font-size:11.5px;font-weight:300;color:#F2F5F4">262144</span><span style="display:grid;place-items:center;width:20px;border-left:1px solid rgba(255,255,255,.05);color:#6E7876;font-size:6px">▲</span><span style="display:grid;place-items:center;width:20px;border-left:1px solid rgba(255,255,255,.05);color:#6E7876;font-size:6px">▼</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;flex:1;height:28px;padding:0 11px;border-radius:4px;background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);font-family:'Chivo Mono',monospace;font-size:10px;font-weight:400;letter-spacing:.12em;color:#F2F5F4">ACESCG<span style="color:#6E7876;font-size:7px">▾</span></div>
+            </div>
+            <div style="display:flex;gap:18px;align-items:center;margin-top:4px">
+              <span style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:300;color:#B9C2BF"><i style="display:grid;place-items:center;width:14px;height:14px;border-radius:2px;background:rgba(0,0,0,.34);box-shadow:inset 0 0 0 1px rgba(47,179,156,.5)"><b style="width:6px;height:6px;background:#2FB39C;display:block"></b></i>Denoise</span>
+              <span style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:300;color:#8A9491"><i style="width:14px;height:14px;border-radius:2px;background:rgba(0,0,0,.34);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)"></i>Motion blur</span>
+              <span style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:300;color:#B9C2BF"><i style="display:grid;place-items:center;width:14px;height:14px;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)"><b style="width:2px;height:8px;background:#2FB39C;display:block"></b></i>GPU</span>
+            </div>
+            <div style="display:flex;gap:18px;align-items:center;margin-top:2px">
+              <span style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:300;color:#B9C2BF"><i style="position:relative;display:block;width:34px;height:16px;border-radius:3px;background:rgba(0,0,0,.34);box-shadow:inset 0 1px 2px rgba(0,0,0,.5),inset 0 0 0 1px rgba(47,179,156,.4)"><b style="position:absolute;right:1.5px;top:1.5px;bottom:1.5px;width:15px;border-radius:2px;background:rgba(47,179,156,.85);display:block"></b></i><span class="m" style="font-size:9px;font-weight:500;letter-spacing:.2em;color:#7FE3D4">ON</span></span>
+              <span style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:300;color:#8A9491"><i style="position:relative;display:block;width:34px;height:16px;border-radius:3px;background:rgba(0,0,0,.34);box-shadow:inset 0 1px 2px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.07)"><b style="position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:15px;border-radius:2px;background:rgba(255,255,255,.1);display:block"></b></i><span class="m" style="font-size:9px;font-weight:500;letter-spacing:.2em;color:#525B59">OFF</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">STATUS · CHIP · KEY · PRESENCE</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.06</span></div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="6">
+              <span style="position:relative;display:flex;align-items:center;height:22px;padding:0 10px 0 12px;border-radius:3px;background:{{ s.wash }};box-shadow:inset 0 0 0 1px {{ s.line }};color:{{ s.fg }};font-family:'Chivo Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:.2em;overflow:hidden"><i style="position:absolute;left:0;top:0;bottom:0;width:2px;background:{{ s.dot }}"></i>{{ s.label }}</span>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4">
+              <span style="display:flex;align-items:stretch;height:24px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);font-family:'Chivo Mono',monospace;font-size:9.5px;font-weight:300;letter-spacing:.08em;color:#B9C2BF"><span style="display:flex;align-items:center;padding:0 10px">{{ c }}</span><i style="display:grid;place-items:center;width:18px;border-left:1px solid rgba(255,255,255,.06);color:#6E7876;font-size:8px;font-style:normal">×</i></span>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <sc-for list="{{ keyCaps }}" as="k" hint-placeholder-count="3">
+              <span class="m" style="display:grid;place-items:center;min-width:22px;height:22px;padding:0 7px;border-radius:3px;background:rgba(255,255,255,.035);box-shadow:inset 0 -1px 0 rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.08);font-size:9.5px;font-weight:400;color:#F2F5F4">{{ k }}</span>
+            </sc-for>
+            <span style="font-size:11px;font-weight:300;color:#6E7876;margin-left:6px">Re-render active view</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:flex"><i style="display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#252D2C;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);color:#B9C2BF;font-family:'Chivo Mono',monospace;font-size:9px;font-style:normal;letter-spacing:.04em">AK</i><i style="display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#2FB39C;color:#04120F;font-family:'Chivo Mono',monospace;font-size:9px;font-style:normal;letter-spacing:.04em;margin-left:-8px;box-shadow:0 0 0 2px #08090A">JR</i></span>
+            <span style="font-size:11px;font-weight:300;color:#6E7876">2 editors on this scene</span>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">PROGRESS · READOUT</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.07</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;font-weight:300;color:#B9C2BF">Bake · 512 samples</span><span class="m" style="font-size:11px;font-weight:300;color:#F2F5F4">68%</span></div>
+            <div style="height:3px;border-radius:2px;background:rgba(255,255,255,.055);overflow:hidden"><i style="display:block;height:100%;width:68%;background:linear-gradient(90deg,rgba(47,179,156,.5),#2FB39C)"></i></div>
+          </div>
+          <div style="height:3px;border-radius:2px;background:rgba(255,255,255,.055);overflow:hidden"><i style="display:block;height:100%;width:30%;background:linear-gradient(90deg,transparent,#7FE3D4,transparent);animation:indet 1.6s linear infinite"></i></div>
+          <div style="display:flex;align-items:flex-end;gap:22px">
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:baseline;gap:7px"><span class="m" style="font-size:40px;font-weight:200;letter-spacing:-.035em">16.43</span><span class="m" style="font-size:9.5px;font-weight:300;letter-spacing:.16em;color:#78827F">MS</span></div>
+              <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:9.5px;font-weight:300;color:#7FE3D4">▼ 1.8</span><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#4E5856">FRAME TIME</span></div>
+            </div>
+            <svg viewBox="0 0 90 28" style="width:130px;height:38px;margin-left:auto;opacity:.95"><polyline points="0,22 10,20 20,23 30,17 40,19 50,13 60,18 70,12 80,15 90,9" fill="none" stroke="#4ED6BD" stroke-width="1"></polyline><polyline points="0,26 10,24 20,25 30,22 40,24 50,20 60,23 70,19 80,21 90,17" fill="none" stroke="#91B9EB" stroke-width=".9" opacity=".65"></polyline></svg>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">MENU · TOOLTIP · TOAST</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.08</span></div>
+          <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+            <div style="width:188px;padding:5px;border-radius:6px;background:rgba(22,25,26,.94);backdrop-filter:blur(32px) saturate(105%);-webkit-backdrop-filter:blur(32px) saturate(105%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.09),0 28px 60px -18px rgba(0,0,0,.9)">
+              <sc-for list="{{ menuItems }}" as="i" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:8px;height:27px;padding:0 10px;border-radius:3px;background:{{ i.bg }};color:{{ i.fg }};font-size:11.5px;font-weight:300">{{ i.label }}<span class="m" style="margin-left:auto;font-size:9px;font-weight:300;letter-spacing:.08em;color:#525B59">{{ i.hint }}</span></div>
+              </sc-for>
+              <i style="display:block;height:1px;margin:5px 8px;background:rgba(255,255,255,.07)"></i>
+              <div style="display:flex;align-items:center;gap:8px;height:27px;padding:0 10px;border-radius:3px;color:#F2606F;font-size:11.5px;font-weight:300">Delete binding<span class="m" style="margin-left:auto;font-size:9px;color:#525B59">⌫</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;flex:1;min-width:160px">
+              <span style="display:inline-flex;align-self:flex-start;flex-direction:column;gap:3px;padding:8px 10px;border-radius:3px;background:rgba(22,25,26,.96);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 14px 30px -12px rgba(0,0,0,.85)"><b style="font-size:11px;font-weight:500;color:#F2F5F4">Exposure</b><span class="m" style="font-size:9.5px;font-weight:300;letter-spacing:.04em;color:#78827F">EV · drag or ⌥click to reset</span></span>
+              <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:3px;background:rgba(22,25,26,.9);box-shadow:inset 0 0 0 1px {{ t.line }},0 18px 40px -18px rgba(0,0,0,.9)">
+                  <i style="width:5px;height:5px;border-radius:50%;background:{{ t.dot }};display:block"></i>
+                  <span style="font-size:11px;font-weight:300;color:#DDE4E2">{{ t.msg }}</span>
+                  <span style="margin-left:auto;color:#525B59;font-size:10px">×</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">OUTLINER · TABLE</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.09</span></div>
+          <div style="display:flex;flex-direction:column;border-radius:4px;overflow:hidden;background:rgba(0,0,0,.2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)">
+            <sc-for list="{{ tree }}" as="n" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:8px;height:25px;padding-right:10px;padding-left:{{ n.pad }};background:{{ n.bg }};font-size:11px;font-weight:300;color:{{ n.fg }}">
+                <span style="width:8px;color:#525B59;font-size:7px">{{ n.caret }}</span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ n.label }}</span>
+                <span class="m" style="margin-left:auto;font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#4E5856">{{ n.meta }}</span>
+                <span style="color:{{ n.eyeColor }};font-size:9px">◉</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:1fr 72px 64px;gap:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.09)">
+              <span class="m" style="font-size:8px;font-weight:500;letter-spacing:.2em;color:#5F6B68">PASS</span>
+              <span class="m" style="font-size:8px;font-weight:500;letter-spacing:.2em;color:#5F6B68">TIME</span>
+              <span class="m" style="font-size:8px;font-weight:500;letter-spacing:.2em;color:#5F6B68">STATE</span>
+            </div>
+            <sc-for list="{{ tableRows }}" as="r" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:1fr 72px 64px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.035);background:{{ r.bg }}">
+                <span style="font-size:11px;font-weight:300;color:#BEC6C4">{{ r.pass }}</span>
+                <span class="m" style="font-size:10.5px;font-weight:300;color:#F2F5F4">{{ r.time }}</span>
+                <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.18em;color:{{ r.stateColor }}">{{ r.state }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">TIMELINE · PATH · EMPTY</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">PL.10</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:300;color:#8A9491"><span>Project</span><span style="color:#3B4442">/</span><span>Studio 04</span><span style="color:#3B4442">/</span><span style="color:#F2F5F4">Environment</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between"><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#4E5856">0</span><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#4E5856">240</span></div>
+            <div style="position:relative;height:32px;border-radius:4px;background:rgba(0,0,0,.26);box-shadow:inset 0 1px 2px rgba(0,0,0,.4),inset 0 0 0 1px rgba(255,255,255,.04);overflow:hidden">
+              <sc-for list="{{ keys }}" as="k" hint-placeholder-count="6">
+                <i style="position:absolute;top:10px;left:{{ k }};width:6px;height:6px;background:#7FE3D4;transform:rotate(45deg);display:block"></i>
+              </sc-for>
+              <b style="position:absolute;top:0;bottom:0;left:44%;width:1px;background:#F2606F;box-shadow:0 0 8px rgba(242,96,111,.5);display:block"></b>
+              <span class="m" style="position:absolute;top:5px;left:calc(44% + 6px);font-size:8.5px;font-weight:300;color:#F2606F">106</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;padding:24px 20px;border-radius:4px;background:rgba(255,255,255,.014);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)">
+            <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.22em;color:#525B59">NO BINDINGS</span>
+            <span style="font-size:11px;font-weight:300;color:#6E7876;text-align:center;max-width:250px;line-height:1.65;text-wrap:pretty">Drag a parameter onto a controller channel, or press ⌘B with a row selected.</span>
+            <span style="display:flex;align-items:center;height:24px;padding:0 13px;border-radius:4px;background:rgba(255,255,255,.035);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);font-family:'Chivo Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#DDE4E2;margin-top:6px">ADD BINDING</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="patterns" style="display:grid;grid-template-columns:132px minmax(0,1fr);padding:64px 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">06</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">PATTERNS</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">Fixed arrangements of the controls above, not new components.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:34px;min-width:0">
+      <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em">Assemblies</h2>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1px;background:rgba(255,255,255,.06)">
+        <div style="background:#08090A;padding:22px 24px 26px">
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:18px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">PANEL CARD</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">AS.01</span></div>
+          <div style="border-radius:12px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 40%),rgba(0,0,0,.24);box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)">
+            <div style="display:flex;align-items:center;gap:10px;height:36px;padding:0 13px;border-bottom:1px solid rgba(255,255,255,.05)">
+              <b class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;color:#F2F5F4">ENVIRONMENT</b>
+              <span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#4E5856">12</span>
+              <span style="margin-left:auto;display:flex;gap:9px;color:#78827F;font-size:10px"><span>⌕</span><span>⋯</span><span>▾</span></span>
+            </div>
+            <div style="padding:12px 12px 13px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:9px"><b class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.22em;color:#8A9491">LIGHTING</b><i style="flex:1;height:1px;background:rgba(255,255,255,.055)"></i></div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <sc-for list="{{ panelRows }}" as="r" hint-placeholder-count="3">
+                  <div style="position:relative;display:grid;grid-template-columns:1fr 76px;align-items:center;height:26px;padding:0 10px;border-radius:6px;background:rgba(255,255,255,.024);overflow:hidden">
+                    <i style="position:absolute;inset:0 auto 0 0;width:{{ r.fill }};background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.06));display:block"></i>
+                    <span style="position:relative;font-size:11px;font-weight:300;color:#BEC6C4">{{ r.label }}</span>
+                    <span class="m" style="position:relative;font-size:11px;font-weight:300;color:#F2F5F4;text-align:right">{{ r.value }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <span class="m" style="font-size:9px;font-weight:300;letter-spacing:.16em;color:#525B59">HDRI · STUDIO_SOFT_4K</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;height:34px;margin-top:10px;padding:0 13px;border-radius:9px;background:rgba(255,255,255,.014);box-shadow:inset 0 0 0 1px rgba(255,255,255,.045)">
+            <span class="m" style="font-size:9px;font-weight:500;letter-spacing:.22em;color:#8A9491">MATERIAL</span>
+            <span class="m" style="margin-left:auto;font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#4E5856">COLLAPSED</span>
+            <span style="color:#525B59;font-size:8px">▸</span>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px">
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:18px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">GUTTER GRID</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">AS.02</span></div>
+          <div style="display:flex;gap:12px;height:158px;padding:12px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01) 34%,transparent),rgba(20,24,25,.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.08)">
+            <sc-for list="{{ gutterCols }}" as="c" hint-placeholder-count="3">
+              <div style="flex:{{ c.grow }};border-radius:10px;background:rgba(0,0,0,.2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);display:grid;place-items:center"><span class="m" style="font-size:9px;font-weight:300;letter-spacing:.18em;color:#4E5856">{{ c.label }}</span></div>
+            </sc-for>
+          </div>
+          <p style="margin:14px 0 0;font-size:11px;font-weight:300;line-height:1.7;color:#6E7876;text-wrap:pretty">Width carries hierarchy: the panel holding the active tool takes 1.2fr and its neighbours give way. A gutter reads as a separation without adding a stroke.</p>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px">
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:18px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">DIALOG OVER SCRIM</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">AS.03</span></div>
+          <div style="position:relative;height:190px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#1A2122,#0B0D0E)">
+            <div style="position:absolute;inset:0;background:rgba(8,9,10,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)"></div>
+            <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:286px;border-radius:13px;overflow:hidden;background:rgba(22,25,26,.92);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.09),0 30px 64px -18px rgba(0,0,0,.9)">
+              <div style="padding:16px 16px 14px;display:flex;flex-direction:column;gap:7px">
+                <b style="font-size:13.5px;font-weight:400;letter-spacing:-.01em">Discard unsaved layout?</b>
+                <span style="font-size:11px;font-weight:300;line-height:1.65;color:#8A9491;text-wrap:pretty">Panel positions for Studio 04 will return to the last recalled layout.</span>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:8px;padding:11px 16px;background:rgba(0,0,0,.22);border-top:1px solid rgba(255,255,255,.05)">
+                <span style="display:flex;align-items:center;height:26px;padding:0 13px;border-radius:6px;font-size:11px;font-weight:300;color:#B9C2BF">Keep</span>
+                <span style="display:flex;align-items:center;height:26px;padding:0 13px;border-radius:6px;background:rgba(242,96,111,.12);box-shadow:inset 0 0 0 1px rgba(242,96,111,.4);font-size:11px;font-weight:300;color:#F2606F">Discard</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#08090A;padding:22px 24px 26px">
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:18px"><span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">STATUS LINE</span><i style="flex:1;height:1px;background:rgba(255,255,255,.05)"></i><span class="m" style="font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#3B4442">AS.04</span></div>
+          <div style="display:flex;align-items:center;gap:11px;height:31px;padding:0 13px;border-radius:9px;background:rgba(0,0,0,.24);box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)">
+            <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#7FE3D4">CONSOLE</span>
+            <span class="m" style="font-size:9.5px;font-weight:300;letter-spacing:.08em;color:#78827F">14:22:09</span>
+            <span style="font-size:11px;font-weight:300;color:#B9C2BF">Bake complete — 2.14s</span>
+            <span class="m" style="margin-left:auto;font-size:8.5px;font-weight:300;letter-spacing:.18em;color:#4E5856">62</span>
+            <span style="font-size:10px;color:#78827F">▴</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;height:31px;margin-top:8px;padding:0 13px;border-radius:9px;background:rgba(224,163,78,.07);box-shadow:inset 0 0 0 1px rgba(224,163,78,.26)">
+            <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#E0A34E">WARN</span>
+            <span style="font-size:11px;font-weight:300;color:#DDE4E2">Texture 4096² exceeds device limit — resampled</span>
+            <span class="m" style="margin-left:auto;font-size:8.5px;font-weight:300;letter-spacing:.16em;color:#8A7247">1 OF 3</span>
+          </div>
+          <p style="margin:14px 0 0;font-size:11px;font-weight:300;line-height:1.7;color:#6E7876;text-wrap:pretty">Collapsed, the console keeps the newest entry and a count. It expands in place — the dock never changes height.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rules" style="display:grid;grid-template-columns:132px minmax(0,1fr);padding:64px 0 0;border-top:1px solid rgba(255,255,255,.07)">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-right:32px">
+      <span class="m" style="font-size:26px;font-weight:200;letter-spacing:-.02em;color:#2A3231">07</span>
+      <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68">KNOWLEDGE</span>
+      <p style="margin:0;font-size:10.5px;line-height:1.7;color:#4E5856;text-wrap:pretty">Six rules, each checkable in review.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:34px;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:30px;font-weight:300;letter-spacing:-.022em">How to hold the system</h2>
+        <p style="margin:0;max-width:640px;font-size:13px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">These are the rules that keep the surface coherent as it grows.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ rules }}" as="r" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:44px minmax(0,1fr) 260px;gap:28px;align-items:start;padding:22px 0;border-top:1px solid rgba(255,255,255,.055)">
+            <span class="m" style="font-size:11px;font-weight:300;letter-spacing:.08em;color:#3B4442;padding-top:2px">{{ r.n }}</span>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <b style="font-size:14px;font-weight:400;letter-spacing:-.01em;color:#F2F5F4">{{ r.title }}</b>
+              <p style="margin:0;max-width:520px;font-size:11.5px;font-weight:300;line-height:1.75;color:#8A9491;text-wrap:pretty">{{ r.body }}</p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding-top:3px">
+              <span class="m" style="font-size:10px;font-weight:300;letter-spacing:.02em;color:#75E0CD">✓ {{ r.do }}</span>
+              <span class="m" style="font-size:10px;font-weight:300;letter-spacing:.02em;color:#C4707A">✕ {{ r.dont }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:rgba(255,255,255,.06)">
+        <div style="background:#08090A;padding:22px 24px 26px">
+          <div class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68;margin-bottom:18px">ACCESSIBILITY FLOOR</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ a11y }}" as="a" hint-placeholder-count="6">
+              <div style="display:flex;gap:11px;align-items:flex-start"><span style="color:#2FB39C;font-size:9px;line-height:1.7">◆</span><span style="font-size:11px;font-weight:300;line-height:1.7;color:#B9C2BF;text-wrap:pretty">{{ a }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#08090A;padding:22px 24px 26px">
+          <div class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68;margin-bottom:18px">NAMING</div>
+          <div style="display:flex;flex-direction:column;gap:13px">
+            <sc-for list="{{ naming }}" as="n" hint-placeholder-count="5">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span class="m" style="font-size:10px;font-weight:300;letter-spacing:.02em;color:#75E0CD">{{ n.pattern }}</span>
+                <span style="font-size:10.5px;font-weight:300;line-height:1.6;color:#6E7876">{{ n.use }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#08090A;padding:22px 24px 26px">
+          <div class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#5F6B68;margin-bottom:18px">ADOPTION ORDER</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ adoption }}" as="s" hint-placeholder-count="5">
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span class="m" style="font-size:9.5px;font-weight:300;letter-spacing:.08em;color:#3B4442;min-width:16px">{{ s.n }}</span>
+                <span style="font-size:11px;font-weight:300;line-height:1.7;color:#B9C2BF;text-wrap:pretty">{{ s.step }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="display:flex;align-items:baseline;gap:14px;margin-top:64px;padding:26px 0 0;border-top:1px solid rgba(255,255,255,.07)">
+    <span class="m" style="font-size:8.5px;font-weight:500;letter-spacing:.2em;color:#3B4442">ARTINOS INSTRUMENT</span>
+    <i style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.07),transparent)"></i>
+    <span style="font-size:10.5px;font-weight:300;color:#4E5856">Token layer: <a href="artinos-instrument-tokens.css">artinos-instrument-tokens.css</a> · Shell studies: <a href="ARTINOS Shell Variations copy.dc.html">Shell Variations</a></span>
+  </footer>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400},&quot;accentHi&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#7FE3D4&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#7FE3D4&quot;,&quot;#B7D6EF&quot;,&quot;#F0CD9B&quot;],&quot;section&quot;:&quot;Signal&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    this._fit = () => {
+      document.querySelectorAll('[data-shell-fit]').forEach(box => {
+        const frame = box.querySelector('[data-shell-frame]');
+        if (frame) frame.style.transform = 'scale(' + (box.clientWidth / 1440) + ')';
+      });
+    };
+    this._fit();
+    if (window.ResizeObserver) {
+      this._ro = new ResizeObserver(this._fit);
+      document.querySelectorAll('[data-shell-fit]').forEach(b => this._ro.observe(b));
+    }
+    window.addEventListener('resize', this._fit);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._fit);
+    if (this._ro) this._ro.disconnect();
+  }
+  renderVals() {
+    const accentHi = this.props.accentHi ?? '#7FE3D4';
+    const tick = 'rgba(255,255,255,.26)';
+    return {
+      meta: [
+        {k:'VERSION', v:'1.0 · AUG 2026'},
+        {k:'LAYERS', v:'primitive · role · theme'},
+        {k:'TYPE', v:'Chivo / Chivo Mono'},
+        {k:'THEMES', v:'glass · dark · auto · light'},
+        {k:'CONTROL HEIGHTS', v:'24 / 28 / 32'}
+      ],
+      index: [
+        {n:'00', label:'The shell', href:'#shell'},
+        {n:'01', label:'Primitives', href:'#primitives'},
+        {n:'02', label:'Type', href:'#type'},
+        {n:'03', label:'Roles & themes', href:'#roles'},
+        {n:'04', label:'Material', href:'#material'},
+        {n:'05', label:'Components', href:'#controls'},
+        {n:'06', label:'Patterns', href:'#patterns'},
+        {n:'07', label:'Knowledge', href:'#rules'}
+      ],
+      tabsA: [
+        {label:'SCENE', count:'12', pill:'rgba(255,255,255,.075)', fg:'#F2F5F4', cFg:'#8A9491', w:500, ring:'inset 0 0 0 1px rgba(255,255,255,.06), inset 0 1px 0 rgba(255,255,255,.06)'},
+        {label:'MATERIAL', count:'8', pill:'transparent', fg:'#8A9491', cFg:'#525B59', w:300, ring:'none'},
+        {label:'RENDER', count:'6', pill:'transparent', fg:'#8A9491', cFg:'#525B59', w:300, ring:'none'},
+        {label:'BAKE', count:'3', pill:'transparent', fg:'#8A9491', cFg:'#525B59', w:300, ring:'none'}
+      ],
+      currentPanels: [
+        {group:'Environment', grow:1.2, footer:'HDRI · STUDIO_SOFT_4K', rows:[
+          {label:'Intensity', bind:'', value:'1.240', unit:'EV', fill:'62%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Rotation', bind:'', value:'−135', unit:'°', fill:'38%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Horizon blur', bind:'', value:'0.08', unit:'', fill:'12%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Ground shadow', bind:'MIDI 12', value:'0.62', unit:'', fill:'62%', tickColor:'rgba(143,184,217,.75)', valueColor:'#8FB8D9'}
+        ]},
+        {group:'Material', grow:1, footer:'8 SLOTS · 2 SHARED', rows:[
+          {label:'Base roughness', bind:'', value:'0.34', unit:'', fill:'34%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Clearcoat', bind:'', value:'0.80', unit:'', fill:'80%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Anisotropy', bind:'', value:'0.12', unit:'', fill:'12%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Sheen tint', bind:'', value:'0.00', unit:'', fill:'2%', tickColor:tick, valueColor:'#8A9491'}
+        ]},
+        {group:'Render', grow:0.85, footer:'WEBGPU · ACESCG', rows:[
+          {label:'Samples', bind:'', value:'512', unit:'', fill:'50%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Max bounces', bind:'', value:'6', unit:'', fill:'30%', tickColor:tick, valueColor:'#F2F5F4'},
+          {label:'Denoise', bind:'', value:'ON', unit:'', fill:'100%', tickColor:'rgba(47,179,156,.6)', valueColor:'#7FE3D4'},
+          {label:'Resolution', bind:'', value:'2560', unit:'PX', fill:'70%', tickColor:tick, valueColor:'#F2F5F4'}
+        ]}
+      ],
+      shellSpecs: [
+        {label:'DOCK INSET', value:'32 / 20px', token:'--safe-area'},
+        {label:'DOCK HEIGHT', value:'276px', token:'--e2-dock'},
+        {label:'TAB STRIP', value:'40px', token:'--tab-strip-h'},
+        {label:'PANEL GUTTER', value:'12px', token:'--space-5'},
+        {label:'SCRUB ROW', value:'25px', token:'--control-h-sm'},
+        {label:'STATUS LINE', value:'31px', token:'--control-h-lg'},
+        {label:'DOCK RADIUS', value:'13px', token:'--radius-panel'},
+        {label:'FROST', value:'blur 44 · sat 110', token:'--blur-frost'}
+      ],
+      swatchGroups: [
+        {name:'GRAPHITE', note:'Dark-mode ground. Five steps, never interpolated between.', ramp:'linear-gradient(90deg,#08090A,#1E2223)', items:[
+          {short:'ink-void', hex:'#08090A'}, {short:'ink-stage', hex:'#0D0F10'}, {short:'ink-surface', hex:'#121516'},
+          {short:'ink-raised', hex:'#171A1B'}, {short:'ink-edge', hex:'#1E2223'}
+        ]},
+        {name:'PAPER', note:'Light-mode ground, for daylight desks and printed reviews.', ramp:'linear-gradient(90deg,#DDE2E1,#FFFFFF)', items:[
+          {short:'paper-void', hex:'#EDEFEE'}, {short:'paper-stage', hex:'#DDE2E1'}, {short:'paper-surface', hex:'#F5F7F6'},
+          {short:'paper-raised', hex:'#FFFFFF'}, {short:'paper-edge', hex:'#E2E6E5'}
+        ]},
+        {name:'CHALK', note:'Text on graphite. Five steps of recession, hi to ghost.', ramp:'linear-gradient(90deg,#F2F5F4,#4E5856)', items:[
+          {short:'chalk-hi', hex:'#F2F5F4'}, {short:'chalk-mid', hex:'#B9C2BF'}, {short:'chalk-low', hex:'#8A9491'},
+          {short:'chalk-faint', hex:'#616B69'}, {short:'chalk-ghost', hex:'#4E5856'}
+        ]},
+        {name:'SLATE', note:'Text on paper.', ramp:'linear-gradient(90deg,#101716,#8B9694)', items:[
+          {short:'slate-hi', hex:'#101716'}, {short:'slate-mid', hex:'#28312F'}, {short:'slate-low', hex:'#5A6664'}, {short:'slate-faint', hex:'#8B9694'}
+        ]},
+        {name:'SIGNAL', note:'Meaning, never decoration. One hue per state, three tints each.', ramp:'linear-gradient(90deg,#2FB39C,#E0A34E,#F2606F,#8FB8D9)', items:[
+          {short:'teal-500', hex:'#2FB39C'}, {short:'teal-300', hex:'#7FE3D4'}, {short:'teal-700', hex:'#0B7A69'},
+          {short:'amber-500', hex:'#E0A34E'}, {short:'rose-500', hex:'#F2606F'}, {short:'azure-500', hex:'#8FB8D9'}
+        ]}
+      ],
+      scaleTables: [
+        {name:'SPACE', count:'2PX BASE · 8 STEPS', rows:[
+          {token:'--space-1', value:'2px', use:'Hairline offsets, icon nudges.'},
+          {token:'--space-2', value:'4px', use:'Inside a control; segmented padding.'},
+          {token:'--space-3', value:'6px', use:'Row gap in a panel section.'},
+          {token:'--space-4', value:'8px', use:'Control to control in a row.'},
+          {token:'--space-5', value:'12px', use:'Panel gutter, card padding.'},
+          {token:'--space-6', value:'16px', use:'Section spacing inside a panel.'},
+          {token:'--space-7', value:'24px', use:'Group separation, dock inset.'},
+          {token:'--space-8', value:'32px', use:'Shell margin.'}
+        ]},
+        {name:'METRICS', count:'8 FIXED', rows:[
+          {token:'--control-h-sm', value:'24px', use:'Scrub row, chip, dense list item.'},
+          {token:'--control-h', value:'28px', use:'Default: button, field, tab pill.'},
+          {token:'--control-h-lg', value:'32px', use:'Primary action, status line.'},
+          {token:'--row-gap', value:'6px', use:'Between scrub rows.'},
+          {token:'--panel-header-h', value:'36px', use:'Panel header band.'},
+          {token:'--tab-strip-h', value:'34–40px', use:'Dock tab strip.'},
+          {token:'--command-bar-h', value:'44px', use:'Top command bar.'},
+          {token:'--safe-area', value:'24–32px', use:'Canvas to dock clearance.'}
+        ]},
+        {name:'RADIUS', count:'4 STEPS', rows:[
+          {token:'--radius-control', value:'5–6px', use:'Buttons, fields, tab pills.'},
+          {token:'--radius-card', value:'8–9px', use:'Cards, list containers, toasts.'},
+          {token:'--radius-panel', value:'11–13px', use:'Panel cards, the dock.'},
+          {token:'--radius-shell', value:'16px', use:'The window itself.'}
+        ]},
+        {name:'TRACKING', count:'2 CAPS SETTINGS', rows:[
+          {token:'--track-caps', value:'.16–.20em', use:'Mono caps in labels and badges.'},
+          {token:'--track-panel', value:'.22em', use:'Panel names — the widest setting on the surface.'}
+        ]}
+      ],
+      typeRows: [
+        {token:'--type-display', spec:'64 / 200 / −3.5%', family:'Chivo', size:'44px', weight:200, tracking:'-.035em', transform:'none', color:'#F2F5F4', sample:'Instrument'},
+        {token:'--type-title', spec:'30 / 300 / −2.2%', family:'Chivo', size:'26px', weight:300, tracking:'-.022em', transform:'none', color:'#F2F5F4', sample:'Environment lighting'},
+        {token:'--type-hero', spec:'40 / 200 / mono', family:'"Chivo Mono"', size:'34px', weight:200, tracking:'-.035em', transform:'none', color:'#F2F5F4', sample:'16.43'},
+        {token:'--type-panel', spec:'9 / 500 / +22% caps', family:'"Chivo Mono"', size:'9px', weight:500, tracking:'.22em', transform:'uppercase', color:'#F2F5F4', sample:'Environment'},
+        {token:'--type-section', spec:'8.5 / 500 / +20% caps', family:'"Chivo Mono"', size:'8.5px', weight:500, tracking:'.2em', transform:'uppercase', color:'#8A9491', sample:'Lighting'},
+        {token:'--type-body', spec:'13 / 300 / 1.75', family:'Chivo', size:'13px', weight:300, tracking:'0', transform:'none', color:'#B9C2BF', sample:'Prose, help text, dialog copy.'},
+        {token:'--type-label', spec:'11 / 300', family:'Chivo', size:'11px', weight:300, tracking:'0', transform:'none', color:'#B9C2BF', sample:'Environment intensity'},
+        {token:'--type-value', spec:'11 / 300 / tabular', family:'"Chivo Mono"', size:'11px', weight:300, tracking:'0', transform:'none', color:'#F2F5F4', sample:'1.240 EV'},
+        {token:'--type-readout', spec:'11.5 / 300 / tabular', family:'"Chivo Mono"', size:'11.5px', weight:300, tracking:'0', transform:'none', color:'#F2F5F4', sample:'60 FPS · CPU 41'}
+      ],
+      textRoles: [
+        {token:'--text-hi', hex:'#F2F5F4', sample:'Primary value and title', contrast:'14.8:1'},
+        {token:'--text-mid', hex:'#B9C2BF', sample:'Label, body, list item', contrast:'8.6:1'},
+        {token:'--text-low', hex:'#8A9491', sample:'Secondary, footer, meta', contrast:'5.1:1'},
+        {token:'--text-faint', hex:'#616B69', sample:'Units, counts, timestamps', contrast:'2.9:1'},
+        {token:'--text-ghost', hex:'#4E5856', sample:'Disabled only', contrast:'2.1:1'}
+      ],
+      roleRows: [
+        {token:'--bg-app', dark:'#08090A', darkLabel:'ink-void', light:'#EDEFEE', lightLabel:'paper-void', use:'Behind everything, including the canvas.'},
+        {token:'--bg-stage', dark:'#0D0F10', darkLabel:'ink-stage', light:'#DDE2E1', lightLabel:'paper-stage', use:'Viewport ground and page sections.'},
+        {token:'--bg-surface', dark:'#121516', darkLabel:'ink-surface', light:'#F5F7F6', lightLabel:'paper-surface', use:'Panels, cards, dock body.'},
+        {token:'--bg-raised', dark:'#171A1B', darkLabel:'ink-raised', light:'#FFFFFF', lightLabel:'paper-raised', use:'Anything sitting on a surface.'},
+        {token:'--bg-hover', dark:'rgba(255,255,255,.05)', darkLabel:'white 5%', light:'rgba(20,30,28,.05)', lightLabel:'slate 5%', use:'Pointer over an interactive row.'},
+        {token:'--bg-active', dark:'rgba(255,255,255,.09)', darkLabel:'white 9%', light:'rgba(20,30,28,.1)', lightLabel:'slate 10%', use:'Selected tab, pressed control.'},
+        {token:'--bg-well', dark:'rgba(0,0,0,.34)', darkLabel:'black 34%', light:'rgba(30,40,38,.08)', lightLabel:'slate 8%', use:'Inputs and tracks — recessed, not raised.'},
+        {token:'--bg-float', dark:'rgba(23,26,27,.86)', darkLabel:'raised 86%', light:'rgba(255,255,255,.9)', lightLabel:'white 90%', use:'Menus, popovers, dialogs.'},
+        {token:'--bg-scrim', dark:'rgba(8,9,10,.6)', darkLabel:'void 60%', light:'rgba(255,255,255,.7)', lightLabel:'white 70%', use:'Behind a modal layer only.'},
+        {token:'--line-subtle', dark:'rgba(255,255,255,.06)', darkLabel:'white 6%', light:'rgba(20,30,28,.09)', lightLabel:'slate 9%', use:'Internal hairline inside a card.'},
+        {token:'--line', dark:'rgba(255,255,255,.09)', darkLabel:'white 9%', light:'rgba(20,30,28,.14)', lightLabel:'slate 14%', use:'Card and panel edge.'},
+        {token:'--line-strong', dark:'rgba(255,255,255,.14)', darkLabel:'white 14%', light:'rgba(20,30,28,.22)', lightLabel:'slate 22%', use:'Floating layer edge.'},
+        {token:'--sig-live', dark:'#2FB39C', darkLabel:'teal-500', light:'#0B7A69', lightLabel:'teal-700', use:'Running, armed, enabled, primary.'},
+        {token:'--sig-warn', dark:'#E0A34E', darkLabel:'amber-500', light:'#E0A34E', lightLabel:'amber-500', use:'Degraded but proceeding.'},
+        {token:'--sig-fault', dark:'#F2606F', darkLabel:'rose-500', light:'#F2606F', lightLabel:'rose-500', use:'Stopped, invalid, destructive.'},
+        {token:'--sig-bind', dark:'#8FB8D9', darkLabel:'azure-500', light:'#8FB8D9', lightLabel:'azure-500', use:'Externally driven — MIDI, OSC, expression.'},
+        {token:'--fill-track', dark:'rgba(255,255,255,.05)', darkLabel:'white 5%', light:'rgba(20,30,28,.08)', lightLabel:'slate 8%', use:'Scrub fill and slider track.'},
+        {token:'--tick', dark:'rgba(255,255,255,.2)', darkLabel:'white 20%', light:'rgba(20,30,28,.3)', lightLabel:'slate 30%', use:'The exact-value hairline.'}
+      ],
+      themes: [
+        {name:'GLASS', use:'Clear — blur only, no tint. Text always sits over a local scrim.', canvas:'linear-gradient(135deg,#3A4A52,#7E8C86)', tint:'rgba(255,255,255,.02)', sheen:'linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.015) 32%,transparent)', line:'rgba(255,255,255,.12)', row:'rgba(255,255,255,.06)', textHi:'#FFFFFF', textMid:'#DDE4E2'},
+        {name:'DARK', use:'Frost with a deeper tint. Default for long sessions and capture.', canvas:'linear-gradient(135deg,#14191A,#22292A)', tint:'rgba(14,17,18,.74)', sheen:'linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.01) 30%,transparent)', line:'rgba(255,255,255,.1)', row:'rgba(255,255,255,.028)', textHi:'#F2F5F4', textMid:'#B9C2BF'},
+        {name:'AUTO · BRIGHT', use:'Bright canvas behind chrome: deepen the tint, keep the frost.', canvas:'linear-gradient(135deg,#D9DEDC,#A9B3AF)', tint:'rgba(14,17,18,.7)', sheen:'linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01) 30%,transparent)', line:'rgba(255,255,255,.1)', row:'rgba(255,255,255,.04)', textHi:'#F2F5F4', textMid:'#B9C2BF'},
+        {name:'LIGHT', use:'Daylight desks and printed reviews. Frost lightens rather than darkens.', canvas:'linear-gradient(135deg,#EDEFEE,#CFD6D4)', tint:'rgba(238,241,240,.66)', sheen:'linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.2) 32%,transparent)', line:'rgba(20,30,28,.14)', row:'rgba(20,30,28,.05)', textHi:'#101716', textMid:'#28312F'}
+      ],
+      elevations: [
+        {token:'--e0-well', use:'Recessed: inputs, tracks, the console gutter.', bg:'rgba(0,0,0,.34)', shadow:'inset 0 1px 2px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.05)'},
+        {token:'--e1-surface', use:'Flat card on the stage. One hairline, no shadow.', bg:'#121516', shadow:'inset 0 0 0 1px rgba(255,255,255,.06)'},
+        {token:'--e2-dock', use:'The dock. Frost, top sheen, deep cast shadow.', bg:'linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012) 34%,transparent),rgba(20,24,25,.6)', shadow:'inset 0 0 0 1px rgba(255,255,255,.085), inset 0 1px 0 rgba(255,255,255,.1), 0 24px 60px -20px rgba(0,0,0,.9)'},
+        {token:'--e3-float', use:'Menus and dialogs. Strong edge, tightest shadow.', bg:'rgba(22,25,26,.92)', shadow:'inset 0 0 0 1px rgba(255,255,255,.12), inset 0 1px 0 rgba(255,255,255,.09), 0 28px 64px -18px rgba(0,0,0,.9)'}
+      ],
+      motionRows: [
+        {token:'--dur-value', dur:'70ms', use:'Numeric tracking under a drag — near-instant, linear.'},
+        {token:'--dur-state', dur:'130ms', use:'Hover, focus, arm, toggle. Standard ease.'},
+        {token:'--dur-surface', dur:'220ms', use:'Panel open, section expand, popover enter.'},
+        {token:'--dur-layout', dur:'380ms', use:'Dock move, layout recall. Decelerating.'},
+        {token:'--ease-std', dur:'.2 .7 .2 1', use:'Everything except entering layers.'},
+        {token:'--ease-enter', dur:'.16 1 .3 1', use:'Layers arriving: popovers, dialogs, toasts.'}
+      ],
+      iconButtons: [
+        {glyph:'⬒', bg:'rgba(255,255,255,.05)', ring:'inset 0 0 0 1px rgba(255,255,255,.07)', fg:'#B9C2BF'},
+        {glyph:'⟳', bg:'rgba(255,255,255,.05)', ring:'inset 0 0 0 1px rgba(255,255,255,.07)', fg:'#B9C2BF'},
+        {glyph:'◉', bg:'rgba(47,179,156,.14)', ring:'inset 0 0 0 1px rgba(47,179,156,.42)', fg:'#7FE3D4'},
+        {glyph:'⌗', bg:'rgba(0,0,0,.34)', ring:'inset 0 1px 2px rgba(0,0,0,.55)', fg:'#F2F5F4'},
+        {glyph:'✕', bg:'transparent', ring:'none', fg:'#4E5856'}
+      ],
+      sideRail: [
+        {label:'SCENE 12', bg:'rgba(255,255,255,.075)', fg:'#F2F5F4', accent:'#2FB39C'},
+        {label:'MATERIAL 8', bg:'transparent', fg:'#8A9491', accent:'transparent'},
+        {label:'RENDER 6', bg:'transparent', fg:'#8A9491', accent:'transparent'},
+        {label:'BAKE 3', bg:'transparent', fg:'#8A9491', accent:'transparent'},
+        {label:'BIND 2', bg:'transparent', fg:'#8A9491', accent:'transparent'}
+      ],
+      railTabs: [
+        {label:'SCENE 12', bg:'rgba(255,255,255,.075)', fg:'#F2F5F4', accent:'#2FB39C'},
+        {label:'MATL 8', bg:'transparent', fg:'#8A9491', accent:'transparent'},
+        {label:'RNDR 6', bg:'transparent', fg:'#8A9491', accent:'transparent'}
+      ],
+      scrubStates: [
+        {state:'REST', label:'Intensity', bind:'', value:'1.240', unit:'EV', fill:'62%', bg:'rgba(255,255,255,.024)', fillColor:'linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.055))', tickColor:tick, valueColor:'#F2F5F4', ring:'none'},
+        {state:'HOVER', label:'Intensity', bind:'', value:'1.240', unit:'EV', fill:'62%', bg:'rgba(255,255,255,.055)', fillColor:'linear-gradient(90deg,rgba(255,255,255,.03),rgba(255,255,255,.085))', tickColor:'rgba(255,255,255,.4)', valueColor:'#F2F5F4', ring:'inset 0 0 0 1px rgba(255,255,255,.05)'},
+        {state:'DRAG', label:'Intensity', bind:'', value:'1.318', unit:'EV', fill:'68%', bg:'rgba(255,255,255,.06)', fillColor:'linear-gradient(90deg,rgba(47,179,156,.1),rgba(47,179,156,.24))', tickColor:accentHi, valueColor:'#7FE3D4', ring:'0 0 0 1px #7FE3D4, 0 0 0 3px rgba(127,227,212,.15)'},
+        {state:'BOUND', label:'Ground shadow', bind:'MIDI 12', value:'0.620', unit:'', fill:'62%', bg:'rgba(143,184,217,.07)', fillColor:'linear-gradient(90deg,rgba(143,184,217,.06),rgba(143,184,217,.16))', tickColor:'rgba(143,184,217,.85)', valueColor:'#8FB8D9', ring:'none'},
+        {state:'WARN', label:'Resolution', bind:'', value:'4096', unit:'PX', fill:'92%', bg:'rgba(224,163,78,.08)', fillColor:'linear-gradient(90deg,rgba(224,163,78,.06),rgba(224,163,78,.18))', tickColor:'#E0A34E', valueColor:'#E0A34E', ring:'none'},
+        {state:'FAULT', label:'Cache path', bind:'', value:'MISSING', unit:'', fill:'0%', bg:'rgba(242,96,111,.07)', fillColor:'transparent', tickColor:'transparent', valueColor:'#F2606F', ring:'inset 0 0 0 1px rgba(242,96,111,.35)'}
+      ],
+      faders: [
+        {label:'Key', val:'0.82', h:'32px', bar:'linear-gradient(180deg,#37C4AB,#2FB39C)', valColor:'#F2F5F4'},
+        {label:'Fill', val:'0.41', h:'16px', bar:'rgba(47,179,156,.55)', valColor:'#B9C2BF'},
+        {label:'Rim', val:'0.66', h:'26px', bar:'rgba(47,179,156,.55)', valColor:'#B9C2BF'},
+        {label:'Bounce', val:'0.12', h:'5px', bar:'rgba(255,255,255,.18)', valColor:'#78827F'},
+        {label:'Amb', val:'0.94', h:'36px', bar:'linear-gradient(180deg,#37C4AB,#2FB39C)', valColor:'#F2F5F4'},
+        {label:'Spec', val:'0.55', h:'21px', bar:'rgba(224,163,78,.65)', valColor:'#E0A34E'}
+      ],
+      statuses: [
+        {label:'LIVE', wash:'rgba(47,179,156,.12)', line:'rgba(47,179,156,.3)', fg:'#7FE3D4', dot:'#2FB39C'},
+        {label:'BAKING', wash:'rgba(47,179,156,.07)', line:'rgba(47,179,156,.2)', fg:'#7FE3D4', dot:'#2FB39C'},
+        {label:'WARN', wash:'rgba(224,163,78,.1)', line:'rgba(224,163,78,.28)', fg:'#E0A34E', dot:'#E0A34E'},
+        {label:'FAULT', wash:'rgba(242,96,111,.09)', line:'rgba(242,96,111,.3)', fg:'#F2606F', dot:'#F2606F'},
+        {label:'BOUND', wash:'rgba(143,184,217,.1)', line:'rgba(143,184,217,.28)', fg:'#8FB8D9', dot:'#8FB8D9'},
+        {label:'IDLE', wash:'rgba(255,255,255,.035)', line:'rgba(255,255,255,.07)', fg:'#8A9491', dot:'#4E5856'}
+      ],
+      chips: ['studio_soft_4k', 'ACEScg', 'MIDI 12', '512 spp'],
+      keyCaps: ['⌘', '⇧', 'R'],
+      menuItems: [
+        {label:'Reset to default', hint:'⌥click', bg:'transparent', fg:'#B9C2BF'},
+        {label:'Bind to MIDI…', hint:'⌘B', bg:'rgba(255,255,255,.055)', fg:'#F2F5F4'},
+        {label:'Copy value', hint:'⌘C', bg:'transparent', fg:'#B9C2BF'},
+        {label:'Add keyframe', hint:'K', bg:'transparent', fg:'#B9C2BF'}
+      ],
+      toasts: [
+        {msg:'Layout recalled — Studio 04', dot:'#2FB39C', line:'rgba(255,255,255,.12)'},
+        {msg:'Texture resampled to 2048²', dot:'#E0A34E', line:'rgba(224,163,78,.26)'},
+        {msg:'Device lost — falling back to WebGL', dot:'#F2606F', line:'rgba(242,96,111,.3)'}
+      ],
+      tree: [
+        {label:'Studio 04', meta:'SCENE', caret:'▾', pad:'11px', bg:'transparent', fg:'#F2F5F4', eyeColor:'#78827F'},
+        {label:'Environment', meta:'12', caret:'▾', pad:'24px', bg:'transparent', fg:'#B9C2BF', eyeColor:'#2FB39C'},
+        {label:'Key light', meta:'AREA', caret:'', pad:'38px', bg:'rgba(255,255,255,.05)', fg:'#F2F5F4', eyeColor:'#2FB39C'},
+        {label:'Fill light', meta:'AREA', caret:'', pad:'38px', bg:'transparent', fg:'#B9C2BF', eyeColor:'#2FB39C'},
+        {label:'Geometry', meta:'8', caret:'▸', pad:'24px', bg:'transparent', fg:'#B9C2BF', eyeColor:'#78827F'},
+        {label:'Camera A', meta:'50MM', caret:'', pad:'24px', bg:'transparent', fg:'#8A9491', eyeColor:'#4E5856'}
+      ],
+      tableRows: [
+        {pass:'Beauty', time:'1.24s', state:'DONE', stateColor:'#7FE3D4', bg:'transparent'},
+        {pass:'Depth', time:'0.18s', state:'DONE', stateColor:'#7FE3D4', bg:'transparent'},
+        {pass:'Denoise', time:'0.62s', state:'RUN', stateColor:'#2FB39C', bg:'rgba(255,255,255,.03)'},
+        {pass:'Cryptomatte', time:'—', state:'QUEUE', stateColor:'#8A9491', bg:'transparent'},
+        {pass:'Motion vector', time:'—', state:'SKIP', stateColor:'#E0A34E', bg:'transparent'}
+      ],
+      keys: ['8%', '22%', '44%', '61%', '78%', '91%'],
+      panelRows: [
+        {label:'Intensity', value:'1.240', fill:'62%'},
+        {label:'Rotation', value:'−135°', fill:'38%'},
+        {label:'Horizon blur', value:'0.08', fill:'12%'}
+      ],
+      gutterCols: [
+        {grow:1.2, label:'1.2FR'},
+        {grow:1, label:'1FR'},
+        {grow:.8, label:'.8FR'}
+      ],
+      rules: [
+        {n:'01', title:'Components read roles, never primitives', body:'A component rule that names a primitive pins itself to one theme. Roles are the contract; primitives stay private to the token file.', do:'var(--bg-surface)', dont:'var(--ink-surface)'},
+        {n:'02', title:'One meaning per elevation', body:'Recessed means editable. Frost means floating chrome. A card that is both raised and recessed is two components wearing one shell.', do:'inputs at --e0-well', dont:'a well with a cast shadow'},
+        {n:'03', title:'Colour is state, not decoration', body:'Teal is running or armed, azure externally driven, amber degraded, rose stopped. Nothing on the surface is tinted for emphasis alone.', do:'azure only when bound', dont:'teal to feel active'},
+        {n:'04', title:'Separate with gutters before strokes', body:'A 12px gutter separates as well as a border and adds no visual weight. A hairline belongs inside a card, not between two of them.', do:'gap: var(--space-5)', dont:'1px between panels'},
+        {n:'05', title:'Numbers never move', body:'Values are mono and tabular so a digit change cannot shift the column. The unit is always a separate, quieter element.', do:'--type-value everywhere', dont:'proportional numerals'},
+        {n:'06', title:'Height comes from a token', body:'Three control heights cover the whole surface. A one-off height is a sign the component is doing two jobs at once.', do:'24 / 28 / 32', dont:'height: 30px'}
+      ],
+      a11y: [
+        'Nothing renders below 8.5px, and that floor is reserved for mono caps with wide tracking.',
+        'Body and label text hold 4.5:1 against their own surface; --text-faint is for units and counts only.',
+        'Focus is a two-ring token and is never removed, only restyled.',
+        'State is never colour alone: bound rows name their source, faults carry text.',
+        'Drag targets are at least 24px tall — the scrub row is the floor, not the exception.',
+        'prefers-reduced-motion zeroes all four durations; no animation is load-bearing.'
+      ],
+      naming: [
+        {pattern:'--<family>-<step>', use:'Primitive. ink-surface, chalk-mid, teal-500.'},
+        {pattern:'--bg-* / --text-* / --line-*', use:'Surface, text and edge roles.'},
+        {pattern:'--sig-<state>[-wash|-line]', use:'Signal role plus its two derivatives.'},
+        {pattern:'--e<n>-<name>', use:'Elevation, ordered: e0-well to e3-float.'},
+        {pattern:'--dur-* / --ease-*', use:'Motion, named by what moves.'}
+      ],
+      adoption: [
+        {n:'01', step:'Load the token layer before theme.css.'},
+        {n:'02', step:'Delete the :root and .plate-workspace token blocks from theme.css.'},
+        {n:'03', step:'Sweep components for primitive references; replace with roles.'},
+        {n:'04', step:'Replace hand-set heights with the three control tokens.'},
+        {n:'05', step:'Move panel separation from borders to gutters.'}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

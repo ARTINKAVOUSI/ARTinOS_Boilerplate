@@ -1,0 +1,39 @@
+{
+  "name": "@artinos/metablock",
+  "version": "0.16.0",
+  "description": "ARTINOS React + TypeScript MetaBlock spatial engine with persistent parent docks, root-center safety, bounded detach/float, soft snap vs structural dock, regroup/return semantics, smart context actions and topology-aware workspaces",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "./dist/styles.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "react": ">=18.3 <20",
+    "react-dom": ">=18.3 <20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('src/react/styles.css','dist/styles.css')\"",
+    "prepack": "npm run build"
+  },
+  "license": "UNLICENSED"
+}
