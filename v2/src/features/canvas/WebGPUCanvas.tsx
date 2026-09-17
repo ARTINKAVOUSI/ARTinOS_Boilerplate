@@ -1,5 +1,6 @@
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Canvas } from '@react-three/fiber'
+import { Vector2 } from 'three'
 import { WebGPURenderer } from 'three/webgpu'
 
 /**
@@ -36,6 +37,9 @@ export interface WebGPUCanvasProps {
   style?: CSSProperties
 }
 
+/** Reused so the resize observer allocates nothing per frame. */
+const scratch = new Vector2()
+
 const hasWebGPU = () => typeof navigator !== 'undefined' && 'gpu' in navigator
 const hasWebGL2 = () => {
   try {
@@ -62,6 +66,26 @@ export function WebGPUCanvas({
 }: WebGPUCanvasProps) {
   const [error, setError] = useState<string | null>(null)
   const supported = useMemo(() => (backend === 'webgpu' ? hasWebGPU() : hasWebGPU() || hasWebGL2()), [backend])
+  const host = useRef<HTMLDivElement>(null)
+  const instanceRef = useRef<WebGPURenderer | null>(null)
+
+  // R3F resizes the canvas element, but a renderer it did not construct keeps
+  // the size it started with, so its depth attachment stops matching the colour
+  // one and every submit is rejected. Keep the renderer on the box itself.
+  useEffect(() => {
+    const element = host.current
+    if (!element) return
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      const renderer = instanceRef.current
+      if (!renderer || width < 1 || height < 1) return
+      const size = renderer.getSize(scratch)
+      if (Math.abs(size.x - width) < 1 && Math.abs(size.y - height) < 1) return
+      renderer.setSize(width, height, false)
+    })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   // Shading above the display's ratio costs frame time the compositor throws
   // away. Deliberate supersampling belongs in an SSAA effect.
@@ -92,6 +116,7 @@ export function WebGPUCanvas({
         throw reason
       }
       const backendObject = (instance as unknown as { backend?: { isWebGPUBackend?: boolean } }).backend
+      instanceRef.current = instance
       onReady?.(instance, backendObject?.isWebGPUBackend ? 'webgpu' : 'webgl2')
       return instance
     },
@@ -116,7 +141,7 @@ export function WebGPUCanvas({
   // R3F v10's Canvas accepts an async renderer factory; its types lag behind.
   const V10Canvas = Canvas as unknown as (props: Record<string, unknown>) => ReactNode
   return (
-    <div className={className} style={shell}>
+    <div ref={host} className={className} style={shell}>
       <V10Canvas dpr={clamped} shadows={shadows} renderer={renderer} camera={camera}>
         {children}
       </V10Canvas>

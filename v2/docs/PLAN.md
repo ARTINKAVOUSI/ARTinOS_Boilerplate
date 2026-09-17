@@ -259,6 +259,21 @@ Effects are generated from one spec table so all 44 share the same structure. Th
 
 Still to port from v1, in phase 8: `ColorWheel/ColorArea/GradientEditor`, `CurveEditor/EnvelopeEditor`, `Joystick`, `Waveform`, `RangeSlider`, `Dial`, `RadioGroup`, `Accordion`, `Combobox`, `ContextMenu`, `Drawer`, `Popover`, `VirtualList/VirtualTable/ListBrowser`, `KeyCapture`, `TreeView` (new, for the scene tree).
 
+### 5.4b Modules ported in the second pass
+
+| Module | File | What it does |
+|---|---|---|
+| Subsurface Scattering | `features/postfx/effects/SubsurfaceScattering.tsx` | Screen-space light bleeding through thin geometry, from the scene’s main light |
+| Graph effect | `features/postfx/effects/GraphEffect.tsx` | Renders a GPU graph’s compiled TSL node into the chain (multiply, add, mix, replace) |
+| MIDI | `features/input/MidiInput.tsx` | midi.cc.<n>, midi.note.<n>, midi.bend, with release tails |
+| Gamepad | `features/input/GamepadInput.tsx` | pad.leftX/Y, pad.rightX/Y, pad.button.<n>, dead-zoned |
+| Device tilt | `features/input/OrientationInput.tsx` | tilt.alpha / beta / gamma, asking iOS for the sensor on first tap |
+| Camera | `features/input/CameraInput.tsx` | camera.luma, camera.motion, camera.r/g/b; shares the stream through `webcam.ts` |
+| Media Plane | `features/objects/MediaPlane.tsx` | A video file or the shared webcam, as a plane in the scene |
+| Text | `features/objects/SceneText.tsx` | A line of text drawn to a canvas texture — no font files, no extra dependencies |
+| Glass Mesh | `features/objects/GlassMesh.tsx` | Transmission, dispersion and volume attenuation on five primitives |
+| Gizmo | `features/scene/Gizmo.tsx` | Translate / rotate / scale a named object, suspending the camera controls while dragging |
+
 ### 5.5 Studio (the original dock, rebuilt)
 
 | Piece | File | What it does |

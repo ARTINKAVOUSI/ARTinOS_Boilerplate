@@ -33,7 +33,6 @@ let quad: QuadMesh | null = null
 let inFlight = false
 let cursor = 0
 let lastAt = 0
-let timer = 0
 let snapshot: ReadonlyMap<string, PreviewFrame> = new Map()
 
 const bump = () => {
@@ -70,6 +69,11 @@ async function capture(key: string, node: unknown) {
   bump()
 }
 
+/**
+ * Runs inside the frame loop only. Redirecting the shared renderer at an
+ * arbitrary time wedges the device: the depth buffer and the colour attachments
+ * end up from different frames and every later submit is rejected.
+ */
 function tick() {
   const now = performance.now()
   if (inFlight || !requests.size || now - lastAt < INTERVAL) return
@@ -89,12 +93,13 @@ function tick() {
 }
 
 export const nodePreviews = {
+  /** Call once per frame, from inside the render loop. */
+  tick,
   /** Ask for a thumbnail of this compiled node. Re-requesting the same node is free. */
   request(key: string, node: unknown) {
     if (node == null || requests.get(key) === node) return
     requests.set(key, node)
     failed.delete(key)
-    if (!timer) timer = window.setInterval(tick, INTERVAL / 2)
   },
   /** Drop everything not in `keys` — nodes that are gone, or a closed panel. */
   keepOnly(keys: readonly string[]) {
@@ -107,10 +112,6 @@ export const nodePreviews = {
         failed.delete(key)
         changed = true
       }
-    if (!requests.size && timer) {
-      clearInterval(timer)
-      timer = 0
-    }
     if (changed) bump()
   },
   getFrames: () => snapshot,

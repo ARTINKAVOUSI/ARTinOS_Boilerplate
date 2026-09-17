@@ -1,5 +1,5 @@
 import { useEffect, useMemo, type ReactNode } from 'react'
-import { useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import type { WebGPURenderer } from 'three/webgpu'
 import { WebGPUCanvas, type RendererBackend } from '../features/canvas/WebGPUCanvas'
 import type { DiscoveredFeature } from './feature'
@@ -7,6 +7,7 @@ import { FeatureBoundary } from './FeatureBoundary'
 import { byKind } from './registry'
 import { useStudio, type FeatureState } from './store'
 import { runtime } from './runtime'
+import { nodePreviews } from './node-preview'
 
 const selectFeatures = (state: { features: Record<string, FeatureState> }) => state.features
 
@@ -24,6 +25,8 @@ export function renderFeature(feature: DiscoveredFeature, state: FeatureState | 
 /** Hands the live scene to the app, so graphs and panels can address objects. */
 function SceneProbe() {
   const scene = useThree(state => state.scene)
+  // Node thumbnails capture here: inside the frame, never between frames.
+  useFrame(() => nodePreviews.tick())
   useEffect(() => {
     runtime.setScene(scene)
     return () => runtime.setScene(null)
