@@ -139,3 +139,23 @@
   color: var(--ui-text-meta);
   pointer-events: none;
 }
+
+/* Context menu — the engine draws it; give it the skin's floating surface so it
+   stays readable over a bright scene, like the command palette. */
+.artinos-metablock-shell .mb-context-menu {
+  background: var(--ui-command-sheen), var(--ui-float);
+  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow), inset 0 0 0 1px var(--ui-pane-border);
+  color: var(--ui-text);
+}
+.artinos-metablock-shell .mb-context-head b {
+  color: var(--ui-text-strong);
+}
+.artinos-metablock-shell .mb-context-menu button {
+  color: var(--ui-text);
+}
+.artinos-metablock-shell .mb-context-menu button small {
+  color: var(--ui-text-meta);
+}
+.artinos-metablock-shell .mb-context-label {
+  color: var(--ui-text-summary);
+}

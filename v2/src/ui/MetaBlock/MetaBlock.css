@@ -198,3 +198,14 @@
 .mb-block-error{border:1px solid color-mix(in srgb,var(--au-danger,#ff5a52) 42%,transparent);background:color-mix(in srgb,var(--au-danger,#ff5a52) 7%,transparent);color:var(--au-danger,#ff5a52);padding:10px}
 .mb-block-error span{max-width:36ch;color:var(--au-faint,#7d8885);letter-spacing:.04em;word-break:break-word}
 .mb-block-error button{margin-top:4px;padding:4px 10px;border:1px solid currentColor;border-radius:5px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+
+/* v2 fix: the menu host is a 0×0 anchor, so `max-height: calc(100% - 16px)` on
+   the menu resolved against zero and collapsed it to its padding. Bound it by
+   the viewport instead, and keep it clear of the window edges. */
+.mb-context-menu {
+  max-height: min(430px, calc(100vh - 32px));
+}
+.mb-context-menu-host {
+  max-width: 0;
+  max-height: 0;
+}
