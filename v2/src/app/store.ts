@@ -20,7 +20,7 @@ export interface StudioState {
   features: Record<string, FeatureState>
   /** Named snapshots of `features`. */
   presets: Record<string, Record<string, FeatureState>>
-  ui: { visible: boolean; world: string }
+  ui: { visible: boolean; world: string; favorites: string[]; pins: string[] }
 }
 
 const STORAGE_KEY = 'artinos.v2.studio'
@@ -49,7 +49,7 @@ function reconcile(saved: Record<string, FeatureState> | undefined): Record<stri
 }
 
 function load(): StudioState {
-  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, world: 'frost' } }
+  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, world: 'frost', favorites: [], pins: [] } }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return fallback
@@ -168,6 +168,13 @@ export const studio = {
     const parsed = JSON.parse(text)
     if (!parsed || typeof parsed.features !== 'object') throw new Error('Not an ARTINOS preset file')
     commit({ ...state, features: reconcile(parsed.features) })
+  },
+
+  /** Star or pin one control, keyed `featureId:control`. */
+  toggleMark(kind: 'favorites' | 'pins', key: string) {
+    const list = state.ui[kind]
+    const next = list.includes(key) ? list.filter(item => item !== key) : [...list, key]
+    commit({ ...state, ui: { ...state.ui, [kind]: next } })
   },
 
   setUI(patch: Partial<StudioState['ui']>) {

@@ -1,44 +1,48 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { WebGPURenderer } from 'three/webgpu'
 import type { RendererBackend } from '../features/canvas/WebGPUCanvas'
 import { ToastProvider } from '../ui/Toast/Toast'
 import { byKind } from './registry'
+import { runtime, useRuntime } from './runtime'
 import { Stage, renderFeature } from './Stage'
 import { useStudio, type StudioState } from './store'
-import { Studio } from './studio/Studio'
+import { DockShell } from './studio/DockShell'
 
 const appFeatures = byKind('app')
 const overlays = byKind('overlay')
 const selectFeatures = (state: StudioState) => state.features
 
+/** The 3D view plus the DOM overlays that sit on it. Rendered inside the dock's locked viewport. */
+function Viewport() {
+  const states = useStudio(selectFeatures)
+  const stats = useRuntime()
+  const onReady = useCallback((instance: WebGPURenderer, backend: RendererBackend) => runtime.setRenderer(instance, backend), [])
+  const stage = useMemo(() => <Stage onReady={onReady} />, [onReady])
+  const renderer = runtime.getRenderer()
+  const huds = overlays
+    .filter(overlay => states[overlay.id]?.enabled)
+    .map(overlay => renderFeature(overlay, states[overlay.id], { renderer, backend: stats.backend }))
+  return (
+    <>
+      {stage}
+      {huds}
+    </>
+  )
+}
+
 /**
- * The application: the stage, app-level features (inputs), overlays and the
- * studio. Every feature arrives through the registry, so
- * this file never changes when features are added or removed.
+ * The application: the MetaBlock dock around the viewport, with app-level
+ * features (inputs) mounted beside it. Features and panels arrive through
+ * their registries, so this file never changes when either is added or removed.
  */
 export function App() {
   const states = useStudio(selectFeatures)
-  const [renderer, setRenderer] = useState<{ instance: WebGPURenderer; backend: RendererBackend } | null>(null)
-  const onReady = useCallback((instance: WebGPURenderer, backend: RendererBackend) => setRenderer({ instance, backend }), [])
-
-  const stage = useMemo(() => <Stage onReady={onReady} />, [onReady])
-
-  // App-level features sit beside the stage, so switching one never remounts the canvas.
   const services = useMemo(() => appFeatures.filter(feature => states[feature.id]?.enabled).map(feature => renderFeature(feature, states[feature.id])), [states])
-  const huds = useMemo(
-    () =>
-      overlays
-        .filter(overlay => states[overlay.id]?.enabled)
-        .map(overlay => renderFeature(overlay, states[overlay.id], { renderer: renderer?.instance ?? null, backend: renderer?.backend ?? null })),
-    [states, renderer],
-  )
-
+  const viewport = useMemo(() => <Viewport />, [])
   return (
     <ToastProvider>
-      {stage}
+      <DockShell viewport={viewport} />
       {services}
-      {huds}
-      <Studio />
     </ToastProvider>
   )
 }

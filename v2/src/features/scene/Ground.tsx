@@ -33,6 +33,7 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Ground',
   order: 40,
+  enabled: false,
   component: Ground,
   controls: {
     shape: { type: 'select', value: 'disc', options: ['disc', 'square'] },

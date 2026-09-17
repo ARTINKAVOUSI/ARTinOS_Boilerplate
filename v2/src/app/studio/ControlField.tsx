@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Control, ControlValue } from '../feature'
 import { Slider } from '../../ui/Slider/Slider'
-import { Field } from '../../ui/Field/Field'
 import { Toggle } from '../../ui/Toggle/Toggle'
 import { Select } from '../../ui/Select/Select'
 import { ColorField } from '../../ui/ColorField/ColorField'
@@ -11,7 +10,10 @@ import { TextField } from '../../ui/TextField/TextField'
 export const labelOf = (key: string, control: Control) =>
   control.label ?? key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^\w/, c => c.toUpperCase())
 
-/** Text commits on Enter or blur, so URL fields do not reload on every keystroke. */
+/** Sliders carry their own name inside the capsule; every other control needs the row label. */
+export const namesItself = (control: Control) => control.type === 'number'
+
+/** Text applies on Enter or blur, so URL fields do not reload on every keystroke. */
 function CommitText({ value, label, placeholder, onChange }: { value: string; label: string; placeholder?: string; onChange: (value: string) => void }) {
   const [draft, setDraft] = useState(value)
   useEffect(() => setDraft(value), [value])
@@ -32,8 +34,8 @@ function CommitText({ value, label, placeholder, onChange }: { value: string; la
   )
 }
 
-/** Maps one control schema entry to the matching UI component. */
-export function ControlField({ name, control, value, onChange }: { name: string; control: Control; value: ControlValue | undefined; onChange: (value: ControlValue) => void }) {
+/** The bare control for one schema entry. The row around it supplies the label where needed. */
+export function ControlInput({ name, control, value, onChange }: { name: string; control: Control; value: ControlValue | undefined; onChange: (value: ControlValue) => void }) {
   const label = labelOf(name, control)
   switch (control.type) {
     case 'number':
@@ -50,34 +52,21 @@ export function ControlField({ name, control, value, onChange }: { name: string;
         />
       )
     case 'boolean':
-      return (
-        <Field label={label}>
-          <Toggle label={label} checked={typeof value === 'boolean' ? value : control.value} onChange={onChange} size="sm" />
-        </Field>
-      )
+      return <Toggle label={label} checked={typeof value === 'boolean' ? value : control.value} onChange={onChange} size="sm" />
     case 'select':
-      return (
-        <Field label={label}>
-          <Select label={label} value={String(value ?? control.value)} options={control.options} onChange={onChange} />
-        </Field>
-      )
+      return <Select label={label} value={String(value ?? control.value)} options={control.options} onChange={onChange} />
     case 'color':
-      return (
-        <Field label={label}>
-          <ColorField label={label} value={String(value ?? control.value)} onChange={onChange} />
-        </Field>
-      )
+      return <ColorField label={label} value={String(value ?? control.value)} onChange={onChange} />
     case 'vector3':
       return (
-        <Field label={label}>
-          <VectorField label={label} value={(Array.isArray(value) ? value : control.value) as [number, number, number]} step={control.step} onChange={v => onChange([...v] as [number, number, number])} />
-        </Field>
+        <VectorField
+          label={label}
+          value={(Array.isArray(value) ? value : control.value) as [number, number, number]}
+          step={control.step}
+          onChange={v => onChange([...v] as [number, number, number])}
+        />
       )
     case 'text':
-      return (
-        <Field label={label}>
-          <CommitText label={label} value={String(value ?? control.value)} placeholder={control.placeholder} onChange={onChange} />
-        </Field>
-      )
+      return <CommitText label={label} value={String(value ?? control.value)} placeholder={control.placeholder} onChange={onChange} />
   }
 }

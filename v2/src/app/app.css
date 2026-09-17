@@ -5,10 +5,18 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
   margin: 0;
+  overflow: hidden;
+}
+
+/* Fixed, so nothing (a focus scroll, a scrollIntoView) can scroll the studio off-screen. */
+#root {
+  position: fixed;
+  inset: 0;
+  /* clip, not hidden: hidden boxes can still be scrolled by focus and scrollIntoView */
+  overflow: clip;
 }
 
 body {

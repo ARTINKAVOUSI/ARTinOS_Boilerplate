@@ -1,0 +1,111 @@
+:where(.aui-prop) {
+  --_row: var(--ui-row, 23px);
+  --_label-w: var(--ui-label-w, 62px);
+  --_label: var(--ui-text-label, rgba(255, 255, 255, 0.66));
+  --_ghost: var(--ui-text-ghost, rgba(255, 255, 255, 0.24));
+  --_strong: var(--ui-text-strong, #fff);
+  --_meta: var(--ui-text-meta, rgba(255, 255, 255, 0.4));
+  --_bind: var(--ui-bind, #6fe3c0);
+  --_warn: var(--ui-warn, #e8b27a);
+  --_fault: var(--ui-fault, #e88f9b);
+  --_accent: var(--ui-accent, #6fe3c0);
+  --_face: var(--ui-font, system-ui, -apple-system, 'Segoe UI', sans-serif);
+}
+
+.aui-prop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin-bottom: 3px;
+  font-family: var(--_face);
+}
+.aui-prop__main {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--_row);
+}
+.aui-prop__control {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.aui-prop__control > * {
+  flex: 1;
+  min-width: 0;
+}
+.aui-prop__control > .aui-toggle {
+  flex: 0 0 auto;
+}
+.aui-prop__label {
+  flex: 0 0 var(--_label-w);
+  overflow: hidden;
+  font-size: 10px;
+  color: var(--_label);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* the control names itself in the default density */
+.aui-prop[data-density='default'] .aui-prop__label {
+  display: none;
+}
+.aui-prop[data-density='multiline'] .aui-prop__main {
+  flex-wrap: wrap;
+}
+.aui-prop[data-density='multiline'] .aui-prop__label {
+  flex: 1 0 100%;
+}
+.aui-prop__binding {
+  margin-left: 5px;
+  font-size: 8px;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  color: var(--_bind);
+}
+.aui-prop__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.aui-prop:hover .aui-prop__actions,
+.aui-prop:focus-within .aui-prop__actions {
+  opacity: 1;
+}
+.aui-prop__reset {
+  width: 15px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  color: var(--_ghost);
+  cursor: pointer;
+}
+.aui-prop__reset:hover {
+  color: var(--_strong);
+}
+.aui-prop__message {
+  margin: 0 0 0 calc(var(--_label-w) + 5px);
+  font-size: 9px;
+  color: var(--_meta);
+}
+.aui-prop[data-state='fault'] .aui-prop__message {
+  color: var(--_fault);
+}
+.aui-prop[data-state='warn'] .aui-prop__message {
+  color: var(--_warn);
+}
+.aui-prop[data-highlighted] {
+  border-radius: 6px;
+  outline: 1px solid var(--_accent);
+  outline-offset: 1px;
+}
+.aui-prop[data-disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}

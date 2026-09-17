@@ -1,0 +1,163 @@
+/* Studio chrome — ties the MetaBlock engine and the runtime HUD to the
+   @artinos/ui workbench tokens.
+
+   MetaBlock ships its own visual variables (--mb-*, --au-*) with a teal
+   default; @artinos/ui must not know about them. This file is the bridge. It is
+   unlayered and loaded after @artinos/metablock/styles.css, so it overrides the
+   engine's defaults without editing the engine. */
+
+.artinos-metablock-shell {
+  --mb-radius: var(--ui-radius);
+  --mb-signal: var(--ui-accent);
+  --mb-frost: blur(var(--ui-blur));
+  --mb-shadow: #00000059;
+  --au-surface: #1b2423;
+  --au-surface-2: var(--ui-float);
+  --au-line: var(--ui-line);
+  --au-text: var(--ui-text);
+  --au-muted: var(--ui-text-muted);
+  --au-faint: var(--ui-text-meta);
+  --au-active: var(--ui-object-on);
+  --au-danger: var(--ui-fault);
+  --au-font: var(--ui-font);
+  --au-mono: var(--ui-font);
+}
+.artinos-metablock-shell .mb-workspace-root {
+  --mb-surface-bg: var(--ui-pane-tint);
+  --mb-surface-line: var(--ui-pane-border);
+  --mb-surface-sheen: var(--ui-pane-sheen);
+}
+
+/* Every docked or detached group is a workbench pane. */
+.artinos-metablock-shell .mb-group:not([data-role='viewport']) {
+  border: 1px solid var(--ui-pane-border);
+  border-radius: var(--ui-radius);
+  background: var(--ui-pane-sheen), var(--ui-pane-tint);
+  -webkit-backdrop-filter: blur(var(--ui-blur));
+  backdrop-filter: blur(var(--ui-blur));
+  box-shadow: var(--ui-pane-shadow);
+}
+.artinos-metablock-shell .mb-group[data-focused='true']:not([data-role='viewport']),
+.artinos-metablock-shell .mb-group:not([data-fullscreen-locked='true']):hover {
+  box-shadow: var(--ui-pane-shadow);
+  filter: none;
+}
+.artinos-metablock-shell .mb-group[data-grabbed='true'] {
+  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow);
+  filter: none;
+}
+.artinos-metablock-shell .mb-group-chrome {
+  border: 0;
+  background: transparent;
+}
+.artinos-metablock-shell .mb-group-footer { display: none; }
+.artinos-metablock-shell .mb-block-scroll::-webkit-scrollbar-thumb { background: var(--ui-line-strong); }
+
+/* A block's wrapper is a region of its pane. */
+.artinos-metablock-shell .artinos-panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Floating group head: the pane head with a tab strip. */
+.artinos-metablock-shell .artinos-metablock-panel-header {
+  gap: 10px;
+  min-height: var(--ui-pane-head-h);
+  padding: 0 6px 0 10px;
+}
+
+.artinos-workspace-expand {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 23px;
+  padding: 0 3px;
+  border: 0;
+  background: none;
+  color: var(--ui-icon);
+  cursor: pointer;
+}
+.artinos-workspace-expand:hover { color: var(--ui-text-strong); }
+.artinos-workspace-expand:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+
+/* ── runtime HUD — quiet caps labels and 500-weight figures ───────────── */
+
+.plate-toolbar-status .artinos-hud,
+.plate-toolbar-status .artinos-hud-summary {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  font-family: var(--ui-font);
+}
+.plate-toolbar-status .artinos-hud-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: auto;
+  color: var(--ui-text);
+}
+.plate-toolbar-status .artinos-hud-backend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  background: none;
+}
+.plate-toolbar-status .artinos-hud-backend i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ui-accent-dot);
+  box-shadow: none;
+}
+.plate-toolbar-status .artinos-hud-backend b,
+.plate-toolbar-status .artinos-hud-quality {
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.plate-toolbar-status .artinos-hud-readout,
+.plate-toolbar-status .artinos-hud-load {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 0;
+}
+.plate-toolbar-status .artinos-hud-readout strong {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text);
+}
+.plate-toolbar-status .artinos-hud-readout small,
+.plate-toolbar-status .artinos-hud-load small,
+.plate-toolbar-status .artinos-hud-load b {
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.plate-toolbar-status .artinos-hud-load b,
+.plate-toolbar-status .artinos-hud-quality b {
+  font-weight: 500;
+  color: var(--ui-text-body);
+}
+.plate-toolbar-status .artinos-hud-micrograph .is-cpu { stroke: var(--ui-range-seam); }
+.plate-toolbar-status .artinos-hud-micrograph .is-gpu { stroke: var(--ui-text-meta); }
+.plate-toolbar-status .artinos-hud-chevron { color: var(--ui-icon); }

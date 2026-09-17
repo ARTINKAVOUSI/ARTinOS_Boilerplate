@@ -2,17 +2,17 @@
 
 A full plan for rebuilding the ARTINOS boilerplate (v1.4, the rest of this repository) as a set of copy-pastable React components. It covers the feature contract, the folder layout, how each old package maps to the new files, what is done, and what is left.
 
-Status as of 2026-09-17: **phases 0–5 are built, type-check cleanly, build, and have been checked in the browser** (see [Verification](#10-verification)). Phases 6–9 are not built yet.
+Status as of 2026-09-17: **phases 0–5, the MetaBlock dock and nine section panels are built, type-check cleanly, build, and have been checked in the browser** (see [Verification](#10-verification)). The rest of phases 6–9 is not built yet.
 
 ---
 
 ## 1. Goals
 
 1. **Every capability is one file or one folder.** One PostFX effect, one UI control, fog, the camera, orbit controls, one input device: each is a single unit you can copy into another project, or delete, without editing anything else.
-2. **Adding or removing a feature needs no wiring.** A file under `src/features/` that exports a `feature` manifest shows up in the scene and in the studio. Delete the file and it is gone.
+2. **Adding or removing a feature or a panel needs no wiring.** A file under `src/features/` that exports a `feature` manifest shows up in the scene and in the studio. A file under `src/panels/` that exports a `panel` manifest becomes a tab in the dock. Delete the file and it is gone.
 3. **The components stay portable.** A feature component takes normal React props. Its only link to this app is a `feature` manifest imported with `import type`, which disappears at build time.
 4. **No shared framework.** The old `@artinos/runtime` / `@artinos/r3f` / `@artinos/ui` package layers are gone. Where a small shared piece is really needed (the PostFX host, the signal bus), it is one file and each component that needs it says so.
-5. **Same stack and look.** React 19.2, three 0.185.1 (WebGPU + TSL), R3F 10 alpha, drei 11 alpha, and the ARTINOS frosted-glass design language with its six material worlds.
+5. **Same stack, same studio.** React 19.2, three 0.185.1 (WebGPU + TSL), R3F 10 alpha, drei 11 alpha. The studio is the original one: the MetaBlock dock (tabs, drag-out, float, split, merge, return home, maximize, saved layout), the `plate-*` chrome, the embedded performance HUD, the brand chip and the ARTINOS stylesheet with its six material worlds.
 
 ### What changed from v1
 
@@ -23,7 +23,8 @@ Status as of 2026-09-17: **phases 0–5 are built, type-check cleanly, build, an
 | A central `postfx-pipeline.tsx` `switch` over 44 effect types | Each effect file builds its own TSL node and registers it with `<PostFX>` |
 | 2-line effect wrappers plus a separate catalog | One file per effect: component, props, docs and studio controls together |
 | `*.project.tsx` manifests that list parameters, graphs and bindings | Features discovered from `src/features/**` |
-| UI kit that needed the global `theme.css` | Each component folder has its own scoped CSS with fallback values; the theme file is optional |
+| UI kit that needed the global `theme.css` | Each component folder has its own scoped CSS with fallback values; the studio loads the original stylesheet as its skin |
+| `@artinos/metablock` package + `MetaBlockShell` with a hard-coded panel list | The same engine as one folder (`src/ui/MetaBlock/`); panels discovered from `src/panels/` |
 | Parameter changes rebuilt the whole pipeline | Numeric effect settings are live GPU uniforms (`useUniform`); only structural settings rebuild the chain |
 
 ---
@@ -39,8 +40,15 @@ index.html → src/main.tsx → <App>
                              │              └── effect features  kind: 'effect'
                              ├── app features                  kind: 'app'       (inputs; mounted beside the stage)
                              ├── overlay features              kind: 'overlay'   (DOM HUDs; get renderer + backend)
-                             └── <Studio>                      src/app/studio    (panels, palette, presets)
+                             └── <DockShell>                   src/app/studio    (MetaBlock workspace)
+                                  ├── locked fullscreen viewport  → the stage above
+                                  ├── dock.bottom (persistent)    → one tab per src/panels/*.tsx
+                                  ├── floating / split groups     → panels dragged out of the dock
+                                  ├── dock toolbar                → tabs · search (⌘K) · expand · RuntimeHUD
+                                  └── brand chip · console toast · command palette
 ```
+
+The canvas is a locked fullscreen MetaBlock group underneath everything. Panels are MetaBlocks inside a persistent dock group, so any tab can be dragged out to float, dropped on another group to merge or split, returned to its exact tab position, or maximized. The whole arrangement is saved (`artinos.v2.dock`) and restored while it still matches the panels on disk.
 
 ### 2.1 The feature contract (`src/app/feature.ts`)
 
@@ -74,22 +82,40 @@ Mount rules:
 
 Each feature runs inside a `FeatureBoundary` (error boundary + Suspense). If one feature crashes it renders nothing and shows a toast; the rest of the scene keeps running. Changing its props gives it another try.
 
-### 2.2 Discovery (`src/app/registry.ts`)
+### 2.2 The panel contract (`src/app/panel.ts`)
+
+```tsx
+export const panel: PanelManifest = {
+  id: 'scene',                                    // unique; the saved layout is keyed by it
+  title: 'Scene',
+  description: 'Environment, camera, lighting…',  // tab tooltip + palette
+  keywords: ['camera', 'fog'],                    // palette search
+  order: 1,                                       // tab order
+  dock: 'bottom',                                 // 'bottom' | 'left' | 'right' | 'float'
+  active: true,                                   // optional: the tab open on first launch
+  footer: () => <>ENVIRONMENT · CAMERA</>,        // optional: pane foot status
+  component: Scene,
+}
+```
+
+`import.meta.glob('../panels/*.tsx', { eager: true })` discovers them. Every panel body is wrapped in `PanelWorkbench` (portrait/landscape container, `--panel-height`, error boundary with Retry). Panels share app-level building blocks from `src/app/studio/` (`FeatureCard`, `ControlsBar`, `ControlInput`), never each other, so deleting one panel file never breaks another.
+
+### 2.3 Discovery (`src/app/registry.ts`)
 
 `import.meta.glob('../features/**/*.tsx', { eager: true })`. Only modules that export `feature` are used. Incomplete manifests and duplicate ids are skipped with a console warning. This is the only file that knows the folder name.
 
-### 2.3 State (`src/app/store.ts`)
+### 2.4 State (`src/app/store.ts`)
 
 A plain external store (`useSyncExternalStore`) saved to `localStorage` (`artinos.v2.studio`, versioned):
 
 - `features[id] = { enabled, values, order }`
 - `presets[name]` holds snapshots of `features`
-- `ui = { visible, world }`
+- `ui = { visible, world, favorites, pins }`: favorites and pins are `featureId:control` keys, as in the original inspector
 - `reconcile()` drops saved state for features or controls that no longer exist, so deleting a file never breaks a saved session.
 
 Features never read the store. The app passes values in as props, so the store can be replaced without touching any feature.
 
-### 2.4 Render pipeline (`src/features/postfx/PostFX.tsx`)
+### 2.5 Render pipeline (`src/features/postfx/PostFX.tsx`)
 
 - Owns one `RenderPipeline` and one scene `pass()`. The MRT attachments (normal, packed normal, velocity, metalness/roughness) are requested only while an active effect needs them. A layout change creates a new pass.
 - `usePostFXEffect(id, { order, needs, webgpuOnly, build }, deps)` registers an effect. `build(ctx)` gets `{ input, scenePass, depth, viewZ, normal, velocity, packedNormal, metalRoughness, scene, camera, renderer, backend }` and returns the new image node, or `null` to pass the input through.
@@ -97,7 +123,11 @@ Features never read the store. The app passes values in as props, so the store c
 - Each build is wrapped in `try/catch`, so a broken effect is skipped and logged. On the WebGL2 fallback, effects marked `webgpuOnly` are skipped.
 - The pipeline is handed to R3F with `set({ postProcessing })`; R3F v10 renders it in its render phase. On each rebuild the intermediate nodes are disposed; the pass and pipeline are disposed on unmount.
 
-### 2.5 Signals (`src/features/input/signals.tsx`)
+### 2.6 Runtime facts and console (`src/app/runtime.ts`, `src/app/console.ts`)
+
+One rAF sampler provides fps, frame-time history and renderer counters (calls, triangles, geometries, textures, resolution, backend) to the dock HUD and the Telemetry panel. `installConsoleCapture()` forwards `console.*` to the Console panel and the warning/error toast.
+
+### 2.7 Signals (`src/features/input/signals.tsx`)
 
 A `SignalBus` (`set`, `get`, `delete(prefix)`, `age`, `entries`). Input features write to it every frame; reactive objects read it inside `useFrame`. Neither causes React renders. There is one default bus, so no provider is needed; `<SignalsProvider>` isolates a subtree when you want that. `useSignalSnapshot(hz)` is for monitors.
 
@@ -113,11 +143,17 @@ v2/
 └── src/
     ├── main.tsx
     ├── app/                         host only; never edited to add a feature
-    │   ├── feature.ts  registry.ts  store.ts  Stage.tsx  App.tsx  FeatureBoundary.tsx  app.css
-    │   └── studio/     Studio.tsx  ScenePanel.tsx  PostFXPanel.tsx  FeatureSection.tsx
-    │                   ControlField.tsx  icons.tsx  studio.css
-    ├── ui/                          copy-pastable components: <Name>/<Name>.tsx + <Name>.css
-    │   └── theme/theme.css          optional tokens + 6 material worlds
+    │   ├── feature.ts  registry.ts  panel.ts  store.ts  runtime.ts  console.ts
+    │   ├── Stage.tsx  App.tsx  FeatureBoundary.tsx  app.css
+    │   └── studio/     DockShell.tsx  RuntimeHUD.tsx  ConsoleToast.tsx  PanelWorkbench.tsx
+    │                   FeatureCard.tsx  ControlsBar.tsx  ControlField.tsx  layout.ts  icons.tsx  dock.css
+    │                   skin/  the original ARTINOS stylesheet (tokens, worlds, themes, legacy,
+    │                          instrument, workbench components, plate-* shell, chrome, studio-panels)
+    ├── panels/                      one file per dock tab (9)
+    │   Inspector  Scene  PostFX  InputFlow  Assets  Library  Console  Telemetry  Appearance
+    ├── ui/                          copy-pastable components: <Name>/<Name>.tsx + <Name>.css (29)
+    │   ├── MetaBlock/               the docking engine: core/ (framework-free) + react/ + MetaBlock.css
+    │   └── theme/theme.css          optional tokens + 6 material worlds for standalone use
     └── features/
         ├── canvas/WebGPUCanvas.tsx
         ├── postfx/PostFX.tsx + effects/*.tsx   (44)
@@ -145,6 +181,8 @@ v2/
 | Unit | Copy | Also needs |
 |---|---|---|
 | UI component | `src/ui/<Name>/` | `react`, `react-dom` (optional: `ui/theme/theme.css`) |
+| Docking engine | `src/ui/MetaBlock/` | `react` |
+| Studio panel | `src/panels/<Name>.tsx` | this app's `src/app/studio/` building blocks |
 | PostFX effect | `features/postfx/PostFX.tsx` + `effects/<Effect>.tsx` | `three`, `@react-three/fiber`; mount `<PostFX>` in your canvas |
 | Scene feature | `features/scene/<Name>.tsx` | `three`, R3F; drei for Camera, Controls, Environment, BackdropImage |
 | Reactive object | `features/objects/<Name>.tsx` + `features/input/signals.tsx` | as above |
@@ -162,12 +200,12 @@ Outside this app, delete the `export const feature` block (and its `import type`
 | v1 package | v2 location | Status |
 |---|---|---|
 | `@artinos/runtime` (registries, canvas, frame bridge, postfx controller, telemetry, quality, inspector) | `features/canvas`, `features/postfx/PostFX.tsx`, `app/store.ts`, `features/input/signals.tsx`, `features/overlays/*` | Core done; bindings, automation, history and adaptive quality are in phases 6–7 |
-| `@artinos/r3f` (ArtinosApp, ProjectRuntime, studio panels) | `app/*`, `app/studio/*` | Shell, Scene and PostFX panels done; other panels in phase 7 |
+| `@artinos/r3f` (ArtinosApp, ProjectRuntime, StudioShell, MetaBlockShell, panels) | `app/*`, `app/studio/*`, `src/panels/*` | Dock shell, HUD, console toast and 9 panels done; Graph, Timeline, UI DevTools and the scene tree in phases 7–9 |
 | `@artinos/modules` (scene, postfx, materials, visual, media, drei/stdlib surfaces) | `features/scene`, `features/postfx/effects`, `features/objects` | Done except the spectral glass material and MediaPlane (phase 6) |
 | `@artinos/inputflow` (devices, audio, camera, vision, MIDI, recorder) | `features/input/*` | Pointer, keyboard, audio and hands done; the rest in phase 6 |
 | `@artinos/ui` (kernel, headless, primitives, shell, devtools, showcase) | `src/ui/*` | 28 components done; the remainder in phase 8 |
 | `@artinos/graph` (node schema, five domain executors, editor) | — | Phase 9 |
-| `@artinos/metablock` (spatial docking engine) | — | Phase 8 (optional) |
+| `@artinos/metablock` (spatial docking engine) | `src/ui/MetaBlock/` | **Done**: ported unchanged apart from two unused variables and safe pointer capture |
 | `src/*.project.tsx` (default, persian-garden, ui-platform, voluma) | features + presets | Default scene done; persian-garden and VOLUMA in phase 9 |
 
 ### 5.2 PostFX (44 of 44 done)
@@ -215,15 +253,36 @@ Effects are generated from one spec table so all 44 share the same structure. Th
 | Signal monitor | `overlays/SignalMonitor.tsx` | live meters for every signal |
 | three.js Inspector | `overlays/ThreeInspector.tsx` | three's official WebGPU inspector, cleanly detached on unmount |
 
-### 5.4 UI kit (28 components done)
+### 5.4 UI kit (29 components + the MetaBlock engine done)
 
-`Panel` (glass, collapsible, draggable) · `Field` · `Slider` (capsule: two-ink label, Shift for fine control, double-click reset, type-in, full keyboard) · `NumberField` (scrub) · `VectorField` · `ColorField` (picker + hex + swatches) · `TextField` (search, clear) · `Toggle` · `Checkbox` (indeterminate) · `Select` (native) · `Segmented` · `Tabs` · `Section` · `Button` (4 variants) · `IconButton` · `Toolbar` · `Badge` · `Kbd` · `Meter` (peak hold) · `Sparkline` · `Knob` · `XYPad` · `Tooltip` (portal) · `Menu` (portal, keyboard, checkable) · `Dialog` (native modal) · `CommandPalette` (fuzzy, grouped) · `Toast` (provider + hook, live region) · `FileDrop`.
+`Panel` (glass, collapsible, draggable) · `Field` · `Slider` (capsule: two-ink label, Shift for fine control, double-click reset, type-in, full keyboard) · `NumberField` (scrub) · `VectorField` · `ColorField` (picker + hex + swatches) · `TextField` (search, clear) · `Toggle` · `Checkbox` (indeterminate) · `Select` (native) · `Segmented` · `Tabs` · `Section` · `Button` (4 variants) · `IconButton` · `Toolbar` · `Badge` · `Kbd` · `Meter` (peak hold) · `Sparkline` · `Knob` · `XYPad` · `Tooltip` (portal) · `Menu` (portal, keyboard, checkable) · `Dialog` (native modal) · `CommandPalette` (fuzzy, grouped) · `Toast` (provider + hook, live region) · `FileDrop` · `PropertyRow` (the inspector row: label, control, reset, hover actions).
 
-Still to port from v1, in phase 8: `ColorWheel/ColorArea/GradientEditor`, `CurveEditor/EnvelopeEditor`, `Joystick`, `Waveform`, `RangeSlider`, `Dial`, `RadioGroup`, `Accordion`, `Combobox`, `ContextMenu`, `Drawer`, `Popover`, `VirtualList/VirtualTable/ListBrowser`, `PropertyRow`, `KeyCapture`, `TreeView` (new, for the scene tree), `DockTabs/PanelWorkspace` (docking).
+Still to port from v1, in phase 8: `ColorWheel/ColorArea/GradientEditor`, `CurveEditor/EnvelopeEditor`, `Joystick`, `Waveform`, `RangeSlider`, `Dial`, `RadioGroup`, `Accordion`, `Combobox`, `ContextMenu`, `Drawer`, `Popover`, `VirtualList/VirtualTable/ListBrowser`, `KeyCapture`, `TreeView` (new, for the scene tree).
 
-### 5.5 Studio
+### 5.5 Studio (the original dock, rebuilt)
 
-Done: floating toolbar; Scene panel (search across features and settings, tabs Scene / Input / Diagnostics, groups, per-feature on/off, reset, source path in the tooltip); PostFX panel (bypass for the whole chain, "Add effect" menu by category with cost and WebGPU labels, reorder up/down, cost badges); presets (save, load, delete, export and import JSON, reset); six themes; command palette (views, themes, presets, toggle any feature, copy any feature's path); `H` hides the interface; feature crashes appear as toasts; on narrow screens the panels become a bottom sheet.
+| Piece | File | What it does |
+|---|---|---|
+| Dock shell | `app/studio/DockShell.tsx` | Port of `MetaBlockShell`: locked viewport, persistent bottom dock, dock toolbar (tabs, search, expand/restore, HUD), floating chrome (tabs, maximize, return to dock, close), footer per panel, saved layout, layout undo/redo in the palette |
+| Runtime HUD | `app/studio/RuntimeHUD.tsx` | The original strip readout (backend · fps · micrograph · ms · tier) and its dock-bar popover (fps graph, frame budget, backend, resolution, render, memory, quality tiers that set the pixel-ratio ceiling) |
+| Brand chip | in `DockShell` | `ARTINOS / <active panel>` over the canvas |
+| Console toast | `app/studio/ConsoleToast.tsx` | Latest warning/error; the count opens the Console panel |
+| Command palette | `ui/CommandPalette` | Panels, layout undo/redo/reset, material worlds, toggle any feature |
+| Feature card | `app/studio/FeatureCard.tsx` | The original parameter card: name, count, reset, switch; rows with reset and ⋯ actions (favorite, pin, copy, paste) |
+
+| Panel | File | Contents |
+|---|---|---|
+| Inspector | `panels/Inspector.tsx` | Project objects as cards in columns; search, All / Favorites / Pinned, Presets menu (save, load, delete, export, import, reset) |
+| Scene | `panels/Scene.tsx` | Render, Camera, Atmosphere, Lighting and Ground features as cards, same toolbar |
+| PostFX | `panels/PostFX.tsx` | Stack view (active chain in order, reorder, per-effect cards) and Browse view (all 44 by category with cost, WebGPU label, switch, inline controls); pipeline bypass; backend footer |
+| InputFlow | `panels/InputFlow.tsx` | Devices (live state, capture switches, settings) and Signals (live values with meters, filter) |
+| Assets | `panels/Assets.tsx` | Drop images, glTF and `.cube` files; apply as backdrop, environment, transition target, model or colour grade |
+| Library | `panels/Library.tsx` | Every feature, panel and UI component with its path; copy path, switch features |
+| Console | `panels/Console.tsx` | Captured log with level filter, search, pause, clear, expandable entries |
+| Telemetry | `panels/Telemetry.tsx` | KPIs, frame-time and fps graphs, load meters; Diagnostics tab with Stats HUD, Signal Monitor and the three.js Inspector |
+| Appearance | `panels/Appearance.tsx` | Material world, interface visibility, shortcuts, reset layout / features |
+
+`H` hides the chrome; `Ctrl/⌘ K` opens the palette. The default scene matches the original UI-platform project: Persian garden backdrop and environment, glass rings, Bloom + Vignette + FXAA.
 
 ---
 
@@ -236,10 +295,11 @@ Done: floating toolbar; Scene panel (search across features and settings, tabs S
 | 2 | Render: `WebGPUCanvas`, `PostFX` host, 44 effects | **Done** |
 | 3 | Scene, objects and overlays (20 features) | **Done** |
 | 4 | Input: signal bus, pointer, keyboard, audio, hand tracking | **Done** |
-| 5 | UI kit (28) + studio shell | **Done** |
+| 5 | UI kit (29) + studio shell | **Done** |
+| 5b | MetaBlock dock, original skin, HUD, 9 section panels | **Done** |
 | 6 | Remaining features | To do |
-| 7 | Remaining studio panels | To do |
-| 8 | Remaining UI kit, and docking (optional) | To do |
+| 7 | Remaining studio panels (Scene tree, History, Bindings, UI DevTools) | To do |
+| 8 | Remaining UI kit | To do |
 | 9 | Graph, timeline and example scenes | To do |
 
 ### Phase 6 — remaining features
@@ -254,13 +314,17 @@ Done: floating toolbar; Scene panel (search across features and settings, tabs S
 
 ### Phase 7 — remaining studio panels
 
-Each panel becomes an **overlay feature** (`features/panels/*.tsx`), so panels can be added or removed the same way as everything else:
+Each is one file in `src/panels/` (the dock picks it up):
 
-Console (captures `console.*`), Telemetry (renderer info, frame breakdown), Scene Tree + Object Inspector (select → outline → transform gizmo with drei `TransformControls`), Assets (FileDrop → object URLs → Model/Environment/LUT props), History (undo/redo over `store` commits — add a patch log to the store), Bindings (signal → control mapping with a remap curve; the store applies it per frame for bound numeric controls), Quality.
+- **Scene Tree + Object Inspector**: select → outline → transform gizmo with drei `TransformControls`.
+- **History**: undo/redo over store commits (add a patch log to the store).
+- **Bindings**: signal → control mapping with a remap curve; the store applies it each frame for bound numeric controls.
+- **UI DevTools**: component anatomy, state and token inspector.
+- **Graph** and **Timeline**: see phase 9.
 
-### Phase 8 — remaining UI kit and docking
+### Phase 8 — remaining UI kit
 
-Port the components listed in 5.4, each with its own folder. Docking (v1 MetaBlock) is optional: a `ui/DockLayout` with split panes and tabs, and panel positions saved in `ui` state.
+Port the components listed in 5.4, each with its own folder.
 
 ### Phase 9 — graph, timeline, examples
 
@@ -294,6 +358,8 @@ Public assets: `hdr/persianbeauty.png`, `backgrounds/persian-garden.png`, `model
 - **Scene-replacing passes** (SSAA, Pixelation, Retro) re-render the scene and discard effects ordered before them. They default to orders 10–12, and the panel footer explains this.
 - **Transmission and PostFX.** The simple `GlassRings` material uses three's built-in transmission. The v1 spectral backdrop pipeline is phase 6.
 - **No canvas MSAA.** Temporal and supersampling passes need single-sample depth, so anti-aliasing comes from FXAA, SMAA, TRAA or TAAU.
+- **Studio skin weight.** The original stylesheet is carried over whole (about 330 kB, 52 kB gzip) so the studio matches v1 exactly. Its legacy layers can be pruned later.
+- **Default pixel ratio 1.** On a 1.5× display, the glass scene with post-processing ran at 10–16 fps at full resolution and 56–60 fps at 1×. The HUD's quality tiers raise the ceiling.
 - **Drei `ContactShadows` and `Grid`** are not WebGPU-safe in these alphas, so `ContactShadow` and `Grid` are small canvas-texture versions (as in v1).
 
 ## 9. Adding a feature (checklist)
@@ -303,6 +369,12 @@ Public assets: `hdr/persianbeauty.png`, `backgrounds/persian-garden.png`, `model
 3. Clean up everything it allocates.
 4. Export `feature` with a unique `id`, a `kind` and `controls`.
 5. Save. It appears in the studio, and nothing else needs changing.
+
+### Adding a panel
+
+1. Create `src/panels/<Name>.tsx` with a component and a `panel` manifest.
+2. Build it from `FeatureCard`, `ControlsBar` and the `src/ui` components; keep panel-specific state inside the file.
+3. Save. It appears as a dock tab and in the palette. If an older saved layout is active, reset the dock layout (Appearance panel).
 
 ## 10. Verification
 
@@ -326,6 +398,12 @@ What ran for this rebuild:
   - The three.js Inspector used the wrong show/hide API and left timestamp queries running after removal.
   - `onCommit?.(set(x))` skipped `set()` when no `onCommit` was passed (Slider, Knob, NumberField, XYPad).
   - The command palette depended on `requestAnimationFrame`.
+- **Dock and panels (browser, WebGPU):**
+  - All nine panels open with no errors or crashed panels.
+  - A tab dragged out becomes a floating window; "Return to its dock" puts it back at its original tab position.
+  - The brand chip follows the active panel. PostFX Browse and Stack views both work.
+  - The default glass scene runs at 60 fps at pixel ratio 1.
+  - Fixed in this pass: the app root could be scrolled by focus (now `overflow: clip`); Scene cards stacked in one column (group headings replaced by card captions); MetaBlock threw on pointer capture/release for inactive pointers (now guarded).
 - **Not checked:** microphone and webcam permissions (Audio, Hand Tracking), the WebGL2 fallback, and the look of each effect beyond "renders without errors".
 
 ### Known gap: shader compile errors

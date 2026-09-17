@@ -1,0 +1,141 @@
+/* v2 studio additions on top of the carried-over skin. */
+
+.artinos-metablock-shell,
+.artinos-metablock-shell .mb-workspace-root {
+  overflow: clip;
+}
+
+.artinos-metablock-shell svg:not([class]) {
+  width: 12px;
+  height: 12px;
+}
+.plate-search-entry > svg {
+  flex: 0 0 auto;
+}
+.artinos-panel-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+.artinos-panel-toolbar > button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--ui-icon, rgba(255, 255, 255, 0.5));
+  cursor: pointer;
+}
+.artinos-panel-toolbar > button:hover {
+  background: var(--ui-body);
+  color: var(--ui-text-strong);
+}
+.artinos-hud-chevron {
+  display: inline-flex;
+}
+
+/* feature cards — the original parameter card head, plus a switch and reset */
+.v2-card-head {
+  cursor: default;
+}
+.v2-card-title {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.v2-card-title b {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2-feature-card[data-enabled] .v2-card-title b {
+  color: var(--ui-text-strong);
+}
+.v2-card-actions {
+  order: 3;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.v2-card-actions .aui-icon-button {
+  opacity: 0.7;
+}
+.v2-feature-card .artinos-parameter-card-body[data-muted] {
+  opacity: 0.45;
+}
+.v2-feature-card .artinos-property-menu > div {
+  z-index: 40;
+}
+
+/* panel toolbars */
+.v2-panel-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin: 0 0 8px;
+}
+.v2-panel-bar > .aui-text {
+  flex: 1 1 200px;
+  min-width: 140px;
+  max-width: 420px;
+}
+.v2-panel-bar > .aui-select {
+  width: 120px;
+}
+.v2-panel-bar .v2-spacer {
+  flex: 1;
+}
+.v2-inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--ui-text-label);
+}
+.v2-empty {
+  padding: 16px 0;
+  font-size: 10px;
+  color: var(--ui-text-meta);
+}
+.v2-group-title {
+  column-span: all;
+  margin: 8px 0 4px;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.v2-group-title:first-child {
+  margin-top: 0;
+}
+
+/* hidden interface */
+.artinos-metablock-shell[data-ui-hidden] .mb-group:not([data-role='viewport']),
+.artinos-metablock-shell[data-ui-hidden] > .plate-brand-chip,
+.artinos-metablock-shell[data-ui-hidden] > .plate-console-toast {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms;
+}
+.v2-ui-hint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  z-index: 30;
+  translate: -50% 0;
+  font: 10px var(--ui-font);
+  color: var(--ui-text-meta);
+  pointer-events: none;
+}

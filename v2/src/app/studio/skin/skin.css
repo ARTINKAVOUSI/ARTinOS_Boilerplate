@@ -1,0 +1,41 @@
+/* Studio skin — the ARTINOS workbench stylesheet, carried over unchanged from
+   @artinos/ui so the v2 studio looks like the original.
+
+     tokens.css      core tokens and the component aliases derived from them
+     worlds.css      the six material worlds (frost is the default)
+     themes.css      [data-theme] overlays
+     legacy.css      pre-workbench rules, in a low layer
+     instrument.css  the previous component layer, in the same low band
+     styles/*        the workbench components and the dock chrome (unlayered)
+     studio-panels   panel layout, in the artinos.studio layer
+
+   chrome.css (the MetaBlock bridge) is imported by DockShell after the engine's
+   own stylesheet, so it can override the engine defaults. */
+
+@layer artinos.legacy, artinos.instrument, artinos.studio;
+
+@import './tokens.css';
+@import './worlds.css';
+@import './themes.css';
+@import './legacy.css' layer(artinos.legacy);
+@import './instrument.css' layer(artinos.instrument);
+
+@import './styles/base.css';
+@import './styles/pane.css';
+@import './styles/field.css';
+@import './styles/slider.css';
+@import './styles/choice.css';
+@import './styles/inputs.css';
+@import './styles/folder.css';
+@import './styles/color.css';
+@import './styles/button.css';
+@import './styles/list.css';
+@import './styles/appbar.css';
+@import './styles/instruments.css';
+@import './styles/display.css';
+@import './styles/overlays.css';
+@import './styles/collections.css';
+@import './styles/files.css';
+@import './styles/shell.css';
+
+@import './studio-panels.css';

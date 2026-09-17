@@ -63,6 +63,7 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Objects',
   order: 100,
+  enabled: false,
   component: ReactiveOrb,
   controls: {
     signal: { type: 'text', value: 'audio.bass', placeholder: 'signal name' },

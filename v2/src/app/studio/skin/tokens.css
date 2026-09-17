@@ -1,0 +1,382 @@
+/* ARTINOS UI — tokens
+   ==========================================================================
+   Source of truth: packages/ui/VISUAL_REFERENCES/artinos-core-ui.html
+
+     PRIMITIVES → SEMANTIC ROLES → MATERIAL ROLES → COMPONENT TOKENS
+     → STATE TOKENS → THEME WORLD
+
+   Every token keeps its reference name behind a `--ui-` prefix — `--sig`
+   becomes `--ui-sig`, `--body-in` becomes `--ui-body-in` — so the package can
+   sit on any page without claiming generic names like `--ink` or `--glass`,
+   which the legacy layer and host apps already use.
+
+     1. core      signal, ink, geometry, density, type, motion (this file)
+     2. material  glass, edge, depth, body, active, seam, well (worlds.css —
+                  frost is the attribute-less default, like the reference)
+     3. aliases   the component vocabulary the rest of the kit already reads
+                  (--ui-text-*, --ui-pane-*, --ui-range-* …), derived from 1+2
+     4. roles     the older --bg-* / --text-* / --sig-* names, derived from 3
+
+   Aliases and roles re-derive on every [data-world] and [data-theme] scope. A
+   custom property inherits its COMPUTED value, so an alias resolved once on
+   :root would freeze the default world into every re-themed subtree.
+   ========================================================================== */
+
+/* 1 — CORE ---------------------------------------------------------------- */
+:root {
+  /* signal (accent) */
+  --ui-sig: #6fe3c0;                        /* live / manipulation / bound */
+  --ui-sig-warm: #e8b27a;                   /* automation / modified       */
+  --ui-sig-rose: #e88f9b;                   /* warning                     */
+  --ui-sig-soft: rgba(111, 227, 192, 0.24);
+  --ui-sig-line: rgba(111, 227, 192, 0.55);
+
+  /* ink */
+  --ui-ink: rgba(255, 255, 255, 0.94);
+  --ui-ink-2: rgba(255, 255, 255, 0.66);
+  --ui-ink-3: rgba(255, 255, 255, 0.4);
+  --ui-ink-4: rgba(255, 255, 255, 0.24);
+
+  /* geometry — radius is adaptive, never universal */
+  --ui-r-panel: 12px;
+  --ui-r-comp: 6px;
+  --ui-r-active: 5px;
+  --ui-r-micro: 4px;
+
+  /* density */
+  --ui-h-comp: 23px;
+  --ui-h-comp-sm: 19px;
+  --ui-gap-row: 3px;
+  --ui-pad-panel: 9px;
+  --ui-label-w: 62px;
+  --ui-label-w-wide: 74px;
+
+  /* type */
+  --ui-face: 'Inter', 'SF Pro Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ui-num: 'SF Mono', ui-monospace, 'Roboto Mono', Menlo, monospace;
+
+  /* motion — mass, spring and damping are overridden per material world */
+  --ui-ease: cubic-bezier(0.2, 0.7, 0.25, 1);
+  --ui-t-fast: 110ms;
+  --ui-t-mid: 190ms;
+  --ui-t-slow: 420ms;
+
+  /* scene — what shows before a backdrop paints */
+  --ui-scene: #14110d;
+
+  color-scheme: dark;
+}
+
+/* Motion is never load-bearing. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ui-t-fast: 1ms;
+    --ui-t-mid: 1ms;
+    --ui-t-slow: 1ms;
+  }
+}
+
+/* 3 — ALIASES ------------------------------------------------------------- */
+:root,
+[data-world],
+[data-theme] {
+  /* type */
+  --ui-font: var(--ui-face);
+  --ui-font-size: 12px;
+
+  /* ink */
+  --ui-text: var(--ui-ink);
+  --ui-text-strong: #fff;
+  --ui-text-label: var(--ui-ink-2);
+  --ui-text-summary: var(--ui-ink-3);
+  --ui-text-body: var(--ui-ink-2);
+  --ui-text-muted: var(--ui-ink-2);
+  --ui-text-soft: var(--ui-ink-3);
+  --ui-text-meta: var(--ui-ink-3);
+  --ui-text-serial: var(--ui-ink-4);
+  --ui-text-ghost: var(--ui-ink-4);
+
+  /* signal */
+  --ui-accent: var(--ui-sig);
+  --ui-accent-strong: var(--ui-sig);
+  --ui-accent-pin: var(--ui-sig);
+  --ui-accent-dot: var(--ui-sig);
+  --ui-accent-wash: var(--ui-sig-soft);
+  --ui-accent-line: var(--ui-sig-line);
+  --ui-accent-glow: var(--ui-sig-soft);
+  --ui-warn: var(--ui-sig-warm);
+  --ui-fault: var(--ui-sig-rose);
+  --ui-bind: var(--ui-sig);
+
+  /* lines — every rule on a surface is the world's edge */
+  --ui-line: var(--ui-edge);
+  --ui-line-strong: var(--ui-edge-lit);
+  --ui-line-foot: var(--ui-edge);
+  --ui-line-soft: var(--ui-edge);
+  --ui-line-faint: var(--ui-edge);
+  --ui-line-nest: var(--ui-edge);
+  --ui-hairline: var(--ui-edge);
+
+  /* geometry */
+  --ui-row: var(--ui-h-comp);
+  --ui-control-h: var(--ui-h-comp);
+  --ui-control-height: var(--ui-h-comp);
+  --ui-range-h: var(--ui-h-comp);
+  --ui-trailing-w: 7px;
+  --ui-label-spacing: 0px;
+  --ui-radius: var(--ui-r-panel);
+  --ui-radius-card: var(--ui-r-panel);
+  --ui-radius-panel: var(--ui-r-panel);
+  --ui-radius-shell: var(--ui-r-panel);
+  --ui-radius-control: var(--ui-r-comp);
+  --ui-radius-small: var(--ui-r-active);
+  --ui-radius-tiny: var(--ui-r-micro);
+
+  /* motion */
+  --ui-ease-out: var(--ui-ease);
+  --ui-ease-spring: var(--ui-ease);
+  --ui-dur-press: var(--ui-t-fast);
+  --ui-dur-fast: var(--ui-t-fast);
+  --ui-dur: var(--ui-t-mid);
+  --ui-dur-slow: var(--ui-t-mid);
+  --ui-dur-shadow: var(--ui-t-slow);
+
+  /* interaction */
+  --ui-hover-wash: rgba(255, 255, 255, 0.08);
+  --ui-row-hover: transparent;
+  --ui-press-wash: rgba(0, 0, 0, 0.2);
+  --ui-focus: var(--ui-sig-line);
+
+  /* the active optical material — a denser insert moving inside a softer body */
+  --ui-cap: linear-gradient(180deg, var(--ui-active-lit) 0%, var(--ui-active-a) 42%, var(--ui-active-b) 100%);
+  --ui-cap-raised: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
+  --ui-cap-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --ui-well-in: inset 0 1px 3px rgba(0, 0, 0, 0.22);
+  --ui-card: var(--ui-body);
+  --ui-chrome: var(--ui-glass);
+
+  /* panel */
+  --ui-glass-filter: blur(var(--ui-blur)) saturate(var(--ui-sat));
+  --ui-glass-filter-float: blur(var(--ui-blur)) saturate(var(--ui-sat));
+  --ui-grain-opacity: var(--ui-grain);
+  --ui-pane-tint: var(--ui-glass);
+  --ui-pane-sheen: linear-gradient(180deg, var(--ui-glass-top) 0%, transparent 34%);
+  --ui-pane-border: var(--ui-edge);
+  --ui-pane-shadow: var(--ui-depth), inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
+  --ui-pane-shadow-raised: var(--ui-pane-shadow);
+  --ui-pane-head-h: 32px;
+
+  /* capsule */
+  --ui-range-border: var(--ui-edge);
+  --ui-range-border-hover: var(--ui-edge-lit);
+  --ui-range-well: var(--ui-well);
+  --ui-range-inset: var(--ui-well-in);
+  --ui-range-inset-hover: var(--ui-well-in);
+  --ui-range-fill: var(--ui-cap);
+  --ui-range-fill-hover: var(--ui-cap);
+  --ui-range-fill-active: var(--ui-cap);
+  --ui-range-edge: var(--ui-edge-lit);
+  --ui-range-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  --ui-range-seam: var(--ui-seam);
+  --ui-range-seam-top: 5px;
+  --ui-range-value-shadow: none;
+  --ui-range-ticks: var(--ui-ink-4);
+
+  /* segmented · select · number · switch */
+  --ui-seg-border: var(--ui-edge);
+  --ui-seg-well: var(--ui-well);
+  --ui-seg-inset: inset 0 1px 3px rgba(0, 0, 0, 0.18);
+  --ui-seg-text: var(--ui-ink-2);
+  --ui-seg-on: var(--ui-cap-raised);
+  --ui-seg-on-shadow: var(--ui-cap-shadow);
+  --ui-select-border: var(--ui-edge);
+  --ui-select-fill: var(--ui-body);
+  --ui-option-fill: #1c1e21;
+  --ui-number-border: var(--ui-edge);
+  --ui-number-well: var(--ui-well);
+  --ui-switch-border: var(--ui-edge);
+  --ui-switch-well: var(--ui-well);
+  --ui-knob-border: transparent;
+  --ui-knob-fill: var(--ui-cap-raised);
+  --ui-knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --ui-knob-tick: var(--ui-seam);
+
+  /* tabs · search · pins */
+  --ui-tab-text: var(--ui-ink-3);
+  --ui-search-border: var(--ui-edge);
+  --ui-search-well: var(--ui-well);
+  --ui-search-placeholder: var(--ui-ink-3);
+  --ui-pins-text: var(--ui-ink-3);
+  --ui-pins-link: var(--ui-ink-2);
+  --ui-pins-rule: var(--ui-edge);
+  --ui-pins-empty: var(--ui-ink-4);
+
+  /* vector */
+  --ui-vector-well: var(--ui-well);
+  --ui-vector-border: var(--ui-edge);
+  --ui-vector-axis: var(--ui-ink-3);
+  --ui-vector-title: var(--ui-ink-2);
+
+  /* buttons */
+  --ui-button-border: var(--ui-edge);
+  --ui-button-fill: var(--ui-body);
+  --ui-button-fill-hover: var(--ui-body);
+  --ui-button-text: var(--ui-ink-2);
+  --ui-icon: var(--ui-ink-3);
+
+  /* selection list · notes */
+  --ui-object-text: var(--ui-ink-2);
+  --ui-object-meta: var(--ui-ink-3);
+  --ui-object-on: var(--ui-body);
+  --ui-object-on-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge-lit);
+  --ui-note: var(--ui-ink-3);
+  --ui-log: var(--ui-ink-2);
+  --ui-empty: var(--ui-ink-3);
+
+  /* colour */
+  --ui-swatch-border: rgba(255, 255, 255, 0.22);
+  --ui-ramp-border: rgba(255, 255, 255, 0.22);
+  --ui-ramp-label: var(--ui-ink-3);
+
+  /* instruments */
+  --ui-handle-edge: rgba(0, 0, 0, 0.4);
+  --ui-checker: #8888884d;
+  --ui-mark: var(--ui-sig-soft);
+
+  /* legacy pane presets — every one is now the world's own material */
+  --ui-command-blur: var(--ui-blur);
+  --ui-command-sheen: var(--ui-pane-sheen);
+  --ui-command-tint: var(--ui-glass);
+  --ui-material-sheen: var(--ui-pane-sheen);
+  --ui-material-fill: var(--ui-cap);
+  --ui-light-tint: var(--ui-glass);
+  --ui-light-fill: var(--ui-cap);
+  --ui-camera-well: var(--ui-well);
+  --ui-type-fill: var(--ui-cap);
+  --ui-type-seam: var(--ui-seam);
+  --ui-type-select: var(--ui-body);
+
+  /* ground — the backdrop component paints the scene; this is its fallback */
+  --ui-ground: var(--ui-scene);
+  --ui-ground-env: none;
+  --ui-ground-image: none;
+  --ui-ground-scrim: none;
+  --ui-scrim: rgba(0, 0, 0, 0.35);
+
+  /* app bar · floating layers */
+  --ui-appbar-h: 42px;
+  --ui-appbar-fill: var(--ui-glass);
+  --ui-session: var(--ui-ink-3);
+  --ui-float: var(--ui-glass);
+  --ui-float-shadow: var(--ui-depth), inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
+}
+
+/* 4 — ROLES --------------------------------------------------------------- */
+:root,
+[data-world],
+[data-theme] {
+  --font-ui: var(--ui-face);
+  --font-num: var(--ui-num);
+
+  --type-display: 600 28px/1.1 var(--ui-face);
+  --type-title: 560 12px/1.2 var(--ui-face);
+  --type-hero: 500 20px/1 var(--ui-face);
+  --type-panel: 560 12px/1 var(--ui-face);
+  --type-section: 400 9.5px/1 var(--ui-face);
+  --type-body: 400 11px/1.5 var(--ui-face);
+  --type-label: 400 11px/1.3 var(--ui-face);
+  --type-value: 400 10.5px/1.2 var(--ui-num);
+  --type-readout: 400 10.5px/1.2 var(--ui-num);
+
+  --bg-app: var(--ui-scene);
+  --bg-stage: var(--ui-scene);
+  --bg-surface: var(--ui-glass);
+  --bg-raised: var(--ui-body);
+  --bg-hover: var(--ui-hover-wash);
+  --bg-active: var(--ui-body);
+  --bg-well: var(--ui-well);
+  --bg-float: var(--ui-glass);
+  --bg-scrim: var(--ui-scrim);
+  --bg-row: transparent;
+
+  --text-hi: var(--ui-ink);
+  --text-mid: var(--ui-ink-2);
+  --text-low: var(--ui-ink-3);
+  --text-faint: var(--ui-ink-3);
+  --text-ghost: var(--ui-ink-4);
+
+  --line-subtle: var(--ui-edge);
+  --line: var(--ui-edge);
+  --line-strong: var(--ui-edge-lit);
+
+  --sig-live: var(--ui-sig);
+  --sig-live-hi: var(--ui-sig);
+  --sig-live-wash: var(--ui-sig-soft);
+  --sig-live-line: var(--ui-sig-line);
+  --sig-warn: var(--ui-sig-warm);
+  --sig-warn-wash: color-mix(in srgb, var(--ui-sig-warm) 14%, transparent);
+  --sig-fault: var(--ui-sig-rose);
+  --sig-fault-wash: color-mix(in srgb, var(--ui-sig-rose) 14%, transparent);
+  --sig-bind: var(--ui-sig);
+  --sig-bind-wash: var(--ui-sig-soft);
+  --sig-neutral: var(--ui-ink-4);
+
+  --fill-track: var(--ui-body);
+  --fill-track-hover: var(--ui-edge);
+  --tick: var(--ui-seam);
+
+  --e0-well: var(--ui-well-in), inset 0 0 0 1px var(--ui-edge);
+  --e1-surface: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge);
+  --e2-dock: var(--ui-pane-shadow);
+  --e3-float: var(--ui-float-shadow);
+
+  --frost-tint: var(--ui-glass);
+  --frost-sheen: var(--ui-pane-sheen);
+  --frost-edge: inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
+  --blur-frost: blur(var(--ui-blur));
+  --blur-float: blur(var(--ui-blur));
+  --focus-ring: inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+  --shadow-deep: rgba(0, 0, 0, 0.45);
+  --shadow-well: rgba(0, 0, 0, 0.22);
+
+  --radius-control: var(--ui-r-comp);
+  --radius-card: var(--ui-r-panel);
+  --radius-panel: var(--ui-r-panel);
+  --radius-shell: var(--ui-r-panel);
+
+  --control-h-sm: var(--ui-h-comp-sm);
+  --control-h: var(--ui-h-comp);
+  --control-h-lg: var(--ui-h-comp);
+
+  --dur-value: var(--ui-t-fast);
+  --dur-state: var(--ui-t-mid);
+  --dur-surface: var(--ui-t-slow);
+  --ease-std: var(--ui-ease);
+  --ease-enter: var(--ui-ease);
+}
+
+:root {
+  --track-display: -0.025em;
+  --track-title: -0.006em;
+  --track-caps: 0.04em;
+  --track-panel: 0.04em;
+
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 24px;
+  --space-8: 32px;
+
+  --row-gap: var(--ui-gap-row);
+  --panel-header-h: var(--ui-pane-head-h);
+  --command-bar-h: var(--ui-appbar-h);
+  --tab-strip-h: 27px;
+  --safe-area: 12px;
+
+  --dur-layout: var(--ui-t-slow);
+  --dur-exit: var(--ui-t-fast);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}

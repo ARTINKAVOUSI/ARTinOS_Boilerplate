@@ -1,0 +1,171 @@
+/* Inputs — the recessed well (reference `.field`): number, text, textarea,
+   search, vector. A well is cut into the panel: a shadow along its top edge and
+   the world's edge as a hairline around it. */
+
+/* standalone inputs */
+.artinos-number,
+.artinos-text {
+  width: 100%;
+  min-width: 0;
+  height: var(--ui-h-comp);
+  padding: 0 7px;
+  border: 0;
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-edge);
+  font: inherit;
+  font-size: 11px;
+  color: var(--ui-ink);
+  outline: none;
+  transition: box-shadow var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-number {
+  font-family: var(--ui-num);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.artinos-number:hover,
+.artinos-text:hover {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-edge-lit);
+}
+.artinos-number:focus,
+.artinos-text:focus {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-number::placeholder,
+.artinos-text::placeholder {
+  color: var(--ui-ink-3);
+}
+
+/* the number well — scrub across it, click to type */
+.artinos-number-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  height: var(--ui-h-comp);
+  padding: 0 7px;
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-edge);
+  cursor: ew-resize;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+  transition: box-shadow var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-number-field:hover {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-edge-lit);
+}
+.artinos-number-field:focus-within {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-number-field[data-scrubbing] {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-sig-line);
+}
+.artinos-number-axis {
+  font-size: 9.5px;
+  color: var(--ui-ink-3);
+}
+.artinos-number-unit {
+  margin-left: 2px;
+  font-size: 9.5px;
+  font-style: normal;
+  color: var(--ui-ink-4);
+}
+/* inside a well the input is only the numeral — the well is the surface */
+.artinos-number-field > .artinos-number,
+.artinos-number-field > .artinos-number:hover,
+.artinos-number-field > .artinos-number:focus {
+  flex: 1;
+  width: 100%;
+  height: auto;
+  margin-left: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  cursor: inherit;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.artinos-number-field > .artinos-number:focus {
+  cursor: text;
+}
+.artinos-number-field > .artinos-number::-webkit-inner-spin-button,
+.artinos-number-field > .artinos-number::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* textarea */
+.artinos-textarea {
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--ui-ink-2);
+}
+.artinos-textarea > textarea {
+  min-height: 60px;
+  padding: 6px 7px;
+  resize: vertical;
+  border: 0;
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-edge);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ui-ink);
+  outline: none;
+}
+.artinos-textarea > textarea:focus {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+
+/* search */
+.artinos-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--ui-h-comp);
+  padding: 0 7px;
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-edge);
+  color: var(--ui-ink-3);
+  transition: box-shadow var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-search:hover {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-edge-lit);
+}
+.artinos-search:focus-within {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-search > input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ui-ink);
+  outline: 0;
+}
+.artinos-search > input::placeholder { color: var(--ui-ink-3); }
+.artinos-search > kbd {
+  font-family: var(--ui-num);
+  font-size: 9.5px;
+  color: var(--ui-ink-4);
+}
+
+/* vector — axis wells in a row (reference `.mc__vec`) */
+.artinos-vector-axes {
+  display: grid;
+  grid-template-columns: repeat(var(--axes, 3), minmax(0, 1fr));
+  gap: 4px;
+  min-width: 0;
+}

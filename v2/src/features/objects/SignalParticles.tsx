@@ -64,6 +64,7 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Objects',
   order: 101,
+  enabled: false,
   component: SignalParticles,
   controls: {
     count: { type: 'number', value: 1800, min: 100, max: 50000, step: 100 },

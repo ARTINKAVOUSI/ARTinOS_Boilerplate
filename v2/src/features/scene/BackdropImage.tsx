@@ -77,11 +77,10 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Atmosphere',
   order: 16,
-  enabled: false,
   component: BackdropImage,
   controls: {
     url: { type: 'text', value: '/backgrounds/persian-garden.png', label: 'Image' },
     distance: { type: 'number', value: 40, min: 5, max: 400, step: 1 },
-    tint: { type: 'color', value: '#bdbdbd' },
+    tint: { type: 'color', value: '#ffffff' },
   },
 }

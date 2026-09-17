@@ -1,0 +1,130 @@
+/* Display — read-only surfaces in the workbench's quiet voice: caps meta labels,
+   500-weight tabular values, state as a word with a hue, never a hue alone. */
+
+.artinos-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-button-border);
+  border-radius: var(--ui-radius-tiny);
+  background: var(--ui-button-fill);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ui-text-soft);
+}
+.artinos-badge.tone-accent { border-color: color-mix(in srgb, var(--ui-accent) 45%, transparent); color: var(--ui-accent); }
+.artinos-badge.tone-warn { border-color: color-mix(in srgb, var(--ui-warn) 45%, transparent); color: var(--ui-warn); }
+.artinos-badge.tone-danger { border-color: color-mix(in srgb, var(--ui-fault) 45%, transparent); color: var(--ui-fault); }
+
+.artinos-keyvalue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 22px;
+  color: var(--ui-text);
+}
+.artinos-keyvalue > span {
+  min-width: 0;
+  font-size: 10px;
+  color: var(--ui-text-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.artinos-keyvalue > output {
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.artinos-spark {
+  display: block;
+  width: 100%;
+  height: 36px;
+  overflow: visible;
+}
+.artinos-spark path {
+  fill: none;
+  stroke: var(--ui-range-seam);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.artinos-value-readout,
+.artinos-status-display {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text);
+}
+.artinos-value-readout > span,
+.artinos-status-display > span {
+  font-size: 10px;
+  color: var(--ui-text-label);
+}
+.artinos-value-readout > strong {
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+}
+.artinos-status-display > strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+.artinos-value-readout > em,
+.artinos-status-display > small {
+  font-size: 8px;
+  font-style: normal;
+  color: var(--ui-text-meta);
+}
+.artinos-value-readout[data-state='live'] > strong,
+.artinos-status-display[data-state='live'] > strong { color: var(--ui-accent); }
+.artinos-value-readout[data-state='warn'] > strong,
+.artinos-status-display[data-state='warn'] > strong { color: var(--ui-warn); }
+.artinos-value-readout[data-state='fault'] > strong,
+.artinos-status-display[data-state='fault'] > strong { color: var(--ui-fault); }
+
+/* micro readout — reference `.micro` */
+.artinos-micro-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.artinos-micro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 18px;
+  min-width: 46px;
+  border-radius: var(--ui-r-micro);
+  background: var(--ui-body);
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge);
+  font-family: var(--ui-num);
+  font-size: 9.5px;
+  color: var(--ui-ink-2);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.artinos-micro[data-interactive] {
+  cursor: ew-resize;
+  touch-action: none;
+}
+.artinos-micro[data-interactive]:focus-visible {
+  outline: none;
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-micro > em {
+  font-family: var(--ui-face);
+  font-size: 8.5px;
+  font-style: normal;
+  color: var(--ui-ink-4);
+}

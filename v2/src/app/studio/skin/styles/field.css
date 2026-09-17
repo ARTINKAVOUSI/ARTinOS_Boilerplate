@@ -1,0 +1,108 @@
+/* Field — the MetaComp row (reference `.mc`).
+   Label, surface, value and state designed as one object: a 62px name column,
+   the control, and a 7px column for the modulation marker when there is one. */
+
+.artinos-field {
+  display: grid;
+  grid-template-columns: var(--ui-label-w) minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--ui-ink);
+}
+.artinos-field[data-trailing] {
+  grid-template-columns: var(--ui-label-w) minmax(0, 1fr) 7px;
+}
+.artinos-field[data-label-width='wide'] {
+  grid-template-columns: var(--ui-label-w-wide) minmax(0, 1fr);
+}
+/* the name takes the row; the control sits at its natural width (toggles) */
+.artinos-field[data-label-width='fit'] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.artinos-field-label {
+  min-width: 0;
+  font-size: 11px;
+  letter-spacing: -0.001em;
+  color: var(--ui-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.artinos-field-binding {
+  margin-left: 5px;
+  font-size: 9.5px;
+  font-style: normal;
+  color: var(--ui-sig);
+}
+.artinos-field-unit {
+  font-size: 9.5px;
+  color: var(--ui-ink-3);
+  white-space: nowrap;
+}
+
+/* inline — the name lives inside the capsule (reference `.mc--full`) */
+.artinos-field[data-layout='inline'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.artinos-field[data-layout='inline'][data-trailing] {
+  grid-template-columns: minmax(0, 1fr) 7px;
+  gap: 6px;
+}
+.artinos-field[data-layout='inline'] > .artinos-field-label {
+  display: none;
+}
+
+/* stack — the name above a full-width control */
+.artinos-field[data-layout='stack'] {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 5px;
+}
+.artinos-field[data-layout='stack'][data-trailing] {
+  grid-template-columns: minmax(0, 1fr) 7px;
+}
+.artinos-field[data-layout='stack'] > .artinos-field-label {
+  grid-column: 1 / -1;
+  font-size: 9.5px;
+  color: var(--ui-ink-3);
+}
+
+/* modulation marker — reference `.mod`, the accent as information */
+.artinos-pin {
+  justify-self: center;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ui-ink-4);
+  border-radius: 2px;
+  background: transparent;
+  transform: rotate(45deg);
+  cursor: pointer;
+  transition:
+    border-color var(--ui-t-mid),
+    background var(--ui-t-mid),
+    box-shadow var(--ui-t-mid);
+}
+.artinos-pin:hover {
+  border-color: var(--ui-ink-2);
+}
+.artinos-pin[aria-pressed='true'] {
+  border-color: var(--ui-sig-line);
+  background: var(--ui-sig);
+  box-shadow: 0 0 10px var(--ui-sig-soft);
+}
+.artinos-pin:focus-visible {
+  outline: 1px solid var(--ui-sig-line);
+  outline-offset: 3px;
+}
+
+/* dimension — a value and its sizing behaviour, paired (reference `.mc__pair`) */
+.artinos-dimension {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  gap: 5px;
+  min-width: 0;
+}

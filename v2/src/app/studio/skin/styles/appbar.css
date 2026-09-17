@@ -1,0 +1,55 @@
+/* App bar — reference `header.shell`. */
+
+.artinos-appbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--ui-appbar-h);
+  padding: 0 18px;
+  border-bottom: 1px solid var(--ui-line);
+  background: var(--ui-appbar-fill);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  font-family: var(--ui-font);
+  font-size: var(--ui-font-size);
+  line-height: normal;
+  color: var(--ui-text);
+}
+.artinos-appbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: inherit;
+  text-decoration: none;
+}
+.artinos-appbar-brand > span {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ui-text-muted);
+}
+.artinos-appbar-context {
+  font-size: 9px;
+  color: var(--ui-session);
+}
+.artinos-appbar-nav {
+  display: flex;
+  gap: 20px;
+  font-size: 10px;
+  color: var(--ui-text-muted);
+}
+.artinos-appbar-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+.artinos-appbar-nav a:hover { color: var(--ui-text-strong); }
+
+@media (max-width: 800px) {
+  .artinos-appbar-context { display: none; }
+}
+@media (max-width: 570px) {
+  .artinos-appbar-nav { display: none; }
+}

@@ -42,12 +42,12 @@ export interface RenderSettingsProps {
   exposure?: number
   shadows?: boolean
   shadowType?: ShadowType
-  /** Upper bound for the pixel ratio (never above the display's). */
+  /** Upper bound for the pixel ratio (never above the display's). 1 keeps high-DPI displays at a steady frame rate. */
   maxPixelRatio?: number
 }
 
 /** RenderSettings — tone mapping, exposure, shadow filtering and resolution for the renderer. */
-export function RenderSettings({ toneMapping = 'agx', exposure = 1, shadows = true, shadowType = 'pcf-soft', maxPixelRatio = 2 }: RenderSettingsProps) {
+export function RenderSettings({ toneMapping = 'agx', exposure = 1, shadows = true, shadowType = 'pcf-soft', maxPixelRatio = 1 }: RenderSettingsProps) {
   const gl = useThree(state => state.gl)
   const setDpr = useThree(state => state.setDpr)
   const scene = useThree(state => state.scene)
@@ -88,6 +88,6 @@ export const feature: Feature = {
     exposure: { type: 'number', value: 1, min: 0, max: 4, step: 0.01 },
     shadows: { type: 'boolean', value: true },
     shadowType: { type: 'select', value: 'pcf-soft', options: ['basic', 'pcf', 'pcf-soft', 'vsm'], label: 'Shadow filter' },
-    maxPixelRatio: { type: 'number', value: 2, min: 0.5, max: 3, step: 0.05, label: 'Max DPR' },
+    maxPixelRatio: { type: 'number', value: 1, min: 0.5, max: 3, step: 0.05, label: 'Max DPR' },
   },
 }

@@ -103,7 +103,6 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Objects',
   order: 102,
-  enabled: false,
   component: GlassRings,
   controls: {
     spin: { type: 'number', value: 1, min: 0, max: 3, step: 0.01 },

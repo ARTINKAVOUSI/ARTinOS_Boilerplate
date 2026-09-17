@@ -94,6 +94,7 @@ export const feature: Feature = {
   kind: 'overlay',
   group: 'Diagnostics',
   order: 980,
+  enabled: false,
   component: StatsHUD,
   controls: {
     corner: { type: 'select', value: 'bottom-right', options: ['top-left', 'top-right', 'bottom-left', 'bottom-right'] },

@@ -1,0 +1,60 @@
+/* Base — the element defaults the workbench page sets globally, scoped to the
+   package's own elements so the kit drops into any app without restyling it.
+   :where() keeps every selector here at zero specificity. */
+
+:where(.artinos-root, .artinos-pane, .artinos-field, .artinos-tabs, .artinos-segmented, .artinos-search, .artinos-pins, .artinos-vector, .artinos-folder, .artinos-section, .artinos-selection-list, .artinos-color-field, .artinos-color-ramp, .artinos-toolbar, .artinos-appbar, .artinos-button, .artinos-icon-button),
+:where(.artinos-root, .artinos-pane, .artinos-field, .artinos-tabs, .artinos-segmented, .artinos-search, .artinos-pins, .artinos-vector, .artinos-folder, .artinos-section, .artinos-selection-list, .artinos-color-field, .artinos-color-ramp, .artinos-toolbar, .artinos-appbar) * {
+  box-sizing: border-box;
+}
+
+/* A surface that hosts the kit sets the type once. */
+.artinos-root {
+  font-family: var(--ui-font);
+  font-size: var(--ui-font-size);
+  line-height: normal;
+  color: var(--ui-text);
+}
+
+/* The ground a workspace sits on. Glass reads as glass only when there is a
+   direction to the light behind it, so this is a lit environment rather than a
+   colour: a key from the upper left, a fill from the right, a floor that falls
+   away. The grain on top is what keeps those wide gradients from banding, and
+   it gives the whole surface a matte finish instead of a digital one. */
+.artinos-ground {
+  position: relative;
+  isolation: isolate;
+  background: var(--ui-ground);
+}
+/* The scene, its scrim and the lit gradients are one stack on a fixed layer, so
+   a scrolling workspace slides over a still ground rather than dragging the
+   photograph with it. */
+.artinos-ground::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    var(--ui-ground-env),
+    var(--ui-ground-scrim),
+    var(--ui-ground-image) center / cover no-repeat,
+    var(--ui-ground);
+  pointer-events: none;
+}
+.artinos-ground::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: var(--ui-grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+/* Content sits above the grain. */
+.artinos-ground > * { position: relative; z-index: 1; }
+
+/* Focus is a 1px outline, offset — never removed, only recoloured by a theme. */
+:where(.artinos-root, .artinos-pane, .artinos-field, .artinos-tabs, .artinos-segmented, .artinos-search, .artinos-pins, .artinos-vector, .artinos-folder, .artinos-selection-list, .artinos-color-field, .artinos-toolbar, .artinos-appbar) :is(button, input, select, summary, a):focus-visible,
+:is(.artinos-button, .artinos-icon-button, .artinos-object, .artinos-pin, .artinos-switch):focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 2px;
+}
