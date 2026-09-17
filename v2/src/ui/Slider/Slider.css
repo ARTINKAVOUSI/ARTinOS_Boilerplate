@@ -1,0 +1,150 @@
+/* Slider — a softer body with a denser active insert moving through it. */
+
+:where(.aui-slider) {
+  --_body: var(--ui-body, rgba(255, 255, 255, 0.085));
+  --_body-in: var(--ui-body-in, inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.14));
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
+  --_active-a: var(--ui-active-a, rgba(255, 255, 255, 0.74));
+  --_active-b: var(--ui-active-b, rgba(255, 255, 255, 0.5));
+  --_active-lit: var(--ui-active-lit, rgba(255, 255, 255, 0.92));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+  --_ink-active: var(--ui-ink-active, rgba(16, 20, 22, 0.82));
+  --_seam: var(--ui-seam, rgba(16, 20, 22, 0.6));
+  --_well: var(--ui-well, rgba(0, 0, 0, 0.16));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_h: var(--ui-h-comp, 23px);
+  --_radius: var(--ui-r-comp, 6px);
+  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
+  --_ease: var(--ui-ease, cubic-bezier(0.2, 0.7, 0.25, 1));
+  --_mid: var(--ui-t-mid, 190ms);
+}
+
+.aui-slider {
+  position: relative;
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+  height: var(--_h);
+  border-radius: var(--_radius);
+  background: var(--_body);
+  box-shadow: var(--_body-in), inset 0 0 0 1px var(--_edge);
+  overflow: hidden;
+  isolation: isolate;
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  outline: none;
+  font: 11px/1 var(--_face);
+  color: var(--_ink);
+  transition: box-shadow var(--_mid) var(--_ease);
+}
+.aui-slider[data-size='sm'] {
+  height: 19px;
+  font-size: 10.5px;
+}
+.aui-slider:hover {
+  box-shadow: var(--_body-in), inset 0 0 0 1px var(--_edge-lit);
+}
+.aui-slider:focus-visible {
+  box-shadow: var(--_body-in), inset 0 0 0 1px color-mix(in srgb, var(--_sig) 60%, transparent), 0 0 0 3px color-mix(in srgb, var(--_sig) 24%, transparent);
+}
+.aui-slider[data-disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.aui-slider__fill {
+  position: absolute;
+  inset: 1px auto 1px 1px;
+  width: max(8px, calc(var(--t) * 100% - 2px));
+  border-radius: calc(var(--_radius) - 1.5px);
+  background: linear-gradient(180deg, var(--_active-lit) 0%, var(--_active-a) 42%, var(--_active-b) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 2px rgba(0, 0, 0, 0.12);
+  transition: filter var(--_mid) var(--_ease);
+}
+.aui-slider[data-dragging] .aui-slider__fill {
+  filter: brightness(1.07);
+}
+
+.aui-slider__seam {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: calc(var(--t) * 100%);
+  width: 1.5px;
+  margin-left: -4px;
+  border-radius: 2px;
+  background: var(--_seam);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity var(--_mid), background var(--_mid);
+}
+.aui-slider:hover .aui-slider__seam {
+  opacity: 0.9;
+}
+.aui-slider[data-dragging] .aui-slider__seam {
+  opacity: 1;
+  background: var(--_sig);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--_sig) 40%, transparent);
+}
+
+.aui-slider__text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px;
+  pointer-events: none;
+}
+.aui-slider__text[data-ink='on'] {
+  color: var(--_ink-active);
+  clip-path: inset(0 calc(100% - var(--t) * 100%) 0 0);
+}
+.aui-slider__text[data-ink='off'] {
+  color: var(--_ink-2);
+  clip-path: inset(0 0 0 calc(var(--t) * 100%));
+}
+.aui-slider__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.aui-slider__value {
+  font-family: var(--_num);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.aui-slider__text[data-ink='off'] .aui-slider__value {
+  color: var(--_ink);
+}
+.aui-slider__value i {
+  margin-left: 2px;
+  font-style: normal;
+  opacity: 0.6;
+}
+
+.aui-slider__input {
+  position: absolute;
+  inset: 2px;
+  z-index: 2;
+  width: calc(100% - 4px);
+  padding: 0 6px;
+  border: 0;
+  border-radius: calc(var(--_radius) - 2px);
+  background: var(--_well);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--_sig) 60%, transparent);
+  font: 10.5px var(--_num);
+  text-align: right;
+  color: var(--_ink);
+  outline: none;
+  backdrop-filter: blur(8px);
+}

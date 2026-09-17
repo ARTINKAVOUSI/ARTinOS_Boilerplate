@@ -1,0 +1,57 @@
+:where(.aui-vector) {
+  --_well: var(--ui-well, rgba(0, 0, 0, 0.16));
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_h: var(--ui-h-comp, 23px);
+  --_radius: var(--ui-r-comp, 6px);
+  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
+}
+
+.aui-vector {
+  display: grid;
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  gap: 3px;
+  min-width: 0;
+}
+.aui-vector__cell {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: var(--_h);
+  border-radius: var(--_radius);
+  background: var(--_well);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px var(--_edge);
+}
+.aui-vector__cell:hover {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px var(--_edge-lit);
+}
+.aui-vector__cell:focus-within {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px color-mix(in srgb, var(--_sig) 65%, transparent);
+}
+.aui-vector__axis {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  padding: 0 0 0 6px;
+  font: 700 9px var(--_num);
+  cursor: ew-resize;
+  user-select: none;
+  touch-action: none;
+}
+.aui-vector input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 5px 0 3px;
+  border: 0;
+  background: none;
+  font: 10px var(--_num);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--_ink);
+  outline: none;
+}

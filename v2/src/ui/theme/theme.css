@@ -1,0 +1,180 @@
+/* ARTINOS UI — optional theme
+   ==========================================================================
+   Every component in src/ui works without this file: each one carries its own
+   fallback values (the Frost world). Import this once to get the full token
+   set and the six material worlds, then switch with `data-world` on any
+   element:
+
+     <html data-world="graphite">
+
+   A world moves the glass, its edge light, the body a control is cut from and
+   the active insert moving through it — not just the hue.
+   ========================================================================== */
+
+:root {
+  /* signal */
+  --ui-sig: #6fe3c0;
+  --ui-sig-warm: #e8b27a;
+  --ui-sig-rose: #e88f9b;
+  --ui-sig-soft: rgba(111, 227, 192, 0.24);
+  --ui-sig-line: rgba(111, 227, 192, 0.55);
+
+  /* ink */
+  --ui-ink: rgba(255, 255, 255, 0.94);
+  --ui-ink-2: rgba(255, 255, 255, 0.66);
+  --ui-ink-3: rgba(255, 255, 255, 0.4);
+  --ui-ink-4: rgba(255, 255, 255, 0.24);
+
+  /* geometry */
+  --ui-r-panel: 12px;
+  --ui-r-comp: 6px;
+  --ui-r-micro: 4px;
+  --ui-h-comp: 23px;
+
+  /* type */
+  --ui-face: 'Inter', 'SF Pro Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ui-num: 'SF Mono', ui-monospace, 'Roboto Mono', Menlo, monospace;
+
+  /* motion */
+  --ui-ease: cubic-bezier(0.2, 0.7, 0.25, 1);
+  --ui-t-fast: 110ms;
+  --ui-t-mid: 190ms;
+  --ui-t-slow: 420ms;
+
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ui-t-fast: 1ms;
+    --ui-t-mid: 1ms;
+    --ui-t-slow: 1ms;
+  }
+}
+
+/* 02 · FROST GLASS — the canonical ARTINOS surface */
+:root,
+[data-world='frost'] {
+  --ui-glass: rgba(255, 255, 255, 0.1);
+  --ui-glass-top: rgba(255, 255, 255, 0.19);
+  --ui-blur: 26px;
+  --ui-sat: 1.24;
+  --ui-grain: 0.05;
+  --ui-edge: rgba(255, 255, 255, 0.17);
+  --ui-edge-lit: rgba(255, 255, 255, 0.55);
+  --ui-depth: 0 26px 64px rgba(0, 0, 0, 0.34), 0 3px 10px rgba(0, 0, 0, 0.18);
+  --ui-body: rgba(255, 255, 255, 0.085);
+  --ui-body-in: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+  --ui-active-a: rgba(255, 255, 255, 0.74);
+  --ui-active-b: rgba(255, 255, 255, 0.5);
+  --ui-active-lit: rgba(255, 255, 255, 0.92);
+  --ui-ink-active: rgba(16, 20, 22, 0.82);
+  --ui-seam: rgba(16, 20, 22, 0.6);
+  --ui-well: rgba(0, 0, 0, 0.16);
+  
+}
+
+/* 01 · CLEAR GLASS — highest transmission, lightest mass */
+[data-world='clear'] {
+  --ui-glass: rgba(255, 255, 255, 0.055);
+  --ui-glass-top: rgba(255, 255, 255, 0.13);
+  --ui-blur: 14px;
+  --ui-sat: 1.3;
+  --ui-grain: 0.03;
+  --ui-edge: rgba(255, 255, 255, 0.2);
+  --ui-edge-lit: rgba(255, 255, 255, 0.62);
+  --ui-depth: 0 18px 44px rgba(0, 0, 0, 0.26), 0 2px 8px rgba(0, 0, 0, 0.14);
+  --ui-body: rgba(255, 255, 255, 0.055);
+  --ui-body-in: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  --ui-active-a: rgba(255, 255, 255, 0.62);
+  --ui-active-b: rgba(255, 255, 255, 0.42);
+  --ui-active-lit: rgba(255, 255, 255, 0.85);
+  --ui-ink-active: rgba(18, 22, 24, 0.8);
+  --ui-seam: rgba(20, 24, 26, 0.55);
+  --ui-well: rgba(0, 0, 0, 0.13);
+  
+}
+
+/* 03 · SATIN GLASS — silkier, porcelain active regions */
+[data-world='satin'] {
+  --ui-glass: rgba(246, 248, 247, 0.14);
+  --ui-glass-top: rgba(255, 255, 255, 0.24);
+  --ui-blur: 30px;
+  --ui-sat: 1.1;
+  --ui-grain: 0.058;
+  --ui-edge: rgba(255, 255, 255, 0.22);
+  --ui-edge-lit: rgba(255, 255, 255, 0.6);
+  --ui-depth: 0 28px 70px rgba(0, 0, 0, 0.3), 0 3px 10px rgba(0, 0, 0, 0.16);
+  --ui-body: rgba(255, 255, 255, 0.1);
+  --ui-body-in: inset 0 1px 0 rgba(255, 255, 255, 0.26), inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+  --ui-active-a: rgba(255, 255, 255, 0.8);
+  --ui-active-b: rgba(244, 248, 246, 0.58);
+  --ui-active-lit: rgba(255, 255, 255, 0.96);
+  --ui-ink-active: rgba(24, 30, 30, 0.78);
+  --ui-seam: rgba(24, 30, 30, 0.48);
+  --ui-well: rgba(0, 0, 0, 0.12);
+  
+}
+
+/* 04 · GRAPHITE FROST — smoked, long-session professional */
+[data-world='graphite'] {
+  --ui-glass: rgba(18, 20, 23, 0.52);
+  --ui-glass-top: rgba(255, 255, 255, 0.09);
+  --ui-blur: 30px;
+  --ui-sat: 1.02;
+  --ui-grain: 0.07;
+  --ui-edge: rgba(255, 255, 255, 0.11);
+  --ui-edge-lit: rgba(255, 255, 255, 0.38);
+  --ui-depth: 0 30px 74px rgba(0, 0, 0, 0.52), 0 3px 10px rgba(0, 0, 0, 0.3);
+  --ui-body: rgba(255, 255, 255, 0.055);
+  --ui-body-in: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --ui-active-a: rgba(255, 255, 255, 0.3);
+  --ui-active-b: rgba(255, 255, 255, 0.16);
+  --ui-active-lit: rgba(255, 255, 255, 0.46);
+  --ui-ink-active: rgba(255, 255, 255, 0.95);
+  --ui-seam: rgba(255, 255, 255, 0.7);
+  --ui-well: rgba(0, 0, 0, 0.34);
+  
+}
+
+/* 05 · OPAL STONE GLASS — chalk / mineral, carved controls */
+[data-world='opal'] {
+  --ui-glass: rgba(228, 226, 220, 0.26);
+  --ui-glass-top: rgba(255, 255, 255, 0.26);
+  --ui-blur: 36px;
+  --ui-sat: 0.88;
+  --ui-grain: 0.085;
+  --ui-edge: rgba(255, 255, 255, 0.26);
+  --ui-edge-lit: rgba(255, 255, 255, 0.58);
+  --ui-depth: 0 30px 72px rgba(0, 0, 0, 0.32), 0 4px 12px rgba(0, 0, 0, 0.18);
+  --ui-body: rgba(255, 255, 255, 0.13);
+  --ui-body-in: inset 0 2px 3px rgba(0, 0, 0, 0.1), inset 0 -1px 0 rgba(255, 255, 255, 0.28);
+  --ui-active-a: rgba(255, 255, 255, 0.72);
+  --ui-active-b: rgba(238, 238, 232, 0.52);
+  --ui-active-lit: rgba(255, 255, 255, 0.9);
+  --ui-ink-active: rgba(38, 40, 38, 0.8);
+  --ui-seam: rgba(38, 40, 38, 0.42);
+  --ui-well: rgba(0, 0, 0, 0.14);
+  
+}
+
+/* 06 · MONOLITH — densest body, glass survives underneath */
+[data-world='monolith'] {
+  --ui-glass: rgba(30, 28, 25, 0.46);
+  --ui-glass-top: rgba(255, 255, 255, 0.1);
+  --ui-blur: 42px;
+  --ui-sat: 1.06;
+  --ui-grain: 0.095;
+  --ui-edge: rgba(255, 255, 255, 0.13);
+  --ui-edge-lit: rgba(255, 255, 255, 0.34);
+  --ui-depth: 0 36px 90px rgba(0, 0, 0, 0.5), 0 5px 14px rgba(0, 0, 0, 0.3);
+  --ui-body: rgba(255, 255, 255, 0.07);
+  --ui-body-in: inset 0 1px 0 rgba(255, 255, 255, 0.13), inset 0 -2px 4px rgba(0, 0, 0, 0.28);
+  --ui-active-a: rgba(255, 255, 255, 0.28);
+  --ui-active-b: rgba(255, 255, 255, 0.13);
+  --ui-active-lit: rgba(255, 255, 255, 0.42);
+  --ui-ink-active: rgba(255, 255, 255, 0.94);
+  --ui-seam: rgba(255, 255, 255, 0.66);
+  --ui-well: rgba(0, 0, 0, 0.3);
+  
+}

@@ -1,0 +1,55 @@
+:where(.aui-filedrop) {
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_radius: var(--ui-r-comp, 6px);
+}
+.aui-filedrop {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 76px;
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed var(--_edge);
+  border-radius: var(--_radius);
+  background: rgba(0, 0, 0, 0.1);
+  font: 11px var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  color: var(--_ink);
+  cursor: pointer;
+  transition: border-color 140ms, background 140ms;
+}
+.aui-filedrop:hover {
+  border-color: var(--_edge-lit);
+}
+.aui-filedrop[data-over] {
+  border-color: var(--_sig);
+  background: color-mix(in srgb, var(--_sig) 10%, transparent);
+}
+.aui-filedrop:focus-visible {
+  outline: 1px solid var(--_sig);
+  outline-offset: 2px;
+}
+.aui-filedrop:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.aui-filedrop svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--_ink-3);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.aui-filedrop__hint {
+  font-size: 9.5px;
+  color: var(--_ink-3);
+}

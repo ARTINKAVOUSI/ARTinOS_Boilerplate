@@ -1,0 +1,90 @@
+:where(.aui-section) {
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  --_ink-4: var(--ui-ink-4, rgba(255, 255, 255, 0.24));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --_ease: var(--ui-ease, cubic-bezier(0.2, 0.7, 0.25, 1));
+}
+
+.aui-section {
+  min-width: 0;
+  font-family: var(--_face);
+}
+.aui-section + .aui-section {
+  border-top: 1px solid var(--_edge);
+}
+.aui-section__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+}
+.aui-section__toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font: 560 11px var(--_face);
+  color: var(--_ink-2);
+  text-align: left;
+  cursor: pointer;
+}
+.aui-section__toggle:hover {
+  color: var(--_ink);
+}
+.aui-section__toggle:focus-visible {
+  outline: 1px solid var(--_sig);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+.aui-section__toggle svg {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  fill: none;
+  stroke: var(--_ink-3);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 160ms var(--_ease);
+}
+.aui-section[data-open] .aui-section__toggle svg {
+  transform: rotate(90deg);
+}
+.aui-section[data-open] .aui-section__toggle {
+  color: var(--_ink);
+}
+.aui-section__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.aui-section__meta {
+  font-weight: 400;
+  font-size: 9.5px;
+  color: var(--_ink-4);
+  white-space: nowrap;
+}
+.aui-section__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.aui-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 2px 0 9px 14px;
+  transition: opacity 160ms;
+}
+.aui-section[data-muted] .aui-section__body {
+  opacity: 0.4;
+}

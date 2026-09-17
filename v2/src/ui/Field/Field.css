@@ -1,0 +1,53 @@
+:where(.aui-field) {
+  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  --_label-w: var(--ui-label-w, 74px);
+  --_h: var(--ui-h-comp, 23px);
+  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+}
+
+.aui-field {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: var(--_label-w) minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+  min-width: 0;
+  min-height: var(--_h);
+  font: 11px/1.2 var(--_face);
+}
+.aui-field[data-layout='stack'] {
+  grid-template-columns: minmax(0, 1fr) auto;
+  row-gap: 4px;
+}
+.aui-field[data-layout='stack'] .aui-field__label {
+  grid-column: 1 / -1;
+}
+.aui-field__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--_ink-2);
+}
+.aui-field__control {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.aui-field__control > * {
+  flex: 1;
+  min-width: 0;
+}
+.aui-field__trailing {
+  display: flex;
+  align-items: center;
+}
+.aui-field__hint {
+  grid-column: 2 / -1;
+  font-size: 9.5px;
+  color: var(--_ink-3);
+}
+.aui-field[data-layout='stack'] .aui-field__hint {
+  grid-column: 1 / -1;
+}

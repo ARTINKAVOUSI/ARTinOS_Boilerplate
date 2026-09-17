@@ -1,0 +1,27 @@
+:where(.aui-sparkline) {
+  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+  --_ink-4: var(--ui-ink-4, rgba(255, 255, 255, 0.24));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_warm: var(--ui-sig-warm, #e8b27a);
+}
+.aui-sparkline {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+  color: var(--_sig);
+}
+.aui-sparkline[data-tone='warm'] { color: var(--_warm); }
+.aui-sparkline[data-tone='neutral'] { color: var(--_ink-2); }
+.aui-sparkline__line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.aui-sparkline__threshold {
+  stroke: var(--_ink-4);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke;
+}

@@ -1,0 +1,96 @@
+:where(.aui-color) {
+  --_well: var(--ui-well, rgba(0, 0, 0, 0.16));
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_h: var(--ui-h-comp, 23px);
+  --_radius: var(--ui-r-comp, 6px);
+  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
+}
+
+.aui-color {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.aui-color[data-disabled] {
+  opacity: 0.45;
+}
+.aui-color__well {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--_h);
+  padding: 0 7px 0 3px;
+  border-radius: var(--_radius);
+  background: var(--_well);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px var(--_edge);
+}
+.aui-color__well:hover {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px var(--_edge-lit);
+}
+.aui-color__well:focus-within {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px color-mix(in srgb, var(--_sig) 65%, transparent);
+}
+.aui-color__swatch {
+  flex: 0 0 auto;
+  width: 26px;
+  height: calc(var(--_h) - 6px);
+  border-radius: calc(var(--_radius) - 2px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+/* The native picker sits invisibly over the swatch. */
+.aui-color input[type='color'] {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: calc(var(--_h) - 6px);
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.aui-color__hex {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 10.5px var(--_num);
+  text-align: right;
+  text-transform: lowercase;
+  color: var(--_ink);
+  outline: none;
+}
+.aui-color__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.aui-color__swatches button {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  transition: transform 120ms;
+}
+.aui-color__swatches button:hover {
+  transform: scale(1.12);
+}
+.aui-color__swatches button[aria-pressed='true'] {
+  box-shadow: 0 0 0 1.5px var(--_ink), inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+.aui-color__swatches button:focus-visible {
+  outline: 1px solid var(--_sig);
+  outline-offset: 2px;
+}

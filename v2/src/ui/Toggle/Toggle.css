@@ -1,0 +1,61 @@
+:where(.aui-toggle) {
+  --_body: var(--ui-body, rgba(255, 255, 255, 0.085));
+  --_body-in: var(--ui-body-in, inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.14));
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_active-a: var(--ui-active-a, rgba(255, 255, 255, 0.74));
+  --_active-lit: var(--ui-active-lit, rgba(255, 255, 255, 0.92));
+  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_ease: var(--ui-ease, cubic-bezier(0.2, 0.7, 0.25, 1));
+  --_mid: var(--ui-t-mid, 190ms);
+  --_w: 30px;
+  --_hgt: 17px;
+}
+.aui-toggle[data-size='sm'] {
+  --_w: 24px;
+  --_hgt: 14px;
+}
+
+.aui-toggle {
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 auto !important;
+  width: var(--_w);
+  height: var(--_hgt);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--_body);
+  box-shadow: var(--_body-in), inset 0 0 0 1px var(--_edge);
+  cursor: pointer;
+  transition: background var(--_mid) var(--_ease), box-shadow var(--_mid) var(--_ease);
+}
+.aui-toggle__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(var(--_hgt) - 4px);
+  height: calc(var(--_hgt) - 4px);
+  border-radius: 50%;
+  background: var(--_ink-3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform var(--_mid) var(--_ease), background var(--_mid) var(--_ease);
+}
+.aui-toggle[aria-checked='true'] {
+  background: linear-gradient(180deg, var(--_active-lit), var(--_active-a));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 0 1px var(--_edge);
+}
+.aui-toggle[aria-checked='true'] .aui-toggle__knob {
+  transform: translateX(calc(var(--_w) - var(--_hgt)));
+  background: #fff;
+  box-shadow: 0 0 0 1.5px var(--_sig), 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.aui-toggle:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.aui-toggle:focus-visible {
+  outline: 1px solid var(--_sig);
+  outline-offset: 2px;
+}

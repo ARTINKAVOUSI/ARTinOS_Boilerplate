@@ -1,0 +1,68 @@
+:where(.aui-tabs) {
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  --_ink-4: var(--ui-ink-4, rgba(255, 255, 255, 0.24));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+}
+
+.aui-tabs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.aui-tabs__list {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid var(--_edge);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.aui-tabs__list button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 5px 0 7px;
+  border: 0;
+  background: none;
+  font: 11px var(--_face);
+  color: var(--_ink-3);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 150ms;
+}
+.aui-tabs__list button:hover {
+  color: var(--_ink);
+}
+.aui-tabs__list button[aria-selected='true'] {
+  color: var(--_ink);
+  font-weight: 560;
+}
+.aui-tabs__list button[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--_ink);
+}
+.aui-tabs__list button:focus-visible {
+  outline: 1px solid var(--_sig);
+  outline-offset: 1px;
+}
+.aui-tabs__badge {
+  font-size: 9px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--_ink-4);
+}
+.aui-tabs__panel {
+  min-height: 0;
+  padding-top: 8px;
+}

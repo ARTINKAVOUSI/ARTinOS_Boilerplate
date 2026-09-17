@@ -1,0 +1,118 @@
+.aui-toasts {
+  position: fixed;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(340px, calc(100vw - 32px));
+  pointer-events: none;
+  font-family: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+}
+.aui-toasts[data-placement='bottom-right'] {
+  right: 16px;
+  bottom: 16px;
+}
+.aui-toasts[data-placement='top-right'] {
+  top: 16px;
+  right: 16px;
+}
+.aui-toasts[data-placement='bottom-center'] {
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.aui-toast {
+  --_tone: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 8px 10px 12px;
+  border-radius: 10px;
+  background: rgba(26, 27, 30, 0.86);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  color: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  pointer-events: auto;
+  animation: aui-toast-in 200ms cubic-bezier(0.2, 0.7, 0.25, 1);
+}
+.aui-toast[data-tone='success'] { --_tone: var(--ui-sig, #6fe3c0); }
+.aui-toast[data-tone='warning'] { --_tone: var(--ui-sig-warm, #e8b27a); }
+.aui-toast[data-tone='error'] { --_tone: var(--ui-sig-rose, #e88f9b); }
+@keyframes aui-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aui-toast {
+    animation: none;
+  }
+}
+.aui-toast__dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--_tone);
+  box-shadow: 0 0 8px var(--_tone);
+}
+.aui-toast__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+.aui-toast__text strong {
+  font-weight: 600;
+}
+.aui-toast__text span {
+  color: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+}
+.aui-toast__action {
+  flex: 0 0 auto;
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: inherit;
+  cursor: pointer;
+}
+.aui-toast__action:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.aui-toast__close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  cursor: pointer;
+}
+.aui-toast__close:hover {
+  color: var(--ui-ink, #fff);
+  background: rgba(255, 255, 255, 0.08);
+}
+.aui-toast__close svg {
+  width: 9px;
+  height: 9px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}

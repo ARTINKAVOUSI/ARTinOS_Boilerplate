@@ -1,0 +1,39 @@
+:where(.aui-badge) {
+  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_warm: var(--ui-sig-warm, #e8b27a);
+  --_rose: var(--ui-sig-rose, #e88f9b);
+  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --_tone: var(--_ink-2);
+}
+.aui-badge[data-tone='live'] { --_tone: var(--_sig); }
+.aui-badge[data-tone='warm'] { --_tone: var(--_warm); }
+.aui-badge[data-tone='danger'] { --_tone: var(--_rose); }
+
+.aui-badge {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--_tone) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--_tone) 28%, var(--_edge));
+  font: 500 9.5px var(--_face);
+  letter-spacing: 0.01em;
+  color: var(--_tone);
+  white-space: nowrap;
+}
+.aui-badge[data-tone='neutral'] {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px var(--_edge);
+}
+.aui-badge__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}

@@ -1,0 +1,72 @@
+:where(.aui-knob) {
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  --_active-a: var(--ui-active-a, rgba(255, 255, 255, 0.74));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
+}
+.aui-knob {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--_face);
+}
+.aui-knob__dial {
+  cursor: ns-resize;
+  touch-action: none;
+  border-radius: 50%;
+  outline: none;
+}
+.aui-knob__dial:focus-visible {
+  box-shadow: 0 0 0 1px var(--_sig);
+}
+.aui-knob svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.aui-knob__track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.aui-knob__value {
+  fill: none;
+  stroke: var(--_active-a);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.aui-knob__dial:active .aui-knob__value {
+  stroke: var(--_sig);
+}
+.aui-knob__cap {
+  fill: rgba(255, 255, 255, 0.1);
+  stroke: var(--_edge);
+}
+.aui-knob__pointer {
+  stroke: var(--_ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.aui-knob__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+.aui-knob__text span {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 9.5px;
+  color: var(--_ink-3);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.aui-knob__text b {
+  font: 400 9.5px var(--_num);
+  color: var(--_ink);
+}

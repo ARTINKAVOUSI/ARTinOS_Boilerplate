@@ -1,0 +1,44 @@
+:where(.aui-toolbar) {
+  --_glass: var(--ui-glass, rgba(255, 255, 255, 0.1));
+  --_glass-top: var(--ui-glass-top, rgba(255, 255, 255, 0.19));
+  --_blur: var(--ui-blur, 26px);
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
+  --_depth: var(--ui-depth, 0 26px 64px rgba(0, 0, 0, 0.34), 0 3px 10px rgba(0, 0, 0, 0.18));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+}
+.aui-toolbar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  color: var(--_ink);
+  font-family: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+}
+.aui-toolbar[aria-orientation='vertical'] {
+  flex-direction: column;
+}
+.aui-toolbar[data-floating] {
+  padding: 4px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, var(--_glass-top), transparent 60%), var(--_glass);
+  -webkit-backdrop-filter: blur(var(--_blur)) saturate(1.2);
+  backdrop-filter: blur(var(--_blur)) saturate(1.2);
+  box-shadow: var(--_depth), inset 0 1px 0 var(--_edge-lit), inset 0 0 0 1px var(--_edge);
+}
+.aui-toolbar__separator {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 14px;
+  margin: 0 3px;
+  background: var(--_edge);
+}
+.aui-toolbar[aria-orientation='vertical'] .aui-toolbar__separator {
+  width: 14px;
+  height: 1px;
+  margin: 3px 0;
+}
+.aui-toolbar__spacer {
+  flex: 1;
+}

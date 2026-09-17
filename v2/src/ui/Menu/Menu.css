@@ -1,0 +1,77 @@
+.aui-menu {
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  --_rose: var(--ui-sig-rose, #e88f9b);
+  position: fixed;
+  z-index: 10000;
+  box-sizing: border-box;
+  min-width: 170px;
+  max-height: 70vh;
+  padding: 4px;
+  overflow: auto;
+  border-radius: 9px;
+  background: rgba(26, 27, 30, 0.86);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  font: 11px var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  color: var(--_ink);
+  outline: none;
+  transition: opacity 100ms;
+}
+.aui-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 25px;
+  padding: 0 8px 0 5px;
+  border-radius: 5px;
+  cursor: default;
+  user-select: none;
+}
+.aui-menu__item[data-active] {
+  background: rgba(255, 255, 255, 0.1);
+}
+.aui-menu__item[aria-disabled] {
+  opacity: 0.38;
+}
+.aui-menu__item[data-danger] {
+  color: var(--_rose);
+}
+.aui-menu__icon {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  color: var(--_ink-3);
+}
+.aui-menu__icon svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.aui-menu__text {
+  flex: 1;
+  white-space: nowrap;
+}
+.aui-menu__shortcut {
+  padding-left: 16px;
+  font-size: 10px;
+  color: var(--_ink-3);
+}
+.aui-menu__separator {
+  height: 1px;
+  margin: 4px 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.aui-menu__label {
+  padding: 6px 8px 3px 26px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--_ink-3);
+}

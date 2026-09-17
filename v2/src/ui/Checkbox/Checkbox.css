@@ -1,0 +1,76 @@
+:where(.aui-checkbox) {
+  --_body: var(--ui-body, rgba(255, 255, 255, 0.085));
+  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
+  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
+  --_active-a: var(--ui-active-a, rgba(255, 255, 255, 0.74));
+  --_active-lit: var(--ui-active-lit, rgba(255, 255, 255, 0.92));
+  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+  --_ink-active: var(--ui-ink-active, rgba(16, 20, 22, 0.82));
+  --_sig: var(--ui-sig, #6fe3c0);
+  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+}
+
+.aui-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 19px;
+  font: 11px/1.2 var(--_face);
+  color: var(--_ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+.aui-checkbox[data-disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+.aui-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+.aui-checkbox__box {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--_body);
+  box-shadow: inset 0 0 0 1px var(--_edge);
+  transition: background 140ms, box-shadow 140ms;
+}
+.aui-checkbox__box svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: var(--_ink-active);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 140ms, transform 140ms;
+}
+.aui-checkbox:hover .aui-checkbox__box {
+  box-shadow: inset 0 0 0 1px var(--_edge-lit);
+}
+.aui-checkbox input:checked + .aui-checkbox__box,
+.aui-checkbox input:indeterminate + .aui-checkbox__box {
+  background: linear-gradient(180deg, var(--_active-lit), var(--_active-a));
+}
+.aui-checkbox input:checked + .aui-checkbox__box svg,
+.aui-checkbox input:indeterminate + .aui-checkbox__box svg {
+  opacity: 1;
+  transform: none;
+}
+.aui-checkbox input:focus-visible + .aui-checkbox__box {
+  outline: 1px solid var(--_sig);
+  outline-offset: 2px;
+}
+.aui-checkbox input:checked ~ .aui-checkbox__text {
+  color: var(--_ink);
+}
