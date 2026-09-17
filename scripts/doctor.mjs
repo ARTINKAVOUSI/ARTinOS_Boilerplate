@@ -6,9 +6,13 @@ const manifest = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf
 let failures = 0
 const report = (ok, message) => { console.log(`${ok ? 'OK' : 'FAIL'} ${message}`); if (!ok) failures++ }
 report(Number(process.versions.node.split('.')[0]) >= 20, `Node ${process.versions.node}`)
-for (const folder of await readdir(path.join(root, 'packages'))) {
-  const location = path.join(root, 'packages', folder)
-  const pkg = JSON.parse(await readFile(path.join(location, 'package.json'), 'utf8'))
+for (const entry of await readdir(path.join(root, 'packages'), { withFileTypes: true })) {
+  // Only package folders count; archives or notes dropped into packages/ are ignored.
+  if (!entry.isDirectory()) continue
+  const location = path.join(root, 'packages', entry.name)
+  let pkg
+  try { pkg = JSON.parse(await readFile(path.join(location, 'package.json'), 'utf8')) }
+  catch { continue }
   const entries = Object.values(pkg.exports ?? {}).filter(value => typeof value === 'string' && value.startsWith('./') && !value.includes('*'))
   for (const entry of entries) {
     try { await access(path.resolve(location, entry)); report(true, `${pkg.name} ${entry}`) }

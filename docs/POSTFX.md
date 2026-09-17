@@ -18,6 +18,10 @@ import { Bloom, SSGI, TRAA } from '@artinos/modules/postfx'
 <TRAA order={900} />
 ```
 
+### SSGI
+
+SSGI outputs raw indirect light (a separate RGB texture) and ambient occlusion (a single-channel texture). The pipeline adds a `diffuseColor` attachment to the scene pass while SSGI is enabled and composites `beauty·AO + albedo·GI`. Sampling density follows the quality tier (low 1×8, balanced 2×8, high 3×12, ultra 4×16 slices×steps). `postfx.ssgi.*` exposes GI and AO intensity, radius, thickness, distribution, backface lighting and temporal filtering. GTAO likewise multiplies by the AO texture's red channel only.
+
 The Studio PostFX panel can enable/disable every effect, edit parameters, change order, enable/disable the whole chain and apply PostFX presets.
 
 ## Provider effects

@@ -1,0 +1,24 @@
+{
+  "name": "@artinos/scenes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Preset, fully configured, ready-to-use 3D scenes for React Three Fiber + three/webgpu.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./core": "./src/core/index.ts",
+    "./adaptive-room": "./src/adaptive-room/index.ts",
+    "./adaptive-room/model": "./src/adaptive-room/model/index.ts",
+    "./artinos": "./src/artinos/index.ts"
+  },
+  "peerDependencies": {
+    "@react-three/fiber": "10.0.0-alpha.2",
+    "react": "19.2.0",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@artinos/runtime": "file:../runtime"
+  }
+}

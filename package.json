@@ -23,6 +23,7 @@
     "@artinos/metablock": "file:packages/metablock",
     "@artinos/modules": "file:packages/modules",
     "@artinos/r3f": "file:packages/r3f",
+    "@artinos/scenes": "file:packages/scenes",
     "@artinos/ui": "file:packages/ui",
     "@mediapipe/tasks-vision": "0.10.35",
     "@react-three/drei": "11.0.0-alpha.5",

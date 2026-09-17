@@ -7,6 +7,7 @@
     { "path": "./packages/inputflow" },
     { "path": "./packages/ui" },
     { "path": "./packages/graph" },
+    { "path": "./packages/scenes" },
     { "path": "./packages/r3f" }
   ]
 }

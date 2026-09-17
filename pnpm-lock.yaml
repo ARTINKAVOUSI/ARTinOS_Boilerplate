@@ -26,6 +26,9 @@ importers:
       '@artinos/runtime':
         specifier: file:packages/runtime
         version: link:packages/runtime
+      '@artinos/scenes':
+        specifier: file:packages/scenes
+        version: link:packages/scenes
       '@artinos/ui':
         specifier: file:packages/ui
         version: link:packages/ui
@@ -135,6 +138,9 @@ importers:
       '@artinos/inputflow':
         specifier: file:../inputflow
         version: link:../inputflow
+      '@artinos/metablock':
+        specifier: file:../metablock
+        version: link:../metablock
       '@artinos/modules':
         specifier: file:../modules
         version: link:../modules
@@ -144,9 +150,18 @@ importers:
       '@artinos/ui':
         specifier: file:../ui
         version: link:../ui
+      lucide-react:
+        specifier: ^0.546.0
+        version: 0.546.0(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
 
   packages/runtime:
     dependencies:
@@ -160,20 +175,24 @@ importers:
         specifier: 0.185.1
         version: 0.185.1
 
-  packages/ui:
+  packages/scenes:
     dependencies:
-      '@artinos/graph':
-        specifier: file:../graph
-        version: link:../graph
-      '@artinos/inputflow':
-        specifier: file:../inputflow
-        version: link:../inputflow
-      '@artinos/modules':
-        specifier: file:../modules
-        version: link:../modules
+      '@react-three/fiber':
+        specifier: 10.0.0-alpha.2
+        version: 10.0.0-alpha.2(@types/react@19.2.18)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(three@0.185.1)
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
       '@artinos/runtime':
         specifier: file:../runtime
         version: link:../runtime
+
+  packages/ui:
+    dependencies:
       lucide-react:
         specifier: ^0.546.0
         version: 0.546.0(react@19.2.0)

@@ -1,6 +1,35 @@
 # `@artinos/scenes` — Package Plan
 
-Status: **plan / not started** · Target branch: `v0.4` · Source: `packages/adaptive-open-front-3d-room (fable stable).zip`
+Status: **phases 0–4 implemented** on `feat/scenes-package` · Source: `packages/adaptive-open-front-3d-room (fable stable).zip`
+
+## Implementation status (2026-09-16)
+
+Done:
+- **Phase 0:** API spike. R3F v10 runs `useFrame` priorities highest-first (v9 ran lowest-first), and `{ phase }` options are v10-only, so the package targets v10 (D2). `PostProcessing` is deprecated in favour of `RenderPipeline`.
+- **Phase 1:** package, core and model, plus 15 model tests and 2 boundary tests.
+- **Phase 2:** R3F layer, `AdaptiveRoomScene`, `SceneCanvas`, `ScenePostFX`, controller and shortcuts.
+- **Phase 3:** `ArtinosProject.stage` opt-out, and the SSGI blend and parameters in the runtime pipeline.
+- **Phase 4:** `@artinos/scenes/artinos` kit, `src/adaptive-room.project.tsx` and 7 adapter tests. Verified in the studio on WebGPU.
+
+Where the build differs from the plan:
+- Presets stay in one file, and `lighting.ts` holds modes, schemes and Kelvin helpers together.
+- The room's per-frame work runs in one `start`-phase job inside `AdaptiveRoom` rather than in separate layout, camera and subject components. v10's reversed priorities made cross-component ordering fragile.
+- The recipe/controller is room-specific (`useAdaptiveRoomController`) rather than a generic `useSceneController`.
+- Plan item 4.2 changed: the kit does not register its own PostFX effects. It enables the host's `postfx.ssgi` and `postfx.traa` parameters (one writer per value). Room exposure and SSGI strength map to `render.exposure` and `postfx.ssgi.*`.
+- A new `scene.room.themeSurface` flag lets theme switches keep driving plaster colour and roughness without a second writer.
+
+Bugs found and fixed along the way:
+- SSGI and GTAO AO textures are single-channel, so blending with the vec4 tinted the image red. Fixed in the zip pipeline and the runtime pipeline.
+- `RectAreaLightNode.setLTC` was missing.
+- Swapped geometries and plaster maps leaked; fog and background were not restored on unmount.
+- `scripts/doctor.mjs` crashed on non-directory entries in `packages/`.
+
+Open:
+- Phase 5 (panel on `@artinos/ui`) and phase 6 (hardening).
+- Inert stage controls still appear in the Scene panel when a project turns those stage sections off.
+- Scaling BallSim population with the quality tier.
+- Registering plaster maps as runtime resources.
+- Screenshot parity against the zip.
 
 `@artinos/scenes` is a library of **preset, fully configured, ready-to-use 3D scenes**. You drop in a
 scene, pass your content as children, and get architecture, camera, lighting, staging, themes,

@@ -14,6 +14,10 @@ The Environment family supports blank/clean/neutral/studio/softbox/warehouse/gal
 
 Perspective and orthographic cameras share presets for front/back/top/bottom/left/right/isometric/product/portrait/wide/cinematic/macro. Controls include target, FOV, focal-length/lens conversion, lens presets, film gauge, zoom and clipping range. Named views capture and restore the live camera transform; the project stores view-layout state for single, horizontal, vertical and quad hosts.
 
+## Stage ownership
+
+A project can keep only part of the stage with `stage` in `defineArtinosProject`. For example, `stage: { camera: false, lighting: false }` leaves the camera and lights to the project, and `stage: false` keeps only `RenderSettings`. Render settings (tone mapping, DPR, shadow-map type) always stay mounted. When the stage's shadow section is off, renderer shadow maps stay enabled for the project's own lights. Preset scenes from `@artinos/scenes` use this; the Adaptive Room kit turns off every section.
+
 ## Controls
 
 Orbit, Map, Trackball, Fly, CameraControls and Pointer Lock are available as the main camera-control family. Presentation, Transform and Pivot controls are exported directly for object interaction.

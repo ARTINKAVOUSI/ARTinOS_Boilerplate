@@ -4,6 +4,8 @@ export type PostFXType='bloom'|'dof'|'afterImage'|'anamorphic'|'chromaticAberrat
 export interface PostFXEffect{id:string;type:PostFXType;enabled?:boolean;order?:number;params?:Record<string,number|boolean>;resources?:string[];minTier?:'low'|'balanced'|'high'|'ultra';fallback?:'disable'|PostFXType;supportedBackend?:'webgpu'|'webgl2'|'both'}
 export interface PostFXRuntimeState{id:string;type:PostFXType;state:'disabled'|'active'|'fallback'|'unavailable';reason?:string;fallback?:PostFXType;backend:'webgpu'|'webgl2';tier:string}
 const tierRank={low:0,balanced:1,high:2,ultra:3} as const
+/** SSGI sampling density per quality tier (hemisphere slices × steps per side). */
+export const SSGI_TIER_SAMPLING:Record<keyof typeof tierRank,{slices:number;steps:number}>={low:{slices:1,steps:8},balanced:{slices:2,steps:8},high:{slices:3,steps:12},ultra:{slices:4,steps:16}}
 export const resolvePostFXCapability=(effect:PostFXEffect,backend:'webgpu'|'webgl2',tier:keyof typeof tierRank,hasResource:(id:string)=>boolean):Pick<PostFXRuntimeState,'state'|'reason'|'fallback'>=>{if(effect.enabled===false)return{state:'disabled'};const supported=effect.supportedBackend,incompatible=supported&&supported!=='both'&&supported!==backend,missing=effect.resources?.find(id=>!hasResource(id)),belowTier=effect.minTier&&tierRank[tier]<tierRank[effect.minTier],reason=incompatible?`Requires ${supported==='webgpu'?'WebGPU':'WebGL2'}`:missing?`Missing ${missing}`:belowTier?`Requires ${effect.minTier} quality`:undefined;if(!reason)return{state:'active'};return effect.fallback&&effect.fallback!=='disable'?{state:'fallback',reason,fallback:effect.fallback}:{state:'unavailable',reason}}
 
 export class PostFXController{
