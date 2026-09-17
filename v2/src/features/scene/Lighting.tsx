@@ -32,7 +32,7 @@ export function kelvinToHex(kelvin: number) {
 
 function KeyLight({ position, intensity, color, shadows, size }: { position: [number, number, number]; intensity: number; color: string; shadows: boolean; size: number }) {
   return (
-    <directionalLight
+    <directionalLight name="KeyLight"
       position={position}
       intensity={intensity}
       color={color}

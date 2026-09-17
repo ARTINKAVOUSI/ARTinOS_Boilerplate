@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { PanelManifest } from '../app/panel'
-import { graphs, parameterOptions, useGraphs } from '../app/graphs'
+import { GRAPH_TEMPLATES, effectOptions, graphs, objectOptions, parameterOptions, useGraphs } from '../app/graphs'
 import { applyLiveControl, buildLiveGraph } from '../app/live-graph'
+import { nodePreviews } from '../app/node-preview'
 import { PanelBar } from '../app/studio/PanelBar'
 import { Icons } from '../app/studio/icons'
 import { NodeGraph } from '../ui/NodeGraph/NodeGraph'
 import { LiveGraph } from '../ui/NodeGraph/LiveGraph'
-import type { GraphDiagnostic } from '../ui/NodeGraph/graph'
+import { GRAPH_DOMAINS, type GraphDiagnostic, type GraphDomain } from '../ui/NodeGraph/graph'
 import { useSignalSnapshot } from '../features/input/signals'
 import { Segmented } from '../ui/Segmented/Segmented'
 import { Select } from '../ui/Select/Select'
@@ -14,6 +15,7 @@ import { Button } from '../ui/Button/Button'
 import { IconButton } from '../ui/IconButton/IconButton'
 import { TextField } from '../ui/TextField/TextField'
 import { Toggle } from '../ui/Toggle/Toggle'
+import { Menu, type MenuEntry } from '../ui/Menu/Menu'
 import { useToast } from '../ui/Toast/Toast'
 
 type View = 'live' | 'edit'
@@ -43,7 +45,8 @@ function LivePipeline() {
 
 function Graph() {
   const toast = useToast()
-  const { documents, readouts } = useGraphs()
+  const { documents, readouts, diagnostics: runtimeNotes, compiled } = useGraphs()
+  const frames = useSyncExternalStore(nodePreviews.subscribe, nodePreviews.getFrames, nodePreviews.getFrames)
   const [view, setView] = useState<View>('live')
   const [activeId, setActiveId] = useState<string | null>(documents[0]?.id ?? null)
   const [diagnostics, setDiagnostics] = useState<GraphDiagnostic[]>([])
@@ -55,15 +58,43 @@ function Graph() {
     if (active && active.id !== activeId) setActiveId(active.id)
   }, [active, activeId])
 
+  // GPU nodes get rendered thumbnails; ask only for the graph on screen.
+  const build = active && active.domain === 'gpu' ? compiled[active.id] : undefined
+  useEffect(() => {
+    if (view !== 'edit' || !build) {
+      nodePreviews.keepOnly([])
+      return
+    }
+    for (const [nodeId, node] of build.values) nodePreviews.request(nodeId, node)
+    nodePreviews.keepOnly([...build.values.keys()])
+  }, [view, build])
+
   const signals = useSignalSnapshot(4).map(([name]) => name)
   const parameters = useMemo(parameterOptions, [])
+  const effects = useMemo(effectOptions, [])
+  const sources = useMemo(() => ({ signals, parameters, effects, objects: objectOptions() }), [signals, parameters, effects])
+
   const blocked = diagnostics.some(item => item.severity === 'error')
   const running = documents.filter(document => document.running).length
+  const notes = useMemo(
+    () => (active ? [...(runtimeNotes[active.id] ?? []), ...(active.domain === 'gpu' ? compiled[active.id]?.diagnostics ?? [] : [])] : []),
+    [active, runtimeNotes, compiled],
+  )
 
-  const newGraph = () => {
-    setActiveId(graphs.create(documents.length ? undefined : 'Modulation'))
+  const newFrom = (templateId: string) => {
+    const template = GRAPH_TEMPLATES.find(item => item.id === templateId) ?? GRAPH_TEMPLATES[0]
+    setActiveId(graphs.create(template.id === 'blank' ? `Graph ${documents.length + 1}` : template.name, template.domain, template.build()))
     setView('edit')
   }
+
+  const templateMenu: MenuEntry[] = [
+    { type: 'label', label: 'New graph from' },
+    ...GRAPH_TEMPLATES.map<MenuEntry>(template => ({
+      id: template.id,
+      label: `${template.name} · ${template.domain}`,
+      onSelect: () => newFrom(template.id),
+    })),
+  ]
 
   return (
     <div className="artinos-panel-suite v2-graph-suite">
@@ -81,13 +112,16 @@ function Graph() {
 
         {view === 'edit' && documents.length > 0 && (
           <>
-            <Select
-              size="sm"
-              label="Graph"
-              value={active?.id ?? ''}
-              onChange={setActiveId}
-              options={documents.map(document => ({ value: document.id, label: document.name }))}
-            />
+            <Select size="sm" label="Graph" value={active?.id ?? ''} onChange={setActiveId} options={documents.map(document => ({ value: document.id, label: document.name }))} />
+            {active && (
+              <Select<GraphDomain>
+                size="sm"
+                label="Domain"
+                value={active.domain}
+                onChange={domain => graphs.setDomain(active.id, domain)}
+                options={GRAPH_DOMAINS.map(domain => ({ value: domain, label: domain }))}
+              />
+            )}
             {active && (
               <label className="v2-inline-toggle">
                 Run
@@ -96,10 +130,14 @@ function Graph() {
             )}
           </>
         )}
-        {view === 'live' && <span className="artinos-panel-summary v2-bar-summary">{running} OF {documents.length} GRAPHS RUNNING</span>}
+        {view === 'live' && (
+          <span className="artinos-panel-summary v2-bar-summary">
+            {running} OF {documents.length} GRAPHS RUNNING
+          </span>
+        )}
 
         <span className="v2-spacer" />
-        <IconButton size="sm" label="New graph" icon={Icons.plus} onClick={newGraph} />
+        <Menu align="end" items={templateMenu} trigger={<Button size="sm" icon={Icons.plus}>New</Button>} />
         {view === 'edit' && active && <IconButton size="sm" label={`Rename ${active.name}`} icon={Icons.bookmark} onClick={() => setRenaming(true)} />}
         <IconButton size="sm" label="Export graphs" icon={Icons.download} onClick={() => download('artinos-graphs.json', graphs.exportJSON())} />
         <IconButton size="sm" label="Import graphs" icon={Icons.upload} onClick={() => file.current?.click()} />
@@ -134,25 +172,28 @@ function Graph() {
         <LivePipeline />
       ) : !documents.length ? (
         <div className="v2-empty">
-          No graphs yet. A graph shapes live signals into controls — audio.bass into Bloom strength, an oscillator into camera height. It then appears in the live pipeline, wired to what it drives.
-          <div style={{ marginTop: 10 }}>
-            <Button size="sm" variant="primary" icon={Icons.plus} onClick={newGraph}>
-              New graph
-            </Button>
+          No graphs yet. A graph wires live signals into the pipeline — audio into bloom, an oscillator into an object, a TSL chain into the effect stack.
+          <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+            {GRAPH_TEMPLATES.slice(1).map(template => (
+              <Button key={template.id} size="sm" variant={template.id === 'audio-pulse' ? 'primary' : 'ghost'} onClick={() => newFrom(template.id)} title={template.description}>
+                {template.name}
+              </Button>
+            ))}
           </div>
         </div>
       ) : (
         active && (
           <>
-            {blocked && !active.running && <div className="artinos-panel-notice">Fix the errors below to run this graph.</div>}
+            {active.domain === 'gpu' && <div className="artinos-panel-notice">A GPU graph renders through the Graph effect in PostFX; switch that effect on to see it.</div>}
             <NodeGraph
               key={active.id}
               className="v2-graph-editor"
               value={active.graph}
               onChange={graph => graphs.setGraph(active.id, graph)}
               readouts={readouts[active.id]}
-              signals={signals}
-              parameters={parameters}
+              frames={frames}
+              sources={sources}
+              runtimeDiagnostics={notes}
               onDiagnostics={setDiagnostics}
             />
           </>
@@ -196,7 +237,7 @@ export const panel: PanelManifest = {
   id: 'graph',
   title: 'Graph',
   description: 'The running pipeline as nodes, and the graphs that drive it',
-  keywords: ['nodes', 'pipeline', 'modulation', 'binding', 'signals', 'reactive', 'live'],
+  keywords: ['nodes', 'pipeline', 'modulation', 'binding', 'signals', 'reactive', 'live', 'tsl'],
   order: 4,
   footer: GraphFooter,
   component: Graph,

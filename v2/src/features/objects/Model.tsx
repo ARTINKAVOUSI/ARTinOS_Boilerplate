@@ -40,7 +40,7 @@ export function Model({ url = '/models/glass-rings.glb', dracoPath = '/draco/', 
   })
 
   return (
-    <group ref={group} position={position} scale={scale}>
+    <group name="Model" ref={group} position={position} scale={scale}>
       {center ? (
         <Center bottom position-y={floor / scale}>
           <primitive object={object} />

@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import type { Object3D, Scene } from 'three'
 import type { WebGPURenderer } from 'three/webgpu'
 
 /**
@@ -32,6 +33,7 @@ const HISTORY = 120
 const FPS_HISTORY = 60
 
 let renderer: WebGPURenderer | null = null
+let scene: Scene | null = null
 let snapshot: RuntimeSnapshot = {
   backend: null,
   fps: 0,
@@ -96,6 +98,20 @@ export const runtime = {
     listeners.forEach(listener => listener())
   },
   getRenderer: () => renderer,
+
+  /** The live scene, set by the Stage while the canvas is mounted. */
+  setScene(next: Scene | null) {
+    scene = next
+  },
+  getScene: () => scene,
+  /** Named objects in the live scene — what a scene graph can address. */
+  sceneObjects(): Object3D[] {
+    const found: Object3D[] = []
+    scene?.traverse(object => {
+      if (object.name) found.push(object)
+    })
+    return found
+  },
   getSnapshot: () => snapshot,
   subscribe(listener: () => void) {
     start()

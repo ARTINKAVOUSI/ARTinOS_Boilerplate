@@ -267,7 +267,7 @@ Still to port from v1, in phase 8: `ColorWheel/ColorArea/GradientEditor`, `Curve
 | Runtime HUD | `app/studio/RuntimeHUD.tsx` | The original strip readout (backend · fps · micrograph · ms · tier) and its dock-bar popover (fps graph, frame budget, backend, resolution, render, memory, quality tiers that set the pixel-ratio ceiling) |
 | Brand chip | in `DockShell` | `ARTINOS / <active panel>` over the canvas |
 | Console toast | `app/studio/ConsoleToast.tsx` | Latest warning/error; the count opens the Console panel |
-| Node graph | `ui/NodeGraph` | Portable node editor (schema, validation, evaluation) plus the live pipeline view; the studio binds its tokens in dock.css |
+| Node graph | `ui/NodeGraph` | The full graph system: five domains (signal, parameter, scene, render, gpu), schema + validation + evaluation (`graph.ts`), TSL compilation (`gpu.ts`), editing model with undo/redo, clipboard, groups and auto-layout (`editor.ts`), the editor with ports, in-place fields, value plots and GPU thumbnails (`NodeGraph.tsx`, `NodeFields.tsx`, `NodePreview.tsx`), and the live pipeline view (`LiveGraph.tsx`). The studio binds its tokens in dock.css |
 | Command palette | `ui/CommandPalette` | The studio’s only search: every panel, feature, control (“Glass Rings › Dispersion” — opens the owning panel and scrolls to the row), source path, layout undo/redo/reset, material worlds, toggle any feature |
 | Feature card | `app/studio/FeatureCard.tsx` | The original parameter card: name, count, reset, switch; rows with reset and ⋯ actions (favorite, pin, copy, paste) |
 
@@ -280,7 +280,7 @@ Still to port from v1, in phase 8: `ColorWheel/ColorArea/GradientEditor`, `Curve
 | Assets | `panels/Assets.tsx` | Drop images, glTF and `.cube` files; apply as backdrop, environment, transition target, model or colour grade |
 | Library | `panels/Library.tsx` | Every feature, panel and UI component with its path; copy path, switch features |
 | Console | `panels/Console.tsx` | Captured log with level filter, message filter, pause, clear, expandable entries |
-| Graph | `panels/Graph.tsx` | Live pipeline (inputs → signals → graphs → controls → scene → effect chain → canvas, every node carrying the real switch or slider) and the node editor for authored graphs |
+| Graph | `panels/Graph.tsx` | Live pipeline (inputs → signals → graphs → controls → scene → effect chain → canvas, every node carrying the real switch or slider) and the node editor: templates per domain, signal/parameter/effect/object pickers, diagnostics, and GPU graphs rendered by the Graph effect |
 | Telemetry | `panels/Telemetry.tsx` | KPIs, frame-time and fps graphs, load meters; Diagnostics tab with Stats HUD, Signal Monitor and the three.js Inspector |
 | Appearance | `panels/Appearance.tsx` | Material world, interface visibility, shortcuts, reset layout / features |
 

@@ -41,7 +41,7 @@ export function ReactiveOrb({ signal = 'audio.bass', energy = 0, color = '#79ffe
   })
 
   const orb = (
-    <mesh ref={mesh} castShadow position={position} userData={{ outline: true }}>
+    <mesh name="ReactiveOrb" ref={mesh} castShadow position={position} userData={{ outline: true }}>
       <icosahedronGeometry args={[1, 8]} />
       <meshPhysicalMaterial ref={material} color={color} emissive={emissive} roughness={roughness} metalness={metalness} clearcoat={1} clearcoatRoughness={0.08} />
     </mesh>

@@ -4,26 +4,75 @@
   --ng-bg: var(--ui-surface-sunken, #12151a);
   --ng-grid: var(--ui-line-subtle, rgba(255, 255, 255, 0.05));
   --ng-node: var(--ui-surface-raised, #1c2128);
-  --ng-line: var(--ui-line, rgba(255, 255, 255, 0.12));
+  --ng-line: var(--ui-line, rgba(255, 255, 255, 0.14));
   --ng-text: var(--ui-text, #e7ebf0);
   --ng-label: var(--ui-text-label, rgba(231, 235, 240, 0.6));
   --ng-accent: var(--ui-accent, #5ad1c4);
   --ng-danger: var(--ui-danger, #ff6b6b);
+  --ng-warn: var(--ui-warn, #ffc46b);
   --ng-radius: 6px;
 
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 240px;
+  min-height: 220px;
   height: 100%;
   color: var(--ng-text);
   font-size: 11px;
   outline: none;
 }
 
+/* ── toolbar ─────────────────────────────────────────────────────────────── */
+.ngraph-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 6px;
+}
+.ngraph-toolbar button {
+  padding: 3px 8px;
+  border: 1px solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  background: none;
+  color: var(--ng-label);
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.ngraph-toolbar button:hover:not(:disabled) {
+  color: var(--ng-text);
+}
+.ngraph-toolbar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ngraph-toolbar button.is-on {
+  border-color: var(--ng-accent);
+  color: var(--ng-text);
+}
+.ngraph-toolbar-gap {
+  flex: 1;
+}
+.ngraph-toolbar-count {
+  color: var(--ng-label);
+  font-size: 9px;
+}
+.ngraph-toolbar-count.is-error {
+  color: var(--ng-danger);
+}
+
+/* ── stage: canvas + inspector ───────────────────────────────────────────── */
+.ngraph-stage {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-height: 0;
+}
 .ngraph-surface {
   position: relative;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--ng-line);
   border-radius: var(--ng-radius);
@@ -32,20 +81,21 @@
     linear-gradient(90deg, var(--ng-grid) 1px, transparent 1px) 0 0 / 20px 20px,
     var(--ng-bg);
   touch-action: none;
-  cursor: grab;
+  cursor: crosshair;
 }
-.ngraph-surface:active {
-  cursor: grabbing;
-}
-
 .ngraph-world {
   position: absolute;
   inset: 0;
   transform-origin: 0 0;
 }
+.ngraph-marquee {
+  position: absolute;
+  border: 1px dashed var(--ng-accent);
+  background: rgba(90, 209, 196, 0.1);
+  pointer-events: none;
+}
 
-/* One overlay in the same coordinate space as the nodes. `overflow: visible`
-   lets a wire run to a node the caller placed at a negative coordinate. */
+/* ── wires ───────────────────────────────────────────────────────────────── */
 .ngraph-wires {
   position: absolute;
   inset: 0;
@@ -67,6 +117,9 @@
   stroke-dasharray: 4 3;
   opacity: 1;
 }
+.ngraph-wire-line.is-muted {
+  opacity: 0.25;
+}
 .ngraph-wire-hit {
   fill: none;
   stroke: transparent;
@@ -78,6 +131,50 @@
   opacity: 1;
 }
 
+/* ── groups ──────────────────────────────────────────────────────────────── */
+.ngraph-group {
+  position: absolute;
+  border: 1px dashed var(--ng-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.ngraph-group header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 4px;
+}
+.ngraph-group header button {
+  padding: 0 3px;
+  border: 0;
+  background: none;
+  color: var(--ng-label);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.ngraph-group header input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--ng-label);
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ngraph-group header input:focus {
+  outline: 1px solid var(--ng-accent);
+}
+.ngraph-group header span {
+  color: var(--ng-label);
+  font-size: 8px;
+}
+
+/* ── nodes ───────────────────────────────────────────────────────────────── */
 .ngraph-node {
   position: absolute;
   border: 1px solid var(--ng-line);
@@ -92,40 +189,64 @@
 .ngraph-node.is-error {
   border-color: var(--ng-danger);
 }
-
+.ngraph-node.is-warning {
+  border-color: var(--ng-warn);
+}
 .ngraph-node-head {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   height: 26px;
-  padding: 0 8px;
+  padding: 0 6px;
   border-bottom: 1px solid var(--ng-line);
   border-radius: var(--ng-radius) var(--ng-radius) 0 0;
   background: rgba(255, 255, 255, 0.04);
   cursor: move;
   touch-action: none;
 }
+/* One accent per node family, so a graph reads at a glance. */
+.ngraph-node[data-category='source'] .ngraph-node-head { box-shadow: inset 2px 0 0 #7aa2ff; }
+.ngraph-node[data-category='math'] .ngraph-node-head { box-shadow: inset 2px 0 0 #b98cff; }
+.ngraph-node[data-category='shape'] .ngraph-node-head { box-shadow: inset 2px 0 0 #5ad1c4; }
+.ngraph-node[data-category='logic'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffc46b; }
+.ngraph-node[data-category='output'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ff8fa3; }
+.ngraph-node[data-category='scene'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffd27a; }
+.ngraph-node[data-category='render'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ff8fa3; }
+.ngraph-node[data-category='gpu'] .ngraph-node-head { box-shadow: inset 2px 0 0 #8ce7ff; }
+
+.ngraph-fold {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ng-label);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
 .ngraph-node-title {
   flex: 1;
   overflow: hidden;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
 }
 .ngraph-node-readout {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
+  font-size: 9px;
   color: var(--ng-accent);
 }
 
+/* ── ports ───────────────────────────────────────────────────────────────── */
+.ngraph-ports {
+  position: relative;
+}
 .ngraph-port {
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   height: 14px;
   padding: 0;
   border: 0;
@@ -137,38 +258,42 @@
   touch-action: none;
 }
 .ngraph-port.is-in {
-  left: -6px;
+  left: -5px;
 }
 .ngraph-port.is-out {
-  right: -6px;
+  right: -5px;
 }
-.ngraph-port-dot {
+.ngraph-port i {
+  flex: 0 0 auto;
   width: 9px;
   height: 9px;
   border: 1px solid var(--ng-line);
   border-radius: 50%;
   background: var(--ng-bg);
 }
-.ngraph-port:hover .ngraph-port-dot,
-.ngraph-port.is-wired .ngraph-port-dot {
+.ngraph-port.type-object i {
+  border-radius: 2px;
+}
+.ngraph-port.type-node i {
+  rotate: 45deg;
+  border-radius: 2px;
+}
+.ngraph-port:hover i,
+.ngraph-port.is-wired i {
   border-color: var(--ng-accent);
   background: var(--ng-accent);
 }
-.ngraph-port.is-required:not(.is-wired) .ngraph-port-dot {
+.ngraph-port.is-required:not(.is-wired) i {
   border-color: var(--ng-danger);
 }
-.ngraph-port-label {
+.ngraph-port b {
+  font-weight: 400;
   white-space: nowrap;
 }
-.ngraph-port.is-out .ngraph-port-label {
-  display: none;
-}
 
+/* ── fields ──────────────────────────────────────────────────────────────── */
 .ngraph-fields {
-  position: absolute;
-  left: 0;
-  right: 0;
-  padding: 0 8px;
+  padding: 0 7px;
 }
 .ngraph-field {
   display: flex;
@@ -184,9 +309,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ngraph-field input,
+.ngraph-field input[type='number'],
+.ngraph-field input[type='text'],
+.ngraph-field input[type='search'],
 .ngraph-field select {
-  width: 84px;
+  width: 88px;
   height: 18px;
   padding: 0 4px;
   border: 1px solid var(--ng-line);
@@ -201,25 +328,100 @@
   border-color: var(--ng-accent);
   outline: none;
 }
+.ngraph-vector {
+  display: flex;
+  gap: 2px;
+}
+.ngraph-vector input {
+  width: 30px !important;
+}
+.ngraph-check {
+  appearance: none;
+  position: relative;
+  width: 22px;
+  height: 12px;
+  border: 1px solid var(--ng-line);
+  border-radius: 7px;
+  background: var(--ng-bg);
+  cursor: pointer;
+}
+.ngraph-check::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ng-label);
+  transition: translate 120ms ease, background 120ms ease;
+}
+.ngraph-check:checked {
+  border-color: var(--ng-accent);
+}
+.ngraph-check:checked::after {
+  translate: 10px 0;
+  background: var(--ng-accent);
+}
 
+/* ── previews ────────────────────────────────────────────────────────────── */
+.ngraph-preview {
+  padding: 2px 7px 0;
+  color: var(--ng-accent);
+}
+.ngraph-preview-canvas {
+  display: block;
+  width: 100%;
+  height: 44px;
+  border-radius: 3px;
+  background: var(--ng-bg);
+}
+.ngraph-preview-pending {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  border-radius: 3px;
+  background: var(--ng-bg);
+  color: var(--ng-label);
+  font-size: 9px;
+}
+
+/* ── palette ─────────────────────────────────────────────────────────────── */
 .ngraph-palette {
   position: absolute;
   z-index: 5;
   display: flex;
-  max-height: 260px;
+  flex-direction: column;
+  width: 340px;
+  max-height: 280px;
   padding: 6px;
-  gap: 10px;
-  overflow: auto;
+  gap: 6px;
   border: 1px solid var(--ng-line);
   border-radius: var(--ng-radius);
   background: var(--ng-node);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
+.ngraph-palette > input {
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--ng-line);
+  border-radius: 4px;
+  background: var(--ng-bg);
+  color: var(--ng-text);
+  font: inherit;
+  font-size: 10px;
+}
+.ngraph-palette-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  overflow: auto;
+}
 .ngraph-palette-group {
   display: flex;
   flex-direction: column;
   min-width: 96px;
-  gap: 2px;
+  gap: 1px;
 }
 .ngraph-palette-group b {
   padding: 2px 4px;
@@ -229,7 +431,7 @@
   text-transform: uppercase;
 }
 .ngraph-palette-group button {
-  padding: 3px 6px;
+  padding: 2px 6px;
   border: 0;
   border-radius: 3px;
   background: none;
@@ -242,7 +444,102 @@
 .ngraph-palette-group button:hover {
   background: rgba(255, 255, 255, 0.08);
 }
+.ngraph-palette-empty {
+  padding: 6px;
+  color: var(--ng-label);
+  font-size: 10px;
+}
 
+/* ── inspector ───────────────────────────────────────────────────────────── */
+.ngraph-inspector {
+  display: flex;
+  flex: 0 0 196px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  overflow: auto;
+  border: 1px solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  background: var(--ng-bg);
+}
+.ngraph-inspector header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ngraph-inspector header input {
+  flex: 1;
+  min-width: 0;
+  height: 20px;
+  padding: 0 4px;
+  border: 1px solid var(--ng-line);
+  border-radius: 3px;
+  background: var(--ng-node);
+  color: var(--ng-text);
+  font: inherit;
+  font-size: 10px;
+}
+.ngraph-inspector header button {
+  padding: 0 5px;
+  border: 1px solid var(--ng-line);
+  border-radius: 3px;
+  background: none;
+  color: var(--ng-label);
+  font: inherit;
+  cursor: pointer;
+}
+.ngraph-inspector-note {
+  margin: 0;
+  color: var(--ng-label);
+  font-size: 9px;
+  line-height: 1.4;
+}
+.ngraph-inspector-rows {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ng-label);
+  font-size: 9px;
+}
+.ngraph-inspector-rows b {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--ng-text);
+}
+.ngraph-inspector-empty {
+  color: var(--ng-label);
+  font-size: 9px;
+  line-height: 1.5;
+}
+.ngraph-inspector-empty ul {
+  margin: 6px 0 0;
+  padding-left: 14px;
+}
+.ngraph-diagnostics {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+.ngraph-diagnostics button {
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ng-label);
+  font: inherit;
+  font-size: 9px;
+  text-align: left;
+  cursor: pointer;
+}
+.ngraph-diagnostics button.is-error {
+  color: var(--ng-danger);
+}
+.ngraph-diagnostics button.is-warning {
+  color: var(--ng-warn);
+}
+
+/* ── status ──────────────────────────────────────────────────────────────── */
 .ngraph-status {
   display: flex;
   align-items: center;
@@ -271,11 +568,8 @@
   font-size: 9px;
   cursor: pointer;
 }
-.ngraph-status-error + button {
-  margin-left: 0;
-}
 
-/* ── Live view ──────────────────────────────────────────────────────────── */
+/* ── live view ───────────────────────────────────────────────────────────── */
 .nglive .ngraph-surface {
   cursor: grab;
 }
@@ -346,18 +640,6 @@
   color: var(--ng-text);
   text-align: right;
 }
-.ngraph-wire-line.is-muted {
-  opacity: 0.25;
-}
-
-/* One accent per pipeline stage, so a column reads at a glance. */
-.nglive-node[data-tone='input'] .ngraph-node-head { box-shadow: inset 2px 0 0 #7aa2ff; }
-.nglive-node[data-tone='logic'] .ngraph-node-head { box-shadow: inset 2px 0 0 #b98cff; }
-.nglive-node[data-tone='parameter'] .ngraph-node-head { box-shadow: inset 2px 0 0 #5ad1c4; }
-.nglive-node[data-tone='scene'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffc46b; }
-.nglive-node[data-tone='render'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ff8fa3; }
-.nglive-node[data-tone='output'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffffff; }
-
 .nglive-control input[type='checkbox'] {
   appearance: none;
   position: relative;
@@ -388,3 +670,9 @@
   translate: 10px 0;
   background: var(--ng-accent);
 }
+.nglive-node[data-tone='input'] .ngraph-node-head { box-shadow: inset 2px 0 0 #7aa2ff; }
+.nglive-node[data-tone='logic'] .ngraph-node-head { box-shadow: inset 2px 0 0 #b98cff; }
+.nglive-node[data-tone='parameter'] .ngraph-node-head { box-shadow: inset 2px 0 0 #5ad1c4; }
+.nglive-node[data-tone='scene'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffc46b; }
+.nglive-node[data-tone='render'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ff8fa3; }
+.nglive-node[data-tone='output'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffffff; }

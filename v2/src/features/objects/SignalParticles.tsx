@@ -50,7 +50,7 @@ export function SignalParticles({ count = 1800, radius = 2.8, size = 0.014, colo
   })
 
   return (
-    <points ref={points} geometry={geometry}>
+    <points name="SignalParticles" ref={points} geometry={geometry}>
       <pointsMaterial ref={material} color={color} size={size * 10} sizeAttenuation transparent opacity={0.55} depthWrite={false} blending={AdditiveBlending} />
     </points>
   )

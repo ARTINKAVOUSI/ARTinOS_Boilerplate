@@ -63,7 +63,7 @@ export function GlassRings({
 
   if (!torus || !cylinder) return null
   return (
-    <group rotation={[-Math.PI / 2, -0.5, 0]} scale={scale} position={position}>
+    <group name="GlassRings" rotation={[-Math.PI / 2, -0.5, 0]} scale={scale} position={position}>
       <mesh geometry={torus.geometry} position={torus.position} rotation={torus.rotation} scale={torus.scale} castShadow userData={{ outline: true }}>
         <meshPhysicalMaterial
           color="#ffffff"

@@ -1,10 +1,12 @@
-import { useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, type ReactNode } from 'react'
+import { useThree } from '@react-three/fiber'
 import type { WebGPURenderer } from 'three/webgpu'
 import { WebGPUCanvas, type RendererBackend } from '../features/canvas/WebGPUCanvas'
 import type { DiscoveredFeature } from './feature'
 import { FeatureBoundary } from './FeatureBoundary'
 import { byKind } from './registry'
 import { useStudio, type FeatureState } from './store'
+import { runtime } from './runtime'
 
 const selectFeatures = (state: { features: Record<string, FeatureState> }) => state.features
 
@@ -17,6 +19,16 @@ export function renderFeature(feature: DiscoveredFeature, state: FeatureState | 
       <Component {...props}>{children}</Component>
     </FeatureBoundary>
   )
+}
+
+/** Hands the live scene to the app, so graphs and panels can address objects. */
+function SceneProbe() {
+  const scene = useThree(state => state.scene)
+  useEffect(() => {
+    runtime.setScene(scene)
+    return () => runtime.setScene(null)
+  }, [scene])
+  return null
 }
 
 const canvasProviders = byKind('canvas-provider')
@@ -64,6 +76,7 @@ export function Stage({ onReady }: StageProps) {
   // need single-sample depth. FXAA / SMAA / TRAA do the anti-aliasing.
   return (
     <WebGPUCanvas dpr={[1, 2]} antialias={false} onReady={onReady}>
+      <SceneProbe />
       {tree}
     </WebGPUCanvas>
   )
