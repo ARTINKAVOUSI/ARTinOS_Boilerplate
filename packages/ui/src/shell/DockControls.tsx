@@ -18,7 +18,7 @@ const SIZES: Array<{ id: 'min' | 'default' | 'max'; label: string }> = [
 ]
 
 const THEMES: Array<{ id: WorkspaceTheme; label: string }> = [
-  { id: 'glass', label: 'Glass' },
+  { id: 'workbench', label: 'Workbench' },
   { id: 'dark', label: 'Dark' },
   { id: 'light', label: 'Light' },
   { id: 'auto', label: 'Auto' },

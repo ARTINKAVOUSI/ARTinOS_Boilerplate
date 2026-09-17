@@ -1,0 +1,204 @@
+/* Capsule — the living surface (reference `.cap`).
+   The capsule is the whole instrument: a softer body, a denser active insert
+   moving through it, a seam at the exact value, and the name and value riding
+   inside in two inks that swap precisely at the seam, so each half stays
+   readable on whichever material it lands on.
+
+   --control-t (0…1) is written by the kernel during a drag; --pose-y by the
+   contact spring. State comes from kernel attributes: data-state="dragging",
+   data-precision, data-snapping, data-fast — plus data-pressed from the component. */
+
+.artinos-range {
+  position: relative;
+  display: block;
+  min-width: 0;
+  height: var(--ui-h-comp);
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-body);
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge);
+  overflow: hidden;
+  isolation: isolate;
+  cursor: ew-resize;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+  outline: none;
+  color: var(--ui-ink);
+  transform: translateZ(0) scaleY(var(--pose-y, 1));
+  transition:
+    box-shadow var(--ui-t-mid) var(--ui-ease),
+    background var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-range:focus-visible {
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+
+/* active optical material — a denser insert moving inside a softer body */
+.artinos-range-fill {
+  position: absolute;
+  inset: 1px auto 1px 1px;
+  width: calc(var(--control-t, 0) * 100% - 2px);
+  min-width: calc(var(--ui-r-active) * 2);
+  border-radius: calc(var(--ui-r-active) - 1px);
+  background: linear-gradient(180deg, var(--ui-active-lit) 0%, var(--ui-active-a) 42%, var(--ui-active-b) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.12),
+    1px 0 0 rgba(0, 0, 0, 0.1);
+  transition:
+    filter var(--ui-t-mid) var(--ui-ease),
+    box-shadow var(--ui-t-mid) var(--ui-ease);
+}
+
+/* the seam — quiet at rest, present under the hand */
+.artinos-range-seam {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: calc(var(--control-t, 0) * 100%);
+  width: 1.5px;
+  margin-left: -4px;
+  border-radius: 2px;
+  background: var(--ui-seam);
+  opacity: 0.55;
+  pointer-events: none;
+  transition:
+    opacity var(--ui-t-mid),
+    box-shadow var(--ui-t-mid);
+}
+
+/* the tick band — appears only with the hand, finer under precision */
+.artinos-range-ticks {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ui-t-mid) var(--ui-ease);
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.001) 0 calc(var(--tick-gap, 10%) - 1px),
+    var(--ui-ink-4) calc(var(--tick-gap, 10%) - 1px) var(--tick-gap, 10%)
+  );
+  -webkit-mask-image: linear-gradient(180deg, transparent 42%, #000 42%, #000 76%, transparent 76%);
+  mask-image: linear-gradient(180deg, transparent 42%, #000 42%, #000 76%, transparent 76%);
+}
+
+/* the name and value, drawn twice and clipped at the seam */
+.artinos-range-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  pointer-events: none;
+  font-size: 11px;
+}
+.artinos-range-text[data-ink='on'] {
+  color: var(--ui-ink-active);
+  clip-path: inset(0 calc(100% - var(--control-t, 0) * 100%) 0 0);
+}
+.artinos-range-text[data-ink='off'] {
+  color: var(--ui-ink-2);
+  clip-path: inset(0 0 0 calc(var(--control-t, 0) * 100%));
+}
+.artinos-range-value {
+  font-family: var(--ui-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.artinos-range-value > i {
+  margin-left: 1.5px;
+  font-size: 9.5px;
+  font-style: normal;
+  opacity: 0.55;
+}
+.artinos-range-text[data-ink='off'] .artinos-range-value {
+  color: var(--ui-ink);
+}
+.artinos-range-name {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* In a row the name already has its own column; inside, it only holds the space. */
+.artinos-field:not([data-layout='inline']) .artinos-range-name {
+  visibility: hidden;
+}
+
+/* a typed value replaces both inks while it is being edited */
+.artinos-range-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  border-radius: inherit;
+  background: var(--ui-option-fill);
+  font-family: var(--ui-num);
+  font-size: 10.5px;
+  text-align: right;
+  color: var(--ui-ink);
+  outline: none;
+}
+
+/* ticked — the band stays visible at rest (camera cards) */
+.artinos-range[data-variant='ticked'] .artinos-range-ticks,
+.artinos-pane[data-variant='camera'] .artinos-range-ticks {
+  opacity: 0.35;
+}
+
+/* states — material transformation, not recolour */
+.artinos-range:hover .artinos-range-seam { opacity: 0.9; }
+.artinos-range:hover { box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge-lit); }
+.artinos-range:hover .artinos-range-ticks { opacity: 0.5; }
+.artinos-range[data-state='dragging'] .artinos-range-ticks { opacity: 0.85; }
+.artinos-range[data-state='dragging'] .artinos-range-fill { filter: brightness(1.07); }
+.artinos-range[data-state='dragging'] .artinos-range-seam {
+  opacity: 1;
+  box-shadow: 0 0 8px var(--ui-sig-soft);
+  background: var(--ui-sig);
+}
+.artinos-range[data-fast] .artinos-range-ticks { opacity: 0.18; }
+.artinos-range[data-precision] .artinos-range-ticks {
+  opacity: 1;
+  --tick-gap: 5%;
+}
+.artinos-range[data-pressed] .artinos-range-fill { filter: brightness(0.94); }
+.artinos-range[data-snapping] .artinos-range-seam {
+  background: var(--ui-sig);
+  box-shadow: 0 0 12px var(--ui-sig-soft);
+}
+
+/* signal states carry a colour on the edge or the value — never colour alone */
+.artinos-range[data-state='bound'] {
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-sig-line);
+}
+.artinos-range[data-state='warn'] .artinos-range-text[data-ink='off'] .artinos-range-value {
+  color: var(--ui-sig-warm);
+}
+.artinos-range[data-state='fault'] {
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-sig-rose);
+}
+.artinos-range[data-state='fault'] .artinos-range-text[data-ink='off'] .artinos-range-value {
+  color: var(--ui-sig-rose);
+}
+.artinos-range[data-disabled] {
+  cursor: default;
+  opacity: 0.45;
+}
+
+/* compact — reference `.mc--compact` */
+.artinos-range[data-size='compact'] {
+  height: var(--ui-h-comp-sm);
+  border-radius: var(--ui-r-active);
+}
+.artinos-range[data-size='compact'] .artinos-range-text {
+  padding: 0 7px;
+  font-size: 10px;
+}

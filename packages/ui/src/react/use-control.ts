@@ -87,7 +87,7 @@ export function useControl(options: UseControlOptions): ControlBinding {
   const tracker = useMemo(() => new InteractionTracker(axis), [axis])
   const [snapshot, setSnapshot] = useState<ControlSnapshot>(() => ({
     state: 'idle',
-    flags: { precision: false, snapping: false, constrained: false },
+    flags: { precision: false, snapping: false, constrained: false, fast: false },
     value,
     origin: value,
     gestureStarted: false,
@@ -122,7 +122,13 @@ export function useControl(options: UseControlOptions): ControlBinding {
     if (!el) return
     const t = (next.value - spec.min) / (spec.max - spec.min || 1)
     el.style.setProperty('--control-t', String(Math.max(0, Math.min(1, t))))
-    if (live.current) live.current.textContent = formatRef.current(next.value)
+    const text = formatRef.current(next.value)
+    if (live.current) live.current.textContent = text
+    // A capsule draws its value twice — once in each ink, clipped at the seam —
+    // so every mirror has to follow the drag, or the two halves disagree.
+    el.querySelectorAll<HTMLElement>('[data-live-mirror]').forEach(node => {
+      node.textContent = text
+    })
   }, [spec.min, spec.max])
 
   const apply = useCallback(

@@ -138,7 +138,9 @@ export const TOKEN_GRAPH = tokenGraph
 export const tokenManifest = () => TOKEN_GRAPH.manifest()
 export const emitTokenCSS = (rootSelector?: string) => TOKEN_GRAPH.emitCSS(rootSelector)
 
+/** `workbench` is the default look and needs no attribute; `glass` is kept as its alias. */
 export const THEMES = {
+  workbench: { id: 'workbench', label: 'Workbench', material: 'frosted.standard', colorScheme: 'dark' },
   dark: { id: 'dark', label: 'Dark', material: 'frosted.standard', colorScheme: 'dark' },
   light: { id: 'light', label: 'Light', material: 'frosted.standard', colorScheme: 'light' },
   'high-contrast': { id: 'high-contrast', label: 'High Contrast', material: 'overlay', colorScheme: 'dark' },

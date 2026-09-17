@@ -17,6 +17,8 @@ export interface PanelWorkspaceProps {
   viewport: ReactNode
   persistKey?: string
   statusOverlay?: ReactNode
+  /** Rendered in the toolbar beside the dock controls. */
+  toolbarStatus?: ReactNode
 }
 
 /**
@@ -25,15 +27,15 @@ export interface PanelWorkspaceProps {
  *
  * State lives in `PanelHostProvider`; this component only decides what renders where.
  */
-export function PanelWorkspace({ panels, viewport, persistKey = 'artinos.panels', statusOverlay }: PanelWorkspaceProps) {
+export function PanelWorkspace({ panels, viewport, persistKey = 'artinos.panels', statusOverlay, toolbarStatus }: PanelWorkspaceProps) {
   return (
     <PanelHostProvider definitions={panels} persistKey={persistKey}>
-      <PanelWorkspaceSurface viewport={viewport} persistKey={persistKey} statusOverlay={statusOverlay} />
+      <PanelWorkspaceSurface viewport={viewport} persistKey={persistKey} statusOverlay={statusOverlay} toolbarStatus={toolbarStatus} />
     </PanelHostProvider>
   )
 }
 
-function PanelWorkspaceSurface({ viewport, persistKey, statusOverlay }: { viewport: ReactNode; persistKey: string; statusOverlay?: ReactNode }) {
+function PanelWorkspaceSurface({ viewport, persistKey, statusOverlay, toolbarStatus }: { viewport: ReactNode; persistKey: string; statusOverlay?: ReactNode; toolbarStatus?: ReactNode }) {
   const host = usePanelHost()
   const [paletteOpen, setPaletteOpen] = useState(false)
 
@@ -73,7 +75,7 @@ function PanelWorkspaceSurface({ viewport, persistKey, statusOverlay }: { viewpo
   const render = (dock: Dock) =>
     panelsInDock(host.layout, dock, known).map(id => <PanelFrame key={id} definition={byId.get(id)!} state={host.layout[id]} />)
 
-  const chrome = <DockToolbar onSearch={openPalette} />
+  const chrome = <DockToolbar onSearch={openPalette} status={toolbarStatus} />
 
   return (
     <>

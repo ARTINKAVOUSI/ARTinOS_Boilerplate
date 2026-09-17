@@ -10,27 +10,25 @@
     "./headless": "./src/headless/index.ts",
     "./primitives": "./src/primitives/index.ts",
     "./shell": "./src/shell/index.ts",
-    "./panels": "./src/panels/index.ts",
     "./theme": "./src/theme.ts",
     "./theme.css": "./src/theme.css",
     "./tokens.css": "./src/tokens.css",
+    "./worlds.css": "./src/worlds.css",
+    "./themes.css": "./src/themes.css",
+    "./components.css": "./src/components.css",
     "./instrument.css": "./src/instrument.css",
-    "./studio-panels.css": "./src/studio-panels.css",
     "./kernel": "./src/kernel/index.ts",
-    "./adapters": "./src/adapters/index.ts",
     "./registry.json": "./registry.json"
   },
   "dependencies": {
-    "@artinos/graph": "file:../graph",
-    "@artinos/inputflow": "file:../inputflow",
-    "@artinos/modules": "file:../modules",
-    "@artinos/runtime": "file:../runtime",
-    "lucide-react": "^0.546.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "lucide-react": "^0.546.0"
   },
   "bin": {
     "artinos": "./bin/artinos.mjs",
     "artinos-manifest": "./bin/artinos-manifest.mjs"
+  },
+  "peerDependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   }
 }

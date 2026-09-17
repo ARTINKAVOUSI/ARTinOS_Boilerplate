@@ -1,0 +1,88 @@
+/* Colour — the surface is the visualization (reference `.swatch`, `.hue`). */
+
+/* swatch — the whole bar is the colour and the picker */
+.artinos-color-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  height: var(--ui-h-comp);
+  padding: 0 8px;
+  border-radius: var(--ui-r-comp);
+  background: var(--swatch, #8dbbb4);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 1px 3px rgba(0, 0, 0, 0.18);
+  font-family: var(--ui-num);
+  font-size: 10.5px;
+  color: rgba(12, 20, 20, 0.78);
+  cursor: pointer;
+}
+.artinos-color-field::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.36), transparent 60%);
+  pointer-events: none;
+}
+.artinos-color-field > span {
+  position: relative;
+}
+.artinos-color-field > input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* hue rail */
+.artinos-hue {
+  position: relative;
+  height: 13px;
+  border-radius: var(--ui-r-micro);
+  background: linear-gradient(90deg, #e8574f, #e8b24f, #8fe84f, #4fe8b2, #4fb2e8, #8f4fe8, #e84fb2, #e8574f);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), inset 0 1px 3px rgba(0, 0, 0, 0.28);
+  cursor: ew-resize;
+  touch-action: none;
+  outline: none;
+}
+.artinos-hue:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-hue-thumb {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: calc(var(--hue-t, 0) * 100%);
+  width: 7px;
+  margin-left: -3.5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-b));
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+/* ramp — a reference gradient on the rail's body */
+.artinos-color-ramp {
+  height: 13px;
+  border-radius: var(--ui-r-micro);
+  background: var(--ramp, linear-gradient(90deg, #1b2720, #5c7666, #afc3b5, #ebefe9));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), inset 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+.artinos-color-ramp-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+  font-size: 9.5px;
+  color: var(--ui-ink-3);
+}
+
+/* The rail and its swatch sit 4px apart, as the reference's colour stack does —
+   a row gap is 3, so the swatch takes one more. */
+.artinos-hue + .artinos-color-field {
+  margin-top: 1px;
+}

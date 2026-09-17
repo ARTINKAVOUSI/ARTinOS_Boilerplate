@@ -1,7 +1,7 @@
 import { Component, Suspense, useMemo, type ErrorInfo, type PropsWithChildren, type ReactNode } from 'react'
 import { InputProvider } from '@artinos/inputflow'
 import { ArtinosCanvas, ArtinosRuntimeProvider, createArtinosRuntime, useResource } from '@artinos/runtime'
-import { MinimalShell, StudioShell } from '@artinos/ui'
+import { MinimalShell, StudioShell } from './studio'
 import { ProjectRuntime } from './ProjectRuntime'
 import { RuntimeEssentials } from './RuntimeEssentials'
 import { RuntimeStage } from './RuntimeStage'

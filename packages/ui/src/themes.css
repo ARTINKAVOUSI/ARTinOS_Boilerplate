@@ -1,0 +1,274 @@
+/* ARTINOS UI — optional themes
+   ==========================================================================
+   The default look needs no theme: tokens.css already *is* the workbench.
+   A theme is opt-in, set with `data-theme` on any element, and reassigns core
+   tokens only (--ui-*). It never touches a component rule, and roles re-derive
+   inside the themed scope on their own (see tokens.css, section 2).
+
+     workbench · glass   the default — declared here only so the ids resolve
+     dark                deeper tint for long sessions over a bright scene
+     light               dark ink on pale glass, for daylight desks
+     high-contrast       opaque surfaces, full-strength ink and lines
+     studio              the default look at a denser row
+     minimal             no material: flat, transparent, no blur
+
+   Contexts compose with any theme: data-context="compact" / "touch".
+   ========================================================================== */
+
+[data-theme='workbench'],
+[data-theme='glass'] {
+  color-scheme: dark;
+}
+
+[data-theme='dark'] {
+  --ui-pane-tint: #121816c7;
+  --ui-pane-sheen: linear-gradient(135deg, #ffffff10, #ffffff05);
+  --ui-appbar-fill: #121816e0;
+  --ui-float: #121816f2;
+  --ui-ground: #141a18;
+  color-scheme: dark;
+}
+
+/* A bright scene behind an `auto` workspace deepens the tint the same way. */
+[data-theme='auto'][data-backdrop='bright'] {
+  --ui-pane-tint: #151c1ab8;
+  --ui-appbar-fill: #151c1ad9;
+}
+
+[data-theme='light'] {
+  --ui-text: #1c2521;
+  --ui-text-strong: #0d1411;
+  --ui-text-label: #1c2521c9;
+  --ui-text-summary: #1c2521be;
+  --ui-text-body: #1c2521b8;
+  --ui-text-muted: #1c252199;
+  --ui-text-soft: #1c252185;
+  --ui-text-meta: #1c252175;
+  --ui-text-serial: #1c252162;
+  --ui-text-ghost: #1c25214f;
+
+  /* the same teal, turned down until it reads as ink on a lit ground */
+  --ui-accent: #1c6b60;
+  --ui-accent-strong: #0e4c44;
+  --ui-accent-pin: #1c6b60;
+  --ui-accent-dot: #12867a;
+  --ui-accent-wash: #12867a1f;
+  --ui-accent-line: #12867a59;
+  --ui-accent-glow: #12867a26;
+  --ui-warn: #8a5a12;
+  --ui-fault: #a3303a;
+  --ui-bind: #2d5f86;
+
+  --ui-line: #1c252124;
+  --ui-line-strong: #1c252137;
+  --ui-line-foot: #1c252120;
+  --ui-line-soft: #1c252118;
+  --ui-line-faint: #1c252117;
+  --ui-line-nest: #1c252125;
+
+  --ui-ground: #dfe6e2;
+  --ui-scrim: #f4f7f559;
+  --ui-focus: #0d1411;
+
+  --ui-hover-wash: #1c25210d;
+  --ui-row-hover: #1c25210a;
+  --ui-press-wash: #1c252114;
+
+  --ui-pane-border: #ffffffb3;
+  --ui-pane-sheen: linear-gradient(146deg, #ffffffb3 0%, #ffffff8c 24%, #ffffff59 58%, #1c25210a 100%);
+  --ui-pane-tint: #eef3f0a6;
+  --ui-pane-shadow:
+    0 12px 28px -10px #1c252126,
+    0 2px 8px -4px #1c25211f,
+    inset 0 1px 0 #fff,
+    inset 0 -22px 34px -28px #1c252114;
+  --ui-pane-shadow-raised:
+    0 18px 38px -12px #1c252133,
+    0 3px 10px -4px #1c252126,
+    inset 0 1px 0 #fff,
+    inset 0 -22px 34px -28px #1c252114;
+
+  --ui-range-border: #1c25212b;
+  --ui-range-border-hover: #1c252166;
+  --ui-range-well: linear-gradient(#1c252114, #1c252105);
+  --ui-range-inset: inset 0 2px 4px #1c25210d;
+  --ui-range-inset-hover: inset 0 2px 4px #1c252114, 0 0 0 1px #1c25210b;
+  --ui-range-fill: linear-gradient(#1c25212e, #1c252114);
+  --ui-range-fill-hover: linear-gradient(#1c25213b, #1c25211c);
+  --ui-range-fill-active: linear-gradient(#3f7a5f4a, #3f7a5f1f);
+  --ui-range-edge: #1c252175;
+  --ui-range-sheen: inset 0 1px #ffffff80;
+  --ui-range-seam: #1c2521d9;
+  --ui-range-value-shadow: 0 1px 4px #ffffffb3;
+  --ui-range-ticks: #1c252118;
+
+  --ui-seg-border: #1c252125;
+  --ui-seg-well: #1c25210d;
+  --ui-seg-inset: inset 0 1px 3px #1c25210d;
+  --ui-seg-text: #1c25219c;
+  --ui-seg-on: linear-gradient(#ffffffe6, #ffffff99);
+  --ui-seg-on-shadow: inset 0 1px #fff, 0 1px 2px #1c252126;
+
+  --ui-select-border: #1c25212d;
+  --ui-select-fill: #ffffff66;
+  --ui-option-fill: #eef3f0;
+  --ui-number-border: #1c252128;
+  --ui-number-well: #1c25210d;
+
+  --ui-switch-border: #1c25212c;
+  --ui-switch-well: #1c252114;
+  --ui-knob-border: #1c252140;
+  --ui-knob-fill: linear-gradient(#fff, #ffffffb3);
+  --ui-knob-shadow: 0 1px 3px #1c252126;
+  --ui-knob-tick: #1c2521;
+
+  --ui-tab-text: #1c25218d;
+  --ui-search-border: #1c252125;
+  --ui-search-well: #1c25210d;
+  --ui-search-placeholder: #1c252170;
+  --ui-pins-text: #1c252187;
+  --ui-pins-link: #1c2521b0;
+  --ui-pins-rule: #1c252130;
+  --ui-pins-empty: #1c252165;
+
+  --ui-vector-well: #1c25210d;
+  --ui-vector-border: #1c252124;
+  --ui-vector-axis: #1c25218d;
+  --ui-vector-title: #1c252196;
+
+  --ui-button-border: #1c25212b;
+  --ui-button-fill: #ffffff66;
+  --ui-button-fill-hover: #ffffffa6;
+  --ui-button-text: #1c2521b8;
+  --ui-icon: #1c252185;
+
+  --ui-object-text: #1c2521aa;
+  --ui-object-meta: #1c252178;
+  --ui-object-on: #ffffff99;
+  --ui-object-on-shadow: inset 0 1px #fff;
+  --ui-note: #1c252189;
+  --ui-log: #1c2521a7;
+  --ui-empty: #1c25218f;
+
+  --ui-swatch-border: #1c25215a;
+  --ui-ramp-border: #1c252138;
+  --ui-ramp-label: #1c25218f;
+
+  --ui-command-sheen: linear-gradient(136deg, #ffffffcc 0%, #ffffff9e 26%, #ffffff6b 58%, #1c25210a 100%);
+  --ui-command-tint: #eef3f0b3;
+  --ui-material-sheen: linear-gradient(120deg, #ffffffb3, #ffffff66);
+  --ui-material-fill: linear-gradient(#1c252138, #1c252117);
+  --ui-light-tint: #ffffff8c;
+  --ui-light-fill: linear-gradient(#1c252145, #1c25211c);
+  --ui-camera-well: #1c25210d;
+  --ui-type-fill: linear-gradient(#1c252166, #1c252133);
+  --ui-type-seam: #eef3f0;
+  --ui-type-select: linear-gradient(#ffffffe6, #ffffff99);
+
+  --ui-appbar-fill: #f4f7f5b3;
+  --ui-session: #1c252180;
+  --ui-float: #f4f7f5f2;
+  --ui-float-shadow: 0 18px 44px #1c252126;
+  --ui-handle-edge: #1c252140;
+  --ui-mark: #2f5a4730;
+
+  color-scheme: light;
+}
+
+[data-theme='high-contrast'] {
+  --ui-text: #fff;
+  --ui-text-label: #fff;
+  --ui-text-summary: #fff;
+  --ui-text-body: #fff;
+  --ui-text-muted: #e6e6e6;
+  --ui-text-soft: #d9d9d9;
+  --ui-text-meta: #d9d9d9;
+  --ui-text-serial: #cccccc;
+  --ui-text-ghost: #bfbfbf;
+  --ui-line: #ffffffb3;
+  --ui-line-strong: #fff;
+  --ui-line-foot: #ffffffb3;
+  --ui-line-soft: #ffffff80;
+  --ui-line-faint: #ffffff80;
+  --ui-line-nest: #ffffffb3;
+  --ui-blur: 0px;
+  --ui-pane-border: #fff;
+  --ui-pane-sheen: linear-gradient(#000, #000);
+  --ui-pane-tint: #000;
+  --ui-pane-shadow: inset 0 0 0 1px #fff;
+  --ui-pane-shadow-raised: inset 0 0 0 2px #fff;
+  --ui-accent-wash: #ffffff2b;
+  --ui-accent-line: #fff;
+  --ui-accent-glow: #ffffff4d;
+  --ui-hover-wash: #ffffff2b;
+  --ui-row-hover: #ffffff1f;
+  --ui-press-wash: #ffffff3d;
+  --ui-range-border: #fff;
+  --ui-range-fill: linear-gradient(#ffffff80, #ffffff80);
+  --ui-range-seam: #fff;
+  --ui-seg-border: #fff;
+  --ui-select-border: #fff;
+  --ui-number-border: #fff;
+  --ui-switch-border: #fff;
+  --ui-search-border: #fff;
+  --ui-vector-border: #fff;
+  --ui-button-border: #fff;
+  --ui-appbar-fill: #000;
+  --ui-float: #000;
+  color-scheme: dark;
+}
+
+[data-theme='studio'] {
+  --ui-row: 24px;
+  --ui-range-h: 20px;
+  --ui-control-h: 21px;
+  --ui-range-seam-top: 5px;
+  color-scheme: dark;
+}
+
+[data-theme='minimal'] {
+  --ui-blur: 0px;
+  --ui-pane-sheen: linear-gradient(transparent, transparent);
+  --ui-pane-tint: transparent;
+  --ui-pane-shadow: none;
+  --ui-pane-shadow-raised: none;
+  --ui-appbar-fill: transparent;
+  color-scheme: dark;
+}
+
+/* Contrast is pinned while a pointer gesture is live, so a dragged value never
+   loses legibility against a moving scene. useControl sets this attribute. */
+[data-interacting='true'] {
+  --ui-pane-tint: #1b2423a6;
+}
+
+[data-context~='compact'],
+[data-density='compact'] {
+  --ui-row: 24px;
+  --ui-range-h: 20px;
+  --ui-control-h: 21px;
+  --ui-range-seam-top: 5px;
+}
+
+[data-context~='touch'] {
+  --ui-row: 40px;
+  --ui-range-h: 34px;
+  --ui-control-h: 34px;
+  --ui-range-seam-top: 12px;
+}
+
+@media (forced-colors: active) {
+  :root {
+    --ui-text: CanvasText;
+    --ui-text-label: CanvasText;
+    --ui-text-muted: GrayText;
+    --ui-line: ButtonBorder;
+    --ui-line-strong: CanvasText;
+    --ui-pane-border: CanvasText;
+    --ui-pane-tint: Canvas;
+    --ui-pane-sheen: linear-gradient(Canvas, Canvas);
+    --ui-accent: Highlight;
+    --ui-focus: Highlight;
+    --ui-blur: 0px;
+  }
+}

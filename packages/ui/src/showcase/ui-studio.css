@@ -1,0 +1,381 @@
+/* UI Studio — the page that presents the design system.
+
+   Only layout lives here: the three columns, the specimen grid and the few
+   display shapes the foundations need (ramps, swatches, motion tracks).
+   Everything inside a pane is a package component with its own stylesheet. */
+
+/* The studio stands on a living scene (SceneBackdrop); its panels transmit it. */
+.ui-studio {
+  position: relative;
+  isolation: isolate;
+  background: var(--ui-scene);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ui-studio-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: 208px minmax(0, 1fr) 296px;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  padding: 12px;
+}
+.ui-studio-nav,
+.ui-studio-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.ui-studio-nav > .artinos-pane-body,
+.ui-studio-side > .artinos-pane-body { overflow: auto; }
+
+.ui-studio-main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 10px;
+  align-content: start;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-line-strong) transparent;
+}
+.ui-studio-main[data-layout='single'] { grid-template-columns: minmax(0, 1fr); }
+.ui-studio-main[data-layout='single'] > * { min-height: 0; }
+.ui-studio-wide { grid-column: 1 / -1; }
+
+/* Prose outside a pane still needs a surface: with no scrim on the page this
+   line would otherwise sit straight on the photograph. */
+.ui-studio-lead {
+  grid-column: 1 / -1;
+  max-width: 68ch;
+  margin: 0 0 2px;
+  padding: 7px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  background: var(--ui-pane-sheen), var(--ui-pane-tint);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ui-text-body);
+}
+.ui-studio-lead b {
+  font-weight: 500;
+  color: var(--ui-text);
+}
+
+/* ── foundations shapes ───────────────────────────────────────────────── */
+
+.ui-studio-ramp {
+  display: grid;
+  gap: 2px;
+}
+.ui-studio-ramp > div {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 9px;
+  color: var(--ui-text-meta);
+}
+.ui-studio-ramp b {
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--ui-text-label);
+}
+.ui-studio-ramp i {
+  height: 14px;
+  border-radius: var(--ui-radius-tiny);
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px var(--ui-line-soft);
+}
+.ui-studio-ramp span { font-variant-numeric: tabular-nums; }
+
+.ui-studio-inkrow {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 22px;
+}
+.ui-studio-inkrow > b {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--ui-text-label);
+}
+.ui-studio-inkrow > span:first-of-type {
+  font-size: 10px;
+  color: var(--ink);
+}
+.ui-studio-inkrow > span:last-of-type {
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-meta);
+}
+
+.ui-studio-type {
+  display: grid;
+  gap: 6px;
+}
+.ui-studio-type > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ui-line-faint);
+}
+.ui-studio-type small {
+  flex: 0 0 auto;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+
+.ui-studio-metrics {
+  display: grid;
+  gap: 6px;
+}
+.ui-studio-metric {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--ui-text-label);
+}
+.ui-studio-metric i {
+  height: 10px;
+  border-radius: var(--ui-radius-tiny);
+  background: var(--ui-range-fill);
+  box-shadow: var(--ui-range-sheen);
+}
+.ui-studio-metric span {
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-meta);
+}
+
+.ui-studio-surfaces {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+.ui-studio-surface {
+  display: grid;
+  align-content: end;
+  gap: 2px;
+  min-height: 72px;
+  padding: 8px;
+  border: 1px solid var(--ui-pane-border);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-pane-shadow);
+  font-size: 9px;
+  color: var(--ui-text-meta);
+}
+.ui-studio-surface b {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--ui-text);
+}
+
+/* motion: hover or focus a track and the marker runs its own curve */
+.ui-studio-motion {
+  display: grid;
+  gap: 6px;
+}
+.ui-studio-motion-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--ui-text-label);
+  cursor: pointer;
+}
+.ui-studio-motion-rail {
+  position: relative;
+  height: 20px;
+  border: 1px solid var(--ui-range-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-range-well);
+  box-shadow: var(--ui-range-inset);
+  overflow: hidden;
+}
+.ui-studio-motion-rail > i {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: 12px;
+  border-radius: 2px;
+  background: var(--ui-knob-fill);
+  box-shadow: var(--ui-knob-shadow);
+  transition: transform var(--duration) var(--ease);
+}
+.ui-studio-motion-track:hover .ui-studio-motion-rail > i,
+.ui-studio-motion-track:focus-visible .ui-studio-motion-rail > i {
+  transform: translateX(calc(100cqw - 100%));
+  transform: translateX(calc(var(--travel, 180px)));
+}
+
+/* ── responsive ───────────────────────────────────────────────────────── */
+
+/* The editor is a drawer, never a casualty of the viewport. Closed it collapses
+   its column; open on a narrow window it floats over the work rather than
+   squeezing it to nothing. It is always one click away from the bar. */
+.ui-studio[data-editor='closed'] .ui-studio-body { grid-template-columns: 208px minmax(0, 1fr); }
+.ui-studio[data-editor='closed'] .ui-studio-side { display: none; }
+
+/* A laptop still has room for three columns if the side rails give some back —
+   floating the editor over the work is a last resort, not the first step down.
+   It only lifts off the grid once docking would leave the work unusable. */
+@media (max-width: 1320px) {
+  .ui-studio-body { grid-template-columns: 176px minmax(0, 1fr) 268px; gap: 10px; padding: 10px; }
+  .ui-studio[data-editor='closed'] .ui-studio-body { grid-template-columns: 176px minmax(0, 1fr); }
+  .ui-studio-main { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+}
+@media (max-width: 1020px) {
+  .ui-studio-body { grid-template-columns: 160px minmax(0, 1fr); }
+  .ui-studio[data-editor='open'] .ui-studio-side {
+    position: absolute;
+    z-index: 30;
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: 280px;
+    box-shadow: var(--ui-float-shadow), var(--ui-pane-shadow-raised);
+  }
+}
+@media (max-width: 720px) {
+  .ui-studio-body { grid-template-columns: minmax(0, 1fr); padding: 9px; }
+  .ui-studio-nav { display: none; }
+  .ui-studio-main { grid-template-columns: minmax(0, 1fr); }
+  .ui-studio[data-editor='open'] .ui-studio-side { left: 9px; right: 9px; width: auto; }
+}
+
+/* ── scene, world bar, core reference ───────────────────────────────────── */
+
+/* The living scene sits under everything; the chrome and the work float on it. */
+.ui-studio-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.ui-studio > .artinos-appbar,
+.ui-studio > .ui-studio-body {
+  position: relative;
+  z-index: 1;
+}
+.ui-studio-main {
+  padding-bottom: 64px;
+}
+
+/* World bar — reference `.bar`: material worlds and scenes, floating over the work. */
+.ui-studio-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 10px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, var(--ui-glass-top), transparent 40%), var(--ui-glass);
+  -webkit-backdrop-filter: blur(var(--ui-blur)) saturate(var(--ui-sat));
+  backdrop-filter: blur(var(--ui-blur)) saturate(var(--ui-sat));
+  box-shadow: var(--ui-depth), inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
+}
+.ui-studio-bar button {
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 10.5px;
+  color: var(--ui-ink-3);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--ui-t-mid),
+    background var(--ui-t-mid),
+    box-shadow var(--ui-t-mid);
+}
+.ui-studio-bar button:hover {
+  color: var(--ui-ink);
+}
+.ui-studio-bar button[aria-pressed='true'] {
+  color: var(--ui-ink-active);
+  background: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.ui-studio-bar button:focus-visible {
+  outline: 1px solid var(--ui-sig-line);
+  outline-offset: 1px;
+}
+.ui-studio-bar-rule {
+  align-self: stretch;
+  width: 1px;
+  margin: 3px;
+  background: var(--ui-edge);
+}
+.ui-studio-bar-label {
+  padding: 5px 6px 5px 3px;
+  font-size: 9.5px;
+  color: var(--ui-ink-4);
+}
+
+/* Core — the reference page rebuilt from the kit's own components. */
+.ui-core-stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  padding: 6px 0 12px;
+}
+.ui-core-stage > .artinos-pane {
+  flex: 0 0 auto;
+}
+.ui-core-optical {
+  width: 288px;
+}
+.ui-core-camera {
+  width: 268px;
+}
+
+@media (max-width: 700px) {
+  .ui-studio-bar {
+    gap: 2px;
+    padding: 5px;
+    max-width: calc(100% - 20px);
+    overflow-x: auto;
+    border-radius: 13px;
+  }
+  .ui-studio-bar button {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+  .ui-studio-bar-label {
+    display: none;
+  }
+  .ui-core-stage {
+    flex-direction: column;
+    align-items: center;
+  }
+  .ui-core-optical,
+  .ui-core-camera {
+    width: min(100%, 340px);
+  }
+}

@@ -1,5 +1,6 @@
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, Ref } from 'react'
 import { controls } from './control-registry'
+import { Field } from './field'
 
 export function TextField({
   label,
@@ -13,10 +14,9 @@ export function TextField({
   onChange(value: string): void
 }) {
   return (
-    <label className="artinos-control">
-      <span>{label}</span>
-      <input value={value} placeholder={placeholder} onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)} />
-    </label>
+    <Field asLabel label={label}>
+      <input className="artinos-text" value={value} placeholder={placeholder} onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)} />
+    </Field>
   )
 }
 
@@ -41,16 +41,31 @@ export function TextArea({
   )
 }
 
+/** Search — a recessed field with a lens glyph and an optional shortcut hint (reference `.search`). */
 export function SearchField({
   value,
   placeholder = 'Search…',
+  label,
+  shortcut,
+  inputRef,
   onChange,
 }: {
   value: string
   placeholder?: string
+  /** Accessible name. Defaults to the placeholder. */
+  label?: string
+  /** Rendered as a key hint at the right edge, e.g. "/". */
+  shortcut?: string
+  inputRef?: Ref<HTMLInputElement>
   onChange(value: string): void
 }) {
-  return <input className="artinos-search" type="search" aria-label={placeholder} value={value} placeholder={placeholder} onChange={event => onChange(event.target.value)} />
+  return (
+    <label className="artinos-search">
+      <span aria-hidden="true">⌕</span>
+      <input ref={inputRef} type="search" aria-label={label ?? placeholder} value={value} placeholder={placeholder} onChange={event => onChange(event.target.value)} />
+      {shortcut && <kbd>{shortcut}</kbd>}
+    </label>
+  )
 }
 
 TextField.meta = controls.require('text-field')

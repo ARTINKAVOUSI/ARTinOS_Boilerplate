@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import { angularGeometry, DIAL_TRAVEL, linearGeometry, normalize } from '../kernel'
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
+import { angularGeometry, DIAL_TRAVEL, normalize } from '../kernel'
 import { useControl, type ControlScheduler } from '../react/use-control'
+import { runSpring } from '../react/use-spring'
 import { controls } from './control-registry'
-import { NumericInput } from './numeric-input'
+import { Field, PinButton, type FieldLayout } from './field'
+import { NumberWell } from './numeric-input'
 
 export interface SliderProps {
   label: string
@@ -11,36 +13,76 @@ export interface SliderProps {
   max?: number
   step?: number
   unit?: string
+  /** Where a double-click returns the value. Defaults to `min`. */
+  defaultValue?: number
   disabled?: boolean
   readOnly?: boolean
-  /** Values that magnetise the drag. Rendered as detent marks. */
+  /** Values that magnetise the drag, in addition to the capsule's quarter detents. */
   detents?: readonly number[]
-  /** Shown after the label — names the source when a parameter is externally driven. */
+  /** Shown after the name — names the source when a parameter is externally driven. */
   binding?: string
   /** Signal state. `bound` is set automatically when `binding` is present. */
   status?: 'bound' | 'warn' | 'fault'
+  /** `inline` (the default) draws the name inside the capsule; `row` puts it in a column beside it. */
+  layout?: FieldLayout
+  /** `compact` is the 19px capsule (reference `.mc--compact`). */
+  size?: 'default' | 'compact'
+  /** `ticked` keeps the tick band visible at rest. */
+  variant?: 'default' | 'ticked'
+  /** Renders the modulation marker; lit when `pinned`. */
+  pinned?: boolean
+  onPinnedChange?(pinned: boolean): void
   /** Opened when a gesture starts; use it to open a history transaction. */
   onGestureStart?(): void
   onGestureEnd?(): void
+  /** Called after a double-click has returned the value to `defaultValue`. */
+  onReset?(): void
   scheduler?: ControlScheduler
   physicsProfile?: 'precise' | 'soft' | 'mechanical' | 'elastic' | 'magnetic' | 'inertial'
   onChange(value: number): void
 }
+
+/**
+ * The reference instrument's feel: Shift refines to 0.18×, a slow drag refines
+ * to 0.55× on its own, quarter detents pull only while moving deliberately, and
+ * an arrow key moves a hundredth of the range (a tenth with Page Up/Down).
+ */
+const INSTRUMENT_FEEL = {
+  precisionKey: 'shift',
+  precisionFactor: 0.18,
+  slowPrecision: { below: 0.12, factor: 0.55 },
+  softDetents: { at: [0, 0.25, 0.5, 0.75, 1], radius: 0.012, below: 0.35 },
+  nudgeFraction: 0.01,
+  fastVelocity: 0.9,
+} as const
+
+/** Contact compression — how far the capsule gives under the hand. */
+const CONTACT_POSE = 0.985
 
 function decimalsFor(step: number): number {
   if (step >= 1) return 0
   return Math.min(3, (String(step).split('.')[1] ?? '').length || 2)
 }
 
+/** Kelvin groups its thousands with a space, as the reference does ("5 600"). */
+function formatValue(value: number, decimals: number, unit?: string): string {
+  const fixed = value.toFixed(decimals)
+  if (unit !== 'K') return fixed
+  const [whole, fraction] = fixed.split('.')
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return fraction === undefined ? grouped : `${grouped}.${fraction}`
+}
+
 /**
- * Scrub cell — the flagship control (reference PL.03).
+ * Slider — the capsule (reference `.cap`), the full-surface instrument.
  *
- * The row *is* the drag surface: the fill is the value and the hairline is its
- * exact position. Every mechanic — precision, detents, constrain, nudge, reset,
- * cancel — comes from the kernel's `ControlBehavior`, so this file renders
- * anatomy and nothing else.
+ * The whole capsule is the control. A denser active insert moves through a
+ * softer body; a seam marks the exact value; the name and value ride inside in
+ * two inks, clipped at the seam, so both halves stay readable whichever side of
+ * the seam they fall on. Press anywhere to place the value, then drag relative
+ * from there. Double-click resets. Enter types a value.
  *
- * Anatomy: Root · Fill · Tick · Label · Binding · Value · Unit.
+ * Anatomy: Field · Capsule · Fill · Ticks · Seam · Text(off) · Text(on) · Marker.
  */
 export function Slider({
   label,
@@ -49,20 +91,30 @@ export function Slider({
   max = 1,
   step = 0.01,
   unit,
+  defaultValue,
   disabled = false,
   readOnly = false,
   detents,
   binding,
   status,
+  layout = 'inline',
+  size = 'default',
+  variant = 'default',
+  pinned,
+  onPinnedChange,
   onGestureStart,
   onGestureEnd,
+  onReset,
   scheduler,
   physicsProfile,
   onChange,
 }: SliderProps) {
   const [editing, setEditing] = useState<string | null>(null)
+  const [pressed, setPressed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const display = value.toFixed(decimalsFor(step))
+  const labelId = useId()
+  const decimals = decimalsFor(step)
+  const display = formatValue(value, decimals, unit)
 
   const control = useControl({
     value,
@@ -70,7 +122,7 @@ export function Slider({
     max,
     step,
     detents,
-    defaultValue: min,
+    defaultValue: defaultValue ?? min,
     disabled: disabled || editing !== null,
     readOnly,
     onChange,
@@ -78,88 +130,151 @@ export function Slider({
     onGestureEnd,
     scheduler,
     physicsProfile,
+    seekOnPress: true,
+    ...INSTRUMENT_FEEL,
   })
 
-  control.setFormatter(v => v.toFixed(decimalsFor(step)))
+  control.setFormatter(v => formatValue(v, decimals, unit))
 
   useEffect(() => {
     if (editing !== null) inputRef.current?.select()
   }, [editing])
 
+  // Contact compression on grab, a material rebound on release — on the spring
+  // of whichever world the capsule sits in.
+  const dragging = control.isDragging
+  const posed = useRef(false)
+  const cancelPose = useRef<() => void>(() => {})
+  useEffect(() => {
+    if (dragging === posed.current) return
+    posed.current = dragging
+    const element = control.ref.current
+    cancelPose.current()
+    cancelPose.current = runSpring(element, dragging ? 1 : CONTACT_POSE, dragging ? CONTACT_POSE : 1, pose => {
+      element?.style.setProperty('--pose-y', pose.toFixed(4))
+    })
+  }, [dragging, control.ref])
+  useEffect(() => () => cancelPose.current(), [])
+
   const commit = () => {
     if (editing === null) return
-    const parsed = parseFloat(editing)
+    const parsed = parseFloat(editing.replace(/\s/g, ''))
     if (!Number.isNaN(parsed)) onChange(Math.min(max, Math.max(min, parsed)))
     setEditing(null)
   }
 
-  const geometry = linearGeometry({ length: 100, value, min, max, detents })
-  // Fill and tick are driven by --control-t, which useControl writes straight to
-  // the element during a drag. React only seeds it.
-  const seed = geometry.normalized
-  // The value tracks the pointer exactly during a drag; easing it would lag the cursor.
-  const glide = control.isDragging ? 'none' : `width var(--dur-value) var(--ease-std)`
-
+  const t = max === min ? 0 : Math.min(1, Math.max(0, normalize(value, min, max)))
   const state = status && !control.isDragging ? status : undefined
 
-  return (
-    <div
-      ref={control.ref}
-      className={`artinos-scrub-cell ${control.isDragging ? 'is-scrubbing' : ''} ${disabled ? 'is-disabled' : ''}`}
-      role="slider"
-      tabIndex={disabled ? -1 : 0}
-      aria-label={label}
-      aria-valuenow={value}
-      aria-valuemin={min}
-      aria-valuemax={max}
-      aria-valuetext={unit ? `${display} ${unit}` : display}
-      aria-disabled={disabled || undefined}
-      aria-readonly={readOnly || undefined}
-      {...control.attributes}
-      data-state={state ?? control.attributes['data-state']}
-      {...control.handlers}
-      onDoubleClick={() => setEditing(display)}
-      style={{ ['--control-t' as string]: String(seed) }}
-    >
-      <i aria-hidden style={{ transition: glide }} />
-      <b aria-hidden style={{ transition: control.isDragging ? 'none' : `left var(--dur-value) var(--ease-std)` }} />
-      {geometry.detents.map((position, index) => (
-        <u
-          key={index}
-          aria-hidden
-          className="artinos-scrub-detent"
-          style={{ left: `${position}%` }}
-        />
-      ))}
-      <span>
-        {label}
-        {binding && <em>{binding}</em>}
+  const readout = (live: boolean) => (
+    <span className="artinos-range-value">
+      <span
+        ref={live ? (control.liveRef as React.RefObject<HTMLSpanElement>) : undefined}
+        data-live-mirror={live ? undefined : ''}
+      >
+        {display}
       </span>
-      {editing !== null ? (
-        <input
-          ref={inputRef}
-          value={editing}
-          onChange={event => setEditing(event.target.value)}
-          onBlur={commit}
-          onPointerDown={event => event.stopPropagation()}
-          onKeyDown={event => {
-            event.stopPropagation()
-            if (event.key === 'Enter') commit()
-            if (event.key === 'Escape') setEditing(null)
-          }}
-        />
-      ) : (
-        <output>
-          <span ref={control.liveRef as React.RefObject<HTMLSpanElement>}>{display}</span>
-          {unit && <em>{unit}</em>}
-        </output>
-      )}
-    </div>
+      {unit && <i>{unit}</i>}
+    </span>
+  )
+
+  return (
+    <Field
+      className="artinos-slider"
+      label={
+        <>
+          {label}
+          {binding && <em className="artinos-field-binding">{binding}</em>}
+        </>
+      }
+      labelId={labelId}
+      layout={layout}
+      trailing={onPinnedChange ? <PinButton label={label} pinned={Boolean(pinned)} onChange={onPinnedChange} /> : undefined}
+    >
+      <div
+        ref={control.ref}
+        className="artinos-range"
+        data-size={size === 'compact' ? 'compact' : undefined}
+        data-variant={variant === 'ticked' ? 'ticked' : undefined}
+        data-disabled={disabled || undefined}
+        data-pressed={pressed || undefined}
+        role="slider"
+        tabIndex={disabled ? -1 : 0}
+        aria-labelledby={labelId}
+        aria-valuenow={value}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuetext={`${display}${unit ?? ''}`}
+        aria-disabled={disabled || undefined}
+        aria-readonly={readOnly || undefined}
+        {...control.attributes}
+        data-state={state ?? control.attributes['data-state']}
+        {...control.handlers}
+        onPointerDown={event => {
+          // The kernel cancels the default so a drag never selects text, which also
+          // cancels focus. Take it explicitly, then let the fill dip for a beat.
+          if (!disabled) event.currentTarget.focus({ preventScroll: true })
+          if (!disabled && !readOnly && event.button === 0) {
+            setPressed(true)
+            window.setTimeout(() => setPressed(false), 120)
+          }
+          control.handlers.onPointerDown(event)
+        }}
+        onDoubleClick={() => {
+          if (disabled || readOnly) return
+          control.handlers.onDoubleClick()
+          onReset?.()
+        }}
+        onKeyDown={event => {
+          if (event.key === 'Enter' && !disabled && !readOnly) {
+            event.preventDefault()
+            setEditing(display)
+            return
+          }
+          control.handlers.onKeyDown(event)
+        }}
+        // Fill, seam and both inks follow --control-t, which useControl writes
+        // straight to this element during a drag. React only seeds it.
+        style={{ '--control-t': String(t) } as CSSProperties}
+      >
+        <span className="artinos-range-fill" aria-hidden />
+        <span className="artinos-range-ticks" aria-hidden />
+        <span className="artinos-range-seam" aria-hidden />
+        {editing !== null ? (
+          <input
+            ref={inputRef}
+            className="artinos-range-input"
+            aria-label={label}
+            value={editing}
+            onChange={event => setEditing(event.target.value)}
+            onBlur={commit}
+            onPointerDown={event => event.stopPropagation()}
+            onKeyDown={event => {
+              event.stopPropagation()
+              if (event.key === 'Enter') commit()
+              if (event.key === 'Escape') setEditing(null)
+            }}
+          />
+        ) : (
+          <>
+            <span className="artinos-range-text" data-ink="off" aria-hidden>
+              <span className="artinos-range-name">{label}</span>
+              {readout(true)}
+            </span>
+            <span className="artinos-range-text" data-ink="on" aria-hidden>
+              <span className="artinos-range-name">{label}</span>
+              {readout(false)}
+            </span>
+          </>
+        )}
+      </div>
+    </Field>
   )
 }
 
 Slider.meta = controls.require('slider')
 
+/** NumberField — a named row with a recessed, scrubbable number well (reference `.field`). */
 export function NumberField({
   label,
   value,
@@ -178,18 +293,9 @@ export function NumberField({
   onChange(value: number): void
 }) {
   return (
-    <label className="artinos-control">
-      <span>{label}</span>
-      <NumericInput
-        className="artinos-number artinos-number-wide"
-        value={value}
-        min={min}
-        max={max}
-        step={step}
-        onChange={onChange}
-      />
-      {unit && <em>{unit}</em>}
-    </label>
+    <Field label={label}>
+      <NumberWell label={label} value={value} min={min} max={max} step={step} unit={unit} onChange={onChange} />
+    </Field>
   )
 }
 
@@ -237,7 +343,7 @@ export function RangeSlider({
 
 /**
  * Dial — the same kernel mechanics on a vertical axis, so precision, detents and
- * keyboard behave identically to the scrub cell (they previously did not).
+ * keyboard behave identically to the slider.
  */
 export function Dial({
   label,

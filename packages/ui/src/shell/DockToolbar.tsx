@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react'
-import { RuntimeHUD } from '../panels/RuntimeHUD'
+import type { ReactNode } from 'react'
 import { DockControls } from './DockControls'
 import { DockTabs } from './DockTabs'
 import { usePanelHost } from './panel-host'
@@ -12,8 +12,11 @@ import type { EdgeDock } from './panel-types'
  * Everything that is not panel selection or search lives in one collapsed
  * `DockControls`, so the strip reads as four regions rather than a row of
  * competing icon clusters.
+ *
+ * `status` renders beside the controls. The shell knows nothing about a runtime, so
+ * the host passes its own readout (the studio passes its runtime HUD).
  */
-export function DockToolbar({ onSearch }: { onSearch(): void }) {
+export function DockToolbar({ onSearch, status }: { onSearch(): void; status?: ReactNode }) {
   const { layout } = useWorkspaceLayout()
   const activeDock: EdgeDock = layout.leftOpen ? 'left' : layout.rightOpen ? 'right' : 'bottom'
 
@@ -30,9 +33,7 @@ export function DockToolbar({ onSearch }: { onSearch(): void }) {
       </button>
 
       <div className="plate-toolbar-cluster">
-        <div className="plate-toolbar-status">
-          <RuntimeHUD embedded />
-        </div>
+        {status && <div className="plate-toolbar-status">{status}</div>}
         <DockControls />
       </div>
     </header>

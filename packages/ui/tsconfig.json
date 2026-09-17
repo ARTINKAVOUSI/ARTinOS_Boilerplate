@@ -12,20 +12,6 @@
     "jsx": "react-jsx",
     "preserveSymlinks": true
   },
-  "references": [
-    {
-      "path": "../runtime"
-    },
-    {
-      "path": "../inputflow"
-    },
-    {
-      "path": "../modules"
-    },
-    {
-      "path": "../graph"
-    }
-  ],
   "include": [
     "src"
   ]

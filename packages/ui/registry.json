@@ -101,7 +101,7 @@
       "name": "Inspector",
       "category": "composite",
       "description": "Per-parameter subscribed property grid with search, grouping and reset.",
-      "files": ["src/panels/ParametersPanel.tsx", "src/primitives/PropertyRow.tsx"],
+      "files": ["src/primitives/PropertyRow.tsx"],
       "kernel": ["registry"],
       "tokens": ["--panel-header-h", "--space-5", "--type-panel"],
       "parameters": ["*"],
@@ -136,9 +136,6 @@
     { "id": "accordion", "name": "Accordion", "category": "collection", "description": "Expandable content collection.", "files": ["src/primitives/collections.tsx"], "parameters": [], "states": ["collapsed", "expanded"] },
     { "id": "virtual-list", "name": "VirtualList", "category": "collection", "description": "Uniform and variable windowed collections.", "files": ["src/primitives/list.tsx"], "parameters": [], "states": ["empty", "populated"] },
     { "id": "virtual-table", "name": "VirtualTable", "category": "collection", "description": "Windowed semantic table.", "files": ["src/primitives/list.tsx"], "parameters": [], "states": ["empty", "populated"] },
-    { "id": "panel-workspace", "name": "PanelWorkspace", "category": "workspace", "description": "Serializable dock, float and split workspace.", "files": ["src/shell/PanelWorkspace.tsx"], "parameters": [], "states": ["docked", "floating"] },
-    { "id": "timeline-panel", "name": "TimelinePanel", "category": "composite", "description": "Automation track and keyframe editor.", "files": ["src/panels/TimelinePanel.tsx"], "parameters": ["number"], "states": ["empty", "editing"] },
-    { "id": "asset-browser", "name": "AssetBrowserPanel", "category": "composite", "description": "Virtualized project asset browser.", "files": ["src/panels/AssetBrowserPanel.tsx"], "parameters": ["asset"], "states": ["empty", "filtered"] },
-    { "id": "component-devtools", "name": "ComponentDevToolsPanel", "category": "composite", "description": "Component, parameter, token, anatomy and accessibility inspector.", "files": ["src/devtools/ComponentDevToolsPanel.tsx"], "parameters": ["*"], "states": ["inspecting", "simulating"] }
+    { "id": "panel-workspace", "name": "PanelWorkspace", "category": "workspace", "description": "Serializable dock, float and split workspace.", "files": ["src/shell/PanelWorkspace.tsx"], "parameters": [], "states": ["docked", "floating"] }
   ]
 }

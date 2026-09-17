@@ -66,8 +66,8 @@ export const nativeModuleCatalog:ModuleManifest[]=[
   module('graph.runtime','Graph Runtime','graph','Semantic five-domain graph registry and evaluator for signal/parameter/math pipelines.','headless',['scene','signal','parameter','gpu','render'],'@artinos/graph'),
   module('ui.workspace','Panel Workspace','ui/panels','Persistent dockable/floating panel orchestration with drag/reorder, split sizing, resize, collapse, visibility and saved layouts.','headless',['panels','docking','layout'],'@artinos/ui'),
   module('ui.controls','Control Kit','ui/controls','Schema-friendly sliders, fields, toggles, selects, vectors, XY pads, meters, sparklines and control primitives.','headless',['controls','schema'],'@artinos/ui'),
-  module('inspector.artinos','ARTINOS Inspector','inspector','Semantic inspector for parameters, signals, resources, history, telemetry and runtime health.','headless',['debug','semantic'],'@artinos/ui'),
-  module('inspector.three','Three.js Inspector','inspector/three','Official Three WebGPU Inspector attached to the one shared renderer with performance, memory, timeline, viewer, parameters and console tabs.','headless',['three','webgpu','debug'],'@artinos/ui'),
+  module('inspector.artinos','ARTINOS Inspector','inspector','Semantic inspector for parameters, signals, resources, history, telemetry and runtime health.','headless',['debug','semantic'],'@artinos/r3f'),
+  module('inspector.three','Three.js Inspector','inspector/three','Official Three WebGPU Inspector attached to the one shared renderer with performance, memory, timeline, viewer, parameters and console tabs.','headless',['three','webgpu','debug'],'@artinos/r3f'),
 
   // Native TSL shared RenderPipeline effects
   ...postFXCatalog.map((effect)=>module(

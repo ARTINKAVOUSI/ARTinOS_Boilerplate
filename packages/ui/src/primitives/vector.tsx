@@ -1,19 +1,116 @@
-import { useRef, type PointerEvent as ReactPointerEvent } from 'react'
+import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { controls } from './control-registry'
-import { NumericInput } from './numeric-input'
+import { Field } from './field'
+import { NumberWell } from './numeric-input'
 
 const AXES = ['X', 'Y', 'Z', 'W']
 
-export function ColorField({ label, value, onChange }: { label: string; value: string; onChange(value: string): void }) {
-  return (
-    <label className="artinos-control">
-      <span>{label}</span>
-      <input type="color" value={value} onChange={event => onChange(event.target.value)} />
-      <input value={value} onChange={event => onChange(event.target.value)} />
+/**
+ * ColorField — the swatch (reference `.swatch`): the surface is the
+ * visualization. The whole bar is the colour, a gloss rides its top, the hex and
+ * alpha sit on it in the numeral face, and the native picker lies invisibly on top.
+ *
+ * With `hideLabel` the swatch stands alone at full width; otherwise it sits in a row.
+ */
+export function ColorField({
+  label,
+  value,
+  alpha = '100%',
+  hideLabel = false,
+  onChange,
+}: {
+  label: string
+  value: string
+  /** Shown at the right edge of the swatch. */
+  alpha?: string
+  hideLabel?: boolean
+  onChange(value: string): void
+}) {
+  const swatch = (
+    <label className="artinos-color-field" style={{ '--swatch': value } as CSSProperties}>
+      <input type="color" value={value} aria-label={label} onChange={event => onChange(event.target.value)} />
+      <span>{value.replace('#', '').toUpperCase()}</span>
+      <span>{alpha}</span>
     </label>
+  )
+  return hideLabel ? swatch : <Field label={label}>{swatch}</Field>
+}
+
+/** ColorRamp — a reference gradient with its three stop labels. */
+export function ColorRamp({
+  label,
+  stops,
+  labels,
+}: {
+  label: string
+  stops?: string[]
+  labels?: [string, string, string]
+}) {
+  return (
+    <>
+      <div
+        className="artinos-color-ramp"
+        role="img"
+        aria-label={label}
+        style={stops ? ({ '--ramp': `linear-gradient(90deg, ${stops.join(', ')})` } as CSSProperties) : undefined}
+      />
+      {labels && (
+        <div className="artinos-color-ramp-labels">
+          {labels.map(text => (
+            <span key={text}>{text}</span>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
 
+/**
+ * HueBar — the hue rail (reference `.hue`): a 13px spectrum with a 7px thumb cut
+ * from the active material. Drag along it, or use the arrow keys — five degrees
+ * a press, one with Shift.
+ */
+export function HueBar({ label, value, onChange }: { label: string; value: number; onChange(hue: number): void }) {
+  const rail = useRef<HTMLDivElement>(null)
+  const hue = ((value % 360) + 360) % 360
+
+  const place = (event: ReactPointerEvent) => {
+    const rect = rail.current?.getBoundingClientRect()
+    if (!rect || rect.width === 0) return
+    onChange(Math.round(Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)) * 360))
+  }
+
+  return (
+    <div
+      ref={rail}
+      className="artinos-hue"
+      role="slider"
+      tabIndex={0}
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={360}
+      aria-valuenow={Math.round(hue)}
+      style={{ '--hue-t': String(hue / 360) } as CSSProperties}
+      onPointerDown={event => {
+        event.currentTarget.setPointerCapture(event.pointerId)
+        place(event)
+      }}
+      onPointerMove={event => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) place(event)
+      }}
+      onKeyDown={event => {
+        const direction = event.key === 'ArrowRight' || event.key === 'ArrowUp' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? -1 : 0
+        if (!direction) return
+        event.preventDefault()
+        onChange((((hue + direction * (event.shiftKey ? 1 : 5)) % 360) + 360) % 360)
+      }}
+    >
+      <span className="artinos-hue-thumb" aria-hidden />
+    </div>
+  )
+}
+
+/** VectorField — a named row of scrubbable axis wells (reference `.mc__vec`). */
 export function VectorField({
   label,
   value,
@@ -27,27 +124,26 @@ export function VectorField({
   step?: number
   onChange(value: number[]): void
 }) {
+  const axes = AXES.slice(0, dimensions)
   return (
-    <div className="artinos-vector">
-      <span>{label}</span>
-      <div>
-        {Array.from({ length: dimensions }, (_, index) => (
-          <label key={index}>
-            <small>{AXES[index]}</small>
-            <NumericInput
-              label={`${label} ${AXES[index]}`}
-              step={step}
-              value={value[index] ?? 0}
-              onChange={number => {
-                const next = [...value]
-                next[index] = number
-                onChange(next)
-              }}
-            />
-          </label>
+    <Field label={label} className="artinos-vector-field">
+      <div className="artinos-vector-axes" style={{ '--axes': dimensions } as CSSProperties}>
+        {axes.map((axis, index) => (
+          <NumberWell
+            key={axis}
+            axis={axis}
+            label={`${label} ${axis}`}
+            step={step}
+            value={value[index] ?? 0}
+            onChange={number => {
+              const next = [...value]
+              next[index] = number
+              onChange(next)
+            }}
+          />
         ))}
       </div>
-    </div>
+    </Field>
   )
 }
 

@@ -1,7 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
+import { createRequire } from 'node:module'
+
+// Render with the React copy the components themselves resolve: packages/ui carries its
+// own node_modules, and a second React makes every hook throw "invalid hook call".
+const require = createRequire(new URL('../packages/ui/package.json', import.meta.url))
+const { createElement } = require('react')
+const { renderToStaticMarkup } = require('react-dom/server')
 import { controls } from '../packages/ui/src/primitives/control-registry.ts'
 import { Segmented, Select, Tabs } from '../packages/ui/src/primitives/choice.tsx'
 

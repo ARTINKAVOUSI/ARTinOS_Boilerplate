@@ -10,7 +10,7 @@ export interface WorkspaceLayout {
   bottomOpen: boolean
 }
 
-export type WorkspaceTheme = 'auto' | 'glass' | 'dark' | 'light'
+export type WorkspaceTheme = 'auto' | 'workbench' | 'glass' | 'dark' | 'light'
 export type Backdrop = 'bright' | 'dark'
 
 const DEFAULT_LAYOUT: WorkspaceLayout = { left: 424, right: 424, bottom: 276, leftOpen: false, rightOpen: false, bottomOpen: true }
@@ -31,7 +31,9 @@ export function useWorkspaceTheme() {
 }
 
 function parseTheme(raw: string): WorkspaceTheme | null {
-  return raw === 'glass' || raw === 'dark' || raw === 'light' || raw === 'auto' ? raw : null
+  // `glass` predates the workbench look and now resolves to it.
+  if (raw === 'glass') return 'workbench'
+  return raw === 'workbench' || raw === 'dark' || raw === 'light' || raw === 'auto' ? raw : null
 }
 
 /** Portable auto-contrast fallback. A graphics host may style `data-backdrop`
@@ -53,10 +55,10 @@ function useAdaptiveBackdrop(active: boolean, _region: Pick<WorkspaceLayout, 'le
 /** Root workspace grid: owns dock sizes, theme and the adaptive backdrop. */
 export function Workspace({ children, persistKey = 'artinos.workspace' }: { children: ReactNode; persistKey?: string }) {
   const [layout, setLayout] = usePersistentState<WorkspaceLayout>(persistKey, DEFAULT_LAYOUT)
-  // Glass is the default material: clear frost that lets the scene read
-  // through the chrome. `auto` tints toward opacity to guarantee contrast on
-  // any backdrop, which is the safer default but not the intended one.
-  const [theme, setTheme] = usePersistentValue<WorkspaceTheme>(`${persistKey}.theme`, 'glass', parseTheme)
+  // The workbench glass is the default: the scene reads through the chrome.
+  // `auto` tints toward opacity to guarantee contrast on any backdrop, which is
+  // the safer default but not the intended one.
+  const [theme, setTheme] = usePersistentValue<WorkspaceTheme>(`${persistKey}.theme`, 'workbench', parseTheme)
   const backdrop = useAdaptiveBackdrop(theme === 'auto', layout)
 
   const layoutValue = useMemo(() => ({ layout, setLayout }), [layout, setLayout])
@@ -66,7 +68,7 @@ export function Workspace({ children, persistKey = 'artinos.workspace' }: { chil
     <LayoutContext.Provider value={layoutValue}>
       <ThemeContext.Provider value={themeValue}>
         <div
-          className="artinos-workspace plate-workspace"
+          className="artinos-workspace plate-workspace artinos-root"
           data-theme={theme}
           data-backdrop={backdrop}
           style={

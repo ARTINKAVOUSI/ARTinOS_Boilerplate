@@ -1,0 +1,580 @@
+/* Instruments — the controls the workbench page does not show, drawn in its
+   language: recessed range wells, white fills with a lit edge, 2px seams for
+   exact positions, the switch knob's material for every handle, 10px names and
+   500-weight tabular readouts on the row rhythm. */
+
+/* ── shared row shape ─────────────────────────────────────────────────── */
+
+.artinos-range-control,
+.artinos-dial-control,
+.artinos-meter,
+.artinos-progress {
+  display: grid;
+  grid-template-columns: var(--ui-label-w) minmax(0, 1fr) auto;
+  gap: 5px;
+  align-items: center;
+  min-height: var(--ui-row);
+  margin-bottom: 3px;
+  color: var(--ui-text);
+}
+.artinos-knob {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  min-height: var(--ui-row);
+  margin-bottom: 3px;
+  color: var(--ui-text);
+}
+.artinos-xypad-wrap,
+.artinos-waveform,
+.artinos-envelope,
+.artinos-gradient,
+.artinos-gradient-editor,
+.artinos-color-area-wrap,
+.artinos-color-slider-wrap,
+.artinos-curve,
+.artinos-curve-control {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 3px;
+  color: var(--ui-text);
+}
+
+.artinos-range-control > span,
+.artinos-dial-control > span,
+.artinos-meter > span,
+.artinos-progress > span,
+.artinos-knob > span,
+.artinos-xypad-wrap > span,
+.artinos-waveform > span,
+.artinos-envelope > span,
+.artinos-gradient > span,
+.artinos-gradient-editor > span,
+.artinos-color-area-wrap > span,
+.artinos-color-slider-wrap > span,
+.artinos-curve > span,
+.artinos-curve-control > header {
+  font-size: 10px;
+  color: var(--ui-text-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artinos-range-control > output,
+.artinos-dial-control > output,
+.artinos-meter > output,
+.artinos-progress > output,
+.artinos-knob > output,
+.artinos-xypad-wrap > output {
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ui-text);
+}
+.artinos-meter > output em,
+.artinos-knob > output em {
+  margin-left: 2px;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--ui-text-meta);
+}
+
+/* ── range slider — two seams over one fill ───────────────────────────── */
+
+.artinos-range-track {
+  position: relative;
+  height: var(--ui-range-h);
+  box-sizing: border-box;
+  border: 1px solid var(--ui-range-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-range-well);
+  box-shadow: var(--ui-range-inset);
+  transition:
+    border-color var(--ui-dur-fast) var(--ui-ease),
+    box-shadow var(--ui-dur-shadow) var(--ui-ease);
+}
+.artinos-range-track:hover {
+  border-color: var(--ui-range-border-hover);
+  box-shadow: var(--ui-range-inset-hover);
+}
+.artinos-range-track:focus-within {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 1px;
+}
+.artinos-range-track > i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  border-left: 1px solid var(--ui-range-edge);
+  border-right: 1px solid var(--ui-range-edge);
+  background: var(--ui-range-fill);
+  box-shadow: var(--ui-range-sheen);
+  pointer-events: none;
+}
+.artinos-range-track > input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  pointer-events: none;
+}
+.artinos-range-track > input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: calc(var(--ui-range-h) - 2px);
+  background: linear-gradient(var(--ui-range-seam), var(--ui-range-seam)) center / 2px 12px no-repeat;
+  cursor: ew-resize;
+  pointer-events: auto;
+}
+.artinos-range-track > input::-moz-range-thumb {
+  width: 10px;
+  height: calc(var(--ui-range-h) - 2px);
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(var(--ui-range-seam), var(--ui-range-seam)) center / 2px 12px no-repeat;
+  cursor: ew-resize;
+  pointer-events: auto;
+}
+
+/* ── dial and knob — a round well with a seam for a pointer ───────────── */
+
+.artinos-dial-control > button,
+.artinos-knob-dial {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-range-border);
+  border-radius: 50%;
+  background: var(--ui-range-well);
+  box-shadow: var(--ui-range-inset);
+  cursor: ns-resize;
+  touch-action: none;
+  transition:
+    border-color var(--ui-dur-fast) var(--ui-ease),
+    box-shadow var(--ui-dur-shadow) var(--ui-ease);
+}
+.artinos-dial-control > button:hover,
+.artinos-knob-dial:hover { border-color: var(--ui-range-border-hover); }
+.artinos-dial-control > button:focus-visible,
+.artinos-knob-dial:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+.artinos-dial-control > button > i,
+.artinos-knob-dial > i {
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 2px;
+  height: 8px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ui-range-seam);
+  transform-origin: 50% 8px;
+}
+
+/* ── XY pad — a quartered well with the knob for a handle ─────────────── */
+
+.artinos-xypad {
+  position: relative;
+  height: 120px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-range-border);
+  border-radius: var(--ui-radius-control);
+  background:
+    linear-gradient(var(--ui-line-soft) 1px, transparent 1px) 0 0 / 100% 25%,
+    linear-gradient(90deg, var(--ui-line-soft) 1px, transparent 1px) 0 0 / 25% 100%,
+    var(--ui-range-well);
+  box-shadow: var(--ui-range-inset);
+  cursor: crosshair;
+  touch-action: none;
+}
+.artinos-xypad:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 1px;
+}
+.artinos-xypad > i {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-knob-border);
+  border-radius: var(--ui-radius-tiny);
+  background: var(--ui-knob-fill);
+  box-shadow: var(--ui-knob-shadow);
+  pointer-events: none;
+}
+.artinos-xypad[data-state='dragging'] { border-color: var(--ui-range-border-hover); }
+.artinos-xypad-wrap > output { justify-self: end; }
+
+/* ── meter · progress · level ─────────────────────────────────────────── */
+
+.artinos-meter > div,
+.artinos-progress > div {
+  position: relative;
+  height: 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-range-border);
+  border-radius: var(--ui-radius-tiny);
+  background: var(--ui-range-well);
+  box-shadow: var(--ui-range-inset);
+  overflow: hidden;
+}
+.artinos-progress > div { height: 6px; }
+.artinos-meter > div > i,
+.artinos-progress > div > i {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  border-right: 1px solid var(--ui-range-edge);
+  background: var(--ui-range-fill);
+  box-shadow: var(--ui-range-sheen);
+}
+.artinos-meter[data-state='live'] > div > i { border-right-color: var(--ui-accent); }
+.artinos-meter[data-state='warn'] > div > i {
+  border-right-color: var(--ui-warn);
+  background: linear-gradient(color-mix(in srgb, var(--ui-warn) 55%, transparent), color-mix(in srgb, var(--ui-warn) 25%, transparent));
+}
+.artinos-meter[data-state='fault'] > div > i {
+  border-right-color: var(--ui-fault);
+  background: linear-gradient(color-mix(in srgb, var(--ui-fault) 55%, transparent), color-mix(in srgb, var(--ui-fault) 25%, transparent));
+}
+
+.artinos-level-meter {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 3px;
+}
+.artinos-level-meter > span {
+  font-size: 10px;
+  color: var(--ui-text-label);
+}
+.artinos-level-meter > div {
+  display: flex;
+  gap: 3px;
+  height: 72px;
+}
+.artinos-level-meter i {
+  position: relative;
+  width: 10px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-range-border);
+  border-radius: var(--ui-radius-tiny);
+  background: var(--ui-range-well);
+  box-shadow: var(--ui-range-inset);
+  overflow: hidden;
+}
+.artinos-level-meter b {
+  position: absolute;
+  inset: 0;
+  background: var(--ui-range-fill);
+  box-shadow: var(--ui-range-sheen);
+  transform-origin: bottom;
+}
+.artinos-level-meter u {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ui-range-seam);
+}
+
+/* ── scopes — waveform, envelope, curves ──────────────────────────────── */
+
+.artinos-waveform > svg,
+.artinos-envelope > svg,
+.artinos-curve > svg,
+.artinos-curve-control > svg {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-range-border);
+  border-radius: var(--ui-radius-control);
+  box-shadow: var(--ui-range-inset);
+  overflow: visible;
+}
+.artinos-waveform > svg,
+.artinos-envelope > svg {
+  height: 48px;
+  background: var(--ui-range-well);
+}
+.artinos-curve > svg,
+.artinos-curve-control > svg {
+  min-height: 120px;
+  background:
+    linear-gradient(var(--ui-line-soft) 1px, transparent 1px) 0 0 / 100% 25%,
+    linear-gradient(90deg, var(--ui-line-soft) 1px, transparent 1px) 0 0 / 25% 100%,
+    var(--ui-range-well);
+  touch-action: none;
+}
+.artinos-waveform polyline,
+.artinos-envelope path,
+.artinos-curve path,
+.artinos-curve-control path {
+  fill: none;
+  stroke: var(--ui-range-seam);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.artinos-waveform[data-state='warn'] polyline { stroke: var(--ui-warn); }
+.artinos-waveform[data-state='fault'] polyline { stroke: var(--ui-fault); }
+.artinos-envelope circle { fill: var(--ui-range-seam); }
+.artinos-curve circle,
+.artinos-curve-control circle {
+  fill: var(--ui-switch-well);
+  stroke: var(--ui-range-seam);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  cursor: move;
+}
+.artinos-curve-control circle[data-selected] { fill: var(--ui-accent); }
+.artinos-curve-control circle:focus-visible {
+  outline: none;
+  stroke: var(--ui-focus);
+  stroke-width: 2;
+}
+.artinos-curve-control > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.artinos-envelope-editor {
+  display: grid;
+  margin-bottom: 3px;
+}
+.artinos-envelope-editor > strong {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ui-text-summary);
+}
+.artinos-graph-editor {
+  padding: 6px 9px 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+}
+
+/* ── gradients — the colour ramp with seams and stop tabs ─────────────── */
+
+.artinos-gradient-bar,
+.artinos-gradient-editor__rail {
+  position: relative;
+  height: 23px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-ramp-border);
+  border-radius: var(--ui-radius-control);
+}
+.artinos-gradient-bar > i {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ui-range-seam);
+  box-shadow: 0 0 0 1px var(--ui-handle-edge);
+}
+.artinos-gradient-editor__rail {
+  margin-bottom: 12px;
+  touch-action: none;
+}
+.artinos-gradient-editor__rail > button {
+  position: absolute;
+  top: 100%;
+  width: 10px;
+  height: 12px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-swatch-border);
+  border-radius: 2px 2px 5px 5px;
+  background: var(--stop-color);
+  box-shadow: 0 0 0 1px var(--ui-handle-edge);
+  transform: translate(-50%, 3px);
+  cursor: ew-resize;
+}
+.artinos-gradient-editor__rail > button[aria-pressed='true'] {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 1px;
+}
+.artinos-gradient-editor > button { justify-self: start; }
+
+/* ── colour pickers ───────────────────────────────────────────────────── */
+
+.artinos-color-control {
+  display: grid;
+  gap: 3px;
+}
+.artinos-color-area {
+  position: relative;
+  min-height: 120px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-swatch-border);
+  border-radius: var(--ui-radius-control);
+  background:
+    linear-gradient(0deg, #000, transparent),
+    linear-gradient(90deg, #fff, hsl(var(--color-hue, 0) 100% 50%));
+  cursor: crosshair;
+  touch-action: none;
+}
+.artinos-color-area:focus-visible,
+.artinos-color-slider:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 1px;
+}
+.artinos-color-area > i {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 1px solid #fff;
+  border-radius: var(--ui-radius-tiny);
+  box-shadow: 0 0 0 1px var(--ui-handle-edge), var(--ui-knob-shadow);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.artinos-color-slider {
+  position: relative;
+  height: var(--ui-range-h);
+  box-sizing: border-box;
+  border: 1px solid var(--ui-swatch-border);
+  border-radius: var(--ui-radius-control);
+  background:
+    var(--color-gradient, linear-gradient(90deg, transparent, #fff)),
+    repeating-conic-gradient(var(--ui-checker) 0 25%, transparent 0 50%) 0 0 / 8px 8px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+.artinos-color-slider > i {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: calc(var(--control-t, 0) * 100%);
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ui-range-seam);
+  box-shadow: 0 0 0 1px var(--ui-handle-edge);
+  pointer-events: none;
+}
+.artinos-color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  margin: 0 0 3px;
+  padding: 0;
+  border: 0;
+}
+.artinos-color-swatches > legend {
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 0;
+  font-size: 10px;
+  color: var(--ui-text-label);
+}
+.artinos-color-swatches > button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-swatch-border);
+  border-radius: var(--ui-radius-small);
+  cursor: pointer;
+}
+.artinos-color-swatches > button[aria-pressed='true'] {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 1px;
+}
+
+/* ── matrix · object reference · quaternion ───────────────────────────── */
+
+.artinos-matrix-control {
+  min-width: 0;
+  margin: 0 0 3px;
+  padding: 0;
+  border: 0;
+}
+.artinos-matrix-control > legend {
+  margin-bottom: 5px;
+  padding: 0;
+  font-size: 9px;
+  color: var(--ui-vector-title);
+}
+.artinos-matrix-control > div { display: grid; gap: 4px; }
+.artinos-matrix-control label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+  padding: 3px 5px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-vector-border);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-vector-well);
+  font-size: 8px;
+  color: var(--ui-vector-axis);
+}
+.artinos-matrix-control small { font-size: 7px; }
+.artinos-matrix-control input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 10px;
+  color: inherit;
+  text-align: right;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.artinos-matrix-control input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; }
+
+.artinos-object-reference {
+  display: grid;
+  grid-template-columns: var(--ui-label-w) minmax(0, 1fr);
+  gap: 2px 5px;
+  align-items: center;
+  margin-bottom: 3px;
+}
+.artinos-object-reference > span {
+  font-size: 10px;
+  color: var(--ui-text-label);
+}
+.artinos-object-reference > input {
+  width: 100%;
+  min-width: 0;
+  height: var(--ui-control-h);
+  padding: 2px 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--ui-number-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-number-well);
+  font: inherit;
+  font-size: 10px;
+  color: var(--ui-text);
+}
+.artinos-object-reference > code {
+  grid-column: 2;
+  font-family: inherit;
+  font-size: 8px;
+  color: var(--ui-text-meta);
+}
+.artinos-quaternion-control > button { margin-top: -4px; }

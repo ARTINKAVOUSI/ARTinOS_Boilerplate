@@ -6,14 +6,19 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./studio-panels.css": "./src/studio/studio-panels.css"
   },
   "dependencies": {
     "@artinos/graph": "file:../graph",
     "@artinos/inputflow": "file:../inputflow",
+    "@artinos/metablock": "file:../metablock",
     "@artinos/modules": "file:../modules",
     "@artinos/runtime": "file:../runtime",
     "@artinos/ui": "file:../ui",
-    "react": "19.2.0"
+    "lucide-react": "^0.546.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "three": "0.185.1"
   }
 }

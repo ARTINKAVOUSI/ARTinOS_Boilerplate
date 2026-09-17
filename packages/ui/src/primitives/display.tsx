@@ -1,8 +1,8 @@
-import { useMemo, type ReactNode } from 'react'
+import { useMemo, type ReactNode, useRef } from 'react'
 
 export function KeyValue({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="artinos-row">
+    <div className="artinos-keyvalue">
       <span>{label}</span>
       <output>{value}</output>
     </div>
@@ -84,4 +84,73 @@ export function LevelMeter({ label, channels, min = 0, max = 1, peak }: { label:
 
 export function StatusDisplay({ label, value, tone = 'neutral', detail }: { label: string; value: string; tone?: 'neutral' | 'live' | 'warn' | 'fault'; detail?: string }) {
   return <div className="artinos-status-display" data-state={tone}><span>{label}</span><strong>{value}</strong>{detail && <small>{detail}</small>}</div>
+}
+
+/**
+ * MicroReadout — the smallest instrument (reference `.micro`): a value and its
+ * unit in an 18px body. With `onChange` it scrubs like a number well — drag
+ * across it, Shift for a fifth of the rate — and answers the arrow keys.
+ */
+export function MicroReadout({
+  label,
+  value,
+  unit,
+  precision = 2,
+  step,
+  onChange,
+}: {
+  label: string
+  value: number
+  unit?: string
+  precision?: number
+  /** Scrub increment. Defaults to one unit of the displayed precision. */
+  step?: number
+  onChange?(value: number): void
+}) {
+  const increment = step ?? 10 ** -precision
+  const gesture = useRef<{ x: number; start: number; travel: number } | null>(null)
+  const interactive = onChange !== undefined
+  const commit = (next: number) => onChange?.(Number(next.toFixed(precision)))
+  return (
+    <span
+      className="artinos-micro"
+      role={interactive ? 'spinbutton' : undefined}
+      aria-label={label}
+      aria-valuenow={interactive ? value : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      data-interactive={interactive || undefined}
+      onPointerDown={event => {
+        if (!interactive || event.button !== 0) return
+        event.preventDefault()
+        event.currentTarget.setPointerCapture(event.pointerId)
+        gesture.current = { x: event.clientX, start: value, travel: 0 }
+      }}
+      onPointerMove={event => {
+        const active = gesture.current
+        if (!active) return
+        active.travel += (event.clientX - active.x) * increment * (event.shiftKey ? 0.2 : 1)
+        active.x = event.clientX
+        commit(Math.round((active.start + active.travel) / increment) * increment)
+      }}
+      onPointerUp={() => {
+        gesture.current = null
+      }}
+      onPointerCancel={() => {
+        gesture.current = null
+      }}
+      onKeyDown={event => {
+        if (!interactive || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return
+        event.preventDefault()
+        commit(value + (event.key === 'ArrowUp' ? 1 : -1) * increment * (event.shiftKey ? 10 : 1))
+      }}
+    >
+      {value.toFixed(precision)}
+      {unit && <em>{unit}</em>}
+    </span>
+  )
+}
+
+/** A row of micro readouts (reference `.micro-row`). */
+export function MicroReadoutRow({ children }: { children: ReactNode }) {
+  return <div className="artinos-micro-row">{children}</div>
 }

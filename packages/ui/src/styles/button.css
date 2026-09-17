@@ -1,0 +1,95 @@
+/* Buttons — reference `.btn`, `.iconbtn` and `.btn-row`. */
+
+/* Loose action buttons inside other components wear the same body. */
+.artinos-button,
+.artinos-gradient-editor > button,
+.artinos-curve-control > header > button,
+.artinos-quaternion-control > button {
+  height: var(--ui-h-comp-sm);
+  padding: 1px 6px;
+  border: 0;
+  border-radius: var(--ui-r-active);
+  background: var(--ui-body);
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge);
+  font: inherit;
+  font-size: 10.5px;
+  color: var(--ui-ink-2);
+  cursor: pointer;
+  transition:
+    color var(--ui-t-fast) var(--ui-ease),
+    box-shadow var(--ui-t-fast) var(--ui-ease),
+    transform var(--ui-t-fast) var(--ui-ease);
+}
+.artinos-button:hover,
+.artinos-gradient-editor > button:hover,
+.artinos-curve-control > header > button:hover,
+.artinos-quaternion-control > button:hover {
+  color: var(--ui-ink);
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge-lit);
+}
+.artinos-button:active,
+.artinos-gradient-editor > button:active,
+.artinos-curve-control > header > button:active,
+.artinos-quaternion-control > button:active {
+  transform: scale(0.985);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.artinos-button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+/* pressed on — the active material, as a pressed segment carries it */
+.artinos-button.is-active {
+  background: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: var(--ui-ink-active);
+}
+.artinos-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
+.artinos-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-r-micro);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ui-ink-3);
+  cursor: pointer;
+  transition:
+    color var(--ui-t-fast),
+    background var(--ui-t-fast);
+}
+.artinos-icon-button:hover {
+  color: var(--ui-ink);
+  background: rgba(255, 255, 255, 0.08);
+}
+.artinos-icon-button.is-active { color: var(--ui-sig); }
+.artinos-icon-button:focus-visible {
+  outline: 1px solid var(--ui-sig-line);
+  outline-offset: 1px;
+}
+
+/* a row of actions; `fill` shares the width equally (reference `.btn-row`) */
+.artinos-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 1px;
+}
+.artinos-toolbar[data-fill] {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+/* a row control in a toolbar keeps room for its name and its value */
+.artinos-toolbar > .artinos-field {
+  flex: 1 1 160px;
+}

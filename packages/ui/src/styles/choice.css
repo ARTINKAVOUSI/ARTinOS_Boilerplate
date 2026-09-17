@@ -1,0 +1,247 @@
+/* Choice — segmented, select, toggle, checkbox, tabs.
+   Two of these carry travelling parts — the segmented insert and the toggle
+   knob — and both move on the world's spring, driven from choice.tsx through
+   --seg-pos and --switch-t. Until the first frame they rest on --seg-index and
+   the checked state, so server markup already draws them in place. */
+
+/* ── segmented — the active segment rises from the frost (reference `.seg`) ── */
+.artinos-segmented {
+  position: relative;
+  display: flex;
+  height: var(--ui-h-comp);
+  padding: 2px;
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18), inset 0 0 0 1px var(--ui-edge);
+  isolation: isolate;
+}
+.artinos-segmented-thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: calc(2px + var(--seg-pos, var(--seg-index, 0)) * (100% - 4px) / var(--seg-count, 1));
+  width: calc((100% - 4px) / var(--seg-count, 1));
+  z-index: 0;
+  border-radius: calc(var(--ui-r-active) - 1px);
+  background: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+.artinos-segmented > button {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  border: 0;
+  border-radius: var(--ui-r-active);
+  background: none;
+  font: inherit;
+  font-size: 10.5px;
+  color: var(--ui-ink-2);
+  cursor: pointer;
+  transition: color var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-segmented > button:hover { color: var(--ui-ink); }
+.artinos-segmented > button[aria-pressed='true'] { color: var(--ui-ink-active); }
+.artinos-segmented > button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ui-sig-line);
+}
+/* without the travelling insert (a single option) the pressed button carries it */
+.artinos-segmented:not(:has(.artinos-segmented-thumb)) > button[aria-pressed='true'] {
+  background: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ── select — a raised body, not a well (reference `.select`) ── */
+.artinos-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  height: var(--ui-h-comp);
+  padding: 0 6px 0 8px;
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-body);
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge);
+  font-size: 11px;
+  cursor: pointer;
+  transition: box-shadow var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-select:hover {
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge-lit);
+}
+.artinos-select:has(select:focus-visible) {
+  box-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-select > select {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ui-ink);
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.artinos-select option { background: #1c1e21; color: #fff; }
+.artinos-select-chevron {
+  flex: 0 0 auto;
+  color: var(--ui-ink-3);
+}
+/* a bare <select class="artinos-select"> from before the shell existed */
+select.artinos-select {
+  width: 100%;
+  border: 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ui-ink);
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+/* ── toggle (reference `.tgl`) ── */
+.artinos-switch {
+  position: relative;
+  justify-self: end;
+  width: 42px;
+  height: var(--ui-h-comp);
+  padding: 2px;
+  border: 0;
+  border-radius: var(--ui-r-comp);
+  background: var(--ui-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 0 0 1px var(--ui-edge);
+  cursor: pointer;
+  transition: box-shadow var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-switch[aria-checked='true'] {
+  --switch-rest: 1;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 0 0 1px var(--ui-sig-line);
+}
+.artinos-switch-knob {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: 19px;
+  display: grid;
+  place-items: center;
+  border-radius: calc(var(--ui-r-active) - 1px);
+  background: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateX(calc(var(--switch-t, var(--switch-rest, 0)) * 19px));
+}
+.artinos-switch-knob::after {
+  content: '';
+  width: 1.5px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--ui-seam);
+  opacity: 0.6;
+}
+.artinos-switch[aria-checked='true'] .artinos-switch-knob::after {
+  background: var(--ui-sig);
+  opacity: 1;
+  box-shadow: 0 0 8px var(--ui-sig-soft);
+}
+.artinos-switch:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-switch:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ── checkbox — a small well that takes the active material ── */
+.artinos-checkbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ui-ink-2);
+  cursor: pointer;
+  transition: color var(--ui-t-fast);
+}
+.artinos-checkbox:hover { color: var(--ui-ink); }
+.artinos-checkbox > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+.artinos-checkbox > i {
+  display: grid;
+  place-items: center;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border-radius: var(--ui-r-micro);
+  background: var(--ui-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 0 0 1px var(--ui-edge);
+  transition: box-shadow var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-checkbox > i::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transition: opacity var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-checkbox > input:checked + i {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 0 0 1px var(--ui-sig-line);
+}
+.artinos-checkbox > input:checked + i::after { opacity: 1; }
+.artinos-checkbox > input:focus-visible + i {
+  box-shadow: inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
+}
+.artinos-checkbox[data-disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ── tabs (reference `.tabs`) ── */
+.artinos-tabs {
+  display: flex;
+  gap: 11px;
+  padding: 7px var(--ui-pad-panel) 0;
+  border-bottom: 1px solid var(--ui-edge);
+}
+.artinos-tabs > button {
+  position: relative;
+  padding: 0 0 5px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 10.5px;
+  color: var(--ui-ink-3);
+  cursor: pointer;
+  transition: color var(--ui-t-mid);
+}
+.artinos-tabs > button:hover { color: var(--ui-ink-2); }
+.artinos-tabs > button[aria-selected='true'] { color: var(--ui-ink); }
+.artinos-tabs > button[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--ui-sig);
+}
+.artinos-tabs > button:focus-visible {
+  outline: 1px solid var(--ui-sig-line);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

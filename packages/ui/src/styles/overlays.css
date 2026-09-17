@@ -1,0 +1,178 @@
+/* Overlays — every floating surface is the command pane's glass: its sheen over
+   the float tint, its blur, the pane border and shadow. Rows inside menus use the
+   selection list's pressed state. */
+
+.artinos-overlay-trigger {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.artinos-popover,
+.artinos-context-menu,
+.artinos-dialog,
+.artinos-drawer,
+.artinos-tooltip {
+  box-sizing: border-box;
+  border: 1px solid var(--ui-pane-border);
+  background: var(--ui-command-sheen), var(--ui-float);
+  -webkit-backdrop-filter: var(--ui-glass-filter-float);
+  backdrop-filter: var(--ui-glass-filter-float);
+  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow);
+  font-family: var(--ui-font);
+  font-size: var(--ui-font-size);
+  line-height: normal;
+  color: var(--ui-text);
+}
+
+.artinos-popover,
+.artinos-context-menu {
+  z-index: 60;
+  min-width: 180px;
+  padding: 6px;
+  border-radius: var(--ui-radius);
+}
+.artinos-context-menu { padding: 3px; }
+.artinos-popover[data-placement^='top'] { transform: translateY(-100%); }
+.artinos-popover[data-placement$='end'] { transform: translateX(-100%); }
+.artinos-popover[data-placement^='top'][data-placement$='end'] { transform: translate(-100%, -100%); }
+
+.artinos-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 160px;
+}
+.artinos-menu > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--ui-row);
+  padding: 0 7px;
+  border: 0;
+  border-radius: var(--ui-radius-small);
+  background: none;
+  font: inherit;
+  font-size: 10px;
+  text-align: left;
+  color: var(--ui-object-text);
+  cursor: pointer;
+  transition:
+    background var(--ui-dur-fast) var(--ui-ease),
+    box-shadow var(--ui-dur-shadow) var(--ui-ease);
+}
+.artinos-menu > button:hover,
+.artinos-menu > button:focus-visible {
+  outline: none;
+  background: var(--ui-object-on);
+  box-shadow: var(--ui-object-on-shadow);
+  color: var(--ui-text-strong);
+}
+.artinos-menu > button[data-danger] { color: var(--ui-fault); }
+.artinos-menu > button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.artinos-menu kbd {
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  color: var(--ui-text-meta);
+}
+
+.artinos-tooltip-anchor {
+  position: relative;
+  display: inline-flex;
+}
+.artinos-tooltip {
+  position: absolute;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  padding: 4px 7px;
+  border-radius: var(--ui-radius-small);
+  font-size: 9px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.artinos-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--ui-scrim);
+}
+.artinos-dialog,
+.artinos-drawer {
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100%);
+  max-height: min(760px, calc(100vh - 48px));
+  overflow: auto;
+  border-radius: var(--ui-radius);
+}
+.artinos-dialog > header,
+.artinos-drawer > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--ui-line);
+}
+.artinos-dialog h2,
+.artinos-drawer h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+}
+.artinos-dialog > header > button,
+.artinos-drawer > header > button {
+  min-width: 20px;
+  height: 23px;
+  padding: 0 3px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ui-icon);
+  cursor: pointer;
+}
+.artinos-dialog > header > button:hover,
+.artinos-drawer > header > button:hover { color: var(--ui-text-strong); }
+.artinos-dialog > p,
+.artinos-drawer > p {
+  margin: 0;
+  padding: 8px 10px 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--ui-note);
+}
+.artinos-dialog-content { padding: 6px 9px 8px; }
+.artinos-dialog > footer,
+.artinos-drawer > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 7px 10px;
+  border-top: 1px solid var(--ui-line-foot);
+}
+
+.artinos-drawer {
+  position: absolute;
+  border-radius: 0;
+}
+.artinos-drawer[data-side='right'] { inset: 0 0 0 auto; }
+.artinos-drawer[data-side='left'] { inset: 0 auto 0 0; }
+.artinos-drawer[data-side='top'] { inset: 0 0 auto; width: 100%; max-width: none; }
+.artinos-drawer[data-side='bottom'] { inset: auto 0 0; width: 100%; max-width: none; }

@@ -1,0 +1,71 @@
+/* Lists — the selection list and the pinned-parameter bar. */
+
+/* selection — reference `.selection-list` / `.object` */
+.artinos-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.artinos-object {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 7px;
+  border: 0;
+  border-radius: var(--ui-radius-small);
+  background: none;
+  font: inherit;
+  font-size: 10px;
+  text-align: left;
+  color: var(--ui-object-text);
+  cursor: pointer;
+  transition:
+    border-color var(--ui-dur-fast) var(--ui-ease),
+    background var(--ui-dur-fast) var(--ui-ease),
+    box-shadow var(--ui-dur-shadow) var(--ui-ease);
+}
+.artinos-object:hover {
+  background: var(--ui-row-hover);
+  color: var(--ui-text-strong);
+}
+.artinos-object:active { background: var(--ui-press-wash); }
+/* the selected object carries a mint edge — the list's only colour */
+.artinos-object[aria-pressed='true'] {
+  background: var(--ui-object-on);
+  box-shadow: var(--ui-object-on-shadow), inset 2px 0 0 var(--ui-accent-dot);
+  color: var(--ui-text-strong);
+}
+.artinos-object > span {
+  font-size: 8px;
+  color: var(--ui-object-meta);
+}
+
+/* pins — reference `.pins` */
+.artinos-pins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 23px;
+  padding: 3px 10px 5px;
+  font-size: 9px;
+  color: var(--ui-pins-text);
+}
+.artinos-pins > button {
+  padding: 1px 0;
+  border: 0;
+  border-bottom: 1px solid var(--ui-pins-rule);
+  background: none;
+  font: inherit;
+  font-size: 9px;
+  color: var(--ui-pins-link);
+  cursor: pointer;
+  transition:
+    border-color var(--ui-dur-fast) var(--ui-ease),
+    color var(--ui-dur-fast) var(--ui-ease);
+}
+.artinos-pins > button:hover {
+  border-bottom-color: var(--ui-accent-line);
+  color: var(--ui-text-strong);
+}
+.artinos-pins-empty { color: var(--ui-pins-empty); }

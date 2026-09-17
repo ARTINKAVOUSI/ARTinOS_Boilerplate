@@ -31,6 +31,8 @@ export interface ControlFlags {
   precision: boolean
   snapping: boolean
   constrained: boolean
+  /** The pointer is moving faster than `fastVelocity`. */
+  fast: boolean
 }
 
 export interface ControlSpec {
@@ -51,6 +53,16 @@ export interface ControlSpec {
   /** Range covered by one full sweep of the drag axis, in px. */
   travel?: number
   physicsProfile?: PhysicsProfile['id']
+  /** The modifier that engages precision. Alt by default; the instrument feel uses Shift. */
+  precisionKey?: 'alt' | 'shift'
+  /** Precision that engages on its own while the pointer moves slower than `below` (px/ms). */
+  slowPrecision?: { below: number; factor: number }
+  /** Detents as fractions of the range that pull only while the pointer is slower than `below` (px/ms). */
+  softDetents?: { at: readonly number[]; radius: number; below: number }
+  /** A keyboard step as a fraction of the range. With the precision key held it is one `step`. */
+  nudgeFraction?: number
+  /** Above this pointer speed (px/ms) the control reports `data-fast`. */
+  fastVelocity?: number
 }
 
 export interface ControlSnapshot {
@@ -66,7 +78,7 @@ export interface ControlSnapshot {
   settleRequest?: { profile: PhysicsProfile; state: PhysicalState }
 }
 
-const NO_FLAGS: ControlFlags = { precision: false, snapping: false, constrained: false }
+const NO_FLAGS: ControlFlags = { precision: false, snapping: false, constrained: false, fast: false }
 
 /**
  * A control's mechanics. Construct once per control instance; feed it intents.
@@ -160,22 +172,54 @@ export class ControlBehavior {
         this._state = 'dragging'
         this._origin = this._value
         this._accumulated = 0
-        this._flags = { ...NO_FLAGS, precision: intent.keys.alt, constrained: intent.keys.shift }
+        const shiftPrecision = this.spec.precisionKey === 'shift'
+        this._flags = {
+          ...NO_FLAGS,
+          precision: shiftPrecision ? intent.keys.shift : intent.keys.alt,
+          constrained: shiftPrecision ? false : intent.keys.shift,
+        }
         return this.snapshot(true)
       }
 
       case 'move': {
         if (this._state !== 'dragging' || readOnly) return this.snapshot()
-        const factor = intent.keys.alt
+        const shiftPrecision = this.spec.precisionKey === 'shift'
+        const keyed = shiftPrecision ? intent.keys.shift : intent.keys.alt
+        const speed = Math.abs(intent.velocity)
+        const slowPrecision = this.spec.slowPrecision
+        const slow = slowPrecision !== undefined && speed < slowPrecision.below
+        const factor = keyed
           ? (this.spec.precisionFactor ?? 0.15)
-          : intent.keys.shift
-            ? (this.spec.coarseFactor ?? 1)
-            : 1
+          : slow
+            ? slowPrecision.factor
+            : !shiftPrecision && intent.keys.shift
+              ? (this.spec.coarseFactor ?? 1)
+              : 1
+        const range = this.spec.max - this.spec.min
         const travel = this.spec.travel && this.spec.travel > 0 ? this.spec.travel : 200
-        this._accumulated += (intent.delta / travel) * (this.spec.max - this.spec.min) * factor
-        const { value, snapped } = this.settle(this._origin + this._accumulated, intent.keys, intent.velocity)
+        this._accumulated += (intent.delta / travel) * range * factor
+        // Clamp the accumulator to the range so reversing after a push past an end
+        // responds at once, instead of first unwinding travel the value never used.
+        this._accumulated = Math.min(this.spec.max, Math.max(this.spec.min, this._origin + this._accumulated)) - this._origin
+        let { value, snapped } = this.settle(this._origin + this._accumulated, intent.keys, intent.velocity)
+        // Soft detents change the value, never the accumulator: a pull into a detent
+        // must not cost the hand the distance it has actually travelled.
+        const soft = this.spec.softDetents
+        if (soft && speed < soft.below && range > 0) {
+          const position = (value - this.spec.min) / range
+          const detent = soft.at.find(at => Math.abs(position - at) < soft.radius)
+          if (detent !== undefined) {
+            value = this.spec.min + detent * range
+            snapped = true
+          }
+        }
         this._value = value
-        this._flags = { precision: intent.keys.alt, snapping: snapped, constrained: intent.keys.shift }
+        this._flags = {
+          precision: keyed || slow,
+          snapping: snapped,
+          constrained: !shiftPrecision && intent.keys.shift,
+          fast: this.spec.fastVelocity !== undefined && speed > this.spec.fastVelocity,
+        }
         return this.snapshot()
       }
 
@@ -215,7 +259,16 @@ export class ControlBehavior {
 
       case 'nudge': {
         if (readOnly) return this.snapshot()
-        const magnitude = this.spec.step * (intent.keys.shift ? 10 : intent.keys.alt ? 0.1 : 1)
+        const fraction = this.spec.nudgeFraction
+        const keyed = this.spec.precisionKey === 'shift' ? intent.keys.shift : intent.keys.alt
+        // With a fraction, a page step is always a tenth of the range and an arrow a
+        // hundredth — or exactly one step while the precision key is held.
+        const magnitude =
+          fraction !== undefined
+            ? Math.abs(intent.steps) >= 10 || !keyed
+              ? (this.spec.max - this.spec.min) * fraction
+              : this.spec.step
+            : this.spec.step * (intent.keys.shift ? 10 : intent.keys.alt ? 0.1 : 1)
         this._origin = this._value
         const { value } = this.settle(this._value + intent.steps * magnitude, intent.keys, 0)
         this._value = value
@@ -274,6 +327,7 @@ export class ControlBehavior {
       'data-precision': this._flags.precision ? '' : undefined,
       'data-snapping': this._flags.snapping ? '' : undefined,
       'data-constrained': this._flags.constrained ? '' : undefined,
+      'data-fast': this._flags.fast ? '' : undefined,
     }
   }
 }

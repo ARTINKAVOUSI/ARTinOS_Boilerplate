@@ -1,0 +1,966 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARTINOS Core UI — floating instrument layer</title>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ARTINOS CORE UI
+   PRIMITIVES → SEMANTIC ROLES → MATERIAL ROLES → COMPONENT TOKENS
+   → STATE TOKENS → THEME WORLD
+   ═══════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── signal (accent) ───────────────────────────────────────── */
+  --sig:            #6FE3C0;      /* live / manipulation / bound  */
+  --sig-warm:       #E8B27A;      /* automation / modified        */
+  --sig-rose:       #E88F9B;      /* warning                      */
+  --sig-soft:       rgba(111,227,192,.24);
+  --sig-line:       rgba(111,227,192,.55);
+
+  /* ── ink ───────────────────────────────────────────────────── */
+  --ink:            rgba(255,255,255,.94);
+  --ink-2:          rgba(255,255,255,.66);
+  --ink-3:          rgba(255,255,255,.40);
+  --ink-4:          rgba(255,255,255,.24);
+
+  /* ── geometry: radius is adaptive, never universal ─────────── */
+  --r-panel:        12px;
+  --r-comp:         6px;
+  --r-active:       5px;
+  --r-micro:        4px;
+
+  /* ── density ───────────────────────────────────────────────── */
+  --h-comp:         23px;
+  --h-comp-sm:      19px;
+  --gap-row:        3px;
+  --pad-panel:      9px;
+
+  /* ── type ──────────────────────────────────────────────────── */
+  --face: "Inter", "SF Pro Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --num:  "SF Mono", ui-monospace, "Roboto Mono", Menlo, monospace;
+
+  /* ── motion: overridden per material world ─────────────────── */
+  --mass: 1; --spring: 210; --damp: 22;
+  --ease: cubic-bezier(.2,.7,.25,1);
+  --t-fast: 110ms; --t-mid: 190ms; --t-slow: 420ms;
+}
+
+/* ═══ MATERIAL WORLDS ═══════════════════════════════════════════
+   Six interpretations of one material — transmission, diffusion,
+   roughness, density, depth and mass interpolate. Not six skins. */
+
+/* 01 · CLEAR GLASS — highest transmission, lightest mass */
+[data-world="clear"]{
+  --glass:        rgba(255,255,255,.055);
+  --glass-top:    rgba(255,255,255,.13);
+  --blur:         14px;  --sat: 1.30;  --grain: .030;
+  --edge:         rgba(255,255,255,.20);
+  --edge-lit:     rgba(255,255,255,.62);
+  --depth:        0 18px 44px rgba(0,0,0,.26), 0 2px 8px rgba(0,0,0,.14);
+  --body:         rgba(255,255,255,.055);
+  --body-in:      inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.10);
+  --active-a:     rgba(255,255,255,.62);
+  --active-b:     rgba(255,255,255,.42);
+  --active-lit:   rgba(255,255,255,.85);
+  --ink-active:   rgba(18,22,24,.80);
+  --seam:         rgba(20,24,26,.55);
+  --well:         rgba(0,0,0,.13);
+  --mass:.7; --spring:260; --damp:19;
+}
+/* 02 · FROST GLASS — the canonical ARTINOS surface */
+[data-world="frost"]{
+  --glass:        rgba(255,255,255,.10);
+  --glass-top:    rgba(255,255,255,.19);
+  --blur:         26px;  --sat: 1.24;  --grain: .050;
+  --edge:         rgba(255,255,255,.17);
+  --edge-lit:     rgba(255,255,255,.55);
+  --depth:        0 26px 64px rgba(0,0,0,.34), 0 3px 10px rgba(0,0,0,.18);
+  --body:         rgba(255,255,255,.085);
+  --body-in:      inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.14);
+  --active-a:     rgba(255,255,255,.74);
+  --active-b:     rgba(255,255,255,.50);
+  --active-lit:   rgba(255,255,255,.92);
+  --ink-active:   rgba(16,20,22,.82);
+  --seam:         rgba(16,20,22,.60);
+  --well:         rgba(0,0,0,.16);
+  --mass:1; --spring:210; --damp:22;
+}
+/* 03 · SATIN GLASS — silkier, porcelain active regions */
+[data-world="satin"]{
+  --glass:        rgba(246,248,247,.14);
+  --glass-top:    rgba(255,255,255,.24);
+  --blur:         30px;  --sat: 1.10;  --grain: .058;
+  --edge:         rgba(255,255,255,.22);
+  --edge-lit:     rgba(255,255,255,.60);
+  --depth:        0 28px 70px rgba(0,0,0,.30), 0 3px 10px rgba(0,0,0,.16);
+  --body:         rgba(255,255,255,.10);
+  --body-in:      inset 0 1px 0 rgba(255,255,255,.26), inset 0 -2px 3px rgba(0,0,0,.10);
+  --active-a:     rgba(255,255,255,.80);
+  --active-b:     rgba(244,248,246,.58);
+  --active-lit:   rgba(255,255,255,.96);
+  --ink-active:   rgba(24,30,30,.78);
+  --seam:         rgba(24,30,30,.48);
+  --well:         rgba(0,0,0,.12);
+  --mass:1.15; --spring:170; --damp:20;
+}
+/* 04 · GRAPHITE FROST — smoked, long-session professional */
+[data-world="graphite"]{
+  --glass:        rgba(18,20,23,.52);
+  --glass-top:    rgba(255,255,255,.09);
+  --blur:         30px;  --sat: 1.02;  --grain: .070;
+  --edge:         rgba(255,255,255,.11);
+  --edge-lit:     rgba(255,255,255,.38);
+  --depth:        0 30px 74px rgba(0,0,0,.52), 0 3px 10px rgba(0,0,0,.30);
+  --body:         rgba(255,255,255,.055);
+  --body-in:      inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.30);
+  --active-a:     rgba(255,255,255,.30);
+  --active-b:     rgba(255,255,255,.16);
+  --active-lit:   rgba(255,255,255,.46);
+  --ink-active:   rgba(255,255,255,.95);
+  --seam:         rgba(255,255,255,.70);
+  --well:         rgba(0,0,0,.34);
+  --mass:1.35; --spring:150; --damp:26;
+}
+/* 05 · OPAL STONE GLASS — chalk / mineral, carved controls */
+[data-world="opal"]{
+  --glass:        rgba(228,226,220,.26);
+  --glass-top:    rgba(255,255,255,.26);
+  --blur:         36px;  --sat: .88;   --grain: .085;
+  --edge:         rgba(255,255,255,.26);
+  --edge-lit:     rgba(255,255,255,.58);
+  --depth:        0 30px 72px rgba(0,0,0,.32), 0 4px 12px rgba(0,0,0,.18);
+  --body:         rgba(255,255,255,.13);
+  --body-in:      inset 0 2px 3px rgba(0,0,0,.10), inset 0 -1px 0 rgba(255,255,255,.28);
+  --active-a:     rgba(255,255,255,.72);
+  --active-b:     rgba(238,238,232,.52);
+  --active-lit:   rgba(255,255,255,.90);
+  --ink-active:   rgba(38,40,38,.80);
+  --seam:         rgba(38,40,38,.42);
+  --well:         rgba(0,0,0,.14);
+  --mass:1.6; --spring:135; --damp:27;
+}
+/* 06 · MONOLITH — densest body, glass survives underneath */
+[data-world="monolith"]{
+  --glass:        rgba(30,28,25,.46);
+  --glass-top:    rgba(255,255,255,.10);
+  --blur:         42px;  --sat: 1.06;  --grain: .095;
+  --edge:         rgba(255,255,255,.13);
+  --edge-lit:     rgba(255,255,255,.34);
+  --depth:        0 36px 90px rgba(0,0,0,.50), 0 5px 14px rgba(0,0,0,.30);
+  --body:         rgba(255,255,255,.07);
+  --body-in:      inset 0 1px 0 rgba(255,255,255,.13), inset 0 -2px 4px rgba(0,0,0,.28);
+  --active-a:     rgba(255,255,255,.28);
+  --active-b:     rgba(255,255,255,.13);
+  --active-lit:   rgba(255,255,255,.42);
+  --ink-active:   rgba(255,255,255,.94);
+  --seam:         rgba(255,255,255,.66);
+  --well:         rgba(0,0,0,.30);
+  --mass:2; --spring:110; --damp:30;
+}
+
+/* ═══ SCENE ═════════════════════════════════════════════════════ */
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0; font-family:var(--face); color:var(--ink);
+  background:#14110d; overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+#scene{position:fixed; inset:0; width:100%; height:100%; display:block}
+#stage{
+  position:fixed; inset:0; overflow:auto; padding:18px 18px 88px;
+  display:flex; gap:12px; align-items:flex-start; justify-content:center;
+}
+
+/* ═══ PANEL — floating optical surface ══════════════════════════ */
+.panel{
+  position:relative; width:288px; flex:0 0 auto;
+  border-radius:var(--r-panel);
+  background:
+    linear-gradient(180deg, var(--glass-top) 0%, transparent 34%),
+    var(--glass);
+  backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  box-shadow:
+    var(--depth),
+    inset 0 1px 0 var(--edge-lit),
+    inset 0 0 0 1px var(--edge);
+  transition: background var(--t-slow) var(--ease),
+              box-shadow var(--t-slow) var(--ease),
+              backdrop-filter var(--t-slow) var(--ease);
+}
+/* micro-roughness + grain: the thing that stops it reading as CSS blur */
+.panel::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  opacity:var(--grain); mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+}
+/* near-edge luminance — brighter where it lifts off the scene */
+.panel::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(120% 70% at 50% -10%, rgba(255,255,255,.10), transparent 60%);
+}
+.panel > *{position:relative; z-index:1}
+
+.panel__head{padding:9px var(--pad-panel) 0}
+.panel__title{font-size:12px; font-weight:560; letter-spacing:-.006em; margin:0}
+.panel__path{font-size:9.5px; color:var(--ink-3); margin-top:1px; letter-spacing:.008em}
+.panel__marks{position:absolute; top:9px; right:var(--pad-panel); display:flex; gap:6px; align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--sig);box-shadow:0 0 8px var(--sig-soft)}
+.dot.warm{background:var(--sig-warm);box-shadow:0 0 9px rgba(232,178,122,.3)}
+.iconbtn{
+  width:16px;height:16px;border:0;border-radius:var(--r-micro);background:transparent;
+  color:var(--ink-3);cursor:pointer;display:grid;place-items:center;
+  transition:color var(--t-fast),background var(--t-fast);
+}
+.iconbtn:hover{color:var(--ink);background:rgba(255,255,255,.08)}
+
+/* tabs */
+.tabs{display:flex; gap:11px; padding:7px var(--pad-panel) 0; border-bottom:1px solid var(--edge)}
+.tab{
+  background:none;border:0;padding:0 0 5px;cursor:pointer;font:inherit;font-size:10.5px;
+  color:var(--ink-3); position:relative; transition:color var(--t-mid);
+}
+.tab:hover{color:var(--ink-2)}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"]::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1.5px;
+  background:var(--sig); border-radius:2px;
+}
+
+.panel__body{padding:7px var(--pad-panel) 3px; display:flex; flex-direction:column; gap:var(--gap-row)}
+.section{display:flex;align-items:center;gap:6px;margin:7px 0 1px;font-size:9.5px;color:var(--ink-3);letter-spacing:.04em}
+.section::after{content:"";flex:1;height:1px;background:var(--edge)}
+.section:first-child{margin-top:1px}
+
+.panel__foot{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px var(--pad-panel) 7px; margin-top:5px;
+  border-top:1px solid var(--edge); font-size:9.5px; color:var(--ink-4);
+}
+.panel__foot b{font-weight:400;color:var(--ink-3);display:inline-flex;align-items:center;gap:5px}
+.panel__foot .dot{width:4px;height:4px}
+
+/* ═══ METACOMP ══════════════════════════════════════════════════
+   Label + surface + value + state designed as ONE object.       */
+.mc{display:grid; align-items:center; gap:7px}
+.mc--full{grid-template-columns:1fr}
+.mc--row{grid-template-columns:62px 1fr}
+.mc--row.wide{grid-template-columns:74px 1fr}
+.mc__label{font-size:11px;color:var(--ink-2);letter-spacing:-.001em}
+.mc__pair{display:grid;grid-template-columns:1fr 92px;gap:5px}
+.mc__vec{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+
+/* modulation / bound marker — the accent as information */
+.mod{
+  width:7px;height:7px;flex:0 0 7px;border:1px solid var(--ink-4);
+  transform:rotate(45deg);border-radius:2px;cursor:pointer;
+  transition:border-color var(--t-mid),background var(--t-mid),box-shadow var(--t-mid);
+}
+.mod:hover{border-color:var(--ink-2)}
+.mod[data-on="1"]{border-color:var(--sig-line);background:var(--sig);box-shadow:0 0 10px var(--sig-soft)}
+.mc--row.bound{grid-template-columns:62px 1fr 7px}
+
+/* ═══ CAPSULE — the living surface ══════════════════════════════ */
+.cap{
+  position:relative; height:var(--h-comp); border-radius:var(--r-comp);
+  background:var(--body); box-shadow:var(--body-in), inset 0 0 0 1px var(--edge);
+  overflow:hidden; cursor:ew-resize; user-select:none; touch-action:none;
+  isolation:isolate;
+  transform:translateZ(0) scaleY(var(--poseY,1));
+  transition:box-shadow var(--t-mid) var(--ease), background var(--t-mid) var(--ease);
+}
+.cap:focus-visible{outline:none; box-shadow:var(--body-in), inset 0 0 0 1px var(--sig-line), 0 0 0 3px var(--sig-soft)}
+
+/* active optical material — a denser insert moving inside a softer body */
+.cap__fill{
+  position:absolute; inset:1px auto 1px 1px; width:calc(var(--p) * 100% - 2px);
+  min-width:calc(var(--r-active) * 2);
+  border-radius:calc(var(--r-active) - 1px);
+  background:linear-gradient(180deg, var(--active-lit) 0%, var(--active-a) 42%, var(--active-b) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -1px 2px rgba(0,0,0,.12),
+    1px 0 0 rgba(0,0,0,.10);
+  transition:filter var(--t-mid) var(--ease), box-shadow var(--t-mid) var(--ease);
+}
+/* the seam — quiet at rest, present under the hand */
+.cap__seam{
+  position:absolute; top:5px; bottom:5px; left:calc(var(--p) * 100%);
+  width:1.5px; margin-left:-4px; border-radius:2px; background:var(--seam);
+  opacity:.55; transition:opacity var(--t-mid), box-shadow var(--t-mid);
+}
+.cap__ticks{
+  position:absolute; inset:0; opacity:0; pointer-events:none;
+  transition:opacity var(--t-mid) var(--ease);
+  background:repeating-linear-gradient(90deg,
+    rgba(255,255,255,.001) 0 calc(var(--tickgap,10%) - 1px),
+    var(--ink-4) calc(var(--tickgap,10%) - 1px) var(--tickgap,10%));
+  -webkit-mask-image:linear-gradient(180deg,transparent 42%,#000 42%,#000 76%,transparent 76%);
+          mask-image:linear-gradient(180deg,transparent 42%,#000 42%,#000 76%,transparent 76%);
+}
+.cap__text{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between;
+  padding:0 8px; pointer-events:none; font-size:11px;
+}
+.cap__text.on{ color:var(--ink-active); clip-path:inset(0 calc(100% - var(--p) * 100%) 0 0); }
+.cap__text.off{ color:var(--ink-2); clip-path:inset(0 0 0 calc(var(--p) * 100%)); }
+.cap__val{font-family:var(--num); font-variant-numeric:tabular-nums; font-size:10.5px; letter-spacing:-.01em}
+.cap__val i{font-style:normal; opacity:.55; margin-left:1.5px; font-size:9.5px}
+.cap__text.off .cap__val{color:var(--ink)}
+
+/* states — material transformation, not recolor */
+.cap:hover .cap__seam{opacity:.9}
+.cap:hover{box-shadow:var(--body-in), inset 0 0 0 1px var(--edge-lit)}
+.cap.hot .cap__ticks{opacity:.5}
+.cap.drag .cap__ticks{opacity:.85}
+.cap.drag .cap__fill{filter:brightness(1.07)}
+.cap.drag .cap__seam{opacity:1; box-shadow:0 0 8px var(--sig-soft); background:var(--sig)}
+.cap.fast .cap__ticks{opacity:.18}
+.cap.precise .cap__ticks{opacity:1; --tickgap:5%}
+.cap.press .cap__fill{filter:brightness(.94)}
+.cap.snap .cap__seam{background:var(--sig); box-shadow:0 0 12px var(--sig-soft)}
+
+/* ═══ FIELD — recessed well ═════════════════════════════════════ */
+.field{
+  position:relative; height:var(--h-comp); border-radius:var(--r-comp);
+  background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.22), inset 0 0 0 1px var(--edge);
+  display:flex; align-items:center; justify-content:space-between; padding:0 7px;
+  cursor:ew-resize; user-select:none; touch-action:none;
+  transition:box-shadow var(--t-mid) var(--ease);
+}
+.field:hover{box-shadow:inset 0 1px 3px rgba(0,0,0,.22), inset 0 0 0 1px var(--edge-lit)}
+.field:focus-visible{outline:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.22),inset 0 0 0 1px var(--sig-line),0 0 0 3px var(--sig-soft)}
+.field__ax{font-size:9.5px;color:var(--ink-3)}
+.field__num{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:10.5px;color:var(--ink);margin-left:auto}
+.field.drag{box-shadow:inset 0 1px 3px rgba(0,0,0,.22), inset 0 0 0 1px var(--sig-line)}
+
+/* ═══ SELECT ════════════════════════════════════════════════════ */
+.select{
+  position:relative; height:var(--h-comp); border-radius:var(--r-comp);
+  background:var(--body); box-shadow:var(--body-in), inset 0 0 0 1px var(--edge);
+  display:flex; align-items:center; padding:0 6px 0 8px; gap:5px; cursor:pointer;
+  font-size:11px; transition:box-shadow var(--t-mid) var(--ease);
+}
+.select:hover{box-shadow:var(--body-in), inset 0 0 0 1px var(--edge-lit)}
+.select select{
+  appearance:none;background:none;border:0;color:var(--ink);font:inherit;font-size:11px;
+  flex:1;cursor:pointer;outline:none;padding:0;
+}
+.select select option{background:#1c1e21;color:#fff}
+.select svg{color:var(--ink-3);flex:0 0 auto}
+
+/* ═══ SEGMENTED — active segment rises from the frost ═══════════ */
+.seg{
+  position:relative; height:var(--h-comp); border-radius:var(--r-comp);
+  background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.18), inset 0 0 0 1px var(--edge);
+  display:flex; padding:2px; isolation:isolate;
+}
+.seg__ind{
+  position:absolute; top:2px; bottom:2px; left:2px; border-radius:calc(var(--r-active) - 1px);
+  background:linear-gradient(180deg, var(--active-lit), var(--active-a) 55%, var(--active-b));
+  box-shadow:0 1px 3px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.5);
+  z-index:0;
+}
+.seg button{
+  position:relative; z-index:1; flex:1; border:0; background:none; font:inherit; font-size:10.5px;
+  color:var(--ink-2); cursor:pointer; border-radius:var(--r-active);
+  transition:color var(--t-mid) var(--ease);
+}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{color:var(--ink-active)}
+.seg button:focus-visible{outline:none;box-shadow:0 0 0 2px var(--sig-line)}
+
+/* ═══ TOGGLE ════════════════════════════════════════════════════ */
+.tgl{
+  width:42px;height:var(--h-comp);border-radius:var(--r-comp);border:0;padding:2px;cursor:pointer;
+  background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.20), inset 0 0 0 1px var(--edge);
+  position:relative; justify-self:end; transition:box-shadow var(--t-mid) var(--ease);
+}
+.tgl__k{
+  position:absolute;top:2px;bottom:2px;width:19px;border-radius:calc(var(--r-active) - 1px);
+  background:linear-gradient(180deg,var(--active-lit),var(--active-a) 55%,var(--active-b));
+  box-shadow:0 1px 3px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.5);
+  display:grid;place-items:center;
+}
+.tgl__k::after{content:"";width:1.5px;height:8px;border-radius:2px;background:var(--seam);opacity:.6}
+.tgl[aria-pressed="true"]{box-shadow:inset 0 1px 3px rgba(0,0,0,.20), inset 0 0 0 1px var(--sig-line)}
+.tgl[aria-pressed="true"] .tgl__k::after{background:var(--sig);opacity:1;box-shadow:0 0 8px var(--sig-soft)}
+.tgl:focus-visible{outline:none;box-shadow:inset 0 0 0 1px var(--sig-line),0 0 0 3px var(--sig-soft)}
+
+/* ═══ COLOUR — the surface is the visualization ═════════════════ */
+.swatch{
+  height:var(--h-comp); border-radius:var(--r-comp); position:relative; overflow:hidden; cursor:pointer;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 1px 3px rgba(0,0,0,.18);
+  display:flex; align-items:center; justify-content:space-between; padding:0 8px;
+  font-family:var(--num); font-size:10.5px; color:rgba(12,20,20,.78);
+}
+.swatch::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.36),transparent 60%)}
+.swatch span{position:relative}
+.hue{
+  height:13px; border-radius:var(--r-micro); position:relative; cursor:ew-resize; touch-action:none;
+  background:linear-gradient(90deg,#e8574f,#e8b24f,#8fe84f,#4fe8b2,#4fb2e8,#8f4fe8,#e84fb2,#e8574f);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18), inset 0 1px 3px rgba(0,0,0,.28);
+}
+.hue__k{
+  position:absolute;top:-2px;bottom:-2px;width:7px;margin-left:-3.5px;border-radius:3px;
+  background:linear-gradient(180deg,var(--active-lit),var(--active-b));
+  box-shadow:0 1px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+/* ═══ COMPACT + MICRO ═══════════════════════════════════════════ */
+.mc--compact .cap{height:var(--h-comp-sm);border-radius:var(--r-active)}
+.mc--compact .cap__text{font-size:10px;padding:0 7px}
+.micro-row{display:flex;gap:4px;align-items:center}
+.micro{
+  height:18px;min-width:46px;border-radius:var(--r-micro);background:var(--body);
+  box-shadow:var(--body-in), inset 0 0 0 1px var(--edge);
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  font-family:var(--num);font-size:9.5px;color:var(--ink-2);cursor:ew-resize;touch-action:none;user-select:none;
+}
+.micro em{font-style:normal;font-family:var(--face);color:var(--ink-4);font-size:8.5px}
+
+/* ═══ BUTTONS ═══════════════════════════════════════════════════ */
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.btn{
+  height:var(--h-comp-sm);border:0;border-radius:var(--r-active);cursor:pointer;font:inherit;font-size:10.5px;
+  color:var(--ink-2);background:var(--body);box-shadow:var(--body-in), inset 0 0 0 1px var(--edge);
+  transition:color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.btn:hover{color:var(--ink);box-shadow:var(--body-in), inset 0 0 0 1px var(--edge-lit)}
+.btn:active{transform:scale(.985);box-shadow:inset 0 2px 4px rgba(0,0,0,.2)}
+
+/* ═══ WORLD BAR ═════════════════════════════════════════════════ */
+.bar{
+  position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
+  display:flex; align-items:center; gap:2px; padding:4px; border-radius:10px; z-index:20;
+  background:linear-gradient(180deg,var(--glass-top),transparent 40%), var(--glass);
+  backdrop-filter:blur(var(--blur)) saturate(var(--sat));
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(var(--sat));
+  box-shadow:var(--depth), inset 0 1px 0 var(--edge-lit), inset 0 0 0 1px var(--edge);
+}
+.bar button{
+  border:0;background:none;font:inherit;font-size:10.5px;color:var(--ink-3);cursor:pointer;
+  padding:5px 9px;border-radius:6px;transition:color var(--t-mid),background var(--t-mid),box-shadow var(--t-mid);
+  white-space:nowrap;
+}
+.bar button:hover{color:var(--ink)}
+.bar button[aria-pressed="true"]{
+  color:var(--ink-active);
+  background:linear-gradient(180deg,var(--active-lit),var(--active-a) 55%,var(--active-b));
+  box-shadow:0 1px 3px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.bar .div{width:1px;align-self:stretch;margin:3px 3px;background:var(--edge)}
+.bar .env{color:var(--ink-4);font-size:9.5px;padding:5px 6px 5px 3px}
+
+.brand{
+  position:fixed;top:14px;left:18px;z-index:20;font-size:10.5px;color:rgba(255,255,255,.72);
+  text-shadow:0 1px 8px rgba(0,0,0,.5); display:flex; gap:8px; align-items:baseline;
+}
+.brand b{font-weight:560;letter-spacing:.02em}
+.brand span{color:rgba(255,255,255,.42);font-size:9.5px}
+.worldname{
+  position:fixed;top:14px;right:18px;z-index:20;font-size:9.5px;color:rgba(255,255,255,.52);
+  text-shadow:0 1px 8px rgba(0,0,0,.5);
+}
+
+@media (max-width:700px){
+  #stage{flex-direction:column;align-items:center;padding:14px 10px 86px}
+  .panel{width:min(100%,340px)}
+  .bar{gap:2px;padding:5px;max-width:calc(100vw - 20px);overflow-x:auto;border-radius:13px}
+  .bar button{padding:7px 10px;font-size:11px}
+  .bar .env{display:none}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important; transition-duration:1ms !important} }
+</style>
+
+<canvas id="scene"></canvas>
+
+<div class="brand"><b>ARTINOS</b><span>Core UI / MetaComp</span></div>
+<div class="worldname" id="worldname">02 · Frost Glass — canonical</div>
+
+<div id="stage">
+  <!-- ════════ PANEL A ════════ -->
+  <section class="panel" data-panel>
+    <div class="panel__head">
+      <h1 class="panel__title">Optical body</h1>
+      <div class="panel__path">Material / Surface response</div>
+      <div class="panel__marks">
+        <span class="dot" title="Live"></span>
+        <button class="iconbtn" title="Reset all">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true">Scene</button>
+      <button class="tab" role="tab" aria-selected="false">Studio</button>
+      <button class="tab" role="tab" aria-selected="false">Detail</button>
+    </div>
+
+    <div class="panel__body">
+      <div class="section">Material</div>
+
+      <!-- FULL — the flagship: capsule is the whole surface -->
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Transmission" data-value="72" data-min="0" data-max="100" data-step="1" data-unit="%"></div></div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Diffusion" data-value="0.38" data-min="0" data-max="1" data-step="0.01" data-dec="2"></div></div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Depth" data-value="5.6" data-min="0" data-max="20" data-step="0.1" data-dec="1" data-unit="mm"></div></div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Refraction" data-value="1.48" data-min="1" data-max="2.4" data-step="0.01" data-dec="2"></div></div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Roughness" data-value="0.14" data-min="0" data-max="1" data-step="0.01" data-dec="2"></div></div>
+
+      <!-- SEGMENTED -->
+      <div class="mc mc--row"><span class="mc__label">Response</span>
+        <div class="seg" data-seg data-index="1"><button>Soft</button><button>Balanced</button><button>Exact</button></div>
+      </div>
+
+      <!-- PAIRED -->
+      <div class="mc mc--row"><span class="mc__label">Finish</span>
+        <div class="select"><select><option>Neutral frost</option><option>Clear optical</option><option>Satin porcelain</option><option>Mineral opal</option></select>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="section">Light</div>
+
+      <!-- BOUND — accent marks an externally driven parameter -->
+      <div class="mc mc--full" style="display:grid;grid-template-columns:1fr 7px;gap:6px;align-items:center">
+        <div class="cap" data-slider data-label="Exposure" data-value="1.2" data-min="-4" data-max="4" data-step="0.1" data-dec="1" data-unit="EV"></div>
+        <span class="mod" data-mod title="Bind to automation"></span>
+      </div>
+      <div class="mc mc--full" style="display:grid;grid-template-columns:1fr 9px;gap:9px;align-items:center">
+        <div class="cap" data-slider data-label="Temperature" data-value="5600" data-min="2000" data-max="10000" data-step="50" data-unit="K"></div>
+        <span class="mod" data-mod data-on="1" title="Bound"></span>
+      </div>
+      <div class="mc mc--compact mc--full"><div class="cap" data-slider data-label="Softness" data-value="64" data-min="0" data-max="100" data-step="1" data-unit="%"></div></div>
+
+      <div class="section">Geometry</div>
+
+      <!-- PAIRED: value + sizing behaviour -->
+      <div class="mc mc--row"><span class="mc__label">Width</span>
+        <div class="mc__pair">
+          <div class="field" data-num data-value="268" data-step="1" tabindex="0"><span class="field__num">268</span></div>
+          <div class="select"><select><option>Fixed</option><option>Fill</option><option>Hug</option></select>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="mc mc--row"><span class="mc__label">Height</span>
+        <div class="mc__pair">
+          <div class="field" data-num data-value="268" data-step="1" tabindex="0"><span class="field__num">268</span></div>
+          <div class="select"><select><option>Fixed</option><option>Fill</option><option>Hug</option></select>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="mc mc--row"><span class="mc__label">Grow</span>
+        <div class="seg" data-seg data-index="1"><button>Fixed</button><button>Fill</button><button>Hug</button></div>
+      </div>
+
+      <!-- VECTOR -->
+      <div class="mc mc--row"><span class="mc__label">Origin</span>
+        <div class="mc__vec">
+          <div class="field" data-num data-value="0.00" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">X</span><span class="field__num">0.00</span></div>
+          <div class="field" data-num data-value="0.00" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">Y</span><span class="field__num">0.00</span></div>
+          <div class="field" data-num data-value="0.00" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">Z</span><span class="field__num">0.00</span></div>
+        </div>
+      </div>
+
+      <div class="section">Colour</div>
+      <div class="mc mc--full" style="display:flex;flex-direction:column;gap:4px">
+        <div class="hue" data-hue><span class="hue__k" style="left:52%"></span></div>
+        <div class="swatch" data-swatch style="background:#8DBBB4"><span>8DBBB4</span><span>100%</span></div>
+      </div>
+
+      <div class="section">Utility</div>
+      <div class="mc mc--row wide" style="grid-template-columns:1fr auto"><span class="mc__label">Live update</span>
+        <button class="tgl" data-toggle aria-pressed="true"><span class="tgl__k"></span></button>
+      </div>
+      <div class="mc mc--row wide" style="grid-template-columns:1fr auto"><span class="mc__label">Enabled</span>
+        <button class="tgl" data-toggle aria-pressed="true"><span class="tgl__k"></span></button>
+      </div>
+    </div>
+
+    <div class="panel__foot"><b><span class="dot warm"></span>Modified</b><span>Local / shared values</span></div>
+  </section>
+
+  <!-- ════════ PANEL B ════════ -->
+  <section class="panel" data-panel style="width:268px">
+    <div class="panel__head">
+      <h1 class="panel__title">Studio camera</h1>
+      <div class="panel__path">Scene / Transform · Evaluation</div>
+      <div class="panel__marks"><span class="dot"></span></div>
+    </div>
+
+    <div class="panel__body" style="padding-top:9px">
+      <div class="section">Camera</div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Focal length" data-value="50" data-min="12" data-max="200" data-step="1" data-unit="mm"></div></div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Aperture" data-value="2.8" data-min="1.2" data-max="22" data-step="0.1" data-dec="1" data-unit="f"></div></div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Focus" data-value="8.0" data-min="0.2" data-max="40" data-step="0.1" data-dec="1" data-unit="m"></div></div>
+
+      <div class="section">Transform</div>
+      <div class="mc mc--row"><span class="mc__label">Position</span>
+        <div class="mc__vec">
+          <div class="field" data-num data-value="0.00" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">X</span><span class="field__num">0.00</span></div>
+          <div class="field" data-num data-value="1.60" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">Y</span><span class="field__num">1.60</span></div>
+          <div class="field" data-num data-value="4.20" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">Z</span><span class="field__num">4.20</span></div>
+        </div>
+      </div>
+      <div class="mc mc--row"><span class="mc__label">Scale</span>
+        <div class="mc__vec">
+          <div class="field" data-num data-value="1.00" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">X</span><span class="field__num">1.00</span></div>
+          <div class="field" data-num data-value="1.00" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">Y</span><span class="field__num">1.00</span></div>
+          <div class="field" data-num data-value="1.00" data-dec="2" data-step="0.01" tabindex="0"><span class="field__ax">Z</span><span class="field__num">1.00</span></div>
+        </div>
+      </div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Rotation" data-value="90" data-min="-180" data-max="180" data-step="1" data-unit="°"></div></div>
+      <div class="btn-row" style="margin-top:1px">
+        <button class="btn">Reset transform</button><button class="btn">Zero position</button>
+      </div>
+
+      <div class="section">Evaluation</div>
+      <div class="mc mc--full"><div class="cap" data-slider data-label="Samples" data-value="336" data-min="16" data-max="1024" data-step="8"></div></div>
+      <div class="mc mc--row"><span class="mc__label">Quality</span>
+        <div class="seg" data-seg data-index="2"><button>Draft</button><button>Studio</button><button>Final</button></div>
+      </div>
+      <div class="mc mc--row wide" style="grid-template-columns:1fr auto"><span class="mc__label">Denoise</span>
+        <button class="tgl" data-toggle aria-pressed="true"><span class="tgl__k"></span></button>
+      </div>
+      <div class="mc mc--row"><span class="mc__label">Output</span>
+        <div class="select"><select><option>Preview</option><option>Beauty</option><option>Cryptomatte</option></select>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="section">Readout</div>
+      <div class="micro-row">
+        <span class="micro" data-num data-value="0.38" data-dec="2" data-step="0.01">0.38</span>
+        <span class="micro" data-num data-value="12.4" data-dec="1" data-step="0.1">12.4<em>ms</em></span>
+        <span class="micro" data-num data-value="98" data-step="1">98<em>fps</em></span>
+        <span class="micro" data-num data-value="1.48" data-dec="2" data-step="0.01">1.48</span>
+      </div>
+    </div>
+
+    <div class="panel__foot"><b><span class="dot"></span>Ready</b><span>No render engine</span></div>
+  </section>
+</div>
+
+<!-- ════════ MATERIAL WORLD BAR ════════ -->
+<nav class="bar" id="bar">
+  <button data-world-btn="clear">Clear</button>
+  <button data-world-btn="frost" aria-pressed="true">Frost</button>
+  <button data-world-btn="satin">Satin</button>
+  <button data-world-btn="graphite">Graphite</button>
+  <button data-world-btn="opal">Opal</button>
+  <button data-world-btn="monolith">Monolith</button>
+  <span class="div"></span>
+  <span class="env">Scene</span>
+  <button data-env="atelier" aria-pressed="true">Atelier</button>
+  <button data-env="garden">Garden</button>
+  <button data-env="studio">Studio</button>
+</nav>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   1 · SCENE — living content underneath. The panels transmit it.
+   ═══════════════════════════════════════════════════════════════ */
+const cv = document.getElementById('scene'), cx = cv.getContext('2d');
+const ENV = {
+  atelier:{base:['#7a5a30','#2d3f42','#8a6a3a'], ink:'#0d1a1c', tile:'rgba(230,200,150,.16)', blobs:['#c98f3e','#2e6f72','#8f3f34','#d8b66a']},
+  garden: {base:['#2f4a22','#16301f','#5a6b2a'], ink:'#0a1408', tile:'rgba(200,230,160,.10)', blobs:['#6d9b3a','#243f22','#a8bd54','#3b7a55']},
+  studio: {base:['#2a2e33','#16181b','#3a4046'], ink:'#0b0d0f', tile:'rgba(210,220,235,.08)', blobs:['#4a5560','#7d8894','#2b3138','#9aa6b2']}
+};
+let env = ENV.atelier, t0 = performance.now(), W=0, H=0;
+
+function size(){
+  const d = Math.min(devicePixelRatio||1, 2);
+  W = cv.width = innerWidth*d; H = cv.height = innerHeight*d;
+  cv.style.width = innerWidth+'px'; cv.style.height = innerHeight+'px';
+  cx.setTransform(d,0,0,d,0,0);
+}
+addEventListener('resize', size); size();
+
+/* procedural ornament — architectural rhythm, not a photograph */
+function ornament(w,h,ink,tile){
+  const s = 76;
+  cx.lineWidth = 1.1; cx.strokeStyle = tile;
+  for(let y=-s; y<h+s; y+=s){
+    for(let x=-s; x<w+s; x+=s){
+      const cxp = x+s/2, cyp = y+s/2, r = s*0.40;
+      cx.beginPath();
+      for(let i=0;i<8;i++){
+        const a = i*Math.PI/4, rr = i%2 ? r*0.56 : r;
+        const px = cxp+Math.cos(a)*rr, py = cyp+Math.sin(a)*rr;
+        i ? cx.lineTo(px,py) : cx.moveTo(px,py);
+      }
+      cx.closePath(); cx.stroke();
+      cx.beginPath(); cx.arc(cxp,cyp,r*0.18,0,6.283); cx.stroke();
+    }
+  }
+}
+
+function frame(now){
+  const t = (now - t0)/1000, w = innerWidth, h = innerHeight;
+  const g = cx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0, env.base[0]); g.addColorStop(.55, env.base[1]); g.addColorStop(1, env.base[2]);
+  cx.globalAlpha = 1; cx.filter = 'none';
+  cx.fillStyle = g; cx.fillRect(0,0,w,h);
+
+  ornament(w,h,env.ink,env.tile);
+
+  /* slow drifting light — the scene must be alive to be worth transmitting */
+  cx.filter = 'blur(64px)'; cx.globalAlpha = .58;
+  env.blobs.forEach((c,i)=>{
+    const a = t*0.055 + i*1.9;
+    const x = w*(.5 + Math.cos(a)*(.30+i*.05)), y = h*(.5 + Math.sin(a*1.28+i)*(.30+i*.04));
+    cx.fillStyle = c; cx.beginPath(); cx.arc(x,y, Math.min(w,h)*(.20+i*.035), 0, 6.283); cx.fill();
+  });
+  cx.filter='none'; cx.globalAlpha=1;
+
+  /* vignette so the floating panels keep their edge luminance */
+  const v = cx.createRadialGradient(w/2,h/2,Math.min(w,h)*.25, w/2,h/2, Math.max(w,h)*.78);
+  v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,.55)');
+  cx.fillStyle=v; cx.fillRect(0,0,w,h);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ═══════════════════════════════════════════════════════════════
+   2 · SPRING — motion is material behaviour, per world
+   ═══════════════════════════════════════════════════════════════ */
+function theme(n){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)) || 1; }
+function spring(from, to, apply){
+  const m = theme('--mass'), k = theme('--spring'), c = theme('--damp');
+  let x = from, v = 0, last = performance.now();
+  (function step(now){
+    const dt = Math.min((now-last)/1000, .032); last = now;
+    const a = (-k*(x-to) - c*v)/m;
+    v += a*dt; x += v*dt; apply(x);
+    if(Math.abs(x-to) > .0008 || Math.abs(v) > .0015) requestAnimationFrame(step);
+    else apply(to);
+  })(performance.now());
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3 · SLIDER CAPSULE — full-surface instrument
+   Label lives inside the body; the active material moves through it.
+   Ink flips at the seam so both regions stay readable.
+   ═══════════════════════════════════════════════════════════════ */
+const DETENTS = [0, .25, .5, .75, 1];
+
+function buildSlider(el){
+  const min = +el.dataset.min, max = +el.dataset.max, step = +el.dataset.step || 1;
+  const dec = +el.dataset.dec || 0, unit = el.dataset.unit || '', label = el.dataset.label;
+  let val = +el.dataset.value;
+
+  el.tabIndex = 0; el.setAttribute('role','slider');
+  el.setAttribute('aria-label', label);
+  el.innerHTML =
+    `<span class="cap__fill"></span><span class="cap__ticks"></span><span class="cap__seam"></span>
+     <span class="cap__text off"><span>${label}</span><span class="cap__val"></span></span>
+     <span class="cap__text on"><span>${label}</span><span class="cap__val"></span></span>`;
+  const vals = el.querySelectorAll('.cap__val');
+
+  const fmt = v => v.toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, unit==='K'? ' ' : '');
+  function paint(){
+    const p = (val-min)/(max-min);
+    el.style.setProperty('--p', p.toFixed(5));
+    vals.forEach(n => n.innerHTML = `${fmt(val)}${unit?`<i>${unit}</i>`:''}`);
+    el.setAttribute('aria-valuenow', val); el.setAttribute('aria-valuetext', fmt(val)+unit);
+  }
+  function set(v, snap){
+    v = Math.min(max, Math.max(min, v));
+    v = Math.round(v/step)*step;
+    if(snap){ /* detents pull only when you're moving deliberately */
+      const p = (v-min)/(max-min);
+      for(const d of DETENTS){ if(Math.abs(p-d) < .012){ v = min + d*(max-min); el.classList.add('snap'); return paint(val=v); } }
+    }
+    el.classList.remove('snap'); val = v; paint();
+  }
+  paint();
+
+  /* ── pointer: velocity-aware precision ── */
+  let drag=false, lastX=0, lastT=0, acc=0, id=null;
+  el.addEventListener('pointerenter',()=>el.classList.add('hot'));
+  el.addEventListener('pointerleave',()=>{ if(!drag) el.classList.remove('hot'); });
+
+  el.addEventListener('pointerdown', e=>{
+    drag=true; id=e.pointerId; el.setPointerCapture(id);
+    el.classList.add('drag','press'); document.body.style.cursor='ew-resize';
+    spring(1, .985, y => el.style.setProperty('--poseY', y));       // contact compression
+    const r = el.getBoundingClientRect();
+    acc = min + ((e.clientX - r.left)/r.width)*(max-min);
+    set(acc, false);
+    lastX = e.clientX; lastT = performance.now();
+    setTimeout(()=>el.classList.remove('press'),120);
+  });
+
+  el.addEventListener('pointermove', e=>{
+    if(!drag) return;
+    const now = performance.now(), dt = Math.max(now-lastT,1), dx = e.clientX-lastX;
+    const speed = Math.abs(dx)/dt;                                   // px per ms
+    lastX = e.clientX; lastT = now;
+
+    const fine = e.shiftKey || speed < .12;                          // precision mode
+    el.classList.toggle('fast', speed > .9);
+    el.classList.toggle('precise', fine);
+
+    const r = el.getBoundingClientRect();
+    const gain = (e.shiftKey ? .18 : fine ? .55 : 1) * (max-min)/r.width;
+    acc += dx * gain;
+    acc = Math.min(max, Math.max(min, acc));
+    set(acc, speed < .35);                                           // detents engage when slow
+  });
+
+  const up = ()=>{
+    if(!drag) return; drag=false;
+    el.classList.remove('drag','fast','precise','snap','hot');
+    document.body.style.cursor='';
+    spring(.985, 1, y => el.style.setProperty('--poseY', y));         // material rebound → settle
+  };
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+
+  /* ── keyboard: the same instrument, precision on shift ── */
+  el.addEventListener('keydown', e=>{
+    const big = (max-min)/10, s = e.shiftKey ? step : (max-min)/100;
+    if(e.key==='ArrowRight'||e.key==='ArrowUp') set(val+s);
+    else if(e.key==='ArrowLeft'||e.key==='ArrowDown') set(val-s);
+    else if(e.key==='PageUp') set(val+big);
+    else if(e.key==='PageDown') set(val-big);
+    else if(e.key==='Home') set(min); else if(e.key==='End') set(max);
+    else return;
+    e.preventDefault();
+  });
+}
+document.querySelectorAll('[data-slider]').forEach(buildSlider);
+
+/* ═══════════════════════════════════════════════════════════════
+   4 · NUMBER FIELD — recessed well, scrub to change
+   ═══════════════════════════════════════════════════════════════ */
+document.querySelectorAll('[data-num]').forEach(el=>{
+  const dec = +el.dataset.dec || 0, step = +el.dataset.step || 1;
+  let val = +el.dataset.value, drag=false, lastX=0;
+  const out = el.querySelector('.field__num') || el;
+  const em = el.querySelector('em');
+  const paint = ()=>{ out.childNodes[0] ? out.childNodes[0].nodeValue = val.toFixed(dec) : out.textContent = val.toFixed(dec); };
+  paint();
+
+  el.addEventListener('pointerdown', e=>{
+    drag=true; lastX=e.clientX; el.setPointerCapture(e.pointerId);
+    el.classList.add('drag'); document.body.style.cursor='ew-resize';
+  });
+  el.addEventListener('pointermove', e=>{
+    if(!drag) return;
+    const dx = e.clientX-lastX; lastX = e.clientX;
+    val = +(val + dx*step*(e.shiftKey?.2:1)*(dec?1:1)).toFixed(dec+2);
+    val = +(Math.round(val/step)*step).toFixed(dec);
+    paint();
+  });
+  const up=()=>{ drag=false; el.classList.remove('drag'); document.body.style.cursor=''; };
+  el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
+  el.addEventListener('keydown', e=>{
+    const s = e.shiftKey ? step*10 : step;
+    if(e.key==='ArrowUp'){ val=+(val+s).toFixed(dec); paint(); e.preventDefault(); }
+    if(e.key==='ArrowDown'){ val=+(val-s).toFixed(dec); paint(); e.preventDefault(); }
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   5 · SEGMENTED — active segment rises and slides with world mass
+   ═══════════════════════════════════════════════════════════════ */
+document.querySelectorAll('[data-seg]').forEach(seg=>{
+  const btns = [...seg.querySelectorAll('button')];
+  const ind = document.createElement('span'); ind.className='seg__ind'; seg.prepend(ind);
+  let i = +seg.dataset.index || 0, cur = i;
+
+  function place(pos, instant){
+    const w = (seg.clientWidth - 4) / btns.length;
+    ind.style.width = w+'px';
+    ind.style.transform = `translateX(${pos*w}px)`;
+  }
+  function select(n){
+    btns.forEach((b,k)=> b.setAttribute('aria-pressed', k===n));
+    spring(cur, n, x => place(x));
+    cur = n; i = n;
+  }
+  btns.forEach((b,k)=> b.addEventListener('click', ()=> select(k)));
+  requestAnimationFrame(()=>{ btns.forEach((b,k)=>b.setAttribute('aria-pressed',k===i)); place(i); });
+  addEventListener('resize', ()=> place(cur));
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   6 · TOGGLE · MOD · HUE
+   ═══════════════════════════════════════════════════════════════ */
+document.querySelectorAll('[data-toggle]').forEach(t=>{
+  const k = t.querySelector('.tgl__k');
+  const put = x => k.style.transform = `translateX(${x*19}px)`;
+  let cur = t.getAttribute('aria-pressed')==='true' ? 1 : 0;
+  put(cur);
+  t.addEventListener('click', ()=>{
+    const next = cur ? 0 : 1;
+    t.setAttribute('aria-pressed', !!next);
+    spring(cur, next, put); cur = next;
+  });
+});
+
+document.querySelectorAll('[data-mod]').forEach(m=>{
+  m.addEventListener('click', ()=> m.dataset.on = m.dataset.on==='1' ? '0' : '1');
+});
+
+document.querySelectorAll('[data-hue]').forEach(h=>{
+  const k = h.querySelector('.hue__k'), sw = document.querySelector('[data-swatch]');
+  let drag=false;
+  const move = e=>{
+    const r = h.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, (e.clientX-r.left)/r.width));
+    k.style.left = (p*100)+'%';
+    const col = `hsl(${Math.round(p*360)} 34% 64%)`;
+    if(sw){ sw.style.background = col; sw.firstElementChild.nextElementSibling ? null : null;
+      sw.querySelector('span').textContent = hslHex(p*360,.34,.64); }
+  };
+  h.addEventListener('pointerdown', e=>{ drag=true; h.setPointerCapture(e.pointerId); move(e); });
+  h.addEventListener('pointermove', e=>{ if(drag) move(e); });
+  h.addEventListener('pointerup', ()=> drag=false);
+});
+function hslHex(h,s,l){
+  const a = s*Math.min(l,1-l);
+  const f = n=>{ const k=(n+h/30)%12, c=l-a*Math.max(-1,Math.min(k-3,Math.min(9-k,1)));
+    return Math.round(255*c).toString(16).padStart(2,'0'); };
+  return (f(0)+f(8)+f(4)).toUpperCase();
+}
+
+/* tabs */
+document.querySelectorAll('.tabs').forEach(row=>{
+  row.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      row.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', t===tab));
+    });
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   7 · WORLD + ENVIRONMENT SWITCHING
+   Themes interpolate material properties, not palettes.
+   ═══════════════════════════════════════════════════════════════ */
+const NAMES = {clear:'01 · Clear Glass — highest transmission',
+  frost:'02 · Frost Glass — canonical', satin:'03 · Satin Glass — silk relief',
+  graphite:'04 · Graphite Frost — smoked studio', opal:'05 · Opal Stone — mineral body',
+  monolith:'06 · Monolith — architectural mass'};
+
+document.querySelectorAll('[data-world-btn]').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const w = b.dataset.worldBtn;
+    document.documentElement.setAttribute('data-world', w);
+    document.querySelectorAll('[data-world-btn]').forEach(x=> x.setAttribute('aria-pressed', x===b));
+    document.getElementById('worldname').textContent = NAMES[w];
+  });
+});
+document.querySelectorAll('[data-env]').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    env = ENV[b.dataset.env];
+    document.querySelectorAll('[data-env]').forEach(x=> x.setAttribute('aria-pressed', x===b));
+  });
+});
+document.documentElement.setAttribute('data-world','frost');
+</script>

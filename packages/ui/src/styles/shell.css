@@ -1,0 +1,559 @@
+/* Shell — the workspace chrome in the workbench's language.
+
+   The dock is a pane, its strip is the pane head, the tabs are the reference
+   tabs and the search is the reference search. Docking layout (rails, splits,
+   side docks) stays with the shell's own rules; this file sets only how the
+   chrome looks. */
+
+/* ── dock surface ─────────────────────────────────────────────────────── */
+
+.plate-workspace > .artinos-dock,
+.plate-workspace .artinos-panel.artinos-panel-float {
+  border: 1px solid var(--ui-pane-border);
+  border-radius: var(--ui-radius);
+  background: var(--ui-pane-sheen), var(--ui-pane-tint);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-pane-shadow);
+}
+.plate-dock-content { background: transparent; }
+
+/* panels inside a dock are regions of the pane, not cards on it */
+.plate-workspace .artinos-dock .artinos-panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ── strip — the pane head ────────────────────────────────────────────── */
+
+.plate-dock-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--ui-pane-head-h);
+  min-height: var(--ui-pane-head-h);
+  padding: 0 10px;
+  border-bottom: 1px solid var(--ui-line);
+  background: transparent;
+  font-family: var(--ui-font);
+  font-size: var(--ui-font-size);
+  line-height: normal;
+  color: var(--ui-text);
+}
+
+.plate-dock-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  height: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.plate-dock-tabs::-webkit-scrollbar { display: none; }
+.plate-dock-tabs > button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  height: 100%;
+  min-height: 0;
+  margin-bottom: -1px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  color: var(--ui-tab-text);
+  cursor: pointer;
+  transition: border-color var(--ui-dur-fast) var(--ui-ease);
+}
+.plate-dock-tabs > button:is(.is-active, [aria-selected='true']) {
+  border-bottom-color: var(--ui-accent);
+  font-weight: 400;
+  color: var(--ui-text-strong);
+}
+.plate-tab-slots i { background: var(--ui-line-soft); }
+.plate-tab-slots i[data-here] { background: var(--ui-accent); }
+.plate-tab-slots i[data-target] { background: var(--ui-text-strong); }
+
+.plate-search-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 240px;
+  width: auto;
+  min-width: 120px;
+  max-width: 260px;
+  height: 25px;
+  margin-left: 0;
+  padding: 0 7px;
+  border: 1px solid var(--ui-search-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-search-well);
+  box-shadow: none;
+  font: inherit;
+  font-size: 10px;
+  text-align: left;
+  color: var(--ui-text-meta);
+  cursor: pointer;
+  transition: border-color var(--ui-dur-fast) var(--ui-ease);
+}
+.plate-search-entry:hover { border-color: var(--ui-range-border-hover); color: var(--ui-text-meta); }
+.plate-search-entry:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+.plate-search-entry > span {
+  flex: 1;
+  font-size: 10px;
+  color: var(--ui-search-placeholder);
+}
+.plate-search-entry > kbd {
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: normal;
+  color: inherit;
+  opacity: 0.55;
+}
+.plate-search-entry > svg {
+  width: 11px;
+  height: 11px;
+}
+
+.plate-toolbar-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: auto;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.plate-toolbar-status {
+  display: flex;
+  align-items: center;
+}
+.plate-dock-controls-trigger {
+  min-width: 20px;
+  height: 23px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ui-icon);
+  cursor: pointer;
+}
+.plate-dock-controls-trigger:hover { color: var(--ui-text-strong); }
+.plate-dock-controls-trigger.is-open { color: var(--ui-accent); }
+
+/* ── side rail ────────────────────────────────────────────────────────── */
+
+.plate-panel-rail {
+  border-color: var(--ui-line);
+  background: transparent;
+}
+.plate-panel-rail button {
+  border-radius: var(--ui-radius-small);
+  background: transparent;
+  box-shadow: none;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--ui-tab-text);
+}
+.plate-panel-rail button:is(.is-active, [aria-pressed='true']) {
+  background: var(--ui-object-on);
+  box-shadow: var(--ui-object-on-shadow);
+  color: var(--ui-text-strong);
+}
+.plate-panel-rail button.is-active::after { background: var(--ui-accent); }
+
+/* ── panel frame — head, body and foot of a pane ──────────────────────── */
+
+.artinos-panel {
+  font-family: var(--ui-font);
+  color: var(--ui-text);
+}
+.artinos-panel-header {
+  min-height: var(--ui-pane-head-h);
+  padding: 0 10px;
+  border-bottom: 1px solid var(--ui-line);
+  background: transparent;
+}
+.artinos-panel-header > button:not(.artinos-panel-close):not(.artinos-panel-float):not(.artinos-panel-float-move) {
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+  text-transform: none;
+  color: var(--ui-text);
+}
+.artinos-panel-header > button span:last-child {
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--ui-text-meta);
+}
+.artinos-panel-body {
+  padding: 6px 9px 8px;
+  background: transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-line-strong) transparent;
+}
+.artinos-panel-footer {
+  margin-top: auto;
+  padding: 7px 10px;
+  border-top: 1px solid var(--ui-line-foot);
+  background: transparent;
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ui-text-soft);
+}
+
+/* ── brand chip — the app bar's brand on a small pane ─────────────────── */
+
+.plate-brand-chip {
+  gap: 14px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--ui-pane-border);
+  border-radius: var(--ui-radius);
+  background: var(--ui-pane-sheen), var(--ui-pane-tint);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-pane-shadow);
+  font-family: var(--ui-font);
+  line-height: normal;
+  color: var(--ui-text);
+}
+.plate-brand-chip .plate-brand-mark,
+.plate-brand-chip > i { display: none; }
+.plate-brand-chip b {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: inherit;
+}
+.plate-brand-chip .plate-brand-context {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ui-text-muted);
+}
+.plate-brand-chip .plate-brand-context::before { content: '/ '; }
+
+/* ── floating chrome — palette, workspace popup, confirm dialog, toast ── */
+
+.artinos-palette,
+.plate-dock-popup,
+.plate-dialog,
+.plate-console-toast {
+  border: 1px solid var(--ui-pane-border);
+  background: var(--ui-command-sheen), var(--ui-float);
+  -webkit-backdrop-filter: var(--ui-glass-filter-float);
+  backdrop-filter: var(--ui-glass-filter-float);
+  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow);
+  font-family: var(--ui-font);
+  line-height: normal;
+  color: var(--ui-text);
+}
+
+.artinos-palette-scrim,
+.plate-dialog-scrim {
+  background: var(--ui-scrim);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.artinos-palette {
+  width: min(560px, calc(100vw - 32px));
+  border-radius: var(--ui-radius);
+  font-size: var(--ui-font-size);
+}
+.artinos-palette-input {
+  gap: 8px;
+  height: 42px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--ui-line);
+  color: var(--ui-text-meta);
+}
+.artinos-palette-input input {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ui-text);
+}
+.artinos-palette-input input::placeholder { color: var(--ui-search-placeholder); }
+.artinos-palette-input kbd {
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.artinos-palette-results { padding: 4px 6px 6px; }
+.artinos-palette-results header {
+  padding: 8px 7px 4px;
+  font: inherit;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.artinos-palette-results button {
+  gap: 8px;
+  min-height: var(--ui-row);
+  padding: 0 7px;
+  border-radius: var(--ui-radius-small);
+  box-shadow: none;
+  font: inherit;
+  font-size: 10px;
+  color: var(--ui-object-text);
+}
+.artinos-palette-results button b { font-weight: 400; }
+.artinos-palette-results button:is(:hover, .is-active) {
+  background: var(--ui-object-on);
+  box-shadow: var(--ui-object-on-shadow);
+  color: var(--ui-text-strong);
+}
+.artinos-palette-results button:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+.artinos-palette-results button :is(small, em, span:not(:first-of-type)) {
+  font-size: 8px;
+  font-style: normal;
+  color: var(--ui-text-meta);
+}
+.artinos-palette-results mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: var(--ui-mark);
+  color: var(--ui-text-strong);
+}
+.artinos-palette-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ui-text-ghost);
+}
+.artinos-palette-empty {
+  padding: 12px 7px;
+  font-size: 10px;
+  color: var(--ui-empty);
+}
+
+.plate-dock-popup {
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--ui-radius);
+  font-size: var(--ui-font-size);
+}
+.plate-dock-popup header {
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--ui-text-summary);
+}
+.plate-seg {
+  display: flex;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--ui-seg-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-seg-well);
+  box-shadow: var(--ui-seg-inset);
+  overflow: visible;
+}
+.plate-seg button {
+  flex: 1;
+  height: auto;
+  min-width: 0;
+  padding: 3px 2px;
+  border: 0;
+  border-radius: var(--ui-radius-tiny);
+  background: transparent;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ui-seg-text);
+  transition: background var(--ui-dur) var(--ui-ease);
+}
+.plate-seg button + button { border-left: 0; }
+.plate-seg button:hover { background: transparent; color: var(--ui-seg-text); }
+.plate-seg button:is(.is-active, [aria-pressed='true']) {
+  background: var(--ui-seg-on);
+  box-shadow: var(--ui-seg-on-shadow);
+  font-weight: 400;
+  color: var(--ui-text-strong);
+}
+
+.plate-dock-popup-reset,
+.plate-dialog-actions button {
+  height: auto;
+  padding: 4px 8px;
+  border: 1px solid var(--ui-button-border);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-button-fill);
+  box-shadow: none;
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ui-button-text);
+}
+.plate-dock-popup-reset:hover,
+.plate-dialog-actions button:hover {
+  background: var(--ui-button-fill);
+  color: var(--ui-text-strong);
+}
+.plate-dialog-actions button.is-danger {
+  border-color: color-mix(in srgb, var(--ui-fault) 50%, transparent);
+  background: color-mix(in srgb, var(--ui-fault) 12%, transparent);
+  color: var(--ui-fault);
+}
+
+.plate-dialog {
+  width: 300px;
+  border-radius: var(--ui-radius);
+}
+.plate-dialog-body {
+  gap: 6px;
+  padding: 12px 10px 10px;
+}
+.plate-dialog-body b {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+  color: var(--ui-text);
+}
+.plate-dialog-body span {
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--ui-note);
+}
+.plate-dialog-actions {
+  gap: 4px;
+  padding: 7px 10px;
+  border-top: 1px solid var(--ui-line-foot);
+  background: transparent;
+}
+
+.plate-console-toast {
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--ui-radius-control);
+  font-size: 10px;
+  color: var(--ui-text-body);
+}
+.plate-console-toast > i {
+  width: 3px;
+  height: 3px;
+  background: var(--ui-accent-dot);
+}
+.plate-console-toast[data-level='warn'] > i { background: var(--ui-warn); }
+.plate-console-toast[data-level='error'] > i { background: var(--ui-fault); }
+.plate-console-toast-open {
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  color: var(--ui-text-meta);
+}
+.plate-console-toast-open:hover {
+  background: transparent;
+  color: var(--ui-text-strong);
+}
+
+/* ── standalone workspace chrome and empty panels ─────────────────────── */
+
+.artinos-workspace-chrome {
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--ui-seg-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-seg-well);
+  box-shadow: var(--ui-seg-inset);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+}
+.artinos-workspace-chrome button {
+  padding: 3px 8px;
+  border-radius: var(--ui-radius-tiny);
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: normal;
+  color: var(--ui-seg-text);
+}
+.artinos-workspace-chrome button.is-active {
+  background: var(--ui-seg-on);
+  box-shadow: var(--ui-seg-on-shadow);
+  color: var(--ui-text-strong);
+}
+
+.artinos-workbench-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 70px;
+  padding: 12px;
+  border: 0;
+  text-align: center;
+  font-size: 10px;
+  color: var(--ui-empty);
+}
+.artinos-workbench-empty h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+  color: var(--ui-text);
+}
+.artinos-workbench-empty p {
+  max-width: 460px;
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--ui-note);
+}
+
+/* scene — the living backdrop fills its positioned parent */
+.artinos-scene {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

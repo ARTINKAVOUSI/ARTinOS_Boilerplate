@@ -1,0 +1,110 @@
+/* Workbench page — only the grid that places the panes and the page backdrop.
+   Everything inside a pane is a package component with its own stylesheet. */
+
+.wb-page {
+  position: relative;
+  z-index: 0;
+  min-width: 340px;
+  height: 100%;
+  overflow: auto;
+  background: var(--ui-ground);
+}
+.wb-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--wb-backdrop, none) center / cover;
+}
+.wb-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--ui-scrim);
+}
+
+/* Embedded in the studio the page is a section, not a page: it flows in the
+   grid, keeps no ground of its own and lets the studio's scene show through. */
+.wb-page[data-embedded] {
+  min-width: 0;
+  height: auto;
+  overflow: visible;
+  background: none;
+}
+.wb-page[data-embedded]::before,
+.wb-page[data-embedded]::after { content: none; }
+.wb-page[data-embedded] > .wb-workspace { padding: 0; }
+
+.wb-workspace {
+  display: grid;
+  grid-template-columns: 278px minmax(0, 1fr);
+  gap: 12px;
+  max-width: 1920px;
+  margin: auto;
+  padding: 12px;
+  align-items: start;
+}
+.wb-canvas { min-width: 0; }
+.wb-canvas-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 27px;
+  margin-bottom: 8px;
+  padding: 0 3px;
+  font-size: 10px;
+  color: var(--ui-text-body);
+}
+.wb-canvas-bar small {
+  font-size: 9px;
+  color: #ffffff8b;
+}
+.wb-canvas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+/* Embedded, the page has the studio's middle column rather than the window, so
+   it sizes to its CONTAINER. Three tool columns inside ~660px is what was
+   crushing the segmented keys into each other. */
+.wb-page[data-embedded] { container: wb / inline-size; }
+@container wb (max-width: 900px) {
+  .wb-canvas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container wb (max-width: 780px) {
+  .wb-workspace { grid-template-columns: minmax(0, 1fr); }
+}
+@container wb (max-width: 560px) {
+  .wb-canvas-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.wb-dock { grid-column: 1 / -1; }
+
+.wb-status {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 14px 10px;
+  font-size: 8px;
+  color: var(--ui-text-muted);
+}
+
+@media (min-width: 1750px) {
+  .wb-canvas-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .wb-workspace { grid-template-columns: 292px minmax(0, 1fr); padding: 16px; gap: 14px; }
+  .wb-canvas-grid .artinos-pane-body { padding: 8px 10px 10px; }
+}
+@media (max-width: 1180px) {
+  .wb-canvas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 800px) {
+  .wb-workspace { grid-template-columns: 250px minmax(0, 1fr); }
+  .wb-canvas-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 570px) {
+  .wb-workspace { grid-template-columns: 1fr; padding: 9px; }
+  .wb-canvas-grid { grid-template-columns: 1fr; }
+  .wb-canvas-bar { margin-top: 3px; }
+  .wb-status { display: block; }
+  .wb-status span { display: block; margin-bottom: 4px; }
+}

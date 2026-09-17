@@ -24,7 +24,16 @@ export default defineConfig({
   // 5173 is occupied on this machine by another node process; strictPort makes a
   // clash fail loudly rather than silently drifting to the next free port, which
   // would leave .claude/launch.json waiting on the wrong one.
-  server: { port: 5180, host: '0.0.0.0', strictPort: true },
+  server: {
+    port: 5180,
+    host: '0.0.0.0',
+    strictPort: true,
+    // VISUAL_REFERENCES holds design screenshots that get dropped in while the
+    // server runs. On Windows a file still being written is locked, chokidar's
+    // watch() throws EBUSY, and the FSWatcher error event takes the dev server
+    // down with it. Nothing in there is an import, so it is not worth watching.
+    watch: { ignored: ['**/VISUAL_REFERENCES/**'] },
+  },
   build: {
     target: 'es2022',
     // ARTINOS copies MediaPipe runtime assets into dist. They may be held open

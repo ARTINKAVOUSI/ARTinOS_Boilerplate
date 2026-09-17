@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { fuzzyFilter, splitRanges, useVariableVirtual, useVirtual, type FuzzyMatch } from '../headless'
+import { Select } from './choice'
 import { SearchField } from './text'
 import { Empty } from './layout'
 
@@ -27,9 +28,17 @@ export interface VirtualListProps<T> {
  * Renders only the rows inside the viewport. Use for any list that can exceed ~200 rows:
  * console output, module registries, telemetry metrics, resources.
  */
+/**
+ * Text gets the styled empty state; a caller that passes its own element keeps it.
+ * Wrapping either way nested one `Empty` paragraph inside another.
+ */
+function emptyState(empty: ReactNode): ReactNode {
+  return typeof empty === 'string' || typeof empty === 'number' ? <Empty>{empty}</Empty> : empty
+}
+
 export function VirtualList<T>({ items, itemHeight, children, empty, className = '' }: VirtualListProps<T>) {
   const view = useVirtual({ count: items.length, itemHeight })
-  if (!items.length && empty) return <Empty>{empty}</Empty>
+  if (!items.length && empty) return <>{emptyState(empty)}</>
   return (
     <div ref={view.ref} className={`artinos-virtual ${className}`}>
       <div style={{ height: view.totalHeight, position: 'relative' }}>
@@ -55,7 +64,7 @@ export function VirtualGrid<T>({
   className = '',
 }: VirtualListProps<T> & { columns: number }) {
   const view = useVirtual({ count: items.length, itemHeight, columns })
-  if (!items.length && empty) return <Empty>{empty}</Empty>
+  if (!items.length && empty) return <>{emptyState(empty)}</>
   return (
     <div ref={view.ref} className={`artinos-virtual ${className}`}>
       <div style={{ height: view.totalHeight, position: 'relative' }}>
@@ -87,7 +96,7 @@ export interface VariableVirtualListProps<T> {
 export function VariableVirtualList<T>({ items, getItemSize, children, empty, className = '' }: VariableVirtualListProps<T>) {
   const sizeAt = useMemo(() => (index: number) => getItemSize(items[index], index), [getItemSize, items])
   const view = useVariableVirtual({ count: items.length, getItemSize: sizeAt })
-  if (!items.length && empty) return <Empty>{empty}</Empty>
+  if (!items.length && empty) return <>{emptyState(empty)}</>
   return (
     <div ref={view.ref} className={`artinos-virtual ${className}`}>
       <div style={{ height: view.totalHeight, position: 'relative' }}>
@@ -180,16 +189,7 @@ export function ListBrowser<T>({
       {filters.length > 0 && (
         <div className="artinos-filter-grid">
           {filters.map(filter => (
-            <label key={filter.id} className="artinos-control">
-              <span>{filter.label}</span>
-              <select value={filter.value} onChange={event => filter.onChange(event.target.value)}>
-                {filter.options.map(option => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select key={filter.id} label={filter.label} value={filter.value} options={filter.options} onChange={filter.onChange} />
           ))}
         </div>
       )}

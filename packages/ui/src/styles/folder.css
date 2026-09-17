@@ -1,0 +1,131 @@
+/* Sections, folders and the quiet text between controls.
+   A section heading is the reference `.section`: a small spaced word and a rule
+   running to the panel edge. A folder is the same heading that also collapses. */
+
+.artinos-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap-row);
+  min-width: 0;
+}
+.artinos-section-title,
+.artinos-folder > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 7px 0 1px;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--ui-ink-3);
+}
+.artinos-section-title::after,
+.artinos-folder > summary::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ui-edge);
+}
+.artinos-section-title > b {
+  font-weight: 400;
+}
+.artinos-section-title > small {
+  order: 2;
+  font-size: 9.5px;
+  color: var(--ui-ink-4);
+}
+/* the first heading in a body sits tight to the top, as the reference's does */
+:where(.artinos-pane-body, .artinos-stack) > .artinos-section:first-child > .artinos-section-title,
+:where(.artinos-pane-body, .artinos-stack) > .artinos-folder:first-child > summary {
+  margin-top: 1px;
+}
+
+/* Sections flow into columns when the panel hosting them is wide. */
+@container (min-width: 440px) {
+  .artinos-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: var(--ui-gap-row);
+    align-content: start;
+  }
+  .artinos-section > .artinos-section-title {
+    grid-column: 1 / -1;
+  }
+}
+@container (min-width: 880px) {
+  .artinos-section {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* folder — the heading that collapses */
+.artinos-folder > summary {
+  list-style: none;
+  cursor: pointer;
+  transition: color var(--ui-t-fast);
+}
+.artinos-folder > summary::-webkit-details-marker {
+  display: none;
+}
+.artinos-folder > summary::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  margin: 0 1px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--ui-t-mid) var(--ui-ease);
+}
+.artinos-folder[open] > summary::before {
+  transform: rotate(45deg) translateY(-1px);
+}
+.artinos-folder > summary:hover {
+  color: var(--ui-ink-2);
+}
+.artinos-folder > summary:focus-visible {
+  outline: 1px solid var(--ui-sig-line);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.artinos-folder > :not(summary) {
+  margin-top: var(--ui-gap-row);
+}
+.artinos-folder .artinos-folder {
+  margin-left: 8px;
+  padding-left: 7px;
+  border-left: 1px solid var(--ui-edge);
+}
+
+.artinos-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap-row);
+}
+
+/* note — quiet explanatory text */
+.artinos-note {
+  margin: 4px 0;
+  font-size: 9.5px;
+  line-height: 1.5;
+  color: var(--ui-ink-3);
+}
+
+/* change log */
+.artinos-log {
+  min-height: 34px;
+  margin-top: 5px;
+  padding-top: 6px;
+  border-top: 1px solid var(--ui-edge);
+  font-size: 9.5px;
+  line-height: 1.6;
+  color: var(--ui-ink-2);
+}
+
+/* empty */
+.artinos-empty {
+  margin: 4px 0;
+  padding: 6px 0;
+  font-size: 10.5px;
+  color: var(--ui-ink-3);
+}

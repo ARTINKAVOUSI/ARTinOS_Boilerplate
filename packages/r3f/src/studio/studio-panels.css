@@ -1,0 +1,144 @@
+/* Studio panel layout. Joins the artinos.studio layer that @artinos/ui/theme.css
+   declares: it sits above the legacy UI rules and below the workbench components,
+   so it arranges the studio's panels while every control keeps the kit's own look.
+   Colours come from the --ui-* tokens only. The chrome around panels (dock
+   surface, strip, HUD) is chrome.css. */
+@layer artinos.studio {
+.artinos-workbench{container:workbench / inline-size;display:flex;flex-direction:column;flex:1 0 auto;width:100%;min-width:0;min-height:100%;font-size:var(--ui-font-size);color:var(--ui-text)}
+.plate-workspace .artinos-panel-body:has(>.artinos-workbench){display:block;overflow:auto!important;min-height:0}
+.artinos-workbench-content{flex:1;min-width:0}
+.artinos-workbench button:disabled{cursor:not-allowed;opacity:.45}
+
+/* toolbars, tabs, stacks */
+.artinos-workbench .artinos-toolbar{flex-wrap:wrap;margin:0 0 6px}
+.artinos-workbench .artinos-toolbar>.artinos-search{flex:1 1 200px;min-width:120px}
+.artinos-workbench .artinos-tabs{margin:0 -9px 6px}
+/* panel tabs are built from section ids, some lowercase */
+.artinos-workbench .artinos-tabs>button{text-transform:capitalize}
+.artinos-workbench .artinos-stack{gap:6px}
+.artinos-workbench .artinos-button-row{display:flex;flex-wrap:wrap;gap:4px}
+.artinos-workbench .artinos-workbench-content>.artinos-section+.artinos-section{margin-top:10px}
+
+/* parameters */
+.artinos-panel-summary{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin:0 0 8px;font-size:8px;letter-spacing:.06em;color:var(--ui-text-meta)}
+.artinos-parameter-cards{columns:260px;column-gap:16px}
+.artinos-parameter-card{display:inline-block;width:100%;min-width:0;margin:0 0 6px;break-inside:avoid}
+.artinos-parameter-card-head{display:flex;align-items:center;gap:6px;width:100%;min-height:26px;padding:0;border:0;background:none;font:inherit;font-size:9px;letter-spacing:.04em;text-align:left;color:var(--ui-text-summary);cursor:pointer}
+.artinos-parameter-card-head::after{content:"";order:1;flex:1;height:1px;background:var(--ui-line-faint)}
+.artinos-parameter-card-head b{font-weight:400}
+.artinos-parameter-card-head small{order:2;font-size:8px;color:var(--ui-text-meta)}
+.artinos-parameter-card-body{display:grid}
+.artinos-workbench .artinos-property-actions{opacity:1}
+.artinos-workbench .artinos-property-row[data-visibility-state=revealed]{outline:1px solid var(--ui-accent);outline-offset:1px;border-radius:var(--ui-radius-control)}
+.artinos-workbench .artinos-property-menu{position:relative}
+.artinos-property-menu>summary{display:grid;place-items:center;width:15px;height:22px;list-style:none;font-size:11px;color:var(--ui-text-ghost);cursor:pointer}
+.artinos-property-menu>summary:hover{color:var(--ui-text-strong)}
+.artinos-property-menu>summary::-webkit-details-marker{display:none}
+.artinos-property-menu[open]>summary{color:var(--ui-accent)}
+.artinos-property-menu>div{position:absolute;right:0;top:100%;z-index:20;display:flex;gap:2px;padding:3px;border:1px solid var(--ui-pane-border);border-radius:var(--ui-radius-control);background:var(--ui-command-sheen),var(--ui-float);-webkit-backdrop-filter:blur(var(--ui-command-blur));backdrop-filter:blur(var(--ui-command-blur));box-shadow:var(--ui-float-shadow)}
+.artinos-inspector-presets{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:6px}
+.artinos-inspector-presets>.artinos-field{flex:1 1 220px;margin:0}
+
+/* scene */
+.artinos-workbench .artinos-scene-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-items:start}
+.plate-workspace .artinos-workbench .artinos-scene-grid>.artinos-section:first-child{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:0 16px;align-content:start}
+.artinos-workbench .artinos-scene-grid>.artinos-section:first-child>.artinos-section-title{display:none}
+.artinos-workbench[data-layout=landscape] .artinos-parameter-cards{column-width:245px}
+.artinos-workbench[data-layout=landscape] .artinos-scene-grid{grid-template-columns:minmax(0,3fr) minmax(240px,1fr)}
+.artinos-workbench[data-layout=landscape] .artinos-scene-grid>.artinos-section:only-child{grid-column:1/-1}
+
+/* input flow */
+.artinos-workbench .artinos-inputflow-content{display:block}
+.artinos-workbench .artinos-inputflow-switch{margin-bottom:6px}
+.artinos-input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:8px 16px;align-items:start}
+.artinos-workbench .artinos-device{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:26px;padding:4px 0;border-bottom:1px solid var(--ui-line-faint)}
+.artinos-workbench .artinos-device>span{display:grid;gap:2px}
+.artinos-workbench .artinos-device b{font-size:10px;font-weight:500}
+.artinos-workbench .artinos-device small{font-size:8px;letter-spacing:.06em;color:var(--ui-text-meta)}
+.artinos-workbench .artinos-device .state-on{color:var(--ui-accent)}
+.artinos-device-note{margin:4px 0;font-size:9px;line-height:1.5;color:var(--ui-note)}
+.artinos-workbench .artinos-signal-row{height:44px;padding:6px 0;border-bottom:1px solid var(--ui-line-faint);font-size:10px}
+.artinos-workbench .artinos-signal-row small{display:block;margin-top:3px;font-size:8px;color:var(--ui-text-meta)}
+.artinos-workbench .artinos-signal-row output{max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:500;font-variant-numeric:tabular-nums}
+.artinos-workbench .artinos-signals-panel .artinos-virtual{height:calc(var(--panel-height, 420px) - 86px);max-height:none}
+
+/* notices */
+.artinos-panel-notice{margin-bottom:6px;padding:6px 9px;border:1px solid color-mix(in srgb,var(--ui-accent) 40%,transparent);border-radius:var(--ui-radius-control);background:color-mix(in srgb,var(--ui-accent) 8%,transparent);font-size:10px;line-height:1.5;color:var(--ui-text)}
+.artinos-panel-notice.is-error{border-color:var(--ui-fault);color:var(--ui-fault)}
+
+/* postfx */
+.artinos-workbench .artinos-postfx-commandbar{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 6px}
+.artinos-workbench .artinos-postfx-commandbar .artinos-search{flex:1 1 200px}
+.artinos-workbench .artinos-postfx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:6px 16px;align-items:start}
+.artinos-workbench .artinos-effect{border-bottom:1px solid var(--ui-line-soft)}
+.artinos-workbench .artinos-effect-head{display:flex;gap:6px;min-height:30px;padding:2px 0}
+.artinos-workbench .artinos-effect-expand{display:flex;flex:1;align-items:center;gap:6px;min-width:0;padding:0;border:0;background:none;font:inherit;text-align:left;color:inherit;cursor:pointer}
+.artinos-workbench .artinos-effect-expand>.artinos-effect-name{flex:1;min-width:0}
+.artinos-workbench .artinos-effect-expand[aria-expanded=true]>svg{transform:rotate(180deg)}
+.artinos-workbench .artinos-effect-name b{font-size:10px;font-weight:500}
+.artinos-workbench .artinos-effect-name small{font-size:8px;color:var(--ui-text-meta)}
+.artinos-workbench .artinos-effect.is-enabled .artinos-effect-name b{color:var(--ui-text-strong)}
+.artinos-workbench .artinos-effect-body{display:grid;padding:2px 0 6px}
+.artinos-workbench .artinos-effect-cost{font-size:8px;white-space:nowrap;color:var(--ui-text-meta)}
+.artinos-workbench .artinos-effect-power{width:22px;height:22px}
+.artinos-workbench .artinos-effect-status{font-size:9px;line-height:1.5;color:var(--ui-note)}
+
+/* console */
+.artinos-console-entries{display:grid;gap:2px;max-height:480px;overflow:auto}
+.artinos-console-entry{border-bottom:1px solid var(--ui-line-faint);border-left:2px solid var(--ui-text-ghost)}
+.artinos-console-entry.log-error{border-left-color:var(--ui-fault)}
+.artinos-console-entry.log-warn{border-left-color:var(--ui-warn)}
+.artinos-console-entry summary{display:grid;grid-template-columns:60px 48px 100px minmax(0,1fr);gap:10px;align-items:center;padding:6px 8px;font-size:10px;cursor:pointer}
+.artinos-console-entry summary span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.artinos-console-entry summary b{font-size:8px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--ui-text-meta)}
+.artinos-console-entry time{font-size:9px;font-variant-numeric:tabular-nums;color:var(--ui-text-meta)}
+.artinos-console-entry pre{margin:0;padding:0 10px 10px;white-space:pre-wrap;overflow-wrap:anywhere;font:10px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--ui-text-body)}
+
+/* assets and library */
+.artinos-asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px}
+.artinos-asset-card{display:grid;gap:6px;min-width:0;padding:8px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-number-well)}
+.artinos-asset-preview{display:grid;place-items:center;height:96px;border-radius:var(--ui-radius-small);background:var(--ui-range-well);color:var(--ui-text-meta)}
+.artinos-asset-preview img{width:100%;height:100%;object-fit:contain}
+.artinos-asset-card b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:500}
+.artinos-asset-card small{font-size:8px;color:var(--ui-text-meta)}
+.artinos-workbench .artinos-dropzone{margin-bottom:8px}
+.artinos-workbench .artinos-dropzone-browse{display:flex;margin:6px auto 0}
+.artinos-workbench .artinos-module-card{padding:6px 0;border-bottom:1px solid var(--ui-line-faint)}
+.artinos-workbench .artinos-module-card p{font-size:9px;line-height:1.5;color:var(--ui-note)}
+.artinos-workbench .artinos-module-head b{font-size:10px;font-weight:500}
+.plate-workspace .artinos-workbench:has(.artinos-list-browser)>.artinos-workbench-content{display:flex;flex-direction:column;min-height:0}
+.plate-workspace .artinos-workbench .artinos-list-browser{flex:1 1 auto;min-height:180px}
+
+/* timeline */
+.artinos-timeline-tracks{display:grid;gap:10px}
+.artinos-track{padding:8px 0;border-bottom:1px solid var(--ui-line-soft)}
+.artinos-track-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.artinos-track-head b{font-size:10px;font-weight:500}
+.artinos-track-settings{display:flex;flex-wrap:wrap;gap:0 16px;margin:6px 0}
+.artinos-track-settings>.artinos-field{flex:1 1 200px}
+.artinos-track-keys{display:grid;gap:4px;padding-top:6px}
+.artinos-track-key{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center}
+
+/* graph and renderer inspector */
+.artinos-workbench .artinos-graph-studio{width:100%;min-height:200px;height:calc(var(--panel-height, 500px) - 48px);max-height:760px}
+.artinos-workbench .artinos-inspector-dock{width:100%;min-height:200px;height:calc(var(--panel-height, 500px) - 48px)}
+.artinos-glass-inspector{margin:6px 0 10px;padding:6px 0;border-bottom:1px solid var(--ui-line-soft);color:var(--ui-text-body)}
+.artinos-glass-inspector>summary{font-size:9px;letter-spacing:.04em;color:var(--ui-text-summary);cursor:pointer}
+.artinos-glass-diagnostics{display:grid;grid-template-columns:minmax(200px,270px) repeat(2,minmax(220px,1fr));gap:16px;align-items:center}
+.artinos-glass-diagnostics figure{margin:0}
+.artinos-glass-diagnostics svg{display:block;width:100%;max-height:140px}
+.artinos-glass-diagnostics figcaption{font-size:8px;letter-spacing:.06em;text-align:center;color:var(--ui-text-meta)}
+.artinos-glass-diagnostics dl{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:10px}
+.artinos-glass-diagnostics dt{color:var(--ui-text-label)}
+.artinos-glass-diagnostics dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+.artinos-glass-renderer{height:400px;min-width:0;margin-top:8px;overflow:auto}
+.artinos-glass-renderer .artinos-inspector-dock{height:100%!important}
+
+/* the brand chip yields to a maximised dock */
+.artinos-metablock-shell:has(.mb-group[data-posture="maximized"][data-role="dock"])>.plate-brand-chip{display:none}
+
+@container workbench (max-width:760px){.artinos-glass-diagnostics{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+@container workbench (max-width:650px){.artinos-workbench .artinos-toolbar>.artinos-search{flex-basis:140px}.artinos-console-entry summary{grid-template-columns:52px 40px 1fr}.artinos-console-entry summary>span:last-child{grid-column:1/-1}.artinos-track-key{grid-template-columns:1fr 1fr}.artinos-panel-summary>span:last-child{display:none}}
+@container workbench (max-width:400px){.artinos-parameter-cards{columns:1}.artinos-workbench .artinos-toolbar>.artinos-search{flex-basis:120px}}
+@media(prefers-reduced-motion:reduce){.artinos-workbench *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+}

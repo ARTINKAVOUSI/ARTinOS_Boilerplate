@@ -1,0 +1,32 @@
+/* ARTINOS UI — component layer
+   ==========================================================================
+   The workbench components, transcribed from UI PROTOTYPES/workbench.html.
+   Unlayered on purpose: theme.css places every older stylesheet in a cascade
+   layer, so a rule here wins over them regardless of specificity.
+
+   Selectors are plain component classes — no workspace ancestor is required —
+   so every component renders correctly in any app that imports the stylesheet.
+   Rules read --ui-* tokens only.
+   ========================================================================== */
+
+@import './styles/base.css';
+@import './styles/pane.css';
+@import './styles/field.css';
+@import './styles/slider.css';
+@import './styles/choice.css';
+@import './styles/inputs.css';
+@import './styles/folder.css';
+@import './styles/color.css';
+@import './styles/button.css';
+@import './styles/list.css';
+@import './styles/appbar.css';
+
+/* The rest of the kit, drawn in the workbench's language. */
+@import './styles/instruments.css';
+@import './styles/display.css';
+@import './styles/overlays.css';
+@import './styles/collections.css';
+@import './styles/files.css';
+
+/* The workspace chrome. */
+@import './styles/shell.css';
