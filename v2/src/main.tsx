@@ -5,11 +5,12 @@ import './app/app.css'
 import { installConsoleCapture } from './app/console'
 import { App } from './app/App'
 import { studio } from './app/store'
+import { graphs } from './app/graphs'
 
 installConsoleCapture()
 
 // Dev-only handle for console debugging: `__artinos.studio.setEnabled('effect.bloom', false)`.
-if (import.meta.env.DEV) Object.assign(window, { __artinos: { studio } })
+if (import.meta.env.DEV) Object.assign(window, { __artinos: { studio, graphs } })
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Missing #root element')

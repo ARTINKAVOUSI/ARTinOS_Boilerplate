@@ -32,6 +32,8 @@ export const feature: Feature = {
 
 ## Add or remove a panel
 
+The architecture rules live in `CLAUDE.md` and the skill in `.claude/skills/copy-pastable-reusable-react/` — every capability is a file or a folder you can paste in or delete.
+
 Put a `.tsx` file under `src/panels/` that exports a component and a `panel` manifest (`id`, `title`, `order`, `component`). It becomes a dock tab and a palette entry. Delete the file and the tab is gone.
 
 ## Use a piece in another project

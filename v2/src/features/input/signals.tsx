@@ -46,8 +46,13 @@ export class SignalBus {
   }
 }
 
-const defaultBus = new SignalBus()
-const SignalsContext = createContext<SignalBus>(defaultBus)
+/**
+ * The bus every writer and reader shares unless a <SignalsProvider> isolates a
+ * subtree. Exported so code outside React — a frame loop, a graph runner — can
+ * read and write the same signals the components see.
+ */
+export const signalBus = new SignalBus()
+const SignalsContext = createContext<SignalBus>(signalBus)
 
 export function SignalsProvider({ bus, children }: { bus?: SignalBus; children?: ReactNode }) {
   const value = useMemo(() => bus ?? new SignalBus(), [bus])

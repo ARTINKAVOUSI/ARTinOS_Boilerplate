@@ -194,3 +194,86 @@
 .artinos-metablock-shell .mb-context-label {
   color: var(--ui-text-summary);
 }
+
+/* Graph panel: the editor takes the height the panel has, minus its toolbar. */
+.v2-graph-suite {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+.v2-graph-editor {
+  flex: 1;
+  min-height: 200px;
+}
+
+/* The node editor keeps its own generic tokens so it stays portable; the studio
+   binds them to the skin here, the same way the MetaBlock chrome is bound. The
+   graph reads as one more instrument surface: a well, glass cards, white ink. */
+.artinos-metablock-shell .ngraph {
+  --ng-bg: var(--ui-scrim);
+  --ng-grid: rgba(255, 255, 255, 0.06);
+  --ng-node: rgba(255, 255, 255, 0.07);
+  --ng-line: var(--ui-line-faint);
+  --ng-text: var(--ui-text-strong);
+  --ng-label: var(--ui-text-label);
+  --ng-accent: var(--ui-accent);
+  --ng-danger: var(--ui-fault);
+  --ng-radius: var(--ui-radius-control);
+  font-family: var(--ui-font);
+}
+.artinos-metablock-shell .ngraph-surface {
+  border-color: var(--ui-line-faint);
+  border-radius: var(--ui-radius-panel);
+  box-shadow: var(--ui-well-in);
+  backdrop-filter: blur(var(--ui-command-blur));
+  -webkit-backdrop-filter: blur(var(--ui-command-blur));
+}
+.artinos-metablock-shell .ngraph-node {
+  background: var(--ui-pane-sheen), var(--ng-node);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.26), inset 0 0 0 1px var(--ui-pane-border);
+  border: 0;
+}
+.artinos-metablock-shell .ngraph-node.is-selected {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.26), inset 0 0 0 1px var(--ui-accent);
+}
+.artinos-metablock-shell .ngraph-node-head,
+.artinos-metablock-shell .nglive-head {
+  border-bottom-color: var(--ui-line-faint);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ui-text-summary);
+}
+.artinos-metablock-shell .ngraph-node-title {
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.artinos-metablock-shell .ngraph-field input,
+.artinos-metablock-shell .ngraph-field select {
+  border-color: var(--ui-number-border);
+  border-radius: var(--ui-radius-tiny);
+  background: var(--ui-number-well);
+  color: var(--ui-text);
+}
+.artinos-metablock-shell .nglive-control input {
+  accent-color: var(--ui-accent);
+}
+.artinos-metablock-shell .ngraph-palette {
+  border: 0;
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-command-sheen), var(--ui-float);
+  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow);
+  backdrop-filter: blur(var(--ui-command-blur));
+  -webkit-backdrop-filter: blur(var(--ui-command-blur));
+}
+.artinos-metablock-shell .ngraph-palette-group button:hover {
+  background: var(--ui-hover-wash);
+}
+.artinos-metablock-shell .ngraph-status button {
+  border-color: var(--ui-button-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-button-fill);
+  color: var(--ui-button-text);
+}
+.artinos-metablock-shell .ngraph-status button:hover {
+  background: var(--ui-button-fill-hover);
+}
