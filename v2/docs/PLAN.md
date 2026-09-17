@@ -267,22 +267,22 @@ Still to port from v1, in phase 8: `ColorWheel/ColorArea/GradientEditor`, `Curve
 | Runtime HUD | `app/studio/RuntimeHUD.tsx` | The original strip readout (backend · fps · micrograph · ms · tier) and its dock-bar popover (fps graph, frame budget, backend, resolution, render, memory, quality tiers that set the pixel-ratio ceiling) |
 | Brand chip | in `DockShell` | `ARTINOS / <active panel>` over the canvas |
 | Console toast | `app/studio/ConsoleToast.tsx` | Latest warning/error; the count opens the Console panel |
-| Command palette | `ui/CommandPalette` | Panels, layout undo/redo/reset, material worlds, toggle any feature |
+| Command palette | `ui/CommandPalette` | The studio’s only search: every panel, feature, control (“Glass Rings › Dispersion” — opens the owning panel and scrolls to the row), source path, layout undo/redo/reset, material worlds, toggle any feature |
 | Feature card | `app/studio/FeatureCard.tsx` | The original parameter card: name, count, reset, switch; rows with reset and ⋯ actions (favorite, pin, copy, paste) |
 
 | Panel | File | Contents |
 |---|---|---|
-| Inspector | `panels/Inspector.tsx` | Project objects as cards in columns; search, All / Favorites / Pinned, Presets menu (save, load, delete, export, import, reset) |
+| Inspector | `panels/Inspector.tsx` | Project objects as cards in columns; All / Favorites / Pinned and the Presets menu (save, load, delete, export, import, reset), both in the dock strip |
 | Scene | `panels/Scene.tsx` | Render, Camera, Atmosphere, Lighting and Ground features as cards, same toolbar |
 | PostFX | `panels/PostFX.tsx` | Stack view (active chain in order, reorder, per-effect cards) and Browse view (all 44 by category with cost, WebGPU label, switch, inline controls); pipeline bypass; backend footer |
 | InputFlow | `panels/InputFlow.tsx` | Devices (live state, capture switches, settings) and Signals (live values with meters, filter) |
 | Assets | `panels/Assets.tsx` | Drop images, glTF and `.cube` files; apply as backdrop, environment, transition target, model or colour grade |
 | Library | `panels/Library.tsx` | Every feature, panel and UI component with its path; copy path, switch features |
-| Console | `panels/Console.tsx` | Captured log with level filter, search, pause, clear, expandable entries |
+| Console | `panels/Console.tsx` | Captured log with level filter, message filter, pause, clear, expandable entries |
 | Telemetry | `panels/Telemetry.tsx` | KPIs, frame-time and fps graphs, load meters; Diagnostics tab with Stats HUD, Signal Monitor and the three.js Inspector |
 | Appearance | `panels/Appearance.tsx` | Material world, interface visibility, shortcuts, reset layout / features |
 
-`H` hides the chrome; `Ctrl/⌘ K` opens the palette. The default scene matches the original UI-platform project: Persian garden backdrop and environment, glass rings, Bloom + Vignette + FXAA.
+`H` hides the chrome; `Ctrl/⌘ K` opens the palette. Search lives there alone — no panel carries a search field of its own, and a panel’s toolbar (filter, presets, view) rides in the dock strip through `PanelBar`, so it costs the panel no row. Each panel claims the features it shows with `owns` in its manifest, which is how a palette hit knows where to go. The default scene matches the original UI-platform project: Persian garden backdrop and environment, glass rings, Bloom + Vignette + FXAA.
 
 ---
 

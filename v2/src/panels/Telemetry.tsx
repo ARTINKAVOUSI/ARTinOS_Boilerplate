@@ -107,6 +107,7 @@ export const panel: PanelManifest = {
   description: 'Frame profile, renderer load and diagnostic overlays',
   keywords: ['performance', 'profiler', 'memory', 'inspector', 'fps'],
   order: 11,
+  owns: feature => feature.group === 'Diagnostics',
   footer: () => <>RUNTIME · LIVE</>,
   component: Telemetry,
 }

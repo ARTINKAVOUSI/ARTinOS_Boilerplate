@@ -48,6 +48,6 @@ PostFX effects need three ≥ 0.185 with `WebGPURenderer` and R3F ≥ 10. The UI
 
 ## Keys
 
-Tab strip: drag a tab out to float it · `H` hides the interface · `Ctrl/⌘ K` opens the command palette · on a slider: Shift for fine control, double-click to reset, Enter to type a value.
+Tab strip: drag a tab out to float it · `H` hides the interface · `Ctrl/⌘ K` opens the command palette (the one search box: panels, features, any control by name) · on a slider: Shift for fine control, double-click to reset, Enter to type a value.
 
 See [docs/PLAN.md](docs/PLAN.md) for the architecture, the v1 → v2 mapping and the remaining phases.

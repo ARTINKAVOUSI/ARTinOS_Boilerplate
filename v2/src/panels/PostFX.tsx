@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PanelManifest } from '../app/panel'
 import { byKind, findFeature } from '../app/registry'
 import { studio, useStudio, type StudioState } from '../app/store'
@@ -6,7 +6,7 @@ import { useRuntime } from '../app/runtime'
 import { FeatureCard } from '../app/studio/FeatureCard'
 import { ControlInput, labelOf } from '../app/studio/ControlField'
 import { Icons } from '../app/studio/icons'
-import { TextField } from '../ui/TextField/TextField'
+import { PanelBar } from '../app/studio/PanelBar'
 import { Select } from '../ui/Select/Select'
 import { Segmented } from '../ui/Segmented/Segmented'
 import { Toggle } from '../ui/Toggle/Toggle'
@@ -17,17 +17,29 @@ import type { DiscoveredFeature } from '../app/feature'
 const effects = byKind('effect')
 const CATEGORIES = ['all', 'light', 'lens', 'color', 'blur', 'stylize', 'temporal', 'screen-space', 'anti-aliasing'] as const
 const selectFeatures = (state: StudioState) => state.features
+const selectReveal = (state: StudioState) => state.reveal
 const words = (value: string) => value.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase())
 
 /** One effect in the browser: switch, name, category · cost, expandable controls. */
 function EffectRow({ effect }: { effect: DiscoveredFeature }) {
   const states = useStudio(selectFeatures)
+  const reveal = useStudio(selectReveal)
   const state = states[effect.id]
   const [open, setOpen] = useState(false)
+  const row = useRef<HTMLDivElement>(null)
+  const mine = reveal?.featureId === effect.id ? reveal : null
+
+  // Opened from the command palette: expand the row and bring it into view.
+  useEffect(() => {
+    if (!mine) return
+    setOpen(true)
+    row.current?.scrollIntoView({ block: 'nearest' })
+  }, [mine?.at])
+
   if (!state) return null
   const controls = Object.entries(effect.controls ?? {})
   return (
-    <div className={`artinos-effect ${state.enabled ? 'is-enabled' : ''}`}>
+    <div ref={row} className={`artinos-effect ${state.enabled ? 'is-enabled' : ''}`}>
       <div className="artinos-effect-head">
         <button type="button" className="artinos-effect-expand" aria-expanded={open} onClick={() => setOpen(value => !value)} title={effect.path}>
           <span className="artinos-effect-name">
@@ -59,9 +71,16 @@ function PostFX() {
   const states = useStudio(selectFeatures)
   const host = findFeature('postfx')
   const [view, setView] = useState<'stack' | 'browse'>('stack')
-  const [query, setQuery] = useState('')
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>('all')
-  const needle = query.trim().toLowerCase()
+  const reveal = useStudio(selectReveal)
+
+  // A palette hit on an effect that is not in the chain belongs in Browse.
+  useEffect(() => {
+    if (!reveal?.featureId.startsWith('effect.')) return
+    setCategory('all')
+    setView(states[reveal.featureId]?.enabled ? 'stack' : 'browse')
+    // The enabled state at reveal time decides the view; later toggles must not move it again.
+  }, [reveal?.at])
 
   const active = useMemo(
     () =>
@@ -70,12 +89,12 @@ function PostFX() {
         .sort((a, b) => (states[a.id]?.order ?? a.order ?? 500) - (states[b.id]?.order ?? b.order ?? 500)),
     [states],
   )
-  const browse = effects.filter(effect => (category === 'all' || effect.category === category) && (!needle || `${effect.label} ${effect.category}`.toLowerCase().includes(needle)))
+  const browse = effects.filter(effect => category === 'all' || effect.category === category)
   const bypassed = host ? !states[host.id]?.enabled : true
 
   return (
     <div className="artinos-panel-suite">
-      <div className="artinos-postfx-commandbar v2-panel-bar">
+      <PanelBar className="artinos-postfx-commandbar">
         <Segmented
           size="sm"
           label="View"
@@ -87,10 +106,7 @@ function PostFX() {
           ]}
         />
         {view === 'browse' && (
-          <>
-            <TextField type="search" size="sm" value={query} onChange={setQuery} label="Search effects" placeholder="Search effects" />
-            <Select size="sm" label="Category" value={category} onChange={setCategory} options={CATEGORIES.map(value => ({ value, label: value === 'all' ? 'All categories' : words(value) }))} />
-          </>
+          <Select size="sm" label="Category" value={category} onChange={setCategory} options={CATEGORIES.map(value => ({ value, label: value === 'all' ? 'All categories' : words(value) }))} />
         )}
         <span className="v2-spacer" />
         {host && (
@@ -99,7 +115,7 @@ function PostFX() {
             <Toggle size="sm" label="Post-processing enabled" checked={!bypassed} onChange={value => studio.setEnabled(host.id, value)} />
           </label>
         )}
-      </div>
+      </PanelBar>
 
       {bypassed && <div className="artinos-panel-notice">Post-processing is bypassed. Effects keep their settings.</div>}
 
@@ -127,7 +143,7 @@ function PostFX() {
           {browse.map(effect => (
             <EffectRow key={effect.id} effect={effect} />
           ))}
-          {browse.length === 0 && <div className="v2-empty">No effect matches.</div>}
+          {browse.length === 0 && <div className="v2-empty">No effect in this category.</div>}
         </div>
       )}
     </div>
@@ -147,6 +163,7 @@ export const panel: PanelManifest = {
   description: 'Post-processing stack and per-effect controls',
   keywords: ['bloom', 'effects', 'post', 'grading', 'anti-aliasing'],
   order: 2,
+  owns: feature => feature.kind === 'effect' || feature.id === 'postfx',
   footer: PostFXFooter,
   component: PostFX,
 }

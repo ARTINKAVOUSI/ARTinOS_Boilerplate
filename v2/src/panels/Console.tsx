@@ -20,7 +20,8 @@ function Console() {
   return (
     <div className="artinos-panel-suite">
       <div className="v2-panel-bar">
-        <TextField type="search" size="sm" value={query} onChange={setQuery} label="Search the log" placeholder="Search messages" />
+        {/* Filters the captured log, which the palette cannot do — not the studio search. */}
+        <TextField type="search" size="sm" value={query} onChange={setQuery} label="Filter messages" placeholder="Filter messages" />
         <Select
           size="sm"
           label="Level"

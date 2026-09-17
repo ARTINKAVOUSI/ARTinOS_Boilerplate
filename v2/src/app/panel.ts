@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import type { DiscoveredFeature } from './feature'
 
 /**
  * The panel contract.
@@ -23,6 +24,13 @@ export interface PanelManifest {
   dock?: 'bottom' | 'left' | 'right' | 'float'
   /** The tab that is active on first launch. */
   active?: boolean
+  /**
+   * Which features this panel shows. The palette uses it to send a control hit
+   * to the panel that owns it, so routing lives with the panel, not the dock:
+   * delete the file and its claim goes with it. Panels are asked in tab order
+   * and the first claim wins.
+   */
+  owns?: (feature: DiscoveredFeature) => boolean
   /** Quiet status line along the pane foot. */
   footer?: ComponentType
   component: ComponentType

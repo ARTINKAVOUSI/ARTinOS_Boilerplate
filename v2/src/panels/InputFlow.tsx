@@ -113,6 +113,7 @@ export const panel: PanelManifest = {
   description: 'Devices and live signals',
   keywords: ['devices', 'pointer', 'audio', 'microphone', 'hands', 'vision', 'signals'],
   order: 3,
+  owns: feature => feature.group === 'Input',
   footer: () => <>DEVICES · SIGNAL BUS</>,
   component: InputFlow,
 }

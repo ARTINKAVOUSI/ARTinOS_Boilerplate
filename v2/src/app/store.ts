@@ -16,11 +16,20 @@ export interface FeatureState {
   order?: number
 }
 
+/** A control the command palette asked a panel to show. */
+export interface RevealTarget {
+  featureId: string
+  control?: string
+  /** Makes each request distinct, so asking twice reveals twice. */
+  at: number
+}
+
 export interface StudioState {
   features: Record<string, FeatureState>
   /** Named snapshots of `features`. */
   presets: Record<string, Record<string, FeatureState>>
   ui: { visible: boolean; world: string; favorites: string[]; pins: string[] }
+  reveal: RevealTarget | null
 }
 
 const STORAGE_KEY = 'artinos.v2.studio'
@@ -49,7 +58,7 @@ function reconcile(saved: Record<string, FeatureState> | undefined): Record<stri
 }
 
 function load(): StudioState {
-  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, world: 'frost', favorites: [], pins: [] } }
+  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, world: 'frost', favorites: [], pins: [] }, reveal: null }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return fallback
@@ -59,6 +68,7 @@ function load(): StudioState {
       features: reconcile(parsed.features),
       presets: parsed.presets ?? {},
       ui: { ...fallback.ui, ...parsed.ui },
+      reveal: null,
     }
   } catch {
     return fallback
@@ -168,6 +178,11 @@ export const studio = {
     const parsed = JSON.parse(text)
     if (!parsed || typeof parsed.features !== 'object') throw new Error('Not an ARTINOS preset file')
     commit({ ...state, features: reconcile(parsed.features) })
+  },
+
+  /** Point the panels at one control: the owning card opens and the row is highlighted. */
+  reveal(featureId: string, control?: string) {
+    commit({ ...state, reveal: { featureId, control, at: Date.now() } })
   },
 
   /** Star or pin one control, keyed `featureId:control`. */

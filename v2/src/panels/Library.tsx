@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react'
 import { panels, type PanelManifest } from '../app/panel'
 import { features } from '../app/registry'
 import { studio, useStudio, type StudioState } from '../app/store'
-import { TextField } from '../ui/TextField/TextField'
 import { Select } from '../ui/Select/Select'
 import { Toggle } from '../ui/Toggle/Toggle'
 import { IconButton } from '../ui/IconButton/IconButton'
 import { useToast } from '../ui/Toast/Toast'
 import { Icons } from '../app/studio/icons'
+import { PanelBar } from '../app/studio/PanelBar'
 
 // File names only — nothing here is loaded.
 const uiComponents = Object.keys(import.meta.glob('../ui/*/*.tsx')).map(path => {
@@ -29,26 +29,17 @@ const selectFeatures = (state: StudioState) => state.features
 function Library() {
   const toast = useToast()
   const states = useStudio(selectFeatures)
-  const [query, setQuery] = useState('')
   const [kind, setKind] = useState<(typeof KINDS)[number]>('all')
-  const needle = query.trim().toLowerCase()
   const entries = useMemo(buildEntries, [])
-  const visible = useMemo(
-    () => entries.filter(entry => (kind === 'all' || entry.kind.startsWith(kind)) && (!needle || `${entry.label} ${entry.kind} ${entry.path} ${entry.description ?? ''}`.toLowerCase().includes(needle))),
-    [entries, kind, needle],
-  )
+  const visible = useMemo(() => entries.filter(entry => kind === 'all' || entry.kind.startsWith(kind)), [entries, kind])
   return (
     <div className="artinos-panel-suite">
-      <div className="v2-panel-bar">
-        <TextField type="search" size="sm" value={query} onChange={setQuery} label="Search the library" placeholder="Search features, panels and components" />
+      <PanelBar>
         <Select size="sm" label="Kind" value={kind} onChange={setKind} options={KINDS.map(value => ({ value, label: value === 'all' ? 'Everything' : value }))} />
-      </div>
-      <div className="artinos-panel-summary">
-        <span>
-          {features.length} FEATURES · {panels.length} PANELS · {uiComponents.length} UI COMPONENTS
+        <span className="artinos-panel-summary v2-bar-summary">
+          {features.length} FEATURES · {panels.length} PANELS · {uiComponents.length} UI COMPONENTS · COPY A FILE OR FOLDER TO REUSE IT
         </span>
-        <span>COPY A FILE OR FOLDER TO REUSE IT</span>
-      </div>
+      </PanelBar>
       <div className="artinos-parameter-cards">
         {visible.map(entry => (
           <div key={entry.id} className="artinos-module-card artinos-parameter-card">

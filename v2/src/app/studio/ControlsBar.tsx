@@ -7,6 +7,7 @@ import { Button } from '../../ui/Button/Button'
 import { Dialog } from '../../ui/Dialog/Dialog'
 import { useToast } from '../../ui/Toast/Toast'
 import type { ControlFilter } from './FeatureCard'
+import { PanelBar } from './PanelBar'
 import { Icons } from './icons'
 
 const selectPresets = (state: StudioState) => state.presets
@@ -87,25 +88,29 @@ export function PresetMenu() {
   )
 }
 
-/** The panel toolbar shared by control panels: search, filter, presets. */
-export function ControlsBar({ query, onQuery, filter, onFilter, placeholder }: { query: string; onQuery: (value: string) => void; filter: ControlFilter; onFilter: (value: ControlFilter) => void; placeholder: string }) {
+/**
+ * The toolbar control panels share: which controls to show, and the presets
+ * menu. Searching lives in the dock's own search (⌘K), so no panel carries a
+ * search field of its own, and the rest rides in the dock's tab bar rather
+ * than spending a row of the panel.
+ */
+export function ControlsBar({ filter, onFilter, summary }: { filter: ControlFilter; onFilter: (value: ControlFilter) => void; summary?: string }) {
   return (
-    <div className="v2-panel-bar">
-      <TextField type="search" size="sm" value={query} onChange={onQuery} label={placeholder} placeholder={placeholder} />
+    <PanelBar>
       <Select<ControlFilter>
         size="sm"
         label="Show"
         value={filter}
         onChange={onFilter}
         options={[
-          { value: 'all', label: 'All' },
+          { value: 'all', label: 'All controls' },
           { value: 'favorites', label: 'Favorites' },
           { value: 'pinned', label: 'Pinned' },
         ]}
       />
+      {summary && <span className="artinos-panel-summary v2-bar-summary">{summary}</span>}
       <span className="v2-spacer" />
       <PresetMenu />
-    </div>
+    </PanelBar>
   )
 }
-

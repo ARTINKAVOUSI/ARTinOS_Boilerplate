@@ -3,8 +3,11 @@ import { MetaBlockWorkspace, MetaBlockWorkspaceView, useWorkspaceRevision, type 
 import { CommandPalette, type Command } from '../../ui/CommandPalette/CommandPalette'
 import { panels, type DiscoveredPanel } from '../panel'
 import { features } from '../registry'
+import type { DiscoveredFeature } from '../feature'
+import { labelOf } from './ControlField'
 import { studio, useStudio, type StudioState } from '../store'
 import { PanelWorkbench } from './PanelWorkbench'
+import { PanelBarSlot, PanelIdContext } from './PanelBar'
 import { RuntimeHUD } from './RuntimeHUD'
 import { ConsoleToast } from './ConsoleToast'
 import { DOCK_LAYOUT_KEY as PERSIST_KEY, resetDockLayout } from './layout'
@@ -12,6 +15,11 @@ import { Icons } from './icons'
 // After the engine's own stylesheet: binds its variables to the studio tokens.
 import './skin/chrome.css'
 import './dock.css'
+
+/** Which panel shows a feature's controls — each panel claims its own. */
+function panelFor(feature: DiscoveredFeature) {
+  return panels.find(panel => panel.owns?.(feature))?.id ?? panels[0]?.id ?? ''
+}
 
 const DOCK_SIZE = { left: 0.22, right: 0.24, bottom: 0.36 } as const
 const WORLDS = ['frost', 'clear', 'satin', 'graphite', 'opal', 'monolith'] as const
@@ -147,13 +155,37 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
       { id: 'ui.toggle', label: 'Hide / show interface', group: 'View', shortcut: 'H', run: () => studio.setUI({ visible: !studio.getState().ui.visible }) },
       ...WORLDS.map(world => ({ id: `world.${world}`, label: `Material world: ${world}`, group: 'View', run: () => studio.setUI({ world }) })),
       { id: 'reset.all', label: 'Reset every feature', group: 'Features', run: () => studio.resetAll() },
-      ...features.map(feature => ({
-        id: `toggle.${feature.id}`,
-        label: `Toggle ${feature.label}`,
-        group: feature.kind === 'effect' ? 'Effects' : (feature.group ?? 'Features'),
-        keywords: `${feature.id} ${feature.category ?? ''} ${feature.path}`,
-        run: () => studio.setEnabled(feature.id, !studio.getState().features[feature.id]?.enabled),
-      })),
+      ...features.flatMap(feature => {
+        const group = feature.kind === 'effect' ? 'Effects' : (feature.group ?? 'Features')
+        const keywords = `${feature.id} ${feature.category ?? ''} ${feature.path}`
+        const show = () => {
+          openPanel(panelFor(feature))
+          studio.reveal(feature.id)
+        }
+        return [
+          { id: `show.${feature.id}`, label: feature.label, group, keywords: `${keywords} show open`, run: show },
+          {
+            id: `toggle.${feature.id}`,
+            label: `Toggle ${feature.label}`,
+            group,
+            keywords,
+            run: () => studio.setEnabled(feature.id, !studio.getState().features[feature.id]?.enabled),
+          },
+          { id: `path.${feature.id}`, label: `Copy path · ${feature.path}`, group: 'Source', keywords, run: () => void navigator.clipboard?.writeText(feature.path) },
+          // Every control is searchable by name: the hit opens its panel and
+          // scrolls the row into view, which is what the per-panel search fields did.
+          ...Object.entries(feature.controls ?? {}).map(([name, control]) => ({
+            id: `control.${feature.id}.${name}`,
+            label: `${feature.label} › ${labelOf(name, control)}`,
+            group: 'Controls',
+            keywords: `${keywords} ${name} ${control.type}`,
+            run: () => {
+              openPanel(panelFor(feature))
+              studio.reveal(feature.id, name)
+            },
+          })),
+        ]
+      }),
     ],
     [openPanel, workspace],
   )
@@ -165,13 +197,15 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
     if (!panel) return null
     const Content = panel.component
     return (
-      <div className={`artinos-panel artinos-panel-${panel.id} is-open`}>
-        <div className="artinos-panel-body">
-          <PanelWorkbench title={panel.title}>
-            <Content />
-          </PanelWorkbench>
+      <PanelIdContext value={panel.id}>
+        <div className={`artinos-panel artinos-panel-${panel.id} is-open`}>
+          <div className="artinos-panel-body">
+            <PanelWorkbench title={panel.title}>
+              <Content />
+            </PanelWorkbench>
+          </div>
         </div>
-      </div>
+      </PanelIdContext>
     )
   }
 
@@ -209,6 +243,7 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
           <span>Search…</span>
           <kbd>⌘K</kbd>
         </button>
+        <PanelBarSlot panelId={context.activeBlock?.id ?? null} />
         <div className="plate-toolbar-cluster" data-no-drag>
           <button
             type="button"

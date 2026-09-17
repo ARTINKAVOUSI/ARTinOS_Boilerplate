@@ -97,6 +97,41 @@
 .v2-panel-bar .v2-spacer {
   flex: 1;
 }
+.v2-bar-summary {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The active panel's toolbar, hoisted into the dock strip so a handful of
+   small controls never costs the panel a whole row. */
+.plate-panel-slot {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.plate-panel-slot:empty {
+  display: none;
+}
+.plate-panel-slot > .v2-panel-bar {
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin: 0;
+  min-width: 0;
+}
+.plate-panel-slot .v2-spacer {
+  display: none;
+}
+.plate-panel-slot .v2-bar-summary {
+  flex: 0 1 auto;
+}
+@media (max-width: 1280px) {
+  .plate-panel-slot .v2-bar-summary {
+    display: none;
+  }
+}
 .v2-inline-toggle {
   display: inline-flex;
   align-items: center;

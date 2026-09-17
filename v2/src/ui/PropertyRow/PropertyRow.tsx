@@ -20,6 +20,8 @@ export interface PropertyRowProps {
   density?: PropertyDensity
   /** Marks the row as the target of a search reveal. */
   highlighted?: boolean
+  /** Written as `data-control`, so a search result can find and scroll to this row. */
+  dataControl?: string
   disabled?: boolean
 }
 
@@ -27,9 +29,9 @@ export interface PropertyRowProps {
  * PropertyRow — the Inspector's structural row: label, control, reset and
  * actions in one consistent arrangement. The row never owns the value.
  */
-export function PropertyRow({ label, children, binding, status, message, onReset, actions, density = 'default', highlighted = false, disabled = false }: PropertyRowProps) {
+export function PropertyRow({ label, children, binding, status, message, onReset, actions, density = 'default', highlighted = false, dataControl, disabled = false }: PropertyRowProps) {
   return (
-    <div className="aui-prop" data-density={density} data-state={status} data-highlighted={highlighted || undefined} data-disabled={disabled || undefined}>
+    <div className="aui-prop" data-density={density} data-state={status} data-control={dataControl} data-highlighted={highlighted || undefined} data-disabled={disabled || undefined}>
       <div className="aui-prop__main">
         <span className="aui-prop__label" title={label}>
           {label}

@@ -1,4 +1,4 @@
-import { memo, useState, type ReactNode } from 'react'
+import { memo, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Control, ControlValue, DiscoveredFeature } from '../feature'
 import { studio, useFeatureState, useStudio, type StudioState } from '../store'
 import { PropertyRow } from '../../ui/PropertyRow/PropertyRow'
@@ -11,8 +11,6 @@ export type ControlFilter = 'all' | 'favorites' | 'pinned'
 
 export interface FeatureCardProps {
   feature: DiscoveredFeature
-  /** Lower-case search text; matching controls stay, the rest hide. */
-  query?: string
   filter?: ControlFilter
   /** Extra header controls (reorder buttons for effects). */
   extra?: ReactNode
@@ -23,6 +21,7 @@ export interface FeatureCardProps {
 }
 
 const selectMarks = (state: StudioState) => state.ui
+const selectReveal = (state: StudioState) => state.reveal
 const same = (a: unknown, b: unknown) => Object.is(a, b) || JSON.stringify(a) === JSON.stringify(b)
 
 let clipboard: string | null = null
@@ -69,27 +68,41 @@ function RowActions({ id, label, marks, onPaste, value }: { id: string; label: s
 /**
  * One feature as an Inspector card: a quiet header (name, control count, switch,
  * reset) over its property rows, laid out by the panel's column flow.
+ *
+ * Searching happens in the dock's command palette, not here; a palette hit
+ * arrives as a `reveal` target, which opens this card and highlights the row.
  */
-export const FeatureCard = memo(function FeatureCard({ feature, query = '', filter = 'all', extra, hideSwitch = false, caption }: FeatureCardProps) {
+export const FeatureCard = memo(function FeatureCard({ feature, filter = 'all', extra, hideSwitch = false, caption }: FeatureCardProps) {
   const state = useFeatureState(feature.id)
   const marks = useStudio(selectMarks)
+  const reveal = useStudio(selectReveal)
   const [collapsed, setCollapsed] = useState(false)
+  const card = useRef<HTMLDivElement>(null)
+  const mine = reveal?.featureId === feature.id ? reveal : null
+
+  useEffect(() => {
+    if (!mine) return
+    setCollapsed(false)
+    const target = mine.control ? card.current?.querySelector(`[data-control="${mine.control}"]`) : null
+    ;(target ?? card.current)?.scrollIntoView({ block: 'nearest' })
+  }, [mine?.at, mine?.control])
+
   if (!state) return null
 
-  const featureMatches = !query || `${feature.label} ${feature.group ?? ''} ${feature.category ?? ''}`.toLowerCase().includes(query)
-  const entries = Object.entries(feature.controls ?? {}).filter(([name, control]) => {
+  const entries = Object.entries(feature.controls ?? {}).filter(([name]) => {
+    // A revealed control is shown whatever the filter says.
+    if (mine?.control === name) return true
     const key = `${feature.id}:${name}`
     if (filter === 'favorites' && !marks.favorites.includes(key)) return false
     if (filter === 'pinned' && !marks.pins.includes(key)) return false
-    return featureMatches || `${name} ${labelOf(name, control)}`.toLowerCase().includes(query)
+    return true
   })
-  if (filter !== 'all' && entries.length === 0) return null
-  if (query && !featureMatches && entries.length === 0) return null
+  if (filter !== 'all' && entries.length === 0 && !mine) return null
 
   const changed = entries.some(([name, control]) => !same(state.values[name], control.value))
 
   return (
-    <div className="artinos-parameter-card v2-feature-card" data-enabled={state.enabled || undefined}>
+    <div ref={card} className="artinos-parameter-card v2-feature-card" data-enabled={state.enabled || undefined} data-revealed={mine ? '' : undefined}>
       <div className="artinos-parameter-card-head v2-card-head">
         <button type="button" className="v2-card-title" aria-expanded={!collapsed} onClick={() => setCollapsed(value => !value)} title={`${feature.description ?? feature.label}\n${feature.path}`}>
           <b>{feature.label}</b>
@@ -115,7 +128,8 @@ export const FeatureCard = memo(function FeatureCard({ feature, query = '', filt
                 key={name}
                 label={labelOf(name, control)}
                 density={namesItself(control) ? 'default' : 'compact'}
-                highlighted={Boolean(query) && name.toLowerCase() === query}
+                dataControl={name}
+                highlighted={mine?.control === name}
                 onReset={same(value, control.value) ? undefined : () => set(control.value)}
                 actions={<RowActions id={key} label={labelOf(name, control)} marks={marks} value={value} onPaste={set} />}
               >
