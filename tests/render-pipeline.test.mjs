@@ -98,3 +98,31 @@ test('refraction chart agrees with Snell law, zero dispersion and shader IOR spr
   assert.ok(Math.abs(refractedAngle(clear.criticalAngle, 1.5, true) - 90) < 1e-6)
   assert.ok(Math.abs(refractedAngle(19.4712206345, 1.5, true) - 30) < 1e-8)
 })
+
+test('scene attachments follow enabled effects only', async () => {
+  const { resolveSceneAttachments } = await import('../packages/runtime/src/react/postfx.tsx')
+  const all = ['ssr', 'gtao', 'denoise', 'ssgi', 'recurrentDenoise', 'traa', 'taau', 'motionBlur'].map(type => ({ type, enabled: false }))
+  assert.deepEqual(resolveSceneAttachments(all), { normal: false, packedNormal: false, velocity: false, diffuse: false })
+  const room = all.map(e => ({ ...e, enabled: e.type === 'ssgi' || e.type === 'traa' }))
+  // SSGI + TRAA: output + 8-bit packed normal + velocity + 8-bit albedo (fits the 32 bytes/sample WebGPU default)
+  assert.deepEqual(resolveSceneAttachments(room), { normal: false, packedNormal: true, velocity: true, diffuse: true })
+  assert.deepEqual(resolveSceneAttachments(room, false), { normal: false, packedNormal: false, velocity: false, diffuse: false })
+  assert.equal(resolveSceneAttachments([{ type: 'gtao' }]).normal, true)
+})
+
+test('SSGI tier sampling matches the Adaptive Room quality table', async () => {
+  const { SSGI_TIER_SAMPLING } = await import('../packages/runtime/src/react/postfx.tsx')
+  const { QUALITIES } = await import('../packages/scenes/src/adaptive-room/model/quality.ts')
+  for (const q of QUALITIES) assert.deepEqual(SSGI_TIER_SAMPLING[q.id], { slices: q.slices, steps: q.steps }, q.id)
+})
+
+test('anti-aliasing defaults to running after every screen-space effect', async () => {
+  const { postFXCatalog, defaultPostFXOrder } = await import('../packages/modules/src/postfx/catalog.ts')
+  const orders = postFXCatalog.map(e => [e, defaultPostFXOrder(e.type)])
+  const lastLighting = Math.max(...orders.filter(([e]) => e.category !== 'aa').map(([, o]) => o))
+  for (const [e, o] of orders) {
+    if (e.category === 'aa') assert.ok(o > lastLighting, `${e.type} (${o}) must follow ${lastLighting}`)
+    assert.ok(o <= 5000, `${e.type} order within parameter range`)
+  }
+  assert.equal(new Set(orders.map(([, o]) => o)).size, orders.length, 'orders are unique')
+})

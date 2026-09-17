@@ -34,11 +34,18 @@ export const ADAPTIVE_ROOM_STAGE = {
 const HOST_POSTFX: Record<string, ParameterValue> = {
   'postfx.ssgi.enabled': true,
   'postfx.traa.enabled': true,
+  // the stand-alone pipeline's chain: SSGI composite, then TRAA resolves its noise
+  'postfx.ssgi.order': 300,
+  'postfx.traa.order': 900,
   'postfx.fxaa.enabled': false,
   'postfx.bloom.enabled': false,
   'postfx.vignette.enabled': false,
   'render.toneMapping': 'aces',
 };
+
+/** Scalars the studio uses for each tier; the room starts at its recipe's tier, as the stand-alone app does. */
+const TIER_SCALARS = { low: 0.5, balanced: 0.72, high: 0.88, ultra: 1 } as const;
+type Tier = keyof typeof TIER_SCALARS;
 
 /** Apply values as a single undoable step. */
 export function applyValues(runtime: ArtinosRuntime, values: Record<string, ParameterValue>, label: string) {
@@ -99,6 +106,8 @@ export function adaptiveRoomKit(options: AdaptiveRoomKitOptions = {}) {
     for (const [id, value] of Object.entries(hostDefaults)) {
       if (runtime.parameters.state(id)) runtime.parameters.write(id, value, { source: 'preset' });
     }
+    const tier = defaults.qualityId as Tier;
+    if (tier in TIER_SCALARS) runtime.quality.setState({ tier, scalar: TIER_SCALARS[tier] });
 
     const cycle = (id: string, list: readonly { id: string }[], dir: number, label: string) => {
       const current = runtime.parameters.getBase<string>(id);

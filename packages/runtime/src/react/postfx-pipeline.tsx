@@ -41,17 +41,13 @@ import { bilateralBlur } from 'three/addons/tsl/display/BilateralBlurNode.js'
 import { recurrentDenoise } from 'three/addons/tsl/display/RecurrentDenoiseNode.js'
 import { configureScenePasses, isTransmissionGlass } from './scene-pass-filter'
 import { useArtinosRuntime } from './runtime'
-import { resolvePostFXCapability, SSGI_TIER_SAMPLING, usePostFXController, TRANSMISSION_BACKDROP_RESOURCE, type PostFXEffect, type PostFXRuntimeState } from './postfx'
+import { resolvePostFXCapability, resolveSceneAttachments, SSGI_TIER_SAMPLING, usePostFXController, TRANSMISSION_BACKDROP_RESOURCE, type PostFXEffect, type PostFXRuntimeState } from './postfx'
 
 const nodes = TSL as Record<string, any>
-const { float, mrt, normalView, output, pass, posterize, vec2, vec4, velocity, grayscale, hue, saturation, packNormalToRGB, diffuseColor } = nodes
+const { float, mrt, normalView, output, pass, posterize, vec2, vec4, velocity, grayscale, hue, saturation, packNormalToRGB, unpackRGBToNormal, sample, diffuseColor } = nodes
 
 const n=(p:Record<string,number|boolean>|undefined,key:string,fallback:number)=>typeof p?.[key]==='number'?p[key] as number:fallback
 const b=(p:Record<string,number|boolean>|undefined,key:string,fallback=false)=>typeof p?.[key]==='boolean'?p[key] as boolean:fallback
-/** Effects that read the scene pass normal / velocity attachments. Anything not listed here runs
- *  off the beauty buffer alone, so the pass can skip MRT entirely and keep scene.background. */
-const MRT_NORMAL=new Set(['ssr','ssgi','gtao','denoise','recurrentDenoise']);
-const MRT_VELOCITY=new Set(['traa','taau','motionBlur']);
 const disposePostFXTree=(root:any,scenePass:any,backdropPass:any,cleanPass:any)=>{const disposed=new Set<any>();root?.traverse?.((node:any)=>{if(node===scenePass||node===backdropPass||node===cleanPass||disposed.has(node))return;disposed.add(node);node.dispose?.()})}
 
 export function RenderPipelineSystem(){
@@ -59,14 +55,19 @@ export function RenderPipelineSystem(){
   useSyncExternalStore(controller.subscribe,()=>controller.revision,()=>0);const quality=useSyncExternalStore(runtime.quality.subscribe,runtime.quality.getState,runtime.quality.getState)
   const effectsKey=JSON.stringify(controller.snapshot())
   const effects=useMemo<PostFXEffect[]>(()=>JSON.parse(effectsKey),[effectsKey])
-  const needsNormal=controller.enabled&&effects.some(e=>MRT_NORMAL.has(e.type)),needsVelocity=controller.enabled&&effects.some(e=>MRT_VELOCITY.has(e.type)),needsPackedNormal=controller.enabled&&effects.some(e=>e.type==='recurrentDenoise'),needsDiffuse=controller.enabled&&effects.some(e=>e.type==='ssgi'&&e.enabled!==false)
+  // Every catalog effect is registered (most disabled). Only enabled ones add scene attachments; anything
+  // else runs off the beauty buffer, so the pass can skip MRT entirely and keep scene.background.
+  const attachments=resolveSceneAttachments(effects,controller.enabled)
+  const needsNormal=attachments.normal,needsVelocity=attachments.velocity,needsPackedNormal=attachments.packedNormal,needsDiffuse=attachments.diffuse
   const state=useMemo(()=>{
     const pipeline=new (THREE as any).RenderPipeline(renderer);const scenePass:any=pass(scene,camera)
     // Attachment layout is immutable for this pass lifetime. Reusing a target after MRT
     // toggles leaves orphan attachments and incompatible cached GPU render pipelines.
-    scenePass.setMRT(needsNormal||needsVelocity?mrt({output,...(needsNormal?{normal:normalView}:null),...(needsPackedNormal?{normalPacked:packNormalToRGB(normalView)}:null),...(needsVelocity?{velocity}:null),...(needsDiffuse?{diffuseColor}:null)}):null)
+    scenePass.setMRT(needsNormal||needsPackedNormal||needsVelocity?mrt({output,...(needsNormal?{normal:normalView}:null),...(needsPackedNormal?{normalPacked:packNormalToRGB(normalView)}:null),...(needsVelocity?{velocity}:null),...(needsDiffuse?{diffuseColor}:null)}):null)
     // SSGI only needs albedo at 8-bit precision
+    // albedo and packed normals only need 8-bit precision
     if(needsDiffuse){try{scenePass.getTexture('diffuseColor').type=THREE.UnsignedByteType}catch{/* optional */}}
+    if(needsPackedNormal){try{scenePass.getTexture('normalPacked').type=THREE.UnsignedByteType}catch{/* optional */}}
     const backdropPass:any=pass(scene,camera)
     backdropPass.renderTarget.texture.generateMipmaps=true
     backdropPass.renderTarget.texture.minFilter=THREE.LinearMipmapLinearFilter
@@ -109,7 +110,8 @@ export function RenderPipelineSystem(){
     let current:any=state.scenePass.toInspector?.('Pass / Scene / Beauty')??state.scenePass;
     const depth=state.scenePass.getTextureNode('depth').toInspector?.('Pass / Scene / Depth')??state.scenePass.getTextureNode('depth'),viewZ=state.scenePass.getViewZNode(),normal=needsNormal?(state.scenePass.getTextureNode('normal').toInspector?.('Pass / Scene / Normal')??state.scenePass.getTextureNode('normal')):null,vel=needsVelocity?(state.scenePass.getTextureNode('velocity').toInspector?.('Pass / Scene / Velocity')??state.scenePass.getTextureNode('velocity')):null,backend=renderer.backend?.isWebGLBackend===true?'webgl2':'webgpu',runtimeStates:PostFXRuntimeState[]=[],resolvedEffects:PostFXEffect[]=[];for(const effect of effects){const capability=controller.enabled?resolvePostFXCapability(effect,backend,quality.tier,id=>runtime.resources.get(id)!=null):{state:'disabled' as const};runtimeStates.push({id:effect.id,type:effect.type,...capability,backend,tier:quality.tier});if(capability.state==='active')resolvedEffects.push(effect);else if(capability.state==='fallback'&&capability.fallback)resolvedEffects.push({...effect,type:capability.fallback,resources:[],minTier:'low',fallback:'disable',supportedBackend:'both'});}controller.setRuntimeStates(runtimeStates);for(const effect of resolvedEffects){const p=effect.params;switch(effect.type){case'bloom':current=current.add(bloom(current,n(p,'strength',1),n(p,'radius',.25),n(p,'threshold',.8)));break;case'dof':current=dof(current,viewZ,n(p,'focusDistance',4),n(p,'focalLength',.02),n(p,'bokehScale',2));break;case'afterImage':current=afterImage(current,n(p,'damp',.96));break;case'anamorphic':current=current.add(bloom(current,n(p,'scale',3),.9,n(p,'threshold',.9)));break;case'chromaticAberration':current=chromaticAberration(current,float(n(p,'strength',.004)));break;case'dotScreen':current=dotScreen(current,n(p,'angle',1.57),n(p,'scale',1));break;case'film':current=film(current,n(p,'intensity',.12) as any);break;case'fxaa':current=fxaa(current);break;case'rgbShift':current=rgbShift(current,n(p,'amount',.003),n(p,'angle',0));break;case'smaa':current=smaa(current);break;case'sobel':current=sobel(current);break;case'sepia':current=sepia(current);break;case'grayscale':current=grayscale(current);break;case'motionBlur':current=motionBlur(current,vel,n(p,'samples',16) as any);break;case'ssr':current=ssr(current,depth,normal,{camera,stochastic:b(p,'stochastic',true),binaryRefine:b(p,'binaryRefine',true)} as any);break;case'ssgi':{
       // SSGI outputs raw GI (rgb) + AO (a); it must be composited: beauty·AO + albedo·GI.
-      const gi:any=ssgi(current,depth,normal,camera),sampling=SSGI_TIER_SAMPLING[quality.tier]??SSGI_TIER_SAMPLING.balanced
+      const packed=state.scenePass.getTextureNode('normalPacked'),viewNormal=sample((uv:any)=>unpackRGBToNormal(packed.sample(uv)))
+      const gi:any=ssgi(current,depth,viewNormal,camera),sampling=SSGI_TIER_SAMPLING[quality.tier]??SSGI_TIER_SAMPLING.balanced
       gi.sliceCount.value=sampling.slices;gi.stepCount.value=sampling.steps
       gi.giIntensity.value=n(p,'giIntensity',9);gi.aoIntensity.value=n(p,'aoIntensity',1);gi.radius.value=n(p,'radius',10);gi.thickness.value=n(p,'thickness',1);gi.expFactor.value=n(p,'expFactor',2);gi.backfaceLighting.value=n(p,'backfaceLighting',0);gi.useTemporalFiltering=b(p,'temporal',true)
       const albedo=needsDiffuse?state.scenePass.getTextureNode('diffuseColor'):current
@@ -120,7 +122,7 @@ export function RenderPipelineSystem(){
     // from empty canvas, and brightness is not opacity.
     const backdropSampler=state.backdropPass.getTextureNode()
     const outputNode=vec4(current.rgb,state.scenePass.getTextureNode().a)
-    state.pipeline.outputNode=outputNode;state.pipeline.needsUpdate=true;setThree({postProcessing:state.pipeline,passes:{scene:state.scenePass}});runtime.telemetry.set('postfx.effects',runtimeStates.filter(effect=>effect.state==='active'||effect.state==='fallback').length,{group:'postfx'});runtime.telemetry.set('postfx.enabled',controller.enabled,{group:'postfx'});const clean=[runtime.resources.set('render.pipeline',state.pipeline),runtime.resources.set('render.scenePass',state.scenePass),runtime.resources.set(TRANSMISSION_BACKDROP_RESOURCE,backdropSampler),runtime.resources.set('render.transmissionCleanBackdrop',state.cleanPass.getTextureNode()),runtime.resources.set('render.transmissionBackdropPass',state.backdropPass),runtime.resources.set('render.output',outputNode),runtime.resources.set('render.depth',depth),runtime.resources.set('render.normal',normal),runtime.resources.set('render.velocity',vel),runtime.resources.set('postfx.controller',controller),runtime.quality.register('render.postfx',next=>runtime.telemetry.set('postfx.quality',`${next.tier}:${next.scalar.toFixed(2)}`,{group:'quality'}))];return()=>{setThree((three:any)=>three.postProcessing===state.pipeline?{postProcessing:null,passes:{}}:{});clean.forEach(fn=>fn());disposePostFXTree(outputNode,state.scenePass,state.backdropPass,state.cleanPass);(state.pipeline as any)._quadMesh?.material?.dispose?.()}},[effects,state,runtime,camera,scene,controller,controller.enabled,setThree,quality,size.width,size.height])
+    state.pipeline.outputNode=outputNode;state.pipeline.needsUpdate=true;setThree({postProcessing:state.pipeline,passes:{scene:state.scenePass}});runtime.telemetry.set('postfx.effects',runtimeStates.filter(effect=>effect.state==='active'||effect.state==='fallback').length,{group:'postfx'});runtime.telemetry.set('postfx.enabled',controller.enabled,{group:'postfx'});const clean=[runtime.resources.set('render.pipeline',state.pipeline),runtime.resources.set('render.scenePass',state.scenePass),runtime.resources.set(TRANSMISSION_BACKDROP_RESOURCE,backdropSampler),runtime.resources.set('render.transmissionCleanBackdrop',state.cleanPass.getTextureNode()),runtime.resources.set('render.transmissionBackdropPass',state.backdropPass),runtime.resources.set('render.output',outputNode),runtime.resources.set('render.depth',depth),runtime.resources.set('render.normal',normal),runtime.resources.set('render.velocity',vel),runtime.resources.set('postfx.controller',controller),runtime.quality.register('render.postfx',next=>runtime.telemetry.set('postfx.quality',`${next.tier}:${next.scalar.toFixed(2)}`,{group:'quality'}))];return()=>{setThree((three:any)=>three.postProcessing===state.pipeline?{postProcessing:null,passes:{}}:{});clean.forEach(fn=>fn());disposePostFXTree(outputNode,state.scenePass,state.backdropPass,state.cleanPass);(state.pipeline as any)._quadMesh?.material?.dispose?.()}},[effects,state,runtime,camera,scene,controller,controller.enabled,setThree,quality.tier,size.width,size.height])
   useEffect(()=>()=>{state.scenePass.dispose();state.backdropPass.dispose();state.cleanPass.dispose();state.pipeline.dispose?.()},[state])
   return null
 }

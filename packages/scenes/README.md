@@ -32,6 +32,8 @@ import { SceneCanvas, AdaptiveRoomScene } from '@artinos/scenes'
 </SceneCanvas>
 ```
 
+A runnable example without ARTINOS lives at `examples/standalone.html`. With the workspace dev server running, open `/packages/scenes/examples/standalone.html?preset=golden-hall`.
+
 ### Controlled, with your own UI
 
 ```tsx

@@ -31,4 +31,9 @@ const postFXCatalogEntries:PostFXCatalogInput[]=[
  ,{type:'recurrentDenoise',label:'Recurrent Denoise',category:'temporal',requires:['depth','normal'],cost:'very-high',backend:'webgpu',fallback:'denoise',quality:{minTier:'high'},params:[]}
 ]
 export const postFXCatalog:PostFXCatalogEntry[]=postFXCatalogEntries.map(entry=>({backend:'both',fallback:'disable',quality:{minTier:'low'},resources:[],...entry}))
+/**
+ * Default chain position. Catalog order, except anti-aliasing / temporal resolve, which must see the
+ * finished image: TRAA before SSGI would leave the GI noise unresolved.
+ */
+export const defaultPostFXOrder=(type:PostFXType)=>{const index=postFXCatalog.findIndex(entry=>entry.type===type);return postFXCatalog[index]?.category==='aa'?4500+index:(index+1)*100}
 export const postFXPresets={clean:[{type:'fxaa',enabled:true,order:900,params:{}}],cinematic:[{type:'bloom',enabled:true,order:100,params:{strength:.65,radius:.25,threshold:.82}},{type:'dof',enabled:true,order:200,params:{focusDistance:4,focalLength:.018,bokehScale:1.4}},{type:'vignette',enabled:true,order:700,params:{intensity:.22,smoothness:.65}},{type:'film',enabled:true,order:800,params:{intensity:.035}},{type:'traa',enabled:true,order:900,params:{}}],dream:[{type:'bloom',enabled:true,order:100,params:{strength:1.4,radius:.6,threshold:.55}},{type:'chromaticAberration',enabled:true,order:300,params:{strength:.002}},{type:'vignette',enabled:true,order:800,params:{intensity:.18,smoothness:.7}}],analog:[{type:'bleach',enabled:true,order:200,params:{opacity:.15}},{type:'film',enabled:true,order:400,params:{intensity:.12}},{type:'vignette',enabled:true,order:500,params:{intensity:.4,smoothness:.5}},{type:'fxaa',enabled:true,order:900,params:{}}],performance:[{type:'fxaa',enabled:true,order:900,params:{}}]} as const

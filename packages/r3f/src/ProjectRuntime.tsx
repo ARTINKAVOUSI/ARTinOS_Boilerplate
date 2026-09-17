@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { GraphEngine, GraphRegistry } from '@artinos/graph'
-import { defs, nativeModuleCatalog, postFXCatalog, postFXPresets, scenePresets } from '@artinos/modules'
+import { defaultPostFXOrder, defs, nativeModuleCatalog, postFXCatalog, postFXPresets, scenePresets } from '@artinos/modules'
 import { useArtinosRuntime, type ArtinosRuntime, type ParameterDefinition, type ParameterValue, type Unsubscribe } from '@artinos/runtime'
 import { normalizeCleanup, type ArtinosProject } from './project'
 
@@ -16,7 +16,7 @@ export function installProject(runtime:ArtinosRuntime,project:ArtinosProject):Un
   for(const definition of parameters)runtime.parameters.ensure(definition)
   for(const effect of postFXCatalog){
     runtime.parameters.ensure({id:`postfx.${effect.type}.enabled`,label:`${effect.label} Enabled`,type:'boolean',defaultValue:['bloom','vignette','fxaa'].includes(effect.type),group:`PostFX / ${effect.label}`,order:0})
-    runtime.parameters.ensure({id:`postfx.${effect.type}.order`,label:'Order',type:'number',defaultValue:(postFXCatalog.indexOf(effect)+1)*100,min:0,max:5000,step:10,group:`PostFX / ${effect.label}`,advanced:true})
+    runtime.parameters.ensure({id:`postfx.${effect.type}.order`,label:'Order',type:'number',defaultValue:defaultPostFXOrder(effect.type),min:0,max:5000,step:10,group:`PostFX / ${effect.label}`,advanced:true})
     for(const parameter of effect.params)runtime.parameters.ensure({id:`postfx.${effect.type}.${parameter.key}`,label:parameter.label,type:parameter.type,defaultValue:parameter.defaultValue,min:parameter.min,max:parameter.max,step:parameter.step,group:`PostFX / ${effect.label}`,modulatable:parameter.type==='number',automatable:parameter.type==='number'} as ParameterDefinition)
   }
 

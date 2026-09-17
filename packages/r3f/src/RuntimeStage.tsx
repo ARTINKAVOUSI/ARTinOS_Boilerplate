@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import { Camera, Controls, Environment, Light, Lighting, Shadows, SceneFog, GroundGrid, RenderSettings, Effect, postFXCatalog, defs, type LightProps } from '@artinos/modules'
+import { Camera, Controls, Environment, Light, Lighting, Shadows, SceneFog, GroundGrid, RenderSettings, Effect, postFXCatalog, defaultPostFXOrder, defs, type LightProps } from '@artinos/modules'
 import { useResolvedParameter } from '@artinos/runtime'
 import type { ArtinosStageOptions } from './project'
 
@@ -25,7 +25,7 @@ export function RuntimeStage({children,stage}:PropsWithChildren<{stage?:false|Ar
 function EffectFromParameters({type}:{type:(typeof postFXCatalog)[number]['type']}){
  const entry=postFXCatalog.find(e=>e.type===type)!;
  const[enabled]=useParameter({id:`postfx.${type}.enabled`,label:`${entry.label} Enabled`,type:'boolean',defaultValue:['bloom','vignette','fxaa'].includes(type),group:`PostFX / ${entry.label}`} as any);
- const[order]=useParameter({id:`postfx.${type}.order`,label:'Order',type:'number',defaultValue:(postFXCatalog.indexOf(entry)+1)*100,min:0,max:5000,step:10,group:`PostFX / ${entry.label}`,advanced:true} as any);
+ const[order]=useParameter({id:`postfx.${type}.order`,label:'Order',type:'number',defaultValue:defaultPostFXOrder(entry.type),min:0,max:5000,step:10,group:`PostFX / ${entry.label}`,advanced:true} as any);
  // Every catalog entry mounts, but a disabled effect's parameters are worth nothing: EffectParams
  // recurses one component (and one subscription) per param, so reading them for the ~41 effects
  // that are off by default cost ~55 idle subscriptions and re-rendered the whole stage on any

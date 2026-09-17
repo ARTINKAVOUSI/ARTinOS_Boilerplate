@@ -8,6 +8,17 @@ const tierRank={low:0,balanced:1,high:2,ultra:3} as const
 export const SSGI_TIER_SAMPLING:Record<keyof typeof tierRank,{slices:number;steps:number}>={low:{slices:1,steps:8},balanced:{slices:2,steps:8},high:{slices:3,steps:12},ultra:{slices:4,steps:16}}
 export const resolvePostFXCapability=(effect:PostFXEffect,backend:'webgpu'|'webgl2',tier:keyof typeof tierRank,hasResource:(id:string)=>boolean):Pick<PostFXRuntimeState,'state'|'reason'|'fallback'>=>{if(effect.enabled===false)return{state:'disabled'};const supported=effect.supportedBackend,incompatible=supported&&supported!=='both'&&supported!==backend,missing=effect.resources?.find(id=>!hasResource(id)),belowTier=effect.minTier&&tierRank[tier]<tierRank[effect.minTier],reason=incompatible?`Requires ${supported==='webgpu'?'WebGPU':'WebGL2'}`:missing?`Missing ${missing}`:belowTier?`Requires ${effect.minTier} quality`:undefined;if(!reason)return{state:'active'};return effect.fallback&&effect.fallback!=='disable'?{state:'fallback',reason,fallback:effect.fallback}:{state:'unavailable',reason}}
 
+/** Scene-pass attachments the enabled effects read. Disabled effects never add attachments. */
+const NORMAL_READERS=new Set<string>(['ssr','gtao','denoise'])
+const PACKED_NORMAL_READERS=new Set<string>(['ssgi','recurrentDenoise'])
+const VELOCITY_READERS=new Set<string>(['traa','taau','motionBlur'])
+export interface SceneAttachments{normal:boolean;packedNormal:boolean;velocity:boolean;diffuse:boolean}
+export function resolveSceneAttachments(effects:readonly Pick<PostFXEffect,'type'|'enabled'>[],pipelineEnabled=true):SceneAttachments{
+  const on=new Set<string>(pipelineEnabled?effects.filter(e=>e.enabled!==false).map(e=>e.type):[])
+  const any=(readers:Set<string>)=>[...readers].some(type=>on.has(type))
+  return{normal:any(NORMAL_READERS),packedNormal:any(PACKED_NORMAL_READERS),velocity:any(VELOCITY_READERS),diffuse:on.has('ssgi')}
+}
+
 export class PostFXController{
   private effects=new Map<string,PostFXEffect>();private runtimeStates=new Map<string,PostFXRuntimeState>();private listeners=new Set<()=>void>();revision=0;enabled=true
   register(effect:PostFXEffect){this.effects.set(effect.id,{...effect});this.bump();return()=>{this.remove(effect.id)}}

@@ -45,7 +45,7 @@ const syncRenderGraph=(pipeline:unknown,passes:unknown,resources:readonly {id:st
 
 /** Source-faithful R3F integration of Three r185's official WebGPU Inspector. */
 export function ThreeInspectorRuntime({visible=false}:{visible?:boolean}){
-  const runtime=useArtinosRuntime(),renderer=useThree((state:any)=>state.gl),events=useThree((state:any)=>state.events),set=useThree((state:any)=>state.set),advance=useThree((state:any)=>state.advance),frameloop=useThree((state:any)=>state.frameloop),postProcessing=useThree((state:any)=>state.postProcessing),passes=useThree((state:any)=>state.passes)
+  const runtime=useArtinosRuntime(),renderer=useThree((state:any)=>state.gl),events=useThree((state:any)=>state.events),set=useThree((state:any)=>state.set),advance=useThree((state:any)=>state.advance),scheduler=useThree((state:any)=>state.internal?.scheduler),frameloop=useThree((state:any)=>state.frameloop),postProcessing=useThree((state:any)=>state.postProcessing),passes=useThree((state:any)=>state.passes)
   const resourceRevision=useSyncExternalStore(runtime.resources.subscribe.bind(runtime.resources),()=>runtime.resources.revision,()=>0)
   const graphRef=useRef<any[]>([])
   useLayoutEffect(()=>{
@@ -64,6 +64,11 @@ export function ThreeInspectorRuntime({visible=false}:{visible?:boolean}){
     const previousTarget=events.connected
     events.connect?.(renderer.domElement)
     set({frameloop:'never'})
+    // R3F v10 applies the store's frameloop only when the root is created; its scheduler keeps
+    // its own rAF loop. While the inspector drives frames that loop must stop, or every frame
+    // (update, render and post-processing) runs twice and the second run sees delta 0.
+    const schedulerLoop=scheduler?.frameloop
+    if(scheduler)scheduler.frameloop='never'
     renderer.setAnimationLoop((time:number)=>advance(time))
     const listeners=new Set<()=>void>(),notify=()=>listeners.forEach(listener=>listener()),panel=(inspector as any).profiler.panel as HTMLElement
     let activeTab:ThreeInspectorTab|undefined,embeddedHost:HTMLElement|undefined
@@ -76,7 +81,7 @@ export function ThreeInspectorRuntime({visible=false}:{visible?:boolean}){
     runtime.telemetry.set('inspector.three.ready',true,{group:'runtime'})
     setVisible(visible)
     const nativeBegin=inspector.begin.bind(inspector);inspector.begin=()=>{nativeBegin();for(const node of graphRef.current)inspector.inspect(node)}
-    return()=>{inspector.begin=nativeBegin;inspector.inspect=nativeInspect;viewer.update=nativeViewerUpdate;observe.disconnect();release();dom.classList.remove('artinos-three-inspector-integrated','artinos-three-inspector-embedded');for(const name of stoppedEvents)dom.removeEventListener(name,stop);renderer.setAnimationLoop(null);set({frameloop});if(previousTarget)events.connect?.(previousTarget);else events.disconnect?.();panel.classList.remove('visible')}
+    return()=>{inspector.begin=nativeBegin;inspector.inspect=nativeInspect;viewer.update=nativeViewerUpdate;observe.disconnect();release();dom.classList.remove('artinos-three-inspector-integrated','artinos-three-inspector-embedded');for(const name of stoppedEvents)dom.removeEventListener(name,stop);renderer.setAnimationLoop(null);if(scheduler&&schedulerLoop)scheduler.frameloop=schedulerLoop;set({frameloop});if(previousTarget)events.connect?.(previousTarget);else events.disconnect?.();panel.classList.remove('visible')}
   // Match the reference lifecycle: renderer identity owns this bridge. Including
   // frameloop here would retrigger the effect after set({ frameloop: 'never' }).
   },[renderer])

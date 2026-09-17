@@ -24,6 +24,16 @@ Bugs found and fixed along the way:
 - Swapped geometries and plaster maps leaked; fog and background were not restored on unmount.
 - `scripts/doctor.mjs` crashed on non-directory entries in `packages/`.
 
+Performance and parity with the zip (2026-09-16, NVIDIA Turing, 2713×1543 at DPR 1.25). The room keeps the zip's exact quality table: 1×8, 2×8, 3×12 and 4×16 SSGI slices × steps, all at full resolution.
+- **Reference:** the original zip app, run from its own lockfile (three 0.186, R3F 9), gets 11–15 FPS at `balanced` with the ball pool at this size.
+- **ARTINOS room:** the same settings now run at 12.5 FPS, which is parity.
+- **Boilerplate bugs found and fixed while getting there:**
+  - The Three Inspector drives frames with `setAnimationLoop(advance)`, but R3F v10's scheduler kept its own loop. Every frame ran twice (update, render and SSGI) and the second run saw `delta = 0`. The inspector now stops the scheduler loop while it drives frames.
+  - Scene-pass attachments were chosen from all *registered* effects, disabled ones included. Every project rendered full-resolution normal, packed-normal and velocity targets. With SSGI added, that exceeded WebGPU's 32 bytes/sample limit. `resolveSceneAttachments` now counts enabled effects only, and SSGI reads the 8-bit packed normal as the zip does.
+  - Adaptive quality judged single frames. V-sync alternates 17/33 ms, so it never stepped down. It now uses 0.5 s windows (1 s to step down, 5 s to step up), with hysteresis, and tops out at `high`.
+  - Scalar-only quality changes no longer rebuild the effect graph.
+- **Standalone check:** `/packages/scenes/examples/standalone.html` runs the package's copy of the zip pipeline without ARTINOS.
+
 Open:
 - Phase 5 (panel on `@artinos/ui`) and phase 6 (hardening).
 - Inert stage controls still appear in the Scene panel when a project turns those stage sections off.
