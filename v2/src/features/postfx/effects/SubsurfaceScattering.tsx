@@ -55,7 +55,7 @@ export function SubsurfaceScattering({ id = 'sss', enabled = true, order = 140, 
 export default SubsurfaceScattering
 
 export const feature: Feature = {
-  id: 'effect.sss',
+  id: 'effect.subsurface',
   label: 'Subsurface Scattering',
   kind: 'effect',
   category: 'screen-space',

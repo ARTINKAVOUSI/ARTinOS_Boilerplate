@@ -676,3 +676,32 @@
 .nglive-node[data-tone='scene'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffc46b; }
 .nglive-node[data-tone='render'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ff8fa3; }
 .nglive-node[data-tone='output'] .ngraph-node-head { box-shadow: inset 2px 0 0 #ffffff; }
+.nglive-select {
+  flex: 1;
+  min-width: 0;
+  height: 16px;
+  padding: 0 2px;
+  border: 1px solid var(--ng-line);
+  border-radius: 3px;
+  background: var(--ng-bg);
+  color: var(--ng-text);
+  font: inherit;
+  font-size: 9px;
+}
+.nglive-color {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 14px;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid var(--ng-line);
+  border-radius: 3px;
+  background: none;
+  cursor: pointer;
+}
+/* A node with many controls stays readable: the body scrolls, the head does not. */
+.nglive-controls {
+  max-height: 260px;
+  overflow: auto;
+  scrollbar-width: thin;
+}

@@ -3,6 +3,7 @@ import { useThree } from '@react-three/fiber'
 import { RenderPipeline, type Camera, type Object3D, type Scene, type WebGPURenderer } from 'three/webgpu'
 import { packNormalToRGB, metalness, mrt, normalView, output, pass, roughness, uniform, vec2, vec4, velocity } from 'three/tsl'
 import type { Feature } from '../../app/feature'
+import { pipelineStages, type PipelineStage } from '../../app/pipeline-stages'
 
 /**
  * PostFX — the render pipeline host.
@@ -193,6 +194,8 @@ export function PostFX({ children, enabled = true }: PostFXProps) {
     const backend = (renderer as unknown as { backend?: { isWebGLBackend?: boolean } }).backend?.isWebGLBackend ? 'webgl2' : 'webgpu'
     const beauty = scenePass.getTextureNode('output')
     let current: TSLNode = beauty
+    // Every stage is published for the Graph panel's live thumbnails.
+    const stages: PipelineStage[] = [{ id: 'pass:scene', label: 'Scene Pass', node: beauty }]
 
     if (enabled) {
       const context: Omit<PostFXBuildContext, 'input'> = {
@@ -215,20 +218,29 @@ export function PostFX({ children, enabled = true }: PostFXProps) {
         }
         try {
           current = entry.build({ ...context, input: current }) ?? current
+          stages.push({ id: entry.id, label: entry.id, node: current })
         } catch (error) {
           // One broken effect never takes the frame down with it.
           console.error(`[postfx] ${entry.id} failed to build and was skipped.`, error)
         }
       }
+      for (const attachment of ['depth', 'normal', 'velocity', 'metalRoughness'] as const) {
+        const node = context[attachment]
+        if (node) stages.push({ id: `pass:${attachment}`, label: attachment, node })
+      }
     }
 
     const outputNode = current === beauty ? beauty : vec4(current.rgb, beauty.a)
+    stages.push({ id: 'pass:output', label: 'Canvas', node: outputNode })
+    pipelineStages.publish(stages)
     pipeline.outputNode = outputNode
     pipeline.needsUpdate = true
     set({ postProcessing: pipeline })
 
     return () => {
       set(state => (state.postProcessing === pipeline ? { postProcessing: null } : {}))
+      // The published nodes are about to be disposed, so retract them first.
+      pipelineStages.publish([])
       disposeChain(outputNode, new Set([scenePass, beauty]))
     }
   }, [base, entries, enabled, renderer, scene, camera, set, needNormal, needVelocity, needPacked, needMR])

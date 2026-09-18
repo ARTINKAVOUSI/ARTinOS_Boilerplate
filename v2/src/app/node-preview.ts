@@ -8,11 +8,14 @@
  * WebGPU device.
  */
 import { NodeMaterial, QuadMesh, RenderTarget } from 'three/webgpu'
-import { vec4 } from 'three/tsl'
+import { pow, vec3, vec4 } from 'three/tsl'
 import type { PreviewFrame } from '../ui/NodeGraph/NodePreview'
 import { runtime } from './runtime'
 
-const SIZE = 48
+// 64 * 4 bytes = 256, the row alignment WebGPU pads readbacks to. At a size
+// whose rows are not a multiple of 256 the returned buffer is padded and the
+// image decodes as diagonal stripes.
+const SIZE = 64
 const INTERVAL = 400
 
 type Renderer = {
@@ -49,8 +52,11 @@ async function capture(key: string, node: unknown) {
     quad = new QuadMesh(material)
   }
   // vec4(x) splats a scalar to grey and leaves a vec4 alone; .xyz then drops
-  // alpha. Alpha is forced opaque or a dim scalar reads back transparent.
-  ;(material as NodeMaterial & { fragmentNode?: unknown }).fragmentNode = vec4(vec4(node as never).xyz, 1)
+  // alpha. Alpha is forced opaque or a dim scalar reads back transparent. The
+  // scene renders in linear space, so the thumbnail is display-encoded here —
+  // without it every pass reads as near-black.
+  const linear = vec3(vec4(node as never).xyz).max(vec3(0))
+  ;(material as NodeMaterial & { fragmentNode?: unknown }).fragmentNode = vec4(pow(linear, vec3(1 / 2.2)), 1)
   material!.needsUpdate = true
   const previous = renderer.getRenderTarget()
   const previousMRT = renderer.getMRT?.()
@@ -65,7 +71,9 @@ async function capture(key: string, node: unknown) {
   }
   const pixels = new Uint8Array(await renderer.readRenderTargetPixelsAsync(target, 0, 0, SIZE, SIZE))
   if (requests.get(key) !== node) return
-  frames.set(key, { width: SIZE, height: SIZE, pixels, updatedAt: performance.now() })
+  // Trust the buffer over the request: a padded readback has a wider stride.
+  const stride = Math.max(SIZE, Math.floor(pixels.length / 4 / SIZE))
+  frames.set(key, { width: SIZE, height: SIZE, stride, pixels, updatedAt: performance.now() })
   bump()
 }
 

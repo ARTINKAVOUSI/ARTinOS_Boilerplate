@@ -195,16 +195,30 @@
   color: var(--ui-text-summary);
 }
 
-/* Graph panel: the editor takes the height the panel has, minus its toolbar. */
-.v2-graph-suite {
+/* Graph panel: the editor fills the panel. Percentage heights do not resolve
+   through the workbench's stretched row item, so the whole chain is flex. */
+.artinos-panel-graph,
+.artinos-panel-graph .artinos-panel-body,
+.artinos-panel-graph .artinos-workbench,
+.artinos-panel-graph .artinos-workbench-content {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
+}
+.artinos-panel-graph .artinos-workbench-content,
+.artinos-panel-graph .artinos-panel-body,
+.artinos-panel-graph .artinos-workbench {
+  flex: 1;
+}
+.v2-graph-suite {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 }
 .v2-graph-editor {
   flex: 1;
-  min-height: 200px;
+  min-height: 140px;
 }
 
 /* The node editor keeps its own generic tokens so it stays portable; the studio

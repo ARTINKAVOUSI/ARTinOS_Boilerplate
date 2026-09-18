@@ -104,11 +104,19 @@ export const runtime = {
     scene = next
   },
   getScene: () => scene,
-  /** Named objects in the live scene — what a scene graph can address. */
+  /**
+   * Named objects in the live scene — what a scene graph can address. Editor
+   * furniture (a transform gizmo's axes, all named X/Y/Z) is not scene content,
+   * so it is skipped along with everything under it.
+   */
   sceneObjects(): Object3D[] {
     const found: Object3D[] = []
+    const seen = new Set<string>()
     scene?.traverse(object => {
-      if (object.name) found.push(object)
+      if (!object.name || seen.has(object.name)) return
+      for (let node: Object3D | null = object; node; node = node.parent) if (/^TransformControls/.test(node.type)) return
+      seen.add(object.name)
+      found.push(object)
     })
     return found
   },

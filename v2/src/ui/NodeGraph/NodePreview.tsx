@@ -7,6 +7,8 @@ export const PREVIEW_H = 44
 export interface PreviewFrame {
   width: number
   height: number
+  /** Pixels per row in the buffer. GPU readbacks pad rows to an alignment. */
+  stride?: number
   pixels: Uint8Array
   updatedAt: number
 }
@@ -57,7 +59,7 @@ export const RenderPreview = memo(function RenderPreview({ frame }: { frame?: Pr
     for (let x = 0; x < columns; x++) {
       const sx = Math.floor((x / columns) * frame.width)
       const sy = Math.floor(((rows - 1 - y) / rows) * frame.height)
-      const index = (sy * frame.width + sx) * 4
+      const index = (sy * (frame.stride ?? frame.width) + sx) * 4
       const r = frame.pixels[index] ?? 0
       const g = frame.pixels[index + 1] ?? 0
       const b = frame.pixels[index + 2] ?? 0
