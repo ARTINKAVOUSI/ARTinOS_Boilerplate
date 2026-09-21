@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, memo, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Control, ControlValue, DiscoveredFeature } from '../feature'
 import { studio, useFeatureState, useStudio, type StudioState } from '../store'
 import { PropertyRow } from '../../ui/PropertyRow/PropertyRow'
@@ -89,9 +89,10 @@ export const FeatureCard = memo(function FeatureCard({ feature, filter = 'all', 
 
   if (!state) return null
 
-  const entries = Object.entries(feature.controls ?? {}).filter(([name]) => {
+  const entries = Object.entries(feature.controls ?? {}).filter(([name, control]) => {
     // A revealed control is shown whatever the filter says.
     if (mine?.control === name) return true
+    if (control.advanced && !marks.advanced) return false
     const key = `${feature.id}:${name}`
     if (filter === 'favorites' && !marks.favorites.includes(key)) return false
     if (filter === 'pinned' && !marks.pins.includes(key)) return false
@@ -119,13 +120,15 @@ export const FeatureCard = memo(function FeatureCard({ feature, filter = 'all', 
       </div>
       {!collapsed && (
         <div className="artinos-parameter-card-body" data-muted={!state.enabled || undefined}>
-          {entries.map(([name, control]: [string, Control]) => {
+          {entries.map(([name, control]: [string, Control], index) => {
             const key = `${feature.id}:${name}`
+            const heading = control.group && control.group !== entries[index - 1]?.[1].group ? control.group : null
             const value = state.values[name]
             const set = (next: ControlValue) => studio.setValue(feature.id, name, next)
             return (
+              <Fragment key={name}>
+              {heading && <div className="v2-control-group">{heading}</div>}
               <PropertyRow
-                key={name}
                 label={labelOf(name, control)}
                 density={namesItself(control) ? 'default' : 'compact'}
                 dataControl={name}
@@ -135,6 +138,7 @@ export const FeatureCard = memo(function FeatureCard({ feature, filter = 'all', 
               >
                 <ControlInput name={name} control={control} value={value} onChange={set} />
               </PropertyRow>
+              </Fragment>
             )
           })}
         </div>

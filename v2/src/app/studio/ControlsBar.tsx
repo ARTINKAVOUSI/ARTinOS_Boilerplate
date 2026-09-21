@@ -8,9 +8,22 @@ import { Dialog } from '../../ui/Dialog/Dialog'
 import { useToast } from '../../ui/Toast/Toast'
 import type { ControlFilter } from './FeatureCard'
 import { PanelBar } from './PanelBar'
+import { Toggle } from '../../ui/Toggle/Toggle'
 import { Icons } from './icons'
 
 const selectPresets = (state: StudioState) => state.presets
+const selectAdvanced = (state: StudioState) => state.ui.advanced
+
+/** v1's Advanced switch: reveals the controls a feature marks advanced. */
+function AdvancedSwitch() {
+  const advanced = useStudio(selectAdvanced)
+  return (
+    <label className="v2-inline-toggle">
+      Advanced
+      <Toggle size="sm" label="Show advanced controls" checked={advanced} onChange={value => studio.setUI({ advanced: value })} />
+    </label>
+  )
+}
 
 function download(name: string, text: string) {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
@@ -108,6 +121,7 @@ export function ControlsBar({ filter, onFilter, summary }: { filter: ControlFilt
           { value: 'pinned', label: 'Pinned' },
         ]}
       />
+      <AdvancedSwitch />
       {summary && <span className="artinos-panel-summary v2-bar-summary">{summary}</span>}
       <span className="v2-spacer" />
       <PresetMenu />

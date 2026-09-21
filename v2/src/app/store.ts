@@ -28,7 +28,8 @@ export interface StudioState {
   features: Record<string, FeatureState>
   /** Named snapshots of `features`. */
   presets: Record<string, Record<string, FeatureState>>
-  ui: { visible: boolean; world: string; favorites: string[]; pins: string[] }
+  /** `advanced` reveals the controls a manifest marks advanced, as v1's Advanced switch did. */
+  ui: { visible: boolean; world: string; favorites: string[]; pins: string[]; advanced: boolean }
   reveal: RevealTarget | null
 }
 
@@ -58,7 +59,7 @@ function reconcile(saved: Record<string, FeatureState> | undefined): Record<stri
 }
 
 function load(): StudioState {
-  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, world: 'frost', favorites: [], pins: [] }, reveal: null }
+  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, world: 'frost', favorites: [], pins: [], advanced: false }, reveal: null }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return fallback

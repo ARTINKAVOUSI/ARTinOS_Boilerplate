@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import type { BufferGeometry, Group, Mesh } from 'three'
 import type { Feature } from '../../app/feature'
 import { GlassMaterial, type GlassMaterialProps } from './glass/GlassMaterial'
+import { glassControls } from './glass/glass-parameters'
 
 const MODEL_URL = '/models/glass-rings.glb'
 // The GLB is Draco-compressed; the decoder bundled with three is served under
@@ -107,7 +108,7 @@ useGLTF.preload(MODEL_URL, DRACO_PATH)
 
 export default GlassRings
 
-/** v1's glass parameter set, with its defaults for this object. */
+/** v1's reference object, with v1's whole glass parameter set. */
 export const feature: Feature = {
   id: 'object.glass-rings',
   label: 'Glass Rings',
@@ -117,48 +118,10 @@ export const feature: Feature = {
   description: 'v1 reference object: screen-space glass with dispersion and a backside pass',
   component: GlassRings,
   controls: {
-    spin: { type: 'number', value: 1, min: 0, max: 3, step: 0.01 },
-    scale: { type: 'number', value: 1, min: 0.1, max: 5, step: 0.01 },
-    // Glass
-    color: { type: 'color', value: '#ffffff', label: 'Surface color' },
-    transmission: { type: 'number', value: 1, min: 0, max: 1, step: 0.01 },
-    ior: { type: 'number', value: 1.26, min: 1, max: 2.5, step: 0.01, label: 'IOR' },
-    thickness: { type: 'number', value: 0.98, min: 0, max: 5, step: 0.01 },
-    roughness: { type: 'number', value: 0.05, min: 0, max: 1, step: 0.01 },
-    dispersion: { type: 'number', value: 6, min: 0, max: 20, step: 0.1 },
-    spectralDispersion: { type: 'boolean', value: false, label: 'Spectral dispersion' },
-    anisotropicBlur: { type: 'number', value: 0, min: 0, max: 1, step: 0.01, label: 'Frost' },
-    // Volume
-    attenuationColor: { type: 'color', value: '#f1e2d3', label: 'Attenuation color' },
-    attenuationDistance: { type: 'number', value: 8, min: 0, max: 20, step: 0.1, label: 'Attenuation distance' },
-    distortion: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    distortionScale: { type: 'number', value: 0.5, min: 0, max: 2, step: 0.01, label: 'Distortion scale' },
-    temporalDistortion: { type: 'number', value: 0, min: 0, max: 1, step: 0.01, label: 'Temporal distortion' },
-    // Surface
-    envMapIntensity: { type: 'number', value: 0.8, min: 0, max: 5, step: 0.01, label: 'Env intensity' },
-    clearcoat: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    clearcoatRoughness: { type: 'number', value: 0, min: 0, max: 1, step: 0.01, label: 'Clearcoat roughness' },
-    iridescence: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    iridescenceIOR: { type: 'number', value: 1.3, min: 1, max: 2.5, step: 0.01, label: 'Film IOR' },
-    iridescenceThicknessMin: { type: 'number', value: 100, min: 0, max: 1000, step: 1, label: 'Film thickness min' },
-    iridescenceThicknessMax: { type: 'number', value: 400, min: 0, max: 1000, step: 1, label: 'Film thickness max' },
-    metalness: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    specularIntensity: { type: 'number', value: 1, min: 0, max: 1, step: 0.01, label: 'Reflectivity' },
-    specularColor: { type: 'color', value: '#ffffff', label: 'Specular color' },
-    sheen: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    sheenRoughness: { type: 'number', value: 1, min: 0, max: 1, step: 0.01, label: 'Sheen roughness' },
-    sheenColor: { type: 'color', value: '#ffffff', label: 'Sheen color' },
-    anisotropy: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    anisotropyRotation: { type: 'number', value: 0, min: -3.14159, max: 3.14159, step: 0.01, label: 'Anisotropy rotation' },
-    // Quality
-    samples: { type: 'number', value: 4, min: 1, max: 16, step: 1 },
-    backside: { type: 'boolean', value: true, label: 'Backside pass' },
-    backsideThickness: { type: 'number', value: 3, min: 0, max: 10, step: 0.01, label: 'Backside thickness' },
-    backdropResolutionScale: { type: 'number', value: 0.85, min: 0.25, max: 1, step: 0.05, label: 'Backdrop scale' },
-    backsideResolutionScale: { type: 'number', value: 0.7, min: 0.25, max: 1, step: 0.05, label: 'Clean pass scale' },
-    forceSinglePass: { type: 'boolean', value: false, label: 'Force single pass' },
-    // Metal band
-    metalColor: { type: 'color', value: '#b59d85', label: 'Metal' },
-    metalRoughness: { type: 'number', value: 0.29, min: 0, max: 1, step: 0.01, label: 'Metal roughness' },
+    spin: { type: 'number', value: 1, min: 0, max: 3, step: 0.01, label: 'Spin', group: 'Object' },
+    scale: { type: 'number', value: 1, min: 0.1, max: 5, step: 0.01, label: 'Scale', group: 'Object' },
+    ...glassControls(),
+    metalColor: { type: 'color', value: '#b59d85', label: 'Metal Color', group: 'Metal Band' },
+    metalRoughness: { type: 'number', value: 0.29, min: 0, max: 1, step: 0.01, label: 'Metal Roughness', group: 'Metal Band' },
   },
 }

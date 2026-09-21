@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type DependencyList, type ReactNode } from 'react'
-import { useThree } from '@react-three/fiber'
+import { createContext, useContext, useEffect, useMemo, useRef, useSyncExternalStore, type DependencyList, type ReactNode } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
 import { LinearMipmapLinearFilter, RenderPipeline, type Camera, type Object3D, type Scene, type WebGPURenderer } from 'three/webgpu'
 import { packNormalToRGB, metalness, mrt, normalView, output, pass, roughness, uniform, vec2, vec4, velocity } from 'three/tsl'
 import type { Feature } from '../../app/feature'
 import { pipelineStages, type PipelineStage } from '../../app/pipeline-stages'
-import { configureScenePasses } from './glass-capture'
+import { configureScenePasses, glassMonitor } from './glass-capture'
 
 /**
  * PostFX — the render pipeline host.
@@ -220,6 +220,15 @@ export function PostFX({ children, enabled = true }: PostFXProps) {
     base.cleanPass.dispose()
     base.pipeline.dispose()
   }, [base])
+
+  // v1's glass monitoring, four times a second.
+  const monitorElapsed = useRef(0)
+  useFrame((_, delta) => {
+    monitorElapsed.current += delta
+    if (monitorElapsed.current < 0.25) return
+    monitorElapsed.current = 0
+    glassMonitor.sample(scene, base.backdropPass, base.cleanPass)
+  })
 
   // What glass materials refract: the backdrop, and the clean scene their back faces sample.
   const glassCapture = useMemo(() => ({ backdrop: base.backdropPass.getTextureNode(), clean: base.cleanPass.getTextureNode() }), [base])

@@ -104,3 +104,53 @@ export function configureScenePasses(scenePass: AnyNode, backdropPass: AnyNode, 
     return withScenePassFilter(scene, object => object.userData?.transmissionBackdropOnly === true, () => beauty(frame))
   }
 }
+
+/** What v1 reported about glass, sampled by the PostFX host four times a second. */
+export interface GlassMonitor {
+  meshes: number
+  /** Largest refraction tap count among active glass materials. */
+  taps: number
+  mode: 'Spectral' | 'RGB' | 'inactive'
+  backdropResolution: string
+  cleanResolution: string
+  /** CPU time spent submitting the captures — not GPU duration. */
+  captureCpuMs: number
+}
+
+let monitor: GlassMonitor = { meshes: 0, taps: 0, mode: 'inactive', backdropResolution: 'inactive', cleanResolution: 'bypassed', captureCpuMs: 0 }
+const monitorListeners = new Set<() => void>()
+
+export const glassMonitor = {
+  get: () => monitor,
+  subscribe(listener: () => void) {
+    monitorListeners.add(listener)
+    return () => monitorListeners.delete(listener)
+  },
+  /** Sample the scene and the capture passes, as v1's pipeline did. */
+  sample(scene: AnyNode, backdropPass: AnyNode, cleanPass: AnyNode) {
+    let meshes = 0
+    let taps = 0
+    let backs = false
+    let spectral = false
+    scene.traverseVisible((object: AnyNode) => {
+      if (!isTransmissionGlass(object)) return
+      meshes++
+      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+        if (!material.isTransmissionGlassMaterial) continue
+        taps = Math.max(taps, material.transmissionSampleTaps ?? 0)
+        spectral ||= !!material.transmissionSpectral
+        backs ||= !!material.transmissionBackdropConfig?.backside
+      }
+    })
+    const resolution = (capture: AnyNode) => `${capture.renderTarget.width}×${capture.renderTarget.height}`
+    monitor = {
+      meshes,
+      taps,
+      mode: meshes ? (spectral ? 'Spectral' : 'RGB') : 'inactive',
+      backdropResolution: meshes ? resolution(backdropPass) : 'inactive',
+      cleanResolution: meshes && backs ? resolution(cleanPass) : 'bypassed',
+      captureCpuMs: meshes ? (backdropPass.captureCpuMs ?? 0) : 0,
+    }
+    monitorListeners.forEach(listener => listener())
+  },
+}

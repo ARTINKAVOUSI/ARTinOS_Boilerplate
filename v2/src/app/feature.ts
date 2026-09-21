@@ -14,13 +14,26 @@ import type { ComponentType } from 'react'
  * without this app, delete the `feature` export and use the component directly.
  */
 
-export type Control =
-  | { type: 'number'; value: number; min?: number; max?: number; step?: number; unit?: string; label?: string }
-  | { type: 'boolean'; value: boolean; label?: string }
-  | { type: 'select'; value: string; options: readonly string[]; label?: string }
-  | { type: 'color'; value: string; label?: string }
-  | { type: 'vector3'; value: [number, number, number]; step?: number; label?: string }
-  | { type: 'text'; value: string; label?: string; placeholder?: string }
+/** Presentation every control can carry, whatever its type. */
+interface ControlMeta {
+  label?: string
+  /** Sub-heading the control sits under in its card, e.g. 'Glass Volume'. */
+  group?: string
+  /** Hidden until the panel's Advanced switch is on. */
+  advanced?: boolean
+  /** One line shown as the row's tooltip. */
+  description?: string
+}
+
+export type Control = ControlMeta &
+  (
+    | { type: 'number'; value: number; min?: number; max?: number; step?: number; unit?: string }
+    | { type: 'boolean'; value: boolean }
+    | { type: 'select'; value: string; options: readonly string[] }
+    | { type: 'color'; value: string }
+    | { type: 'vector3'; value: [number, number, number]; step?: number }
+    | { type: 'text'; value: string; placeholder?: string }
+  )
 
 export type Controls = Record<string, Control>
 export type ControlValue = Control['value']

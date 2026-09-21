@@ -3,8 +3,11 @@ import { useFrame } from '@react-three/fiber'
 import type { Mesh } from 'three'
 import type { Feature } from '../../app/feature'
 import { GlassMaterial, type GlassMaterialProps } from './glass/GlassMaterial'
+import { glassControls } from './glass/glass-parameters'
 
-export interface GlassMeshProps extends GlassMaterialProps {
+export interface GlassMeshProps extends Omit<GlassMaterialProps, 'iridescenceThicknessRange'> {
+  iridescenceThicknessMin?: number
+  iridescenceThicknessMax?: number
   shape?: 'sphere' | 'box' | 'torus' | 'knot' | 'cylinder'
   position?: [number, number, number]
   scale?: number
@@ -19,7 +22,7 @@ export interface GlassMeshProps extends GlassMaterialProps {
  *
  * Mount inside a <Canvas>, under <PostFX> for the backdrop and backside passes.
  */
-export function GlassMesh({ shape = 'sphere', position = [0, 1, 0], scale = 1, spin = 4, ...glass }: GlassMeshProps) {
+export function GlassMesh({ shape = 'sphere', position = [0, 1, 0], scale = 1, spin = 4, iridescenceThicknessMin = 100, iridescenceThicknessMax = 400, ...glass }: GlassMeshProps) {
   const mesh = useRef<Mesh>(null)
   useFrame((_, delta) => {
     if (mesh.current && spin) mesh.current.rotation.y += (spin / 60) * Math.PI * 2 * delta
@@ -33,7 +36,7 @@ export function GlassMesh({ shape = 'sphere', position = [0, 1, 0], scale = 1, s
       {shape === 'torus' && <torusGeometry args={[0.55, 0.22, 64, 128]} />}
       {shape === 'knot' && <torusKnotGeometry args={[0.45, 0.16, 180, 32]} />}
       {shape === 'cylinder' && <cylinderGeometry args={[0.45, 0.45, 1, 64]} />}
-      <GlassMaterial {...glass} />
+      <GlassMaterial {...glass} iridescenceThicknessRange={[iridescenceThicknessMin, iridescenceThicknessMax]} />
     </mesh>
   )
 }
@@ -50,26 +53,11 @@ export const feature: Feature = {
   description: 'The ported glass material on a primitive',
   component: GlassMesh,
   controls: {
-    shape: { type: 'select', value: 'sphere', options: ['sphere', 'box', 'torus', 'knot', 'cylinder'] },
-    position: { type: 'vector3', value: [0, 1, 0], step: 0.1 },
-    scale: { type: 'number', value: 1, min: 0.1, max: 4, step: 0.01 },
-    spin: { type: 'number', value: 4, min: 0, max: 60, step: 0.5, unit: 'rpm' },
-    color: { type: 'color', value: '#ffffff', label: 'Surface color' },
-    ior: { type: 'number', value: 1.5, min: 1, max: 2.5, step: 0.01, label: 'IOR' },
-    thickness: { type: 'number', value: 0.6, min: 0, max: 5, step: 0.01 },
-    roughness: { type: 'number', value: 0.05, min: 0, max: 1, step: 0.01 },
-    dispersion: { type: 'number', value: 5, min: 0, max: 20, step: 0.1 },
-    spectralDispersion: { type: 'boolean', value: false, label: 'Spectral dispersion' },
-    anisotropicBlur: { type: 'number', value: 0.1, min: 0, max: 1, step: 0.01, label: 'Frost' },
-    attenuationColor: { type: 'color', value: '#ffffff', label: 'Attenuation color' },
-    attenuationDistance: { type: 'number', value: 0, min: 0, max: 20, step: 0.1, label: 'Attenuation distance' },
-    distortion: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    envMapIntensity: { type: 'number', value: 0.5, min: 0, max: 5, step: 0.01, label: 'Env intensity' },
-    clearcoat: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    iridescence: { type: 'number', value: 0, min: 0, max: 1, step: 0.01 },
-    samples: { type: 'number', value: 6, min: 1, max: 16, step: 1 },
-    backside: { type: 'boolean', value: true, label: 'Backside pass' },
-    backsideThickness: { type: 'number', value: 0.35, min: 0, max: 10, step: 0.01, label: 'Backside thickness' },
-    backdropResolutionScale: { type: 'number', value: 0.85, min: 0.25, max: 1, step: 0.05, label: 'Backdrop scale' },
+    shape: { type: 'select', value: 'sphere', options: ['sphere', 'box', 'torus', 'knot', 'cylinder'], label: 'Shape', group: 'Object' },
+    position: { type: 'vector3', value: [0, 1, 0], step: 0.1, label: 'Position', group: 'Object' },
+    scale: { type: 'number', value: 1, min: 0.1, max: 4, step: 0.01, label: 'Scale', group: 'Object' },
+    spin: { type: 'number', value: 4, min: 0, max: 60, step: 0.5, unit: 'rpm', label: 'Spin', group: 'Object' },
+    // GlassMaterial's own defaults, as v1's GlassMesh used them.
+    ...glassControls({ ior: 1.5, thickness: 0.35, dispersion: 5, anisotropicBlur: 0.1, attenuationColor: '#ffffff', attenuationDistance: 0, envMapIntensity: 0.5, samples: 6, backsideThickness: 0.35 }),
   },
 }
