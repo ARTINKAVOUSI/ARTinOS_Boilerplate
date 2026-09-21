@@ -10,6 +10,11 @@ import { LiveGraphView, type LiveNode } from '../ui/NodeGraph/LiveGraphView'
 import { GRAPH_DOMAINS, type GraphDiagnostic, type GraphDomain } from '../ui/NodeGraph/graph'
 import { useSignalSnapshot } from '../features/input/signals'
 import { Select } from '../ui/Select/Select'
+import { Segmented } from '../ui/Segmented/Segmented'
+import { IconButton } from '../ui/IconButton/IconButton'
+import { Toggle } from '../ui/Toggle/Toggle'
+import { PanelBar } from '../app/studio/PanelBar'
+import { Icons } from '../app/studio/icons'
 import { Button } from '../ui/Button/Button'
 import { Badge } from '../ui/Badge/Badge'
 import { useToast } from '../ui/Toast/Toast'
@@ -111,16 +116,18 @@ function Graph() {
 
   return (
     <div className="artinos-graph-studio">
-      <div className="artinos-graph-bar">
-        <div className="artinos-lmode" role="tablist" aria-label="Graph mode">
-          <button role="tab" aria-selected={mode === 'live'} className={mode === 'live' ? 'is-active' : ''} onClick={() => setMode('live')} title="What is running right now">
-            Live
-          </button>
-          <button role="tab" aria-selected={mode === 'edit'} className={mode === 'edit' ? 'is-active' : ''} onClick={() => setMode('edit')} title="Author node graphs">
-            Edit
-          </button>
-        </div>
-
+      {/* The toolbar rides in the dock strip, like every other panel's. */}
+      <PanelBar>
+        <Segmented<Mode>
+          size="sm"
+          label="Graph mode"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'live', label: 'Live' },
+            { value: 'edit', label: 'Edit' },
+          ]}
+        />
         {mode === 'edit' && documents.length > 0 && (
           <Select
             size="sm"
@@ -130,43 +137,25 @@ function Graph() {
             options={documents.map(document => ({ value: document.id, label: `${document.name}${document.running ? '' : ' · off'}` }))}
           />
         )}
-
-        {mode === 'edit' && active ? (
+        {mode === 'edit' && active && (
           <>
+            <Select<GraphDomain> size="sm" label="Domain" value={active.domain} onChange={domain => graphs.setDomain(active.id, domain)} options={GRAPH_DOMAINS.map(domain => ({ value: domain, label: domain }))} />
+            <label className="v2-inline-toggle">
+              Run
+              <Toggle size="sm" label={`Run ${active.name}`} checked={active.running} disabled={errors > 0 && !active.running} onChange={value => graphs.setRunning(active.id, value)} />
+            </label>
             <Badge tone={!active.running ? 'neutral' : errors ? 'danger' : 'live'}>{!active.running ? 'paused' : errors ? `${errors} error${errors > 1 ? 's' : ''}` : 'live'}</Badge>
-            <span className="artinos-graph-meta">
-              {active.graph.nodes.length}n · {active.graph.edges.length}w · {active.domain}
-            </span>
           </>
-        ) : (
-          <span className="artinos-graph-meta">
-            {liveGraph?.nodes.length ?? 0} nodes · {liveGraph?.edges.length ?? 0} links · reading the live runtime
-          </span>
         )}
-
-        <div className="artinos-graph-bar-actions">
-          {mode === 'edit' && active && (
-            <>
-              <Select<GraphDomain>
-                size="sm"
-                label="Domain"
-                value={active.domain}
-                onChange={domain => graphs.setDomain(active.id, domain)}
-                options={GRAPH_DOMAINS.map(domain => ({ value: domain, label: domain }))}
-              />
-              <button type="button" className={active.running ? 'is-active' : ''} title={active.running ? 'Pause evaluation' : 'Resume evaluation'} onClick={() => graphs.setRunning(active.id, !active.running)}>
-                {active.running ? '❙❙' : '▶'}
-              </button>
-            </>
-          )}
-          <button type="button" className={overlay === 'inspector' ? 'is-active' : ''} title="Inspector" onClick={() => setOverlay(value => (value === 'inspector' ? null : 'inspector'))}>
-            ◧
-          </button>
-          <button type="button" className={overlay === 'graph' ? 'is-active' : ''} title="Graphs, templates and import/export" onClick={() => setOverlay(value => (value === 'graph' ? null : 'graph'))}>
-            ⚙
-          </button>
-        </div>
-      </div>
+        <span className="artinos-panel-summary v2-bar-summary">
+          {mode === 'edit' && active
+            ? `${active.graph.nodes.length} NODES · ${active.graph.edges.length} WIRES · ${active.domain.toUpperCase()}`
+            : `${liveGraph?.nodes.length ?? 0} NODES · ${liveGraph?.edges.length ?? 0} LINKS · LIVE RUNTIME`}
+        </span>
+        <span className="v2-spacer" />
+        <IconButton size="sm" label="Inspector" icon={Icons.sliders} active={overlay === 'inspector'} onClick={() => setOverlay(value => (value === 'inspector' ? null : 'inspector'))} />
+        <IconButton size="sm" label="Graphs, templates and import/export" icon={Icons.bookmark} active={overlay === 'graph'} onClick={() => setOverlay(value => (value === 'graph' ? null : 'graph'))} />
+      </PanelBar>
 
       <div className="artinos-graph-stage">
         {mode === 'live' && liveGraph && (

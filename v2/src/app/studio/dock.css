@@ -225,7 +225,7 @@
    binds them to the skin here, the same way the MetaBlock chrome is bound. The
    graph reads as one more instrument surface: a well, glass cards, white ink. */
 .artinos-metablock-shell .ngraph {
-  --ng-bg: var(--ui-scrim);
+  --ng-bg: var(--ui-well);
   --ng-grid: rgba(255, 255, 255, 0.06);
   --ng-node: rgba(255, 255, 255, 0.07);
   --ng-line: var(--ui-line-faint);
@@ -290,4 +290,89 @@
 }
 .artinos-metablock-shell .ngraph-status button:hover {
   background: var(--ui-button-fill-hover);
+}
+
+/* Graph panel — the ported v1 graph reads v1's tokens (an opaque dark slab).
+   Remap them to the studio skin inside the panel, so the canvas, nodes and
+   overlays are the same glass, wells and ink as every other panel. */
+.artinos-panel-graph {
+  --panel2: transparent;
+  --panel-hi: var(--ui-hover-wash);
+  --bg-app: var(--ui-well);
+  --bg-surface: var(--ui-well);
+  --bg-hover: var(--ui-hover-wash);
+  --bg-float: var(--ui-float);
+  --line: var(--ui-line-faint);
+  --line-strong: var(--ui-line);
+  --muted: var(--ui-text-label);
+  --text: var(--ui-text);
+  --text-low: var(--ui-text-meta);
+  --accent: var(--ui-accent);
+  --sig-live: var(--ui-accent);
+  --sig-live-line: var(--ui-accent-line);
+  --radius-card: var(--ui-radius-card);
+  --radius-control: var(--ui-radius-control);
+}
+.artinos-panel-graph .artinos-graph-stage {
+  border-radius: var(--ui-radius-panel);
+  overflow: hidden;
+}
+.artinos-panel-graph .artinos-gcanvas {
+  background-color: var(--ui-well);
+  background-image: radial-gradient(circle at 1px 1px, var(--ui-line-faint) 1px, transparent 0);
+  background-size: 16px 16px;
+  box-shadow: var(--ui-well-in);
+}
+.artinos-panel-graph .artinos-lnode {
+  border: 0;
+  border-radius: var(--ui-radius-card);
+  background: var(--ui-pane-sheen), var(--ui-card);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-pane-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.artinos-panel-graph .artinos-lnode:hover,
+.artinos-panel-graph .artinos-lnode.is-selected {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--ui-accent);
+  transform: none;
+}
+.artinos-panel-graph .artinos-lnode-head:hover {
+  background: var(--ui-hover-wash);
+}
+.artinos-panel-graph .artinos-lnode-main b {
+  color: var(--ui-text-strong);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.artinos-panel-graph .artinos-lnode-side em,
+.artinos-panel-graph .artinos-lcolumns span {
+  color: var(--ui-text-meta);
+}
+.artinos-panel-graph .artinos-lnode-preview {
+  border-color: var(--ui-line-faint);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-well);
+}
+.artinos-panel-graph .artinos-lport {
+  border-color: var(--ui-line);
+  background: var(--ui-well);
+}
+.artinos-panel-graph .artinos-lport.side-out {
+  border-color: var(--ui-accent);
+  background: var(--ui-accent);
+}
+.artinos-panel-graph .artinos-graph-overlay,
+.artinos-panel-graph .artinos-gzoom {
+  border: 0;
+  background: var(--ui-command-sheen), var(--ui-float);
+  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow);
+  backdrop-filter: blur(var(--ui-command-blur));
+  -webkit-backdrop-filter: blur(var(--ui-command-blur));
+}
+.artinos-panel-graph .artinos-graph-overlay > header {
+  border-bottom-color: var(--ui-line-faint);
+}
+.artinos-panel-graph .artinos-graph-overlay > header b,
+.artinos-panel-graph .artinos-graph-hint {
+  color: var(--ui-text-meta);
 }

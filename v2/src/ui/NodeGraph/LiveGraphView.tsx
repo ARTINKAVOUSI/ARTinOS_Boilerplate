@@ -86,18 +86,33 @@ export function LiveGraphView({ graph, previews, onInspect, onControl, insetRigh
 
   const fit = useCallback(() => {
     const rect = surfaceRef.current?.getBoundingClientRect()
-    if (!rect || !graph.nodes.length) return
+    if (!rect || !graph.nodes.length || rect.width < 50 || rect.height < 50) return false
     const margin = 48
     const usable = Math.max(240, rect.width - margin * 2 - insetRight)
     const zoom = Math.max(MIN_ZOOM, Math.min(1, Math.min(usable / bounds.width, (rect.height - margin * 2) / bounds.height)))
     setViewport({ zoom, x: margin, y: Math.max(margin, rect.height / 2 - (bounds.height * zoom) / 2) })
+    return true
   }, [bounds, graph.nodes.length, insetRight])
 
-  // Fit once on mount; the graph rebuilds constantly, so refitting would jitter.
+  // Fit once, as soon as the canvas has a real size — a panel mounted hidden or
+  // still laying out reports zero. The graph rebuilds constantly, so refitting
+  // after that would jitter.
+  const fitted = useRef(false)
+  const fitRef = useRef(fit)
+  fitRef.current = fit
   useEffect(() => {
-    const id = window.setTimeout(fit)
-    return () => window.clearTimeout(id)
+    const surface = surfaceRef.current
+    if (!surface) return
+    const observer = new ResizeObserver(([entry]) => {
+      if (fitted.current || entry.contentRect.width < 50 || entry.contentRect.height < 50) return
+      fitted.current = fitRef.current()
+    })
+    observer.observe(surface)
+    return () => observer.disconnect()
   }, [])
+  useEffect(() => {
+    if (!fitted.current) fitted.current = fit()
+  }, [fit, graph.nodes.length])
 
   useEffect(() => {
     const surface = surfaceRef.current
