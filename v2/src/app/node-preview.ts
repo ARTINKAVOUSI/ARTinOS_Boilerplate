@@ -8,7 +8,7 @@
  * WebGPU device.
  */
 import { NodeMaterial, QuadMesh, RenderTarget } from 'three/webgpu'
-import { pow, vec3, vec4 } from 'three/tsl'
+import { texture, vec4 } from 'three/tsl'
 import type { PreviewFrame } from '../ui/NodeGraph/NodePreview'
 import { runtime } from './runtime'
 
@@ -52,11 +52,8 @@ async function capture(key: string, node: unknown) {
     quad = new QuadMesh(material)
   }
   // vec4(x) splats a scalar to grey and leaves a vec4 alone; .xyz then drops
-  // alpha. Alpha is forced opaque or a dim scalar reads back transparent. The
-  // scene renders in linear space, so the thumbnail is display-encoded here —
-  // without it every pass reads as near-black.
-  const linear = vec3(vec4(node as never).xyz).max(vec3(0))
-  ;(material as NodeMaterial & { fragmentNode?: unknown }).fragmentNode = vec4(pow(linear, vec3(1 / 2.2)), 1)
+  // alpha. Alpha is forced opaque or a dim scalar reads back transparent.
+  ;(material as NodeMaterial & { fragmentNode?: unknown }).fragmentNode = vec4(vec4(resolvePreviewNode(node) as never).xyz, 1)
   material!.needsUpdate = true
   const previous = renderer.getRenderTarget()
   const previousMRT = renderer.getMRT?.()
@@ -127,4 +124,17 @@ export const nodePreviews = {
     listeners.add(listener)
     return () => listeners.delete(listener)
   },
+}
+
+/**
+ * What a thumbnail actually samples. A pass or a pass texture node rendered
+ * straight into the preview quad re-runs the pass in the wrong context and
+ * comes back as garbage; the thumbnail must sample the texture the pass has
+ * already rendered this frame instead.
+ */
+function resolvePreviewNode(node: unknown) {
+  const candidate = node as { isPassNode?: boolean; getTextureNode?: () => { value: unknown }; isTextureNode?: boolean; value?: { isTexture?: boolean } } | null
+  if (candidate?.isPassNode && typeof candidate.getTextureNode === 'function') return texture(candidate.getTextureNode().value as never)
+  if (candidate?.isTextureNode && candidate.value?.isTexture) return texture(candidate.value as never)
+  return node
 }

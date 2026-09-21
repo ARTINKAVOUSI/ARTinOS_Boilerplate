@@ -8,6 +8,7 @@ import { byKind } from './registry'
 import { useStudio, type FeatureState } from './store'
 import { runtime } from './runtime'
 import { nodePreviews } from './node-preview'
+import { signalBus } from '../features/input/signals'
 
 const selectFeatures = (state: { features: Record<string, FeatureState> }) => state.features
 
@@ -25,8 +26,16 @@ export function renderFeature(feature: DiscoveredFeature, state: FeatureState | 
 /** Hands the live scene to the app, so graphs and panels can address objects. */
 function SceneProbe() {
   const scene = useThree(state => state.scene)
-  // Node thumbnails capture here: inside the frame, never between frames.
-  useFrame(() => nodePreviews.tick())
+  // Node thumbnails capture here: inside the frame, never between frames. The
+  // original runtime also published time and viewport as signals every frame.
+  const started = useMemo(() => performance.now(), [])
+  useFrame((frame, delta) => {
+    signalBus.set('time.elapsed', (performance.now() - started) / 1000)
+    signalBus.set('time.delta', delta)
+    signalBus.set('viewport.aspect', frame.size.width / Math.max(1, frame.size.height))
+    signalBus.set('viewport.dpr', frame.viewport.dpr)
+    nodePreviews.tick()
+  })
   useEffect(() => {
     runtime.setScene(scene)
     return () => runtime.setScene(null)

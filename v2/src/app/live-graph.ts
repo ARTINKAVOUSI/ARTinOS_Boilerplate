@@ -12,13 +12,20 @@ import { studio } from './store'
 import { graphs, parameterId } from './graphs'
 import { runtime } from './runtime'
 import { signalBus } from '../features/input/signals'
+import { pipelineStages } from './pipeline-stages'
 import { drivenParameters, fieldValue } from '../ui/NodeGraph/graph'
-import { LIVE_COLUMN_STEP, measureLiveNode, type LiveControl, type LiveEdge, type LiveGraph, type LiveKind, type LiveNode } from '../ui/NodeGraph/LiveGraphView'
+import { LIVE_COLUMN_STEP, measureLiveNode, type LiveControl, type LiveEdge, type LiveGraph, type LiveNode } from '../ui/NodeGraph/LiveGraphView'
 
 export const LIVE_COLUMNS = ['Input', 'Logic', 'Parameters', 'Scene', 'Render']
 const ROW_GAP = 18
 const SIGNAL_LIMIT = 14
 const SCENE_LIMIT = 14
+/** A signal written within this window counts as moving. */
+const MOVING_MS = 600
+
+// The objects the scene column shows, by node id, for the inspector and controls.
+const liveObjects = new Map<string, Record<string, unknown>>()
+export const liveObject = (nodeId: string) => liveObjects.get(nodeId)
 const short = (value: number) => (Number.isFinite(value) ? (Math.abs(value) >= 1000 ? value.toFixed(0) : value.toFixed(3)) : '—')
 
 /** Which MRT attachment an effect asks the pipeline for — the same list the host uses. */
@@ -92,54 +99,34 @@ export function buildLiveGraph(): LiveGraph {
     if (!has(from) || !has(to) || edges.some(edge => edge.id === id)) return
     edges.push({ id, from, to })
   }
-
   const on = (id: string) => !!state.features[id]?.enabled
   const values = (id: string) => state.features[id]?.values ?? {}
-  const kindOf = (kind: LiveKind) => kind
+  const running = documents.filter(document => document.running)
 
-  // ── Input: the devices capturing, and the signals they are writing ────────
-  const inputFeatures = features.filter(feature => feature.group === 'Input')
-  for (const feature of inputFeatures) {
+  // ── Input: the signals actually consumed, plus anything currently moving ─
+  const consumed = new Set(running.flatMap(document => document.graph.nodes.filter(node => node.type === 'signal').map(node => String(fieldValue(node, 'id') ?? ''))))
+  const moving = signalBus.entries().filter(([name]) => signalBus.age(name) < MOVING_MS).map(([name]) => name)
+  const signalIds = [...new Set([...consumed, ...moving])].filter(Boolean).sort().slice(0, SIGNAL_LIMIT)
+  for (const id of signalIds) {
+    const value = signalBus.get(id)
     place({
-      id: `feature:${feature.id}`,
-      kind: kindOf('object'),
-      title: feature.label,
-      subtitle: 'input',
-      detail: feature.description,
-      column: 0,
-      muted: !on(feature.id),
-      target: { kind: 'feature', id: feature.id },
-      controls: [{ kind: 'boolean', id: 'enabled', label: 'capture', value: on(feature.id) }, ...(on(feature.id) ? controlsOf(feature.id, values(feature.id), feature.controls) : [])],
-    })
-  }
-
-  const live = signalBus.entries().filter(([name]) => signalBus.age(name) < 2000)
-  const consumed = new Set(documents.flatMap(document => document.graph.nodes.filter(node => node.type === 'signal').map(node => String(fieldValue(node, 'id') ?? ''))))
-  const shown = [...new Set([...live.map(([name]) => name), ...consumed])].filter(Boolean).sort().slice(0, SIGNAL_LIMIT)
-  for (const name of shown) {
-    const value = signalBus.get(name)
-    place({
-      id: `signal:${name}`,
-      kind: kindOf('signal'),
-      title: name,
+      id: `signal:${id}`,
+      kind: 'signal',
+      title: id,
       subtitle: 'signal',
       value: short(value),
       column: 0,
-      muted: signalBus.age(name) > 2000,
+      muted: !consumed.has(id),
       preview: 'value',
-      target: { kind: 'signal', id: name },
+      target: { kind: 'signal', id },
     })
-    // A signal's prefix names its writer: `audio.bass` comes from the audio device.
-    const owner = inputFeatures.find(feature => feature.id.endsWith(`.${name.split('.')[0]}`) || feature.label.toLowerCase().startsWith(name.split('.')[0]))
-    if (owner) link(`feature:${owner.id}`, `signal:${name}`)
   }
 
-  // ── Logic: the graphs consuming signals and writing parameters ───────────
-  const running = documents.filter(document => document.running)
+  // ── Logic: the graphs that read signals and write parameters ────────────
   for (const document of documents) {
     place({
       id: `graph:${document.id}`,
-      kind: kindOf('graph'),
+      kind: 'graph',
       title: document.name,
       subtitle: `${document.domain} graph`,
       detail: `${document.graph.nodes.length} nodes`,
@@ -159,26 +146,27 @@ export function buildLiveGraph(): LiveGraph {
     const control = feature?.controls?.[name]
     if (!feature || !control) continue
     const value = values(featureId)[name] ?? control.value
+    const number = typeof value === 'number' ? value : null
     place({
       id: `parameter:${id}`,
-      kind: kindOf('parameter'),
-      title: control.label ?? name,
+      kind: 'parameter',
+      title: id,
       subtitle: 'parameter',
       detail: feature.label,
-      value: typeof value === 'number' ? short(value) : String(value),
+      value: number !== null ? short(number) : String(value),
       column: 2,
-      preview: typeof value === 'number' ? 'value' : 'none',
+      preview: number !== null ? 'value' : 'none',
       target: { kind: 'parameter', id },
       controls:
-        typeof value === 'number'
+        number !== null
           ? [
               {
                 kind: 'number',
                 id,
                 label: 'base',
-                value,
+                value: number,
                 min: control.type === 'number' ? (control.min ?? 0) : 0,
-                max: control.type === 'number' ? (control.max ?? Math.max(1, value * 2)) : Math.max(1, value * 2),
+                max: control.type === 'number' ? (control.max ?? Math.max(1, number * 2)) : Math.max(1, number * 2),
                 step: control.type === 'number' ? (control.step ?? 0.01) : 0.01,
               },
             ]
@@ -187,41 +175,46 @@ export function buildLiveGraph(): LiveGraph {
             : [{ kind: 'readout', id, label: 'base', value: String(value) }],
     })
     for (const document of running) if (drivenParameters(document.graph).includes(id)) link(`graph:${document.id}`, `parameter:${id}`)
-    link(`parameter:${id}`, feature.kind === 'effect' ? `effect:${feature.id}` : `feature:${feature.id}`)
   }
 
-  // ── Scene: the features drawing, and the real objects in the viewport ────
-  const sceneFeatures = features.filter(feature => (feature.kind === 'scene' || feature.kind === 'app') && feature.group !== 'Input' && feature.group !== 'Diagnostics')
-  for (const feature of sceneFeatures.filter(feature => on(feature.id))) {
+  // ── Scene: the real objects in the viewport ─────────────────────────────
+  type SceneThing = { name?: string; type?: string; visible?: boolean; intensity?: number; isMesh?: boolean; isLight?: boolean; isCamera?: boolean; parent?: SceneThing | null }
+  const objects: SceneThing[] = []
+  let meshes = 0
+  let lights = 0
+  runtime.getScene()?.traverse(object => {
+    const thing = object as unknown as SceneThing
+    // A transform gizmo is editor furniture, not scene content.
+    for (let node: SceneThing | null | undefined = thing; node; node = node.parent) if (/^TransformControls/.test(node.type ?? '')) return
+    if (thing.isMesh) meshes++
+    if (thing.isLight) lights++
+    if (thing.isMesh || thing.isLight || thing.isCamera) objects.push(thing)
+  })
+  const shown = objects.slice(0, SCENE_LIMIT)
+  shown.forEach((object, index) => {
+    const kindLabel = object.isMesh ? 'mesh' : object.isLight ? 'light' : 'camera'
+    const id = `object:${index}`
     place({
-      id: `feature:${feature.id}`,
-      kind: kindOf('object'),
-      title: feature.label,
-      subtitle: (feature.group ?? feature.kind).toLowerCase(),
-      detail: feature.path,
-      column: 3,
-      target: { kind: 'feature', id: feature.id },
-      controls: [{ kind: 'boolean', id: 'enabled', label: 'enabled', value: true }, ...controlsOf(feature.id, values(feature.id), feature.controls)],
-    })
-  }
-  const objects = runtime.sceneObjects().slice(0, SCENE_LIMIT)
-  for (const object of objects) {
-    const light = object as unknown as { isLight?: boolean; isMesh?: boolean; isCamera?: boolean; intensity?: number; visible: boolean; type: string }
-    const kindLabel = light.isMesh ? 'mesh' : light.isLight ? 'light' : light.isCamera ? 'camera' : 'object'
-    place({
-      id: `object:${object.name}`,
-      kind: kindOf('object'),
-      title: object.name,
+      id,
+      kind: 'object',
+      title: object.name || object.type || kindLabel,
       subtitle: kindLabel,
-      detail: light.type,
+      detail: object.type,
       column: 3,
-      muted: light.visible === false,
-      target: { kind: 'object', name: object.name },
+      muted: object.visible === false,
+      target: { kind: 'object', name: object.name ?? '' },
       controls: [
-        { kind: 'boolean', id: 'visible', label: 'visible', value: light.visible !== false },
-        ...(typeof light.intensity === 'number' ? ([{ kind: 'number', id: 'intensity', label: 'intensity', value: light.intensity, min: 0, max: Math.max(4, light.intensity * 2), step: 0.01 }] as LiveControl[]) : []),
+        { kind: 'boolean', id: 'visible', label: 'visible', value: object.visible !== false },
+        ...(typeof object.intensity === 'number' ? ([{ kind: 'number', id: 'intensity', label: 'intensity', value: object.intensity, min: 0, max: Math.max(4, object.intensity * 2), step: 0.01 }] as LiveControl[]) : []),
       ],
     })
+    liveObjects.set(id, object as unknown as Record<string, unknown>)
+  })
+  if (objects.length > shown.length) place({ id: 'object:more', kind: 'object', title: `+${objects.length - shown.length} more`, subtitle: 'scene', column: 3, muted: true })
+  for (const id of driven) {
+    const featureId = id.split(':')[0]
+    const feature = features.find(item => item.id === featureId)
+    if (feature && feature.kind !== 'effect') for (let index = 0; index < shown.length; index++) link(`parameter:${id}`, `object:${index}`)
   }
 
   // ── Render: the pipeline in the order it actually runs ───────────────────
@@ -229,55 +222,53 @@ export function buildLiveGraph(): LiveGraph {
   const pipeline = host ? on(host.id) : false
   const scenePass = place({
     id: 'pass:scene',
-    kind: kindOf('pass'),
+    kind: 'pass',
     title: 'Scene Pass',
     subtitle: 'render',
-    detail: `${objects.length} named objects`,
+    detail: `${meshes} meshes · ${lights} lights`,
     column: 4,
     preview: 'render',
     target: { kind: 'pass', id: 'pass:scene' },
-    controls: host ? [{ kind: 'boolean', id: 'enabled', label: 'postfx', value: pipeline }] : [],
   })
-  for (const feature of sceneFeatures.filter(item => on(item.id))) link(`feature:${feature.id}`, scenePass.id)
-  for (const object of objects) link(`object:${object.name}`, scenePass.id)
+  shown.forEach((_, index) => link(`object:${index}`, scenePass.id))
+
+  // The G-buffer targets the pipeline actually rendered this build.
+  const published = new Set(pipelineStages.getStages().map(stage => stage.id))
+  const attachments: string[] = []
+  for (const attachment of ['depth', 'normal', 'velocity', 'metalRoughness']) {
+    if (!published.has(`pass:${attachment}`)) continue
+    attachments.push(attachment)
+    place({ id: `pass:${attachment}`, kind: 'pass', title: attachment, subtitle: 'g-buffer', column: 4, preview: 'render', target: { kind: 'pass', id: `pass:${attachment}` } })
+    link(scenePass.id, `pass:${attachment}`)
+  }
 
   const active = features
     .filter(feature => feature.kind === 'effect' && on(feature.id))
     .sort((a, b) => (state.features[a.id]?.order ?? a.order ?? 500) - (state.features[b.id]?.order ?? b.order ?? 500))
 
-  // Only the attachments the active chain asks for exist this frame.
-  const attachments = [...new Set(active.flatMap(feature => NEEDS[feature.id] ?? []))]
-  for (const attachment of attachments) {
-    place({ id: `pass:${attachment}`, kind: kindOf('pass'), title: attachment, subtitle: 'g-buffer', column: 4, muted: !pipeline, preview: 'render', target: { kind: 'pass', id: `pass:${attachment}` } })
-    link(scenePass.id, `pass:${attachment}`)
-  }
-
   let previous = scenePass.id
   for (const feature of active) {
     const node = place({
       id: `effect:${feature.id}`,
-      kind: kindOf('effect'),
+      kind: 'effect',
       title: feature.label,
       subtitle: 'postfx',
       detail: feature.category,
       column: 4,
       muted: !pipeline,
-      // No thumbnail: an effect transforms the image it is handed, so a capture
-      // after it is the whole chain so far, not this effect. The render targets
-      // that do stand alone — the scene pass, the G-buffer, the output — carry
-      // the previews.
       target: { kind: 'effect', id: feature.id },
       controls: [{ kind: 'boolean', id: 'enabled', label: 'enabled', value: true }, ...controlsOf(feature.id, values(feature.id), feature.controls)],
     })
     link(previous, node.id)
-    for (const attachment of NEEDS[feature.id] ?? []) link(`pass:${attachment}`, node.id)
+    // Effects that read an attachment are wired from it, as in the original.
+    for (const attachment of attachments) if ((NEEDS[feature.id] ?? []).includes(attachment)) link(`pass:${attachment}`, node.id)
     for (const id of driven) if (id.startsWith(`${feature.id}:`)) link(`parameter:${id}`, node.id)
     previous = node.id
   }
 
   place({
     id: 'pass:output',
-    kind: kindOf('output'),
+    kind: 'output',
     title: 'Output',
     subtitle: 'canvas',
     detail: active.length ? `${active.length} effect${active.length > 1 ? 's' : ''}${pipeline ? '' : ' · bypassed'}` : 'no postfx',
@@ -310,7 +301,7 @@ export function applyLiveControl(nodeId: string, controlId: string, value: numbe
     return
   }
   if (kind === 'object') {
-    const object = runtime.sceneObjects().find(item => item.name === id) as unknown as { visible: boolean; intensity?: number } | undefined
+    const object = liveObjects.get(nodeId) as unknown as { visible: boolean; intensity?: number } | undefined
     if (!object) return
     if (controlId === 'visible') object.visible = !!value
     if (controlId === 'intensity' && typeof value === 'number') object.intensity = value

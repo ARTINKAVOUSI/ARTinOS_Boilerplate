@@ -1,8 +1,7 @@
 import { useSyncExternalStore } from 'react'
-import type { LiveTarget } from '../live-graph'
+import { liveObject, type LiveTarget } from '../live-graph'
 import type { LiveNode } from '../../ui/NodeGraph/LiveGraphView'
 import { findFeature } from '../registry'
-import { runtime } from '../runtime'
 import { studio, useFeatureState } from '../store'
 import { signalBus, useSignalSnapshot } from '../../features/input/signals'
 import { PropertyRow } from '../../ui/PropertyRow/PropertyRow'
@@ -30,7 +29,7 @@ export function LiveInspector({ node, target, onOpenGraph }: { node: LiveNode | 
   if (target.kind === 'signal') return <SignalInspector id={target.id} />
   if (target.kind === 'parameter') return <ParameterInspector id={target.id} />
   if (target.kind === 'feature' || target.kind === 'effect') return <FeatureInspector id={target.id} />
-  if (target.kind === 'object') return <ObjectInspector name={target.name} />
+  if (target.kind === 'object') return <ObjectInspector nodeId={node.id} name={node.title} />
   if (target.kind === 'graph')
     return (
       <>
@@ -137,7 +136,7 @@ function FeatureInspector({ id }: { id: string }) {
 }
 
 /** A real object in the rendered scene, written straight through. */
-function ObjectInspector({ name }: { name: string }) {
+function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
   // The scene mutates outside React, so read it on every paint of this panel.
   const revision = useSyncExternalStore(
     listener => {
@@ -146,7 +145,7 @@ function ObjectInspector({ name }: { name: string }) {
     },
     () => Math.floor(performance.now() / 250),
   )
-  const object = runtime.sceneObjects().find(item => item.name === name) as unknown as
+  const object = liveObject(nodeId) as unknown as
     | { visible: boolean; type: string; intensity?: number; position: { x: number; y: number; z: number; set(x: number, y: number, z: number): void } }
     | undefined
   if (!object) {

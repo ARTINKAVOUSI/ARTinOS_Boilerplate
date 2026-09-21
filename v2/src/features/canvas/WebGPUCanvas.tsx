@@ -117,6 +117,11 @@ export function WebGPUCanvas({
       }
       const backendObject = (instance as unknown as { backend?: { isWebGPUBackend?: boolean } }).backend
       instanceRef.current = instance
+      // The box may already have its final size — for instance when the page
+      // loaded hidden and the renderer started at the 300x150 default — and the
+      // observer only reports later changes, so match it once now.
+      const box = host.current?.getBoundingClientRect()
+      if (box && box.width >= 1 && box.height >= 1) instance.setSize(box.width, box.height, false)
       onReady?.(instance, backendObject?.isWebGPUBackend ? 'webgpu' : 'webgl2')
       return instance
     },

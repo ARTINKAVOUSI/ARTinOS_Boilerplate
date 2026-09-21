@@ -51,6 +51,14 @@ function Graph() {
     if (active && active.id !== activeId) setActiveId(active.id)
   }, [active, activeId])
 
+  // Like the original pipeline, the live view has normal and velocity rendered
+  // so the G-buffer passes exist to be seen; released when the view closes.
+  useEffect(() => {
+    if (mode !== 'live') return
+    pipelineStages.want(['normal', 'velocity'])
+    return () => pipelineStages.want([])
+  }, [mode])
+
   // The live view is rebuilt from the runtime a few times a second.
   useEffect(() => {
     if (mode !== 'live') return

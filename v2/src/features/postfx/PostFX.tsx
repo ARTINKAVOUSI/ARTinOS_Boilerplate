@@ -159,7 +159,8 @@ export function PostFX({ children, enabled = true }: PostFXProps) {
   const set = useThree(state => state.set) as unknown as (partial: object | ((state: Record<string, unknown>) => object)) => void
 
   const entries = useMemo(() => registry.list(), [registry, revision])
-  const needs = new Set(enabled ? entries.flatMap(entry => entry.needs) : [])
+  const wanted = useSyncExternalStore(pipelineStages.subscribeWanted, pipelineStages.getWanted, pipelineStages.getWanted)
+  const needs = new Set(enabled ? [...entries.flatMap(entry => entry.needs), ...(wanted as PassAttachment[])] : [])
   const needNormal = needs.has('normal') || needs.has('packedNormal')
   const needVelocity = needs.has('velocity')
   const needPacked = needs.has('packedNormal')
