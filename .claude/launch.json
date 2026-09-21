@@ -20,6 +20,36 @@
         "dev"
       ],
       "port": 5190
+    },
+    {
+      "name": "artinos-v2-alt",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
+      "runtimeArgs": [
+        "--prefix",
+        "v2",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5191",
+        "--strictPort"
+      ],
+      "port": 5191
+    },
+    {
+      "name": "artinos-ui-spec",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
+      "runtimeArgs": [
+        "--prefix",
+        "artinos-ui-design-specification",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5200",
+        "--strictPort"
+      ],
+      "port": 5200
     }
   ]
 }

@@ -1,5 +1,5 @@
 import type { Feature } from '../../app/feature'
-import { useSignalSnapshot } from '../input/signals'
+import { useSignalSnapshot } from '../../app/signals'
 import { Meter } from '../../ui/Meter/Meter'
 import { Panel } from '../../ui/Panel/Panel'
 

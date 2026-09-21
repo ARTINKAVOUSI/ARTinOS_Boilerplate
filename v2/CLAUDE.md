@@ -25,19 +25,28 @@ if you find yourself editing a list to register something, the design is wrong.
 1. **No barrels, no registries, no plugin pipeline.** A file is found by glob or
    imported by path.
 2. **A unit imports only: npm packages, `src/app/*` contracts, `src/ui/*`
-   components.** A feature never imports another feature; a panel never imports
-   another panel; a `src/ui` component never imports anything outside its own
-   folder.
-3. **Modest duplication beats shared infrastructure.** A helper used by one
+   components, and files in its own folder.** A feature never imports another
+   feature (the one declared host: effects and the glass material import
+   `features/postfx/PostFX.tsx`); a panel never imports another panel; a
+   `src/ui` component never imports anything outside its own folder; and
+   `src/app` never imports a feature, so deleting any feature can't break the
+   host. Shared live state (the signal bus, the shared webcam) is a system in
+   `src/app/`.
+3. **Files under `src/features/` never import `app/store` or `app/registry`.**
+   The registry loads every feature file, so that import is circular (it
+   crashes at startup). Values come in as props; a studio section a feature
+   folder ships for itself is an `inspector` export (see `FeatureInspector` in
+   `app/feature.ts`) and gets its state as props too.
+4. **Modest duplication beats shared infrastructure.** A helper used by one
    effect lives in that effect.
-4. **Styling travels with the unit.** Component CSS sits beside the component
+5. **Styling travels with the unit.** Component CSS sits beside the component
    and is scoped to it. Studio tokens are the skin, and a `src/ui` component
    must render correctly without them (local fallbacks for every CSS variable).
-5. **R3F components mount inside the host's `<Canvas>`** and never create their
+6. **R3F components mount inside the host's `<Canvas>`** and never create their
    own; graphics default to TSL on the WebGPU renderer.
-6. **Clean up everything on unmount** — loops, workers, subscriptions, GPU
+7. **Clean up everything on unmount** — loops, workers, subscriptions, GPU
    resources. Deleting a feature file must leave no trace behind.
-7. **Every control is declared in the manifest**, so it appears in the panel,
+8. **Every control is declared in the manifest**, so it appears in the panel,
    the palette search, presets and the saved state with no extra wiring.
 
 ## Porting work

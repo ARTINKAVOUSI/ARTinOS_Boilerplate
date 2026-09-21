@@ -2,7 +2,7 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { AdditiveBlending, BufferAttribute, BufferGeometry, type Points, type PointsMaterial } from 'three'
 import type { Feature } from '../../app/feature'
-import { useSignals } from '../input/signals'
+import { useSignals } from '../../app/signals'
 
 export interface SignalParticlesProps {
   count?: number

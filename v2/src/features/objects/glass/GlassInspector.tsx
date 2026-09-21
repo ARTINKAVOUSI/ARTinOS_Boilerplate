@@ -1,13 +1,11 @@
 import { useState, useSyncExternalStore } from 'react'
-import { findFeature } from '../registry'
-import { studio, useFeatureState } from '../store'
-import { useRuntime } from '../runtime'
-import { glassOptics, refractedAngle } from '../../features/objects/glass/glass-optics'
-import { glassMonitor } from '../../features/postfx/glass-capture'
-import { Button } from '../../ui/Button/Button'
+import type { FeatureInspector, FeatureInspectorProps } from '../../../app/feature'
+import { useRuntime } from '../../../app/runtime'
+import { Button } from '../../../ui/Button/Button'
+import { glassOptics, refractedAngle } from './glass-optics'
+import { glassMonitor } from './glass-capture'
+import './GlassInspector.css'
 
-/** The glass features the diagnostics can read, the reference rings first. */
-const GLASS_FEATURES = ['object.glass-rings', 'object.glass-mesh']
 const THREE_INSPECTOR = 'overlay.three-inspector'
 
 /**
@@ -16,26 +14,24 @@ const THREE_INSPECTOR = 'overlay.three-inspector'
  *
  * The chart plots the shader's real RGB IOR spread against incident angle, in
  * either direction; the readouts are the optics those values imply; the monitor
- * rows are what the PostFX host's capture passes are doing right now.
+ * rows are what the glass capture passes are doing right now.
  */
-export function GlassInspector({ featureId }: { featureId: string }) {
-  const state = useFeatureState(featureId)
+export function GlassInspector({ values, peer, setEnabled }: FeatureInspectorProps) {
   const monitor = useSyncExternalStore(glassMonitor.subscribe, glassMonitor.get, glassMonitor.get)
   const { fps } = useRuntime()
-  const threeInspector = useFeatureState(THREE_INSPECTOR)
+  const threeInspector = peer(THREE_INSPECTOR)
   const [exiting, setExiting] = useState(false)
-  if (!state) return null
 
   const read = (name: string, fallback: number) => {
-    const value = state.values[name]
+    const value = values[name]
     return typeof value === 'number' ? value : fallback
   }
   const ior = read('ior', 1.26)
   const dispersion = read('dispersion', 6)
   const thickness = read('thickness', 0.98)
   const backsideThickness = read('backsideThickness', 3)
-  const backside = state.values.backside !== false
-  const spectral = state.values.spectralDispersion === true
+  const backside = values.backside !== false
+  const spectral = values.spectralDispersion === true
   const optics = glassOptics(ior, dispersion)
 
   const path = (n: number) =>
@@ -124,19 +120,25 @@ export function GlassInspector({ featureId }: { featureId: string }) {
           <dd>{monitor.taps}</dd>
         </dl>
       </div>
-      {findFeature(THREE_INSPECTOR) && (
-        <Button size="sm" aria-expanded={!!threeInspector?.enabled} onClick={() => studio.setEnabled(THREE_INSPECTOR, !threeInspector?.enabled)}>
-          {threeInspector?.enabled ? 'Hide' : 'Show'} renderer monitor
+      {threeInspector && (
+        <Button size="sm" aria-expanded={threeInspector.enabled} onClick={() => setEnabled(THREE_INSPECTOR, !threeInspector.enabled)}>
+          {threeInspector.enabled ? 'Hide' : 'Show'} renderer monitor
         </Button>
       )}
-      {!findFeature('postfx') && <p>Enable the renderer pipeline for clean and backside capture monitoring.</p>}
+      {!peer('postfx') && <p>Enable the renderer pipeline for clean and backside capture monitoring.</p>}
     </details>
   )
 }
 
-/** The first glass feature that is switched on, for the Inspector to show diagnostics for. */
-export function activeGlassFeature(states: Record<string, { enabled: boolean } | undefined>) {
-  return GLASS_FEATURES.find(id => findFeature(id) && states[id]?.enabled) ?? null
-}
-
 export default GlassInspector
+
+/**
+ * Studio-only: the Inspector panel shows this section for the first of these
+ * features that is switched on, the reference rings first. It lives in the
+ * glass folder so deleting the folder removes it too.
+ */
+export const inspector: FeatureInspector = {
+  id: 'glass',
+  features: ['object.glass-rings', 'object.glass-mesh'],
+  component: GlassInspector,
+}

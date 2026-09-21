@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Mesh, MeshPhysicalMaterial } from 'three'
 import type { Feature } from '../../app/feature'
-import { useSignals } from '../input/signals'
+import { useSignals } from '../../app/signals'
 
 export interface ReactiveOrbProps {
   /** Signal that drives size and glow (0…1). Empty to disable. */

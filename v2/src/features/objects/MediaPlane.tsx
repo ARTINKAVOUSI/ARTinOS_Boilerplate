@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DoubleSide, LinearFilter, SRGBColorSpace, VideoTexture, type Texture } from 'three'
 import type { Feature } from '../../app/feature'
-import { useWebcamVideo } from '../input/webcam'
+import { useWebcamVideo } from '../../app/webcam'
 
 export interface MediaPlaneProps {
   /** A video file to play. Empty uses the shared camera, when one is capturing. */

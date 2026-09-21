@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Feature } from '../../app/feature'
-import { useSignalCleanup, useSignals } from './signals'
+import { useSignalCleanup, useSignals } from '../../app/signals'
 
 export interface MidiInputProps {
   /** Only listen to this channel (1–16). 0 listens to all of them. */

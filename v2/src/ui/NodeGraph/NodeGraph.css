@@ -309,6 +309,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.ngraph-number,
 .ngraph-field input[type='number'],
 .ngraph-field input[type='text'],
 .ngraph-field input[type='search'],
@@ -323,6 +324,7 @@
   font: inherit;
   font-size: 10px;
 }
+.ngraph-number:focus,
 .ngraph-field input:focus,
 .ngraph-field select:focus {
   border-color: var(--ng-accent);

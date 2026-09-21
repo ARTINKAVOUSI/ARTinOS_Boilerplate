@@ -16,8 +16,54 @@
  * traversal.
  */
 
+import { LinearMipmapLinearFilter } from 'three/webgpu'
+import { pass } from 'three/tsl'
+import type { PostFXPassProvider } from '../../postfx/PostFX'
+
 // Three's pass nodes are loosely typed; this file drives them opaquely.
 type AnyNode = any
+
+/** The captures glass materials refract: the backdrop, and the clean scene their back faces sample. */
+export interface GlassCapture {
+  backdrop: AnyNode
+  clean: AnyNode
+}
+
+/**
+ * The glass passes, registered with `<PostFX>` through `usePostFXPass('glass', glassPasses)`.
+ * Mipmapped so rough glass can sample a blurrier level; one scene traversal a
+ * frame when no glass is in view.
+ */
+export const glassPasses: PostFXPassProvider<GlassCapture> = {
+  create({ scenePass, scene, camera }) {
+    const backdropPass: AnyNode = pass(scene, camera)
+    backdropPass.name = 'Glass / Backdrop'
+    const cleanPass: AnyNode = pass(scene, camera)
+    cleanPass.name = 'Glass / Clean'
+    for (const capture of [backdropPass, cleanPass]) {
+      const target = capture.renderTarget.texture
+      target.generateMipmaps = true
+      target.minFilter = LinearMipmapLinearFilter
+    }
+    configureScenePasses(scenePass, backdropPass, scene, cleanPass)
+    // v1's glass monitoring, four times a second.
+    let elapsed = 0
+    return {
+      value: { backdrop: backdropPass.getTextureNode(), clean: cleanPass.getTextureNode() },
+      update(delta) {
+        elapsed += delta
+        if (elapsed < 0.25) return
+        elapsed = 0
+        glassMonitor.sample(scene, backdropPass, cleanPass)
+      },
+      dispose() {
+        backdropPass.dispose()
+        cleanPass.dispose()
+        glassMonitor.reset()
+      },
+    }
+  },
+}
 
 /** Keep capture mutations inside the synchronous PassNode draw, restoring even on failure. */
 export function withScenePassFilter<T>(scene: AnyNode, exclude: (object: AnyNode) => boolean, draw: () => T): T {
@@ -105,7 +151,7 @@ export function configureScenePasses(scenePass: AnyNode, backdropPass: AnyNode, 
   }
 }
 
-/** What v1 reported about glass, sampled by the PostFX host four times a second. */
+/** What v1 reported about glass, sampled by the glass passes four times a second. */
 export interface GlassMonitor {
   meshes: number
   /** Largest refraction tap count among active glass materials. */
@@ -117,11 +163,16 @@ export interface GlassMonitor {
   captureCpuMs: number
 }
 
-let monitor: GlassMonitor = { meshes: 0, taps: 0, mode: 'inactive', backdropResolution: 'inactive', cleanResolution: 'bypassed', captureCpuMs: 0 }
+const idle: GlassMonitor = { meshes: 0, taps: 0, mode: 'inactive', backdropResolution: 'inactive', cleanResolution: 'bypassed', captureCpuMs: 0 }
+let monitor = idle
 const monitorListeners = new Set<() => void>()
 
 export const glassMonitor = {
   get: () => monitor,
+  reset() {
+    monitor = idle
+    monitorListeners.forEach(listener => listener())
+  },
   subscribe(listener: () => void) {
     monitorListeners.add(listener)
     return () => monitorListeners.delete(listener)

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Feature } from '../../app/feature'
-import { useSignalCleanup, useSignals } from './signals'
-import { webcam } from './webcam'
+import { useSignalCleanup, useSignals } from '../../app/signals'
+import { webcam } from '../../app/webcam'
 
 export interface CameraInputProps {
   /** Analysis resolution. Small is plenty: this runs every frame on the CPU. */

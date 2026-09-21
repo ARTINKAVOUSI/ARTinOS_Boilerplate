@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import type { Feature } from '../../app/feature'
-import { useSignalCleanup, useSignals } from './signals'
+import { useSignalCleanup, useSignals } from '../../app/signals'
 
 export interface AudioInputProps {
   children?: ReactNode

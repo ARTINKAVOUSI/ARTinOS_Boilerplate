@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import type { Feature } from '../../app/feature'
-import { useSignalCleanup, useSignals } from './signals'
+import { useSignalCleanup, useSignals } from '../../app/signals'
 
 export interface OrientationInputProps {
   /** How fast the values ease towards the device reading, per second. */

@@ -1,9 +1,9 @@
 /**
  * What each stage of the render pipeline produced this build.
  *
- * A leaf module on purpose: the PostFX host publishes here as it assembles the
- * chain, and the Graph panel reads it to show a live thumbnail on every pass
- * and effect node. Neither imports the other.
+ * A leaf module on purpose: the Stage hands `publish` to the PostFX host as its
+ * `onStages` prop, and the Graph panel reads the stages to show a live
+ * thumbnail on every pass and effect node. PostFX never imports this file.
  */
 
 export interface PipelineStage {

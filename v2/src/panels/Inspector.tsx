@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react'
 import type { PanelManifest } from '../app/panel'
-import { features } from '../app/registry'
+import { features, findFeature, inspectors } from '../app/registry'
 import { FeatureCard, type ControlFilter } from '../app/studio/FeatureCard'
 import { ControlsBar } from '../app/studio/ControlsBar'
-import { GlassInspector, activeGlassFeature } from '../app/studio/GlassInspector'
-import { useStudio, type StudioState } from '../app/store'
+import { studio, useStudio, type StudioState } from '../app/store'
 
 /** Groups other panels own. Everything else is project content and lands here. */
 const ELSEWHERE = new Set(['Render', 'Camera', 'Atmosphere', 'Lighting', 'Ground', 'Input', 'Diagnostics'])
@@ -14,14 +13,28 @@ const selectFeatures = (state: StudioState) => state.features
 
 function Inspector() {
   const [filter, setFilter] = useState<ControlFilter>('all')
-  // v1 embedded the glass diagnostics in the Inspector whenever glass was in the scene.
-  const glass = activeGlassFeature(useStudio(selectFeatures))
+  // Sections feature folders ship for themselves (v1's glass diagnostics), each
+  // shown for the first of its features that is switched on.
+  const states = useStudio(selectFeatures)
+  const sections = inspectors.flatMap(inspector => {
+    const target = inspector.features.find(id => findFeature(id) && states[id]?.enabled)
+    return target ? [{ inspector, target }] : []
+  })
   const controlCount = useMemo(() => projectFeatures.reduce((sum, feature) => sum + Object.keys(feature.controls ?? {}).length, 0), [])
 
   return (
     <div className="artinos-panel-suite artinos-inspector-suite">
       <ControlsBar filter={filter} onFilter={setFilter} summary={`${projectFeatures.length} OBJECTS · ${controlCount} CONTROLS · SRC/FEATURES/OBJECTS`} />
-      {glass && filter === 'all' && <GlassInspector featureId={glass} />}
+      {filter === 'all' &&
+        sections.map(({ inspector, target }) => (
+          <inspector.component
+            key={inspector.id}
+            featureId={target}
+            values={states[target]?.values ?? {}}
+            peer={id => (findFeature(id) ? { enabled: !!states[id]?.enabled } : undefined)}
+            setEnabled={(id, enabled) => studio.setEnabled(id, enabled)}
+          />
+        ))}
       {projectFeatures.length === 0 ? (
         <div className="v2-empty">No project features. Add a file under src/features/objects.</div>
       ) : (

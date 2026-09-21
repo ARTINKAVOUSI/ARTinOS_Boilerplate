@@ -1,35 +1,58 @@
 # ARTINOS v2 — Rebuild Plan
 
-A full plan for rebuilding the ARTINOS boilerplate (v1.4, the rest of this repository) as a set of copy-pastable React components. It covers the feature contract, the folder layout, how each old package maps to the new files, what is done, and what is left.
+The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.project.tsx` in the repository root) as a set of copy-pastable React units, following `.claude/skills/copy-pastable-reusable-react/SKILL.md`. It covers the contract every unit follows, the folder layout, a v1 → v2 inventory with the status of every item, the boundary audit and its fixes, and what is left.
 
-Status as of 2026-09-17: **phases 0–5, the MetaBlock dock and nine section panels are built, type-check cleanly, build, and have been checked in the browser** (see [Verification](#10-verification)). The rest of phases 6–9 is not built yet.
+**Status as of 2026-09-21** (branch `v0.5-dock`):
+
+- Phases 0–6 and **6A (boundary fixes)** are done. Every unit listed in [§6](#6-boundary-audit) can be deleted and the app still type-checks and builds.
+- Scope decision (2026-09-21): the extra features, panels, UI-kit remainder, Timeline, presets, VOLUMA and the automated-check work that the previous revision planned as phases 7–10 are **not needed** and have been dropped (listed in [§7](#7-inventory-v1--v2) as ✂).
+- **Left: phase 11, the cut-over** (v2 becomes the repository root). It is not started: it removes v1 from the working tree, and it touches untracked files that git cannot restore (see [§8](#8-phases)).
 
 ---
 
 ## 1. Goals
 
-1. **Every capability is one file or one folder.** One PostFX effect, one UI control, fog, the camera, orbit controls, one input device: each is a single unit you can copy into another project, or delete, without editing anything else.
-2. **Adding or removing a feature or a panel needs no wiring.** A file under `src/features/` that exports a `feature` manifest shows up in the scene and in the studio. A file under `src/panels/` that exports a `panel` manifest becomes a tab in the dock. Delete the file and it is gone.
-3. **The components stay portable.** A feature component takes normal React props. Its only link to this app is a `feature` manifest imported with `import type`, which disappears at build time.
-4. **No shared framework.** The old `@artinos/runtime` / `@artinos/r3f` / `@artinos/ui` package layers are gone. Where a small shared piece is really needed (the PostFX host, the signal bus), it is one file and each component that needs it says so.
-5. **Same stack, same studio.** React 19.2, three 0.185.1 (WebGPU + TSL), R3F 10 alpha, drei 11 alpha. The studio is the original one: the MetaBlock dock (tabs, drag-out, float, split, merge, return home, maximize, saved layout), the `plate-*` chrome, the embedded performance HUD, the brand chip and the ARTINOS stylesheet with its six material worlds.
+1. **Every capability is one file or one folder.** One PostFX effect, one UI control, fog, the camera, orbit controls, one input device, the glass material: each is a unit you can copy into another project, or delete, without editing anything else.
+2. **Adding or removing a feature or a panel needs no wiring.** A file under `src/features/` that exports a `feature` manifest shows up in the scene and in the studio. A file under `src/panels/` that exports a `panel` manifest becomes a dock tab. Delete it and it is gone, including its saved state.
+3. **The components stay portable.** A feature component takes normal React props. Its only link to this app is a `feature` manifest typed with `import type`, which disappears at build time.
+4. **No shared framework.** The v1 package layers (`@artinos/runtime`, `r3f`, `ui`, …) are gone. Where a small shared piece is genuinely needed (the PostFX host, the signal bus), it is one file and each unit that needs it names it.
+5. **Same stack, same studio.** React 19.2, three 0.185.1 (WebGPU + TSL), R3F 10 alpha, drei 11 alpha. The studio is the original one: MetaBlock dock, `plate-*` chrome, embedded performance HUD, brand chip, the ARTINOS stylesheet and its six material worlds.
 
-### What changed from v1
+### What changes from v1
 
 | v1 | v2 |
 |---|---|
 | 7 workspace packages with tier rules and a package doctor | 1 package; folders instead of packages |
-| `RuntimeProvider` with 12 registries (parameters, signals, bindings, automation, resources, telemetry, quality, history, logger, modules, frames, presets) | Features take props. The studio store (`src/app/store.ts`) holds values and passes them in. Live values go through a small signal bus. |
-| A central `postfx-pipeline.tsx` `switch` over 44 effect types | Each effect file builds its own TSL node and registers it with `<PostFX>` |
+| `RuntimeProvider` with 12 registries | Features take props. The studio store holds values and passes them in. Live values go through one signal bus. |
+| A central `postfx-pipeline.tsx` `switch` over 44 effect types | Each effect file builds its own TSL node and registers with `<PostFX>` |
+| Glass capture passes hard-wired into the pipeline | The glass folder registers its own passes with `usePostFXPass` |
 | 2-line effect wrappers plus a separate catalog | One file per effect: component, props, docs and studio controls together |
-| `*.project.tsx` manifests that list parameters, graphs and bindings | Features discovered from `src/features/**` |
-| UI kit that needed the global `theme.css` | Each component folder has its own scoped CSS with fallback values; the studio loads the original stylesheet as its skin |
+| `*.project.tsx` manifests listing parameters, graphs and bindings | Features discovered from `src/features/**` |
+| UI kit that needed the global `theme.css` and a kernel/registry | Each component folder has its own scoped CSS with fallbacks; no kernel |
 | `@artinos/metablock` package + `MetaBlockShell` with a hard-coded panel list | The same engine as one folder (`src/ui/MetaBlock/`); panels discovered from `src/panels/` |
-| Parameter changes rebuilt the whole pipeline | Numeric effect settings are live GPU uniforms (`useUniform`); only structural settings rebuild the chain |
+| Parameter changes rebuilt the whole pipeline | Numeric effect settings are live GPU uniforms (`useUniform`) |
 
 ---
 
-## 2. Architecture
+## 2. Status at a glance
+
+| Area | Count | Status |
+|---|---:|---|
+| App core (contract, discovery, store, boundaries, stage) | — | ✅ |
+| Canvas + PostFX host (with pass providers) | — | ✅ |
+| PostFX effects | 46 | ✅ 44 v1 effects + SubsurfaceScattering + GraphEffect |
+| Scene features | 17 | ✅ incl. Light, Shadows, Gizmo, three.js Inspector |
+| Objects / materials | 8 + glass folder | ✅ |
+| Input devices | 8 | ✅ pointer, keyboard, microphone, hands, camera, MIDI, gamepad, tilt |
+| Overlays | 2 | ✅ Stats HUD, Signal Monitor |
+| Studio panels | 10 | ✅ |
+| UI kit | 29 + MetaBlock + NodeGraph | ✅ |
+| Boundary fixes (§6) | 8 | ✅ phase 6A |
+| Cut-over (v2 replaces the root) | — | ⬜ phase 11 |
+
+---
+
+## 3. Architecture
 
 ```text
 index.html → src/main.tsx → <App>
@@ -48,9 +71,9 @@ index.html → src/main.tsx → <App>
                                   └── brand chip · console toast · command palette
 ```
 
-The canvas is a locked fullscreen MetaBlock group underneath everything. Panels are MetaBlocks inside a persistent dock group, so any tab can be dragged out to float, dropped on another group to merge or split, returned to its exact tab position, or maximized. The whole arrangement is saved (`artinos.v2.dock`) and restored while it still matches the panels on disk.
+The canvas is a locked fullscreen MetaBlock group under everything. Panels are MetaBlocks inside a persistent dock group: any tab can float, merge, split, return to its exact tab position, or maximize. The arrangement is saved (`artinos.v2.dock`) and restored while it still matches the panels on disk.
 
-### 2.1 The feature contract (`src/app/feature.ts`)
+### 3.1 The feature contract (`src/app/feature.ts`)
 
 ```ts
 export const feature: Feature = {
@@ -75,354 +98,367 @@ Control types: `number` → Slider, `boolean` → Toggle, `select` → Select, `
 
 Mount rules:
 
-- **app**: outside the canvas, mounted *beside* the stage, so turning one on or off never remounts the scene.
-- **canvas-provider**: wraps the scene inside the canvas. It stays mounted and receives `enabled`, so switching it off never remounts the scene.
-- **scene / effect**: inside the canvas. Effects are rendered only when the `postfx` host exists.
-- **overlay**: DOM over the canvas. Also receives `renderer` and `backend`.
+- **app**: outside the canvas, beside the stage, so switching one never remounts the scene.
+- **canvas-provider**: wraps the scene inside the canvas, stays mounted and receives `enabled`, `attachments` and `onStages`.
+- **scene / effect**: inside the canvas. Effects render only when the `PostFX` host exists.
+- **overlay**: DOM over the canvas; also receives `renderer` and `backend`.
 
-Each feature runs inside a `FeatureBoundary` (error boundary + Suspense). If one feature crashes it renders nothing and shows a toast; the rest of the scene keeps running. Changing its props gives it another try.
+Each feature runs inside a `FeatureBoundary` (error boundary + Suspense). A crashing feature renders nothing and shows a toast; changing its props retries it.
 
-### 2.2 The panel contract (`src/app/panel.ts`)
+### 3.2 Feature inspectors (`FeatureInspector` in `src/app/feature.ts`)
+
+A feature folder can ship its own studio section by exporting `inspector` from any `.tsx` file under `src/features/`:
+
+```ts
+export const inspector: FeatureInspector = {
+  id: 'glass',
+  features: ['object.glass-rings', 'object.glass-mesh'], // shown for the first one switched on
+  component: GlassInspector,                              // gets { featureId, values, peer, setEnabled }
+}
+```
+
+The Inspector panel renders it. It lives in the feature's folder, so deleting the folder removes it. It receives its state as props because **a file under `src/features/` must never import `app/store` or `app/registry`**: the registry loads every feature file, so that import is circular and crashes at startup.
+
+### 3.3 The panel contract (`src/app/panel.ts`)
 
 ```tsx
 export const panel: PanelManifest = {
-  id: 'scene',                                    // unique; the saved layout is keyed by it
-  title: 'Scene',
+  id: 'scene', title: 'Scene',
   description: 'Environment, camera, lighting…',  // tab tooltip + palette
   keywords: ['camera', 'fog'],                    // palette search
-  order: 1,                                       // tab order
-  dock: 'bottom',                                 // 'bottom' | 'left' | 'right' | 'float'
-  active: true,                                   // optional: the tab open on first launch
-  footer: () => <>ENVIRONMENT · CAMERA</>,        // optional: pane foot status
+  order: 1, dock: 'bottom', active: true,
+  owns: feature => …,                             // features this panel shows (palette jump target)
+  footer: () => <>ENVIRONMENT · CAMERA</>,
   component: Scene,
 }
 ```
 
-`import.meta.glob('../panels/*.tsx', { eager: true })` discovers them. Every panel body is wrapped in `PanelWorkbench` (portrait/landscape container, `--panel-height`, error boundary with Retry). Panels share app-level building blocks from `src/app/studio/` (`FeatureCard`, `ControlsBar`, `ControlInput`), never each other, so deleting one panel file never breaks another.
+Discovered with `import.meta.glob('../panels/*.tsx')`. Every body is wrapped in `PanelWorkbench` (portrait/landscape container, `--panel-height`, error boundary with Retry). Panels share only `src/app/studio/` building blocks (`FeatureCard`, `ControlsBar`, `ControlInput`, `PanelBar`, `icons`), never each other.
 
-### 2.3 Discovery (`src/app/registry.ts`)
+### 3.4 Discovery (`src/app/registry.ts`)
 
-`import.meta.glob('../features/**/*.tsx', { eager: true })`. Only modules that export `feature` are used. Incomplete manifests and duplicate ids are skipped with a console warning. This is the only file that knows the folder name.
+`import.meta.glob('../features/**/*.tsx', { eager: true })`. Modules exporting `feature` become features; modules exporting `inspector` become Inspector sections; everything else (`GlassMaterial.tsx`, `WebGPUCanvas.tsx`) is loaded and ignored. Incomplete manifests and duplicate ids are skipped with a warning. Only `.tsx` files are scanned.
 
-### 2.4 State (`src/app/store.ts`)
+### 3.5 State (`src/app/store.ts`)
 
 A plain external store (`useSyncExternalStore`) saved to `localStorage` (`artinos.v2.studio`, versioned):
 
 - `features[id] = { enabled, values, order }`
-- `presets[name]` holds snapshots of `features`
-- `ui = { visible, world, favorites, pins }`: favorites and pins are `featureId:control` keys, as in the original inspector
-- `reconcile()` drops saved state for features or controls that no longer exist, so deleting a file never breaks a saved session.
+- `presets[name]` = snapshots of `features` (save, load, delete, export, import, reset)
+- `ui = { visible, world, favorites, pins, advanced }`
+- `reconcile()` drops saved state for features or controls that no longer exist.
 
-Features never read the store. The app passes values in as props, so the store can be replaced without touching any feature.
+Features never read the store; the app passes values as props.
 
-### 2.5 Render pipeline (`src/features/postfx/PostFX.tsx`)
+### 3.6 Render pipeline (`src/features/postfx/PostFX.tsx`)
 
-- Owns one `RenderPipeline` and one scene `pass()`. The MRT attachments (normal, packed normal, velocity, metalness/roughness) are requested only while an active effect needs them. A layout change creates a new pass.
-- `usePostFXEffect(id, { order, needs, webgpuOnly, build }, deps)` registers an effect. `build(ctx)` gets `{ input, scenePass, depth, viewZ, normal, velocity, packedNormal, metalRoughness, scene, camera, renderer, backend }` and returns the new image node, or `null` to pass the input through.
-- `useUniform(value)` returns a stable TSL uniform whose `.value` follows the prop, so slider drags never recompile the pipeline.
-- Each build is wrapped in `try/catch`, so a broken effect is skipped and logged. On the WebGL2 fallback, effects marked `webgpuOnly` are skipped.
-- The pipeline is handed to R3F with `set({ postProcessing })`; R3F v10 renders it in its render phase. On each rebuild the intermediate nodes are disposed; the pass and pipeline are disposed on unmount.
+- Owns one `RenderPipeline` and one scene `pass()`. MRT attachments (normal, packed normal, velocity, metalness/roughness) are requested only while an active effect needs them, or while `attachments` asks for them.
+- `usePostFXEffect(id, { order, needs, webgpuOnly, build }, deps)` registers an effect; `build(ctx)` returns the new image node or `null`.
+- `useUniform(value)` returns a stable TSL uniform, so slider drags never recompile.
+- `usePostFXPass(id, provider)` registers extra scene passes. `provider.create({ scenePass, scene, camera, renderer })` runs whenever the scene pass is built, may wrap it, and returns `{ value, update?, dispose? }`; every component registered under the same id receives `value`. The glass material uses this for its backdrop and clean captures. PostFX itself knows nothing about glass.
+- `onStages(stages)` reports every stage (scene pass, each effect, attachments, output) each time the chain is built. The Stage forwards them to `app/pipeline-stages.ts` for the Graph panel.
+- Each build is wrapped in `try/catch`; on WebGL2, `webgpuOnly` effects are skipped. Intermediate nodes are disposed on rebuild; passes, providers and the pipeline on unmount.
 
-### 2.6 Runtime facts and console (`src/app/runtime.ts`, `src/app/console.ts`)
+### 3.7 Systems in `src/app/`
 
-One rAF sampler provides fps, frame-time history and renderer counters (calls, triangles, geometries, textures, resolution, backend) to the dock HUD and the Telemetry panel. `installConsoleCapture()` forwards `console.*` to the Console panel and the warning/error toast.
-
-### 2.7 Signals (`src/features/input/signals.tsx`)
-
-A `SignalBus` (`set`, `get`, `delete(prefix)`, `age`, `entries`). Input features write to it every frame; reactive objects read it inside `useFrame`. Neither causes React renders. There is one default bus, so no provider is needed; `<SignalsProvider>` isolates a subtree when you want that. `useSignalSnapshot(hz)` is for monitors.
+| File | What it is |
+|---|---|
+| `signals.tsx` | The `SignalBus` (`set`, `get`, `delete(prefix)`, `age`, `entries`), the default bus, `<SignalsProvider>`, `useSignals`, `useSignalSnapshot(hz)`, `useSignalCleanup`. Inputs write, objects read in `useFrame`, no React renders. |
+| `webcam.ts` | The shared camera element, so CameraInput and MediaPlane never open the camera twice. |
+| `runtime.ts` | One rAF sampler: fps, frame-time history, renderer counters. |
+| `console.ts` | `console.*` capture for the Console panel and the toast. |
+| `pipeline-stages.ts` | The last-built pipeline stages and the attachments the Graph panel wants. |
+| `compiled-graphs.ts` | Compiled GPU graphs, read by the GraphEffect. |
+| `graphs.ts`, `live-graph.ts`, `node-preview.ts` | The Graph panel's authored graphs, live pipeline view and GPU thumbnails, on top of `ui/NodeGraph`. |
 
 ---
 
-## 3. Folder layout
+## 4. Folder layout
 
 ```text
 v2/
 ├── index.html · package.json · pnpm-workspace.yaml · tsconfig.json · vite.config.ts
+├── CLAUDE.md          the rules; points at the skill
 ├── public/            backgrounds/ hdr/ models/ draco/ mediapipe/{wasm,models}
 ├── docs/PLAN.md       this file
 └── src/
     ├── main.tsx
-    ├── app/                         host only; never edited to add a feature
-    │   ├── feature.ts  registry.ts  panel.ts  store.ts  runtime.ts  console.ts
-    │   ├── Stage.tsx  App.tsx  FeatureBoundary.tsx  app.css
-    │   └── studio/     DockShell.tsx  RuntimeHUD.tsx  ConsoleToast.tsx  PanelWorkbench.tsx
-    │                   FeatureCard.tsx  ControlsBar.tsx  ControlField.tsx  layout.ts  icons.tsx  dock.css
-    │                   skin/  the original ARTINOS stylesheet (tokens, worlds, themes, legacy,
-    │                          instrument, workbench components, plate-* shell, chrome, studio-panels)
-    ├── panels/                      one file per dock tab (9)
-    │   Inspector  Scene  PostFX  InputFlow  Assets  Library  Console  Telemetry  Appearance
-    ├── ui/                          copy-pastable components: <Name>/<Name>.tsx + <Name>.css (29)
-    │   ├── MetaBlock/               the docking engine: core/ (framework-free) + react/ + MetaBlock.css
-    │   └── theme/theme.css          optional tokens + 6 material worlds for standalone use
+    ├── app/                         host and systems; never edited to add a feature
+    │   ├── feature.ts registry.ts panel.ts store.ts runtime.ts console.ts
+    │   ├── signals.tsx webcam.ts pipeline-stages.ts compiled-graphs.ts
+    │   ├── graphs.ts live-graph.ts node-preview.ts
+    │   ├── Stage.tsx App.tsx FeatureBoundary.tsx app.css
+    │   └── studio/  DockShell RuntimeHUD ConsoleToast PanelWorkbench PanelBar FeatureCard
+    │                ControlsBar ControlField LiveInspector layout icons dock.css
+    │                skin/  the original ARTINOS stylesheet
+    ├── panels/      10: Inspector Scene PostFX InputFlow Graph Assets Library Console Telemetry Appearance
+    ├── ui/          31 component folders (<Name>/<Name>.tsx + <Name>.css, incl. MetaBlock/, NodeGraph/) + theme/
     └── features/
         ├── canvas/WebGPUCanvas.tsx
-        ├── postfx/PostFX.tsx + effects/*.tsx   (44)
-        ├── scene/*.tsx                          (13)
-        ├── objects/*.tsx                        (4)
-        ├── input/signals.tsx + *.tsx            (4)
-        └── overlays/*.tsx                       (3)
+        ├── postfx/PostFX.tsx  effects/*.tsx (46)
+        ├── scene/*.tsx (17)
+        ├── objects/*.tsx (8) + glass/ (GlassMaterial, GlassInspector + css, glass-capture,
+        │                               transmission-nodes, glass-optics, glass-parameters)
+        ├── input/*.tsx (8)
+        └── overlays/*.tsx (2)
 ```
 
 ---
 
-## 4. Rules each unit follows (from the copy-pastable React skill)
+## 5. Rules each unit follows
 
-1. **Boundary:** one `.tsx` (plus one `.css` where it has styles). Split only when the file would be hard to follow.
-2. **No hidden coupling:** relative imports only. No aliases, stores or app services inside components. Settings come in as props.
-3. **Styles travel with the component:** every class is prefixed `aui-<name>`. Private variables are declared inside `:where(.aui-x) { --_ink: var(--ui-ink, <fallback>) }`, so the component looks right without `theme.css` and follows a world when the theme is present.
-4. **Declared dependencies:** each file's doc comment lists what it needs (three ≥ 0.185, R3F 10, drei 11, MediaPipe, and the local host file where there is one).
-5. **Cleanup:** every rAF loop, media stream, AudioContext, texture, geometry, pass and pipeline is released on unmount.
-6. **Canvas ownership:** only `WebGPUCanvas` creates a canvas. Every 3D feature mounts inside the canvas you already have.
-7. **Renderer order of preference:** TSL on WebGPU, with WebGL2 fallback through `WebGPURenderer`. When neither is available, a message is shown instead of a blank canvas.
-8. **Accessibility:** native elements where possible (`<select>`, `<dialog>`, checkbox). Custom controls use ARIA roles and full keyboard support, focus rings are always visible, and motion respects `prefers-reduced-motion`.
+1. **Boundary:** one `.tsx` (plus one `.css` where it has styles). A folder only when a single file would be hard to follow; every file in it is one someone would open on its own.
+2. **Imports:** npm packages, `src/app/*` contracts and systems, `src/ui/*` components, and files inside its own folder. A feature never imports another feature, except the declared host `postfx/PostFX.tsx` (effects, the glass material). A panel never imports another panel. A `src/ui` component never imports outside its folder. **`src/app` never imports a feature.**
+3. **No store or registry in features:** files under `src/features/` never import `app/store` or `app/registry` (circular; see §3.2).
+4. **Styles travel with the component:** classes prefixed `aui-<name>`; private variables declared inside `:where(.aui-x) { --_ink: var(--ui-ink, <fallback>) }` so it renders without `theme.css`.
+5. **Declared dependencies:** each file's doc comment lists what it needs (three ≥ 0.185, R3F 10, drei 11, MediaPipe, and a local host file where there is one).
+6. **Cleanup:** every rAF loop, media stream, AudioContext, worker, texture, geometry, pass and pipeline is released on unmount.
+7. **Canvas ownership:** only `WebGPUCanvas` creates a canvas. Every 3D feature mounts inside the existing one.
+8. **Renderer order:** TSL on WebGPU, WebGL2 fallback through `WebGPURenderer`; a message instead of a blank canvas when neither works.
+9. **Accessibility:** native elements where possible; ARIA roles and full keyboard support otherwise; visible focus; `prefers-reduced-motion` respected.
+10. **No demos inside units.** Usage lives in a doc-comment snippet.
 
 ### How to copy a unit into another project
 
 | Unit | Copy | Also needs |
 |---|---|---|
-| UI component | `src/ui/<Name>/` | `react`, `react-dom` (optional: `ui/theme/theme.css`) |
+| UI component | `src/ui/<Name>/` | `react`, `react-dom` (optional `ui/theme/theme.css`) |
 | Docking engine | `src/ui/MetaBlock/` | `react` |
-| Studio panel | `src/panels/<Name>.tsx` | this app's `src/app/studio/` building blocks |
+| Node graph editor | `src/ui/NodeGraph/` | `react`, `three` (GPU domain) |
 | PostFX effect | `features/postfx/PostFX.tsx` + `effects/<Effect>.tsx` | `three`, `@react-three/fiber`; mount `<PostFX>` in your canvas |
-| Scene feature | `features/scene/<Name>.tsx` | `three`, R3F; drei for Camera, Controls, Environment, BackdropImage |
-| Reactive object | `features/objects/<Name>.tsx` + `features/input/signals.tsx` | as above |
-| Input device | `features/input/<Name>.tsx` + `signals.tsx` | MediaPipe for HandTracking |
+| Scene feature | `features/scene/<Name>.tsx` | `three`, R3F; drei for Camera, Controls, Environment, BackdropImage, Gizmo |
+| Glass | `features/objects/glass/` minus `GlassInspector.*`, + `PostFX.tsx` | `three`, R3F |
+| Reactive object / input device | the feature file + `app/signals.tsx` | MediaPipe for HandTracking |
+| Media plane / camera input | the feature file + `app/webcam.ts` | — |
 | Canvas | `features/canvas/WebGPUCanvas.tsx` | `three`, R3F |
+| Studio panel | `src/panels/<Name>.tsx` | this app's `src/app/studio/` blocks (panels are app-bound by design) |
 
-Outside this app, delete the `export const feature` block (and its `import type`) or keep it; it has no runtime effect.
+Outside this app, delete the `export const feature` block and its `import type`, or keep it; it has no runtime effect. Files that import `app/signals` or `app/webcam` need that one import path fixed after pasting. `GraphEffect` reads `app/compiled-graphs` by default; pass it a `node` prop and drop that import to use it elsewhere.
 
 ---
 
-## 5. Inventory: v1 → v2
+## 6. Boundary audit
 
-### 5.1 Packages
+Found by tracing every import in `src/` on 2026-09-21; all fixed the same day (phase 6A).
+
+| # | Problem | Fix |
+|---|---|---|
+| A1 | The app (`Stage`, `graphs`, `live-graph`, `LiveInspector`) and two panels imported the signal bus from `features/input/`; deleting that folder broke the app. | Moved to `src/app/signals.tsx`, a system. |
+| A2 | `PostFX.tsx` imported `app/pipeline-stages`, so it could not be copied with one effect. | `onStages` and `attachments` props; the Stage wires them to `pipeline-stages`. |
+| A3 | `PostFX.tsx` imported and always built the glass capture passes. | Generic `usePostFXPass`. `glass-capture.ts` moved into `objects/glass/` and exports the `glassPasses` provider; passes exist only while glass is mounted. |
+| A4 | `app/studio/GlassInspector.tsx` imported glass files; deleting the glass folder broke the Inspector panel. | Moved to `objects/glass/GlassInspector.tsx` (+ its CSS, out of `dock.css`) as an `inspector` export; the Inspector panel renders inspectors generically. |
+| A5 | `GlassMaterial` imported a glass-specific hook from PostFX. | Uses `usePostFXPass('glass', glassPasses)` from the declared host. |
+| A6 | `MediaPlane` imported `features/input/webcam`. | Moved to `src/app/webcam.ts`. |
+| A7 | `ui/NodeGraph/LiveGraphView` imported `NumberField` and `Toggle` from sibling folders. | Local native inputs styled by `NodeGraph.css` (`.ngraph-number`, `.ngraph-check`). |
+| A8 | `GraphEffect` could only read the studio's compiled graphs. | Optional `node` prop and a header note. |
+
+Also: `ThreeInspector` (kind `scene`) moved from `overlays/` to `scene/`; the stray empty file `v2/1` deleted; stale path comments fixed. The remaining `any` casts (GlassMaterial 4, transmission-nodes 1, MetaBlock core 3) are where `@types/three` 0.185 lacks the node-material and pass members they touch; they stay.
+
+**Deletion test (passed 2026-09-21).** Each of these was removed in turn, then `tsc --noEmit` and `vite build` were run; both passed every time:
+
+- `features/input/`
+- `features/objects/glass/` + `GlassRings.tsx` + `GlassMesh.tsx`
+- `features/objects/MediaPlane.tsx`
+- `features/postfx/effects/GraphEffect.tsx`
+- `panels/Graph.tsx`
+- `features/overlays/`
+- `features/scene/ThreeInspector.tsx`
+
+---
+
+## 7. Inventory: v1 → v2
+
+Legend: ✅ done · ✂ not ported (by design, or not needed per the 2026-09-21 scope decision)
+
+### 7.1 Packages
 
 | v1 package | v2 location | Status |
 |---|---|---|
-| `@artinos/runtime` (registries, canvas, frame bridge, postfx controller, telemetry, quality, inspector) | `features/canvas`, `features/postfx/PostFX.tsx`, `app/store.ts`, `features/input/signals.tsx`, `features/overlays/*` | Core done; bindings, automation, history and adaptive quality are in phases 6–7 |
-| `@artinos/r3f` (ArtinosApp, ProjectRuntime, StudioShell, MetaBlockShell, panels) | `app/*`, `app/studio/*`, `src/panels/*` | Dock shell, HUD, console toast and 9 panels done; Graph, Timeline, UI DevTools and the scene tree in phases 7–9 |
-| `@artinos/modules` (scene, postfx, materials, visual, media, drei/stdlib surfaces) | `features/scene`, `features/postfx/effects`, `features/objects` | Done except the spectral glass material and MediaPlane (phase 6) |
-| `@artinos/inputflow` (devices, audio, camera, vision, MIDI, recorder) | `features/input/*` | Pointer, keyboard, audio and hands done; the rest in phase 6 |
-| `@artinos/ui` (kernel, headless, primitives, shell, devtools, showcase) | `src/ui/*` | 28 components done; the remainder in phase 8 |
-| `@artinos/graph` (node schema, five domain executors, editor) | — | Phase 9 |
-| `@artinos/metablock` (spatial docking engine) | `src/ui/MetaBlock/` | **Done**: ported unchanged apart from two unused variables and safe pointer capture |
-| `src/*.project.tsx` (default, persian-garden, ui-platform, voluma) | features + presets | Default scene done; persian-garden and VOLUMA in phase 9 |
+| `@artinos/runtime` | `features/canvas`, `features/postfx/PostFX.tsx`, `app/store.ts`, `app/runtime.ts`, `app/signals.tsx`, overlays | ✅ (bindings, automation, history, adaptive quality ✂) |
+| `@artinos/r3f` | `app/*`, `app/studio/*`, `src/panels/*` | ✅ 10 panels (the rest ✂, §7.7) |
+| `@artinos/modules` | `features/scene`, `features/postfx/effects`, `features/objects` | ✅ |
+| `@artinos/inputflow` | `features/input/*` | ✅ 8 devices (the rest ✂, §7.5) |
+| `@artinos/ui` | `src/ui/*` | ✅ 29 components (the rest ✂, §7.8) |
+| `@artinos/graph` | `src/ui/NodeGraph/` + `app/graphs.ts` etc. | ✅ |
+| `@artinos/metablock` | `src/ui/MetaBlock/` | ✅ (`MetaBlendPreview` ✂, unused) |
+| `src/*.project.tsx` | features | ✅ ui-platform as the default scene; default, persian-garden, VOLUMA ✂ |
 
-### 5.2 PostFX (44 of 44 done)
-
-Each file is `features/postfx/effects/<Name>.tsx`. "Live" means the setting updates without rebuilding the pipeline.
+### 7.2 PostFX — 46 ✅
 
 | Category | Effects |
 |---|---|
-| Light | Bloom (live), WideBloom (live; was `anamorphic`), LensFlare (live except downsample), GodRays (depth-aware blend, finds the shadow-casting light) |
-| Lens | DepthOfField (live), ChromaticAberration (live), Vignette (live) |
-| Color | Sepia, Grayscale, HueShift, Saturation, BleachBypass, Posterize, Sharpen, ColorGrade (3D LUT: `.cube` URL or a generated built-in grade) — all live |
+| Light | Bloom, WideBloom (v1 `Anamorphic`), LensFlare, GodRays, SubsurfaceScattering |
+| Lens | DepthOfField, ChromaticAberration, Vignette |
+| Color | Sepia, Grayscale, HueShift, Saturation, BleachBypass, Posterize, Sharpen, ColorGrade (3D LUT) |
 | Blur | GaussianBlur, BoxBlur, HashBlur, RadialBlur, BilateralBlur |
-| Stylize | DotScreen, FilmGrain, RGBShift, SobelEdges, Scanlines, ColorBleeding, Pixelation (scene pass), RetroPS1 (scene pass) |
-| Temporal | AfterImage, MotionBlur (velocity), Transition (image + generated noise mask) |
-| Screen-space | SSR (blended over the scene), SSGI (GI + AO composite), AmbientOcclusion (GTAO), ScreenSpaceShadows, Denoise, RecurrentDenoise, Outline (`selection` prop or `userData.outline`) |
-| Anti-aliasing | FXAA, SMAA, TRAA, TAAU, FSR1, SSAA (scene pass) |
+| Stylize | DotScreen, FilmGrain, RGBShift, SobelEdges, Scanlines, ColorBleeding, Pixelation, RetroPS1 |
+| Temporal | AfterImage, MotionBlur, Transition |
+| Screen-space | SSR, SSGI, AmbientOcclusion (GTAO), ScreenSpaceShadows, Denoise, RecurrentDenoise, Outline |
+| Anti-aliasing | FXAA, SMAA, TRAA, TAAU, FSR1, SSAA |
+| Graph | GraphEffect |
 
-Fixes compared to v1: SSR, SSGI and GTAO are now composited as three.js documents them (v1 replaced the image with the raw effect output). Outline builds its visible and hidden edge colours. LUT and Transition no longer need resources registered somewhere else.
+Fixed compared to v1: SSR/SSGI/GTAO composite as three.js documents; Outline builds visible and hidden edge colours; LUT and Transition need no external resource registry.
 
-Effects are generated from one spec table so all 44 share the same structure. The generator is not part of the project; to add an effect, copy any effect file.
+### 7.3 Scene — 17 ✅
 
-### 5.3 Scene, objects, input, overlays
+RenderSettings · Shadows · Camera (8 framings, persp/ortho) · Controls (orbit / map / trackball / camera-controls / none) · Environment · Background · BackdropImage · Sky · Stars · Fog · Lighting (8 rigs, Kelvin) · Light (ambient, hemisphere, directional, point, spot, IES, probe) · Ground · ContactShadow · Grid · Gizmo · ThreeInspector.
 
-| Feature | File | Notes |
-|---|---|---|
-| Render settings | `scene/RenderSettings.tsx` | tone mapping (7), exposure, shadow filter, max DPR |
-| Camera | `scene/Camera.tsx` | 8 framing presets, perspective/orthographic, aims the active controls |
-| Navigation | `scene/Controls.tsx` | orbit / map / trackball / camera-controls / none, auto-rotate, limits |
-| Environment | `scene/Environment.tsx` | procedural Lightformer presets (no downloads) or an equirect image |
-| Background | `scene/Background.tsx` | solid colour, restored on unmount |
-| Backdrop image | `scene/BackdropImage.tsx` | camera-locked, cover-fitted photo inside the scene |
-| Sky | `scene/Sky.tsx` | three `SkyMesh` (node material, works on WebGPU) |
-| Stars | `scene/Stars.tsx` | point shell |
-| Fog | `scene/Fog.tsx` | linear / exponential |
-| Lighting | `scene/Lighting.tsx` | 8 rigs, Kelvin white balance, shadow-casting key light |
-| Ground | `scene/Ground.tsx` | disc/square, matte/glossy/shadow-only |
-| Contact shadow | `scene/ContactShadow.tsx` | gradient decal, any backend |
-| Grid | `scene/Grid.tsx` | fading texture grid |
-| Reactive orb | `objects/ReactiveOrb.tsx` | signal-driven size, spin and glow |
-| Signal particles | `objects/SignalParticles.tsx` | point cloud that responds to a signal |
-| Glass rings | `objects/GlassRings.tsx` | GLB + physical transmission and dispersion |
-| Model | `objects/Model.tsx` | any glTF (Draco), centred and resting on the floor |
-| Pointer / Keyboard / Audio / Hands | `input/*.tsx` | `pointer.*`, `key.*`, `keys.axisX/Y`, `audio.level/bass/mid/treble/beat`, `hand.<i>.x/y/pinch/open` |
-| Stats HUD | `overlays/StatsHUD.tsx` | fps, frame-time sparkline, draw calls, triangles, geometries, textures, backend |
-| Signal monitor | `overlays/SignalMonitor.tsx` | live meters for every signal |
-| three.js Inspector | `overlays/ThreeInspector.tsx` | three's official WebGPU inspector, cleanly detached on unmount |
+✂ Water, Reflector, AdaptiveQuality (the HUD keeps its manual quality tiers), v1 `View` (multi-viewport). v1 `Presentation`, `Stage`, `CameraTarget` are covered by Camera framings + Controls.
 
-### 5.4 UI kit (29 components + the MetaBlock engine done)
+### 7.4 Objects and materials — ✅
 
-`Panel` (glass, collapsible, draggable) · `Field` · `Slider` (capsule: two-ink label, Shift for fine control, double-click reset, type-in, full keyboard) · `NumberField` (scrub) · `VectorField` · `ColorField` (picker + hex + swatches) · `TextField` (search, clear) · `Toggle` · `Checkbox` (indeterminate) · `Select` (native) · `Segmented` · `Tabs` · `Section` · `Button` (4 variants) · `IconButton` · `Toolbar` · `Badge` · `Kbd` · `Meter` (peak hold) · `Sparkline` · `Knob` · `XYPad` · `Tooltip` (portal) · `Menu` (portal, keyboard, checkable) · `Dialog` (native modal) · `CommandPalette` (fuzzy, grouped) · `Toast` (provider + hook, live region) · `FileDrop` · `PropertyRow` (the inspector row: label, control, reset, hover actions).
+Glass material folder (spectral transmission, backdrop + clean passes, dispersion, volume, diagnostics) · GlassRings · GlassMesh · Model (glTF + Draco) · MediaPlane · SceneText · Content · ReactiveOrb · SignalParticles.
 
-Still to port from v1, in phase 8: `ColorWheel/ColorArea/GradientEditor`, `CurveEditor/EnvelopeEditor`, `Joystick`, `Waveform`, `RangeSlider`, `Dial`, `RadioGroup`, `Accordion`, `Combobox`, `ContextMenu`, `Drawer`, `Popover`, `VirtualList/VirtualTable/ListBrowser`, `KeyCapture`, `TreeView` (new, for the scene tree).
+### 7.5 Input — 8 ✅
 
-### 5.4b Modules ported in the second pass
+| Device | Signals |
+|---|---|
+| Pointer | `pointer.*` |
+| Keyboard | `key.*`, `keys.axisX/Y` |
+| Audio (microphone) | `audio.level/bass/mid/treble/beat` |
+| Hands (MediaPipe) | `hand.<i>.x/y/pinch/open` |
+| Camera | `camera.luma/motion/r/g/b` |
+| MIDI | `midi.cc.<n>`, `midi.note.<n>`, `midi.bend` |
+| Gamepad | `pad.*` |
+| Device tilt | `tilt.*` |
 
-| Module | File | What it does |
-|---|---|---|
-| Subsurface Scattering | `features/postfx/effects/SubsurfaceScattering.tsx` | Screen-space light bleeding through thin geometry, from the scene’s main light |
-| Graph effect | `features/postfx/effects/GraphEffect.tsx` | Renders a GPU graph’s compiled TSL node into the chain (multiply, add, mix, replace) |
-| MIDI | `features/input/MidiInput.tsx` | midi.cc.<n>, midi.note.<n>, midi.bend, with release tails |
-| Gamepad | `features/input/GamepadInput.tsx` | pad.leftX/Y, pad.rightX/Y, pad.button.<n>, dead-zoned |
-| Device tilt | `features/input/OrientationInput.tsx` | tilt.alpha / beta / gamma, asking iOS for the sensor on first tap |
-| Camera | `features/input/CameraInput.tsx` | camera.luma, camera.motion, camera.r/g/b; shares the stream through `webcam.ts` |
-| Media Plane | `features/objects/MediaPlane.tsx` | A video file or the shared webcam, as a plane in the scene |
-| Text | `features/objects/SceneText.tsx` | A line of text drawn to a canvas texture — no font files, no extra dependencies |
-| Glass Mesh | `features/objects/GlassMesh.tsx` | Transmission, dispersion and volume attenuation on five primitives |
-| Gizmo | `features/scene/Gizmo.tsx` | Translate / rotate / scale a named object, suspending the camera controls while dragging |
+✂ Audio file/demo sources and v1's extra bands, pointer pressure/tilt/wheel, face/pose/gesture/object vision, OSC/WebSocket signals, signal recorder.
 
-### 5.5 Studio (the original dock, rebuilt)
+### 7.6 Runtime systems
 
-| Piece | File | What it does |
-|---|---|---|
-| Dock shell | `app/studio/DockShell.tsx` | Port of `MetaBlockShell`: locked viewport, persistent bottom dock, dock toolbar (tabs, search, expand/restore, HUD), floating chrome (tabs, maximize, return to dock, close), footer per panel, saved layout, layout undo/redo in the palette |
-| Runtime HUD | `app/studio/RuntimeHUD.tsx` | The original strip readout (backend · fps · micrograph · ms · tier) and its dock-bar popover (fps graph, frame budget, backend, resolution, render, memory, quality tiers that set the pixel-ratio ceiling) |
-| Brand chip | in `DockShell` | `ARTINOS / <active panel>` over the canvas |
-| Console toast | `app/studio/ConsoleToast.tsx` | Latest warning/error; the count opens the Console panel |
-| Node graph | `ui/NodeGraph` | The full graph system: five domains (signal, parameter, scene, render, gpu), schema + validation + evaluation (`graph.ts`), TSL compilation (`gpu.ts`), editing model with undo/redo, clipboard, groups and auto-layout (`editor.ts`), the editor with ports, in-place fields, value plots and GPU thumbnails (`NodeGraph.tsx`, `NodeFields.tsx`, `NodePreview.tsx`), and the live pipeline view (`LiveGraph.tsx`). The studio binds its tokens in dock.css |
-| Command palette | `ui/CommandPalette` | The studio’s only search: every panel, feature, control (“Glass Rings › Dispersion” — opens the owning panel and scrolls to the row), source path, layout undo/redo/reset, material worlds, toggle any feature |
-| Feature card | `app/studio/FeatureCard.tsx` | The original parameter card: name, count, reset, switch; rows with reset and ⋯ actions (favorite, pin, copy, paste) |
+| v1 system | v2 |
+|---|---|
+| Parameters, persistence, presets | ✅ `app/store.ts` |
+| Signals | ✅ `app/signals.tsx` |
+| Logger | ✅ `app/console.ts` |
+| Telemetry | ✅ `app/runtime.ts` |
+| Frame coordinator / scheduler | ✂ R3F owns the loop |
+| Resources, modules, unit and parameter-type registries | ✂ discovery + manifests replace them |
+| Quality manager | ✅ manual tiers in the HUD; adaptive ✂ |
+| History, bindings, automation, agent API | ✂ (the dock keeps its layout undo; signal → parameter routing is done with graphs in the Graph panel) |
+| Interactions / commands | ✅ the command palette; v1 action registry ✂ |
 
-| Panel | File | Contents |
-|---|---|---|
-| Inspector | `panels/Inspector.tsx` | Project objects as cards in columns; All / Favorites / Pinned and the Presets menu (save, load, delete, export, import, reset), both in the dock strip |
-| Scene | `panels/Scene.tsx` | Render, Camera, Atmosphere, Lighting and Ground features as cards, same toolbar |
-| PostFX | `panels/PostFX.tsx` | Stack view (active chain in order, reorder, per-effect cards) and Browse view (all 44 by category with cost, WebGPU label, switch, inline controls); pipeline bypass; backend footer |
-| InputFlow | `panels/InputFlow.tsx` | Devices (live state, capture switches, settings) and Signals (live values with meters, filter) |
-| Assets | `panels/Assets.tsx` | Drop images, glTF and `.cube` files; apply as backdrop, environment, transition target, model or colour grade |
-| Library | `panels/Library.tsx` | Every feature, panel and UI component with its path; copy path, switch features |
-| Console | `panels/Console.tsx` | Captured log with level filter, message filter, pause, clear, expandable entries |
-| Graph | `panels/Graph.tsx` | Live pipeline (inputs → signals → graphs → controls → scene → effect chain → canvas, every node carrying the real switch or slider) and the node editor: templates per domain, signal/parameter/effect/object pickers, diagnostics, and GPU graphs rendered by the Graph effect |
-| Telemetry | `panels/Telemetry.tsx` | KPIs, frame-time and fps graphs, load meters; Diagnostics tab with Stats HUD, Signal Monitor and the three.js Inspector |
-| Appearance | `panels/Appearance.tsx` | Material world, interface visibility, shortcuts, reset layout / features |
+### 7.7 Studio panels — 10 ✅
 
-`H` hides the chrome; `Ctrl/⌘ K` opens the palette. Search lives there alone — no panel carries a search field of its own, and a panel’s toolbar (filter, presets, view) rides in the dock strip through `PanelBar`, so it costs the panel no row. Each panel claims the features it shows with `owns` in its manifest, which is how a palette hit knows where to go. The default scene matches the original UI-platform project: Persian garden backdrop and environment, glass rings, Bloom + Vignette + FXAA.
+| Panel | Replaces v1 |
+|---|---|
+| Inspector | InspectorPanel, ParametersPanel, PresetsPanel, GlassInspector |
+| Scene | ScenePanel, RenderPanel |
+| PostFX | PostFXPanel |
+| InputFlow | InputPanel, SignalsPanel, ProviderPanel |
+| Graph | GraphPanel + graph/* |
+| Assets | AssetBrowserPanel, ResourcesPanel |
+| Library | ModulesPanel |
+| Console | ConsolePanel |
+| Telemetry | TelemetryPanel, ThreeInspectorPanel |
+| Appearance | — |
+
+✂ Scene Tree, Object Inspector, History, Bindings, Timeline/Automation, UI DevTools, Quality, Project, Interaction, MinimalShell, Agent.
+
+### 7.8 UI kit — 29 ✅ + MetaBlock + NodeGraph
+
+`Badge Button Checkbox ColorField CommandPalette Dialog Field FileDrop IconButton Kbd Knob Menu Meter NumberField Panel PropertyRow Section Segmented Select Slider Sparkline Tabs TextField Toast Toggle Toolbar Tooltip VectorField XYPad`, plus `theme/theme.css` (optional tokens and six worlds).
+
+✂ The v1 remainder (RadioGroup, Combobox, Accordion, ColorWheel/Area, GradientEditor, CurveEditor, EnvelopeEditor, Joystick, Waveform, Dial, RangeSlider, Popover, ContextMenu, Drawer, virtual lists, TreeView, KeyCapture, …), the kernel (`lattice`, `physics`, `schema`, `serialization`, `registry`), `token-graph`, the devtools provider, `headless/*` hooks, the v1 shell (replaced by MetaBlock + `DockShell`) and the `showcase`/`UIStudio`.
 
 ---
 
-## 6. Phases
+## 8. Phases
 
 | # | Phase | Status |
 |---|---|---|
-| 0 | Scaffold: Vite 6, TS 5.8 strict, pnpm hoisted, asset copy, launch config | **Done** |
-| 1 | App core: feature contract, discovery, store, boundaries, stage | **Done** |
-| 2 | Render: `WebGPUCanvas`, `PostFX` host, 44 effects | **Done** |
-| 3 | Scene, objects and overlays (20 features) | **Done** |
-| 4 | Input: signal bus, pointer, keyboard, audio, hand tracking | **Done** |
-| 5 | UI kit (29) + studio shell | **Done** |
-| 5b | MetaBlock dock, original skin, HUD, 9 section panels | **Done** |
-| 6 | Remaining features | To do |
-| 7 | Remaining studio panels (Scene tree, History, Bindings, UI DevTools) | To do |
-| 8 | Remaining UI kit | To do |
-| 9 | Graph, timeline and example scenes | To do |
+| 0 | Scaffold: Vite 6, TS 5.8 strict, pnpm, assets, launch config | ✅ |
+| 1 | App core: feature contract, discovery, store, boundaries, stage | ✅ |
+| 2 | Render: `WebGPUCanvas`, `PostFX` host, 44 effects | ✅ |
+| 3 | Scene, objects and overlays | ✅ |
+| 4 | Input: signal bus, pointer, keyboard, audio, hands | ✅ |
+| 5 | UI kit + studio shell | ✅ |
+| 5b | MetaBlock dock, original skin, HUD, section panels | ✅ |
+| 6 | Glass, media, MIDI, gamepad, tilt, camera, text, gizmo, light, SSS, graph effect, Graph panel | ✅ |
+| 6A | Boundary fixes (§6) | ✅ |
+| 7–10 | Extra features, panels, UI kit, timeline, examples, automated checks | ✂ not needed |
+| 11 | Cut-over: v2 becomes the repository root | ⬜ |
 
-### Phase 6 — remaining features
+### Phase 11 — cut-over
 
-- `objects/GlassMaterial` — port v1's spectral transmission material (`transmission-nodes.ts`, `TransmissionPhysicalLightingModel`, backdrop/clean passes). Needs a *pass provider* API on `PostFX` so a material can ask for an extra backdrop pass (`usePostFXPass('backdrop', …)`).
-- `objects/MediaPlane` — webcam or video texture plane. Share the camera stream with `HandTracking` through the signal bus's resource slot (add `bus.setResource/getResource`).
-- `objects/Water` (three `WaterMesh`) and `objects/Reflector`, for the persian-garden scene.
-- `input/Gamepad`, `input/Midi`, `input/Orientation`, `input/AudioFile` (source option), `input/CameraMotion` (frame-difference motion and colour).
-- `input/SignalRecorder` — record and replay the bus to JSON.
-- `scene/AdaptiveQuality` — watch frame time and step DPR and the shadow map size.
-- `scene/Light` — a single configurable light (spot, point, rect-area, IES, probe) for custom rigs.
+1. Tag the current v1 state (e.g. `v1.4-final`) so it stays reachable.
+2. Move `v2/*` to the repository root (keeping git history with `git mv`).
+3. Remove v1: `packages/`, root `src/`, `tests/`, `scripts/`, `.upgrade-backup/`, `tsconfig.app.json`, the root `pnpm-lock.yaml`/`package.json`, and the old `docs/` (keep the PRD and the design specification under `docs/reference/`).
+4. Point `.claude/launch.json` at the root and re-run `pnpm install`, `pnpm typecheck` and `pnpm build`.
+5. Merge to `main` through a PR.
 
-### Phase 7 — remaining studio panels
-
-Each is one file in `src/panels/` (the dock picks it up):
-
-- **Scene Tree + Object Inspector**: select → outline → transform gizmo with drei `TransformControls`.
-- **History**: undo/redo over store commits (add a patch log to the store).
-- **Bindings**: signal → control mapping with a remap curve; the store applies it each frame for bound numeric controls.
-- **UI DevTools**: component anatomy, state and token inspector.
-- **Graph** and **Timeline**: see phase 9.
-
-### Phase 8 — remaining UI kit
-
-Port the components listed in 5.4, each with its own folder.
-
-### Phase 9 — graph, timeline, examples
-
-- `features/graph/` — a node graph as one folder: `schema.ts` (typed ports), `evaluate.ts` (signal/parameter domains first), `GraphEditor.tsx` (canvas editor built on ui components). It drives the same bindings mechanism as phase 7.
-- `features/timeline/` — keyframe tracks over numeric controls, with play/loop.
-- Example scenes as **presets plus optional object features**: `presets/persian-garden.json` (Environment image, Water, Orb, Bloom, Vignette) and VOLUMA as its own folder `features/voluma/` (fluid solver + volume renderer + audio routing). Being a single folder, it can be deleted like any other feature.
+Before starting, decide what happens to the untracked files git cannot restore: `artinos-ui-design-specification/` and the new images under `packages/ui/VISUAL_REFERENCES/` (removing `packages/` would delete them for good); and the untracked v2 features `objects/Content.tsx`, `scene/Light.tsx` and `scene/Shadows.tsx`, which should be committed first. Another session also runs a dev server from `v2/` on port 5190, and moving the folder will stop it.
 
 ---
 
-## 7. Dependencies
+## 9. Dependencies
 
 | Package | Version | Used by |
 |---|---|---|
 | react / react-dom | 19.2.0 | everything |
-| three | 0.185.1 | canvas, postfx, scene, objects |
-| @react-three/fiber | 10.0.0-alpha.2 | canvas and every 3D feature (async `renderer` factory, `state.postProcessing`) |
-| @react-three/drei | 11.0.0-alpha.5 | Camera, Controls, Environment/Lightformer, BackdropImage (`useTexture`), GlassRings/Model (`useGLTF`, `Center`), ReactiveOrb (`Float`) |
-| @mediapipe/tasks-vision | 0.10.35 | HandTracking (loaded only when turned on; own chunk) |
+| three | 0.185.1 | canvas, postfx, scene, objects, NodeGraph GPU domain |
+| @react-three/fiber | 10.0.0-alpha.2 | canvas and every 3D feature |
+| @react-three/drei | 11.0.0-alpha.5 | Camera, Controls, Environment, BackdropImage, GlassRings/Model, ReactiveOrb, Gizmo |
+| @mediapipe/tasks-vision | 0.10.35 | HandTracking (lazy chunk) |
 | typescript ~5.8, vite ^6, @vitejs/plugin-react ^5, @types/* | dev | |
 
-Removed: `three-stdlib` (no longer imported), `lucide-react` (the UI kit uses inline SVG).
-
-Public assets: `hdr/persianbeauty.png`, `backgrounds/persian-garden.png`, `models/glass-rings.glb`, `draco/*`, `mediapipe/wasm/*`, `mediapipe/models/hand_landmarker.task`. The other MediaPipe models (face, pose, gesture, object) stay in v1 until phase 6 needs them.
+Removed: `three-stdlib`, `lucide-react` (inline SVG icons).
 
 ---
 
-## 8. Known limitations
+## 10. Known limitations
 
-- **Alpha dependencies.** R3F 10 and drei 11 are pinned alphas, and their types lag behind (`Canvas` is cast once, in `WebGPUCanvas`). Upgrading means re-checking the async `renderer` factory and `state.postProcessing`.
-- **HashBlur `repeats`.** The option exists in three's JS but not in `@types/three` 0.185, so it is cast.
-- **Scene-replacing passes** (SSAA, Pixelation, Retro) re-render the scene and discard effects ordered before them. They default to orders 10–12, and the panel footer explains this.
-- **Transmission and PostFX.** The simple `GlassRings` material uses three's built-in transmission. The v1 spectral backdrop pipeline is phase 6.
-- **No canvas MSAA.** Temporal and supersampling passes need single-sample depth, so anti-aliasing comes from FXAA, SMAA, TRAA or TAAU.
-- **Studio skin weight.** The original stylesheet is carried over whole (about 330 kB, 52 kB gzip) so the studio matches v1 exactly. Its legacy layers can be pruned later.
-- **Default pixel ratio 1.** On a 1.5× display, the glass scene with post-processing ran at 10–16 fps at full resolution and 56–60 fps at 1×. The HUD's quality tiers raise the ceiling.
-- **Drei `ContactShadows` and `Grid`** are not WebGPU-safe in these alphas, so `ContactShadow` and `Grid` are small canvas-texture versions (as in v1).
+- **Alpha dependencies.** R3F 10 and drei 11 are pinned alphas with lagging types (`Canvas` is cast once in `WebGPUCanvas`).
+- **Scene-replacing passes** (SSAA, Pixelation, Retro) re-render the scene and discard effects ordered before them; they default to orders 10–12.
+- **Shader compile errors** surface after `build()`, so `PostFX`'s try/catch cannot catch them; the frame goes black until the effect is switched off. Test a new effect first in the chain and behind another effect.
+- **No canvas MSAA** — temporal/supersampling passes need single-sample depth; AA comes from FXAA/SMAA/TRAA/TAAU.
+- **Studio skin weight** — the original stylesheet (~330 kB, 52 kB gzip) is carried whole.
+- **Default pixel ratio 1** — the glass scene with post-processing runs 56–60 fps at 1×, 10–16 fps at 1.5×. HUD tiers raise the ceiling.
+- **Drei `ContactShadows`/`Grid`** are not WebGPU-safe in these alphas, so both are small canvas-texture versions.
+- **Never checked:** microphone/webcam/MIDI permission flows and the WebGL2 fallback (out of scope per the 2026-09-21 decision).
 
-## 9. Adding a feature (checklist)
+---
 
-1. Create `src/features/<area>/<Name>.tsx`.
-2. Export the component with typed, defaulted props and a doc comment that lists what it needs.
-3. Clean up everything it allocates.
-4. Export `feature` with a unique `id`, a `kind` and `controls`.
-5. Save. It appears in the studio, and nothing else needs changing.
+## 11. Checklists
+
+### Adding a feature
+
+1. Create `src/features/<area>/<Name>.tsx` (or a folder with one manifest file).
+2. Export the component with typed, defaulted props and a doc comment listing what it needs.
+3. Import only npm packages, `src/app/*` (never `store` or `registry`), `src/ui/*`, files in its own folder, and `postfx/PostFX.tsx` if it is an effect or needs a pass.
+4. Clean up everything it allocates.
+5. Export `feature` with a unique `id`, a `kind` and `controls`; export `inspector` if it needs its own studio section.
+6. Save. It appears in the scene, its panel, the palette and presets.
 
 ### Adding a panel
 
 1. Create `src/panels/<Name>.tsx` with a component and a `panel` manifest.
-2. Build it from `FeatureCard`, `ControlsBar` and the `src/ui` components; keep panel-specific state inside the file.
-3. Save. It appears as a dock tab and in the palette. If an older saved layout is active, reset the dock layout (Appearance panel).
+2. Build it from `app/studio/` blocks and `src/ui` components; keep panel state inside the file.
+3. Save. If an older saved layout is active, reset it (Appearance panel).
 
-## 10. Verification
+### Removing anything
 
-What ran for this rebuild:
+Delete the file or folder. `reconcile()` drops its saved state; the dock drops its tab. If the build fails, a boundary rule was broken — fix the importer, not the deletion.
 
-- `tsc` (strict, `noUnusedLocals`, `verbatimModuleSyntax`): **passes with no errors**.
-- `vite build`: **succeeds** (engine chunk 2.9 MB / 859 kB gzip, app 116 kB, vision 258 kB, CSS 45 kB).
-- **In the browser (Chrome, WebGPU backend):**
-  - The default scene renders at 60 fps.
-  - **All 44 effects** were switched on one at a time, both first in the chain and behind a non-texture effect (Saturation at order 1). None logged errors. The only message is Retro's harmless "no uv" warning for point clouds.
-  - A stacked chain rendered without errors: Glass Rings + Sky + sun lighting + God Rays + GTAO + TRAA + Bloom + Vignette + FXAA.
-  - Scene features toggled without errors: Sky, Stars, Grid, Backdrop, Fog, Glass Rings, Model, Signal Monitor and the three.js Inspector; so did every Environment and Lighting preset, both camera projections and every navigation mode.
-  - UI checked with real input: slider drag, arrow/Home/End keys, typing a value, double-click reset; Add-effect menu; Ctrl+K palette; phone width (375 px), where the bottom sheet shows and nothing scrolls sideways.
-- **Bugs found and fixed during that pass:**
-  - Canvas MSAA broke SSAA, TRAA, TAAU and Recurrent Denoise, so the canvas now runs without MSAA and the pipeline does the anti-aliasing.
-  - Chromatic Aberration needed an explicit centre.
-  - SSR needed a metalness/roughness buffer (new `metalRoughness` attachment).
-  - Recurrent Denoise needs its `raw` input.
-  - God Rays has to wait for the light's shadow map.
-  - God Rays, SSR and Motion Blur need a texture input when they are not first in the chain.
-  - The three.js Inspector used the wrong show/hide API and left timestamp queries running after removal.
-  - `onCommit?.(set(x))` skipped `set()` when no `onCommit` was passed (Slider, Knob, NumberField, XYPad).
-  - The command palette depended on `requestAnimationFrame`.
-- **Dock and panels (browser, WebGPU):**
-  - All nine panels open with no errors or crashed panels.
-  - A tab dragged out becomes a floating window; "Return to its dock" puts it back at its original tab position.
-  - The brand chip follows the active panel. PostFX Browse and Stack views both work.
-  - The default glass scene runs at 60 fps at pixel ratio 1.
-  - Fixed in this pass: the app root could be scrolled by focus (now `overflow: clip`); Scene cards stacked in one column (group headings replaced by card captions); MetaBlock threw on pointer capture/release for inactive pointers (now guarded).
-- **Not checked:** microphone and webcam permissions (Audio, Hand Tracking), the WebGL2 fallback, and the look of each effect beyond "renders without errors".
+---
 
-### Known gap: shader compile errors
+## 12. Verification log
 
-`PostFX` catches errors thrown while an effect *builds* its node. Errors that surface later, when the shader compiles, fail the whole pipeline and the frame goes black until the effect is switched off. The fixes above removed every such case in the shipped effects. A new effect should be tested first in the chain and again behind another effect.
+**2026-09-21 (phase 6A):**
+
+- `tsc -b` passes.
+- Deletion test in §6: seven removals, `tsc --noEmit` and `vite build` pass for each.
+- Chrome, WebGPU (dev server on 5191):
+  - The default glass scene renders. The Inspector shows the glass diagnostics through the new `inspector` export, and its monitor reports the capture passes running (1 mesh, backdrop 870×652, clean 716×537, RGB mode, 12 taps), so the glass passes now arrive through `usePostFXPass`.
+  - The Graph panel's live pipeline lists Scene Pass, depth, normal, velocity, Bloom, Vignette and FXAA. Normal and velocity are only rendered because the panel requests them, so `attachments` and `onStages` both work end to end.
+  - The live-graph nodes render their own number fields (10) and switches (12). Typing a Bloom strength in a node updated the stored value (0.6 → 1.1 → back to 0.6).
+- Found and fixed during the pass: `GlassInspector` under `features/` imported the store, which made a circular import (`Cannot access 'features' before initialization`) and a blank page. It now gets its state as props (rule 3).
+
+**2026-09-21 (commits `aa4247d`…`5da21d3`):** Graph panel restyled; live graph previews each real pass; glass material, capture passes, controls, inspector and monitoring ported from v1.
+
+**2026-09-17:**
+
+- `tsc` and `vite build` pass (engine chunk 2.9 MB / 859 kB gzip, app 116 kB, vision 258 kB, CSS 45 kB).
+- Chrome, WebGPU: default scene 60 fps; all 44 effects switched on one at a time, first and behind Saturation, with no errors; a stacked chain (Glass Rings + Sky + GodRays + GTAO + TRAA + Bloom + Vignette + FXAA) renders; scene features, every Environment/Lighting preset, both projections and every navigation mode toggle cleanly.
+- UI with real input: slider drag, keys, typed values, double-click reset, Add-effect menu, ⌘K palette, 375 px width. Dock: all panels open, drag-out floats, "Return to its dock" restores the tab position.
+- Bugs fixed then: canvas MSAA vs SSAA/TRAA/TAAU/RecurrentDenoise; Chromatic Aberration centre; SSR metal/roughness buffer; Recurrent Denoise `raw`; God Rays waiting for the shadow map; texture input for God Rays/SSR/MotionBlur when not first; three.js Inspector show/hide and timestamp queries; `onCommit?.(set(x))` skipping `set()`; palette depending on rAF; app root scrolled by focus; Scene cards in one column; MetaBlock pointer capture on inactive pointers.

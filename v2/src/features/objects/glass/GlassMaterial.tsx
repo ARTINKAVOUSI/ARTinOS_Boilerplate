@@ -2,7 +2,8 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState }
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three/webgpu'
 import { texture as textureNode, uniform, viewportSharedTexture } from 'three/tsl'
-import { useGlassCapture } from '../../postfx/PostFX'
+import { usePostFXPass } from '../../postfx/PostFX'
+import { glassPasses } from './glass-capture'
 import { buildTransmissionBackdropNode, type TransmissionUniforms } from './transmission-nodes'
 export interface GlassMaterialProps {
   /** Base albedo; tints the transmitted light. */
@@ -166,8 +167,9 @@ export const GlassMaterial = forwardRef<any, GlassMaterialProps>(function GlassM
   const [compiledSamples, setCompiledSamples] = useState(props.samples)
   const [compiledSpectral, setCompiledSpectral] = useState(props.spectralDispersion)
 
-  // v1 read these from its runtime resource registry; the PostFX host provides them here.
-  const capture = useGlassCapture()
+  // v1 read these from its runtime resource registry; here the material asks the
+  // PostFX host for the glass passes. Outside a host it samples the viewport instead.
+  const capture = usePostFXPass('glass', glassPasses, props.screenSpaceBackdrop)
   const backdropTexture = capture?.backdrop ?? null
   const cleanBackdrop = capture?.clean ?? null
   const backdropTex = props.screenSpaceBackdrop ? (backdropTexture ?? props.backdropMap) : null

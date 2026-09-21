@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import type { Feature } from '../../app/feature'
-import { useSignalCleanup, useSignals } from './signals'
+import { useSignalCleanup, useSignals } from '../../app/signals'
 
 export interface GamepadInputProps {
   /** Which pad to read. 0 is the first one connected. */

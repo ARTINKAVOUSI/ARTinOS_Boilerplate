@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { wirePath } from './view'
 import { RenderPreview, ValuePreview, type PreviewFrame } from './NodePreview'
-import { NumberField } from '../NumberField/NumberField'
-import { Toggle } from '../Toggle/Toggle'
 
 export const LIVE_NODE_WIDTH = 252
 const COLUMN_GAP = 88
@@ -219,12 +217,23 @@ export function LiveGraphView({ graph, previews, onInspect, onControl, insetRigh
                 {control.kind === 'boolean' ? (
                   <label className="artinos-control">
                     <span>{control.label}</span>
-                    <Toggle size="sm" label={control.label} checked={control.value} onChange={next => onControl(node, control, next)} />
+                    <input type="checkbox" role="switch" className="ngraph-check" checked={control.value} onChange={event => onControl(node, control, event.target.checked)} />
                   </label>
                 ) : control.kind === 'number' ? (
                   <label className="artinos-control">
                     <span>{control.label}</span>
-                    <NumberField label={control.label} value={control.value} min={control.min} max={control.max} step={control.step} onChange={next => onControl(node, control, next)} />
+                    <input
+                      type="number"
+                      className="ngraph-number"
+                      value={control.value}
+                      min={control.min}
+                      max={control.max}
+                      step={control.step ?? 0.01}
+                      onChange={event => {
+                        const next = event.target.valueAsNumber
+                        if (Number.isFinite(next)) onControl(node, control, next)
+                      }}
+                    />
                   </label>
                 ) : (
                   <label className="artinos-control">

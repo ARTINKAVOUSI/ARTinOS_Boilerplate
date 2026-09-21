@@ -47,7 +47,8 @@ export type Values = Record<string, ControlValue>
  *                    switching one never remounts the scene.
  *   canvas-provider  wraps everything inside the canvas (the PostFX pipeline).
  *                    Always mounted; receives `enabled` and must render its
- *                    children either way.
+ *                    children either way. Also receives `attachments` and
+ *                    `onStages`, which the Graph panel's previews use.
  *   scene            inside the canvas (camera, lights, fog, objects)
  *   effect           inside the canvas, under the PostFX pipeline
  *   overlay          DOM over the canvas (HUDs, monitors). Also receives
@@ -75,6 +76,31 @@ export interface Feature {
   webgpuOnly?: boolean
   controls?: Controls
   component: ComponentType<any>
+}
+
+/**
+ * An extra studio section a feature folder ships for itself, exported as
+ * `inspector` from any `.tsx` file under `src/features/`. The Inspector panel
+ * renders it for the first listed feature that is switched on. Like a manifest
+ * it is found by the glob, so deleting the file removes it.
+ *
+ * It gets everything it needs as props. Files under `src/features/` must not
+ * import the store or the registry: the registry loads them, so that import
+ * would be circular.
+ */
+export interface FeatureInspectorProps {
+  featureId: string
+  values: Values
+  /** Another feature's switch state, or undefined when no such feature exists. */
+  peer: (id: string) => { enabled: boolean } | undefined
+  setEnabled: (id: string, enabled: boolean) => void
+}
+
+export interface FeatureInspector {
+  id: string
+  /** Feature ids it inspects, in order of preference. */
+  features: string[]
+  component: ComponentType<FeatureInspectorProps>
 }
 
 export interface DiscoveredFeature extends Feature {

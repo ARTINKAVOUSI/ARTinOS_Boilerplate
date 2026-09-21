@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, useSyncExternalStore, type ReactNode } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import type { WebGPURenderer } from 'three/webgpu'
 import { WebGPUCanvas, type RendererBackend } from '../features/canvas/WebGPUCanvas'
@@ -8,7 +8,8 @@ import { byKind } from './registry'
 import { useStudio, type FeatureState } from './store'
 import { runtime } from './runtime'
 import { nodePreviews } from './node-preview'
-import { signalBus } from '../features/input/signals'
+import { pipelineStages } from './pipeline-stages'
+import { signalBus } from './signals'
 
 const selectFeatures = (state: { features: Record<string, FeatureState> }) => state.features
 
@@ -57,6 +58,8 @@ export interface StageProps {
  */
 export function Stage({ onReady }: StageProps) {
   const states = useStudio(selectFeatures)
+  // Attachments the Graph panel wants rendered for its previews.
+  const attachments = useSyncExternalStore(pipelineStages.subscribeWanted, pipelineStages.getWanted, pipelineStages.getWanted)
 
   const tree = useMemo(() => {
     const on = (feature: DiscoveredFeature) => states[feature.id]?.enabled
@@ -76,13 +79,13 @@ export function Stage({ onReady }: StageProps) {
     for (const provider of [...canvasProviders].reverse()) {
       const Provider = provider.component
       content = (
-        <Provider key={provider.id} {...states[provider.id]?.values} enabled={on(provider)}>
+        <Provider key={provider.id} {...states[provider.id]?.values} enabled={on(provider)} attachments={attachments} onStages={pipelineStages.publish}>
           {content}
         </Provider>
       )
     }
     return content
-  }, [states])
+  }, [states, attachments])
 
   // No MSAA: the pipeline renders to its own targets, and temporal/SSAA passes
   // need single-sample depth. FXAA / SMAA / TRAA do the anti-aliasing.

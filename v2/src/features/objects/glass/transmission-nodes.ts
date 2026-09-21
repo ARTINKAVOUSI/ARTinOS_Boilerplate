@@ -7,7 +7,7 @@
  *
  * The refraction path is: refract the view direction by IOR, walk it through the volume scaled
  * by thickness x model scale, exit in world space, project to NDC, and sample the backdrop
- * buffer the PostFX host captures (see ../../postfx/glass-capture.ts).
+ * buffer the glass passes capture (see ./glass-capture.ts).
  */
 import {
   Fn as tslFn,

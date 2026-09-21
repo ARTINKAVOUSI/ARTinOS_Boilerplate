@@ -13,6 +13,8 @@ export interface GraphEffectProps {
   /** How the compiled node is combined with the image. */
   blend?: 'multiply' | 'add' | 'mix' | 'replace'
   amount?: number
+  /** A TSL node to render instead of a Graph-panel graph; set it to use this effect outside the studio. */
+  node?: unknown
 }
 
 /**
@@ -23,14 +25,18 @@ export interface GraphEffectProps {
  * uniforms updated every frame. Switch the graph off and this effect passes the
  * image through untouched.
  *
+ * Studio-bound by default: it reads the graphs the Graph panel publishes in
+ * `app/compiled-graphs.ts`. Pass `node` to drive it with any TSL node instead,
+ * which is also how to use it outside this app (drop that import).
+ *
  * Mount inside <PostFX>.
  */
-export function GraphEffect({ id = 'graph-effect', enabled = true, order = 460, graph = '', blend = 'multiply', amount = 1 }: GraphEffectProps) {
+export function GraphEffect({ id = 'graph-effect', enabled = true, order = 460, graph = '', blend = 'multiply', amount = 1, node: explicit }: GraphEffectProps) {
   const entries = useSyncExternalStore(compiledGraphs.subscribe, compiledGraphs.getEntries, compiledGraphs.getEntries)
   const amountU = useUniform(amount)
   // The compiled node changes identity only when a GPU graph is recompiled.
   const entry = graph ? entries.find(item => item.id === graph || item.name.toLowerCase() === graph.toLowerCase()) : entries[0]
-  const node = entry?.node ?? null
+  const node = explicit ?? entry?.node ?? null
 
   usePostFXEffect(
     id,

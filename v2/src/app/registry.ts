@@ -1,11 +1,13 @@
-import type { DiscoveredFeature, Feature, FeatureKind } from './feature'
+import type { DiscoveredFeature, Feature, FeatureInspector, FeatureKind } from './feature'
 
 /**
  * Feature discovery. Every `.tsx` file under `src/features/` that exports a
- * `feature` manifest is picked up here; files without one (shared helpers such
- * as the signal bus) are ignored. This is the only place that knows the folder.
+ * `feature` manifest is picked up here, and every one that exports an
+ * `inspector` section; files with neither (helpers such as the glass material)
+ * are ignored. Only `.tsx` files are scanned. This is the only place that
+ * knows the folder.
  */
-const modules = import.meta.glob<{ feature?: Feature }>('../features/**/*.tsx', { eager: true })
+const modules = import.meta.glob<{ feature?: Feature; inspector?: FeatureInspector }>('../features/**/*.tsx', { eager: true })
 
 function discover(): DiscoveredFeature[] {
   const seen = new Map<string, string>()
@@ -33,3 +35,8 @@ export const features = discover()
 
 export const byKind = (kind: FeatureKind) => features.filter(feature => feature.kind === kind)
 export const findFeature = (id: string) => features.find(feature => feature.id === id)
+
+/** Studio sections shipped by feature folders; see `FeatureInspector`. */
+export const inspectors: FeatureInspector[] = Object.values(modules)
+  .map(module => module.inspector)
+  .filter((inspector): inspector is FeatureInspector => !!inspector && Array.isArray(inspector.features) && typeof inspector.component === 'function')
