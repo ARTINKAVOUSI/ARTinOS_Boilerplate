@@ -1,0 +1,106 @@
+/**
+ * The glass capture passes, ported from v1's scene-pass-filter.
+ *
+ * Pass contract, run inside the scene pass's own update so it is synchronous
+ * with the frame:
+ *   1. Glass / Clean    hides glass and captures the scene behind it, when any
+ *                       glass wants a backside.
+ *   2. Glass / Backdrop draws the glass back faces (their backside materials,
+ *                       sampling Clean) or, with no backside, the scene without
+ *                       glass.
+ *   3. Scene / Beauty   renders front faces sampling Backdrop; objects tagged
+ *                       `transmissionBackdropOnly` are left out.
+ *
+ * Every visibility, material, layer and background change is restored even if
+ * a capture throws. With no glass in view the backdrop pass returns after one
+ * traversal.
+ */
+
+// Three's pass nodes are loosely typed; this file drives them opaquely.
+type AnyNode = any
+
+/** Keep capture mutations inside the synchronous PassNode draw, restoring even on failure. */
+export function withScenePassFilter<T>(scene: AnyNode, exclude: (object: AnyNode) => boolean, draw: () => T): T {
+  const hidden: AnyNode[] = []
+  try {
+    scene.traverse((object: AnyNode) => {
+      if (object.visible && exclude(object)) {
+        hidden.push(object)
+        object.visible = false
+      }
+    })
+    return draw()
+  } finally {
+    for (const object of hidden) object.visible = true
+  }
+}
+
+export const isTransmissionGlass = (object: AnyNode) =>
+  object.isMesh &&
+  (object.userData?.transmissionGlass === true ||
+    (Array.isArray(object.material) ? object.material : [object.material]).some((material: AnyNode) => material?.isTransmissionGlassMaterial))
+
+export function configureScenePasses(scenePass: AnyNode, backdropPass: AnyNode, scene: AnyNode, cleanPass?: AnyNode, clean = false) {
+  if (cleanPass) configureScenePasses({ updateBefore() {} }, cleanPass, scene, undefined, true)
+  const capture = backdropPass.updateBefore.bind(backdropPass)
+  backdropPass.updateBefore = (frame: AnyNode) => {
+    let scale = 0.1
+    let fill: AnyNode = null
+    let needsBackside = false
+    let meshCount = 0
+    scene.traverseVisible((object: AnyNode) => {
+      if (!isTransmissionGlass(object)) return
+      meshCount++
+      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+        const config = material.transmissionBackdropConfig
+        if (!config) continue
+        needsBackside ||= !!config.backside
+        if (clean && !config.backside) continue
+        scale = Math.max(scale, (clean && config.backside ? config.backsideResolutionScale : config.backdropResolutionScale) ?? 1)
+        fill ??= config.background
+      }
+    })
+    backdropPass.captureActive = meshCount > 0
+    if (!meshCount) return
+    backdropPass.setResolutionScale(Math.min(1, Math.max(0.1, scale)))
+    const background = scene.background
+    // A project background wins; the material fill only supplies otherwise empty pixels.
+    if (background === null && !scene.backgroundNode && fill) scene.background = fill
+    const camera = backdropPass.camera
+    const layerMask = camera?.layers.mask
+    camera?.layers.enable(1)
+    const started = performance.now()
+    try {
+      if (!cleanPass || !needsBackside) return withScenePassFilter(scene, isTransmissionGlass, () => capture(frame))
+      frame.updateBeforeNode(cleanPass)
+      const changed: Array<[AnyNode, AnyNode]> = []
+      try {
+        return withScenePassFilter(
+          scene,
+          object => {
+            if (!isTransmissionGlass(object)) return false
+            const materials = Array.isArray(object.material) ? object.material : [object.material]
+            if (!materials.some((m: AnyNode) => m.transmissionBackdropConfig?.backside && m.transmissionBacksideMaterial)) return true
+            changed.push([object, object.material])
+            const replacements = materials.map((m: AnyNode) => m.transmissionBacksideMaterial ?? m)
+            object.material = Array.isArray(object.material) ? replacements : replacements[0]
+            return false
+          },
+          () => capture(frame),
+        )
+      } finally {
+        for (const [object, material] of changed) object.material = material
+      }
+    } finally {
+      if (camera) camera.layers.mask = layerMask
+      backdropPass.captureCpuMs = performance.now() - started
+      scene.background = background
+    }
+  }
+  const beauty = scenePass.updateBefore.bind(scenePass)
+  scenePass.updateBefore = (frame: AnyNode) => {
+    // Same-frame capture must finish before any beauty material samples its texture.
+    frame.updateBeforeNode(backdropPass)
+    return withScenePassFilter(scene, object => object.userData?.transmissionBackdropOnly === true, () => beauty(frame))
+  }
+}

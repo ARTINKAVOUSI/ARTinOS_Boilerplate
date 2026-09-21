@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type DependencyList, type ReactNode } from 'react'
 import { useThree } from '@react-three/fiber'
-import { RenderPipeline, type Camera, type Object3D, type Scene, type WebGPURenderer } from 'three/webgpu'
+import { LinearMipmapLinearFilter, RenderPipeline, type Camera, type Object3D, type Scene, type WebGPURenderer } from 'three/webgpu'
 import { packNormalToRGB, metalness, mrt, normalView, output, pass, roughness, uniform, vec2, vec4, velocity } from 'three/tsl'
 import type { Feature } from '../../app/feature'
 import { pipelineStages, type PipelineStage } from '../../app/pipeline-stages'
+import { configureScenePasses } from './glass-capture'
 
 /**
  * PostFX — the render pipeline host.
@@ -99,6 +100,21 @@ class EffectRegistry {
 
 const RegistryContext = createContext<EffectRegistry | null>(null)
 
+/** The glass captures a <PostFX> host provides: the backdrop, and the clean scene behind glass. */
+export interface GlassCapture {
+  backdrop: TSLNode
+  clean: TSLNode
+}
+const GlassCaptureContext = createContext<GlassCapture | null>(null)
+
+/**
+ * The glass captures of the nearest <PostFX>, or null outside one — a glass
+ * material then falls back to the viewport texture and has no backside.
+ */
+export function useGlassCapture(): GlassCapture | null {
+  return useContext(GlassCaptureContext)
+}
+
 /**
  * Register an effect with the nearest <PostFX>. `deps` lists everything the
  * build reads that is not a live uniform; changing one rebuilds the chain.
@@ -182,13 +198,31 @@ export function PostFX({ children, enabled = true }: PostFXProps) {
         }),
       )
     }
-    return { pipeline, scenePass }
+    scenePass.name = 'Scene / Beauty'
+    // Glass captures, as v1's pipeline had them: mipmapped so rough glass can
+    // sample a blurrier level. They cost one traversal when no glass is in view.
+    const backdropPass = pass(scene, camera)
+    backdropPass.name = 'Glass / Backdrop'
+    const cleanPass = pass(scene, camera)
+    cleanPass.name = 'Glass / Clean'
+    for (const capture of [backdropPass, cleanPass]) {
+      const target = (capture as unknown as { renderTarget: { texture: { generateMipmaps: boolean; minFilter: number } } }).renderTarget.texture
+      target.generateMipmaps = true
+      target.minFilter = LinearMipmapLinearFilter
+    }
+    configureScenePasses(scenePass, backdropPass, scene, cleanPass)
+    return { pipeline, scenePass, backdropPass, cleanPass }
   }, [renderer, scene, camera, needNormal, needVelocity, needPacked, needMR])
 
   useEffect(() => () => {
     base.scenePass.dispose()
+    base.backdropPass.dispose()
+    base.cleanPass.dispose()
     base.pipeline.dispose()
   }, [base])
+
+  // What glass materials refract: the backdrop, and the clean scene their back faces sample.
+  const glassCapture = useMemo(() => ({ backdrop: base.backdropPass.getTextureNode(), clean: base.cleanPass.getTextureNode() }), [base])
 
   useEffect(() => {
     const { pipeline, scenePass } = base
@@ -246,7 +280,11 @@ export function PostFX({ children, enabled = true }: PostFXProps) {
     }
   }, [base, entries, enabled, renderer, scene, camera, set, needNormal, needVelocity, needPacked, needMR])
 
-  return <RegistryContext.Provider value={registry}>{children}</RegistryContext.Provider>
+  return (
+    <RegistryContext.Provider value={registry}>
+      <GlassCaptureContext.Provider value={glassCapture}>{children}</GlassCaptureContext.Provider>
+    </RegistryContext.Provider>
+  )
 }
 
 export default PostFX
