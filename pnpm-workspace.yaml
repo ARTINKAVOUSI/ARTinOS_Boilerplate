@@ -1,9 +1,4 @@
-packages:
-  - packages/*
-
-# Flat, real-directory node_modules (npm-like).
+# Single-package project. Flat, real-directory node_modules (npm-like).
 nodeLinker: hoisted
-
-# esbuild needs its postinstall to place the platform binary.
 allowBuilds:
   esbuild: true

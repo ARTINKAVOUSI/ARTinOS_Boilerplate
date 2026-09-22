@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./packages/runtime" },
+    { "path": "./packages/modules" },
+    { "path": "./packages/inputflow" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/graph" },
+    { "path": "./packages/r3f" }
+  ]
+}

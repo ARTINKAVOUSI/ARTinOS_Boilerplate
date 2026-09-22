@@ -2,31 +2,18 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "artinos-boilerplate",
+      "name": "artinos",
       "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
       "runtimeArgs": [
-        "run",
-        "dev"
-      ],
-      "port": 5180
-    },
-    {
-      "name": "artinos-v2",
-      "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
-      "runtimeArgs": [
-        "--prefix",
-        "v2",
         "run",
         "dev"
       ],
       "port": 5190
     },
     {
-      "name": "artinos-v2-alt",
+      "name": "artinos-alt",
       "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
       "runtimeArgs": [
-        "--prefix",
-        "v2",
         "run",
         "dev",
         "--",

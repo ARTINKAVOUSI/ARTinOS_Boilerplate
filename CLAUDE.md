@@ -51,7 +51,8 @@ if you find yourself editing a list to register something, the design is wrong.
 
 ## Porting work
 
-When bringing a capability over from the original `packages/*` workspace, port
+When bringing a capability over from the original v1 workspace (archived in
+`legacy/v1/`, and at the git tag `v1.4-final`), port
 the *behaviour*, not the architecture: the original's registries, providers and
 cross-package imports are exactly what this rebuild removes. The result is one
 file or one folder in the table above, self-contained and deletable.

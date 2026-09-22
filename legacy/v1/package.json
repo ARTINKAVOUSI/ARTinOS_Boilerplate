@@ -1,0 +1,48 @@
+{
+  "name": "artinos-boilerplate",
+  "private": true,
+  "version": "1.4.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "clean": "tsc -b --clean",
+    "doctor": "node scripts/doctor.mjs",
+    "check:packages": "node scripts/doctor.mjs",
+    "test": "node --import ./tests/register-typescript.mjs --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@artinos/runtime": "file:packages/runtime",
+    "@artinos/graph": "file:packages/graph",
+    "@artinos/inputflow": "file:packages/inputflow",
+    "@artinos/metablock": "file:packages/metablock",
+    "@artinos/modules": "file:packages/modules",
+    "@artinos/r3f": "file:packages/r3f",
+    "@artinos/ui": "file:packages/ui",
+    "@mediapipe/tasks-vision": "0.10.35",
+    "@react-three/drei": "11.0.0-alpha.5",
+    "@react-three/fiber": "10.0.0-alpha.2",
+    "lucide-react": "^0.546.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "three": "0.185.1",
+    "three-stdlib": "2.36.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.185.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,115 @@
+/* SLIDER */
+
+position: absolute;
+width: 209px;
+height: 24px;
+
+
+
+/* base */
+
+position: absolute;
+left: 0%;
+right: -5.26%;
+top: 0%;
+bottom: 0%;
+
+background: rgba(0, 0, 0, 0.01);
+background-blend-mode: plus-lighter;
+box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.43);
+backdrop-filter: blur(30px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 7px;
+
+
+/* bar */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 0.36%;
+right: 37.54%;
+top: 3.77%;
+bottom: 4.21%;
+
+background: linear-gradient(181.66deg, rgba(212, 212, 212, 0.99) 1.18%, rgba(237, 237, 237, 0.99) 18.25%, rgba(204, 202, 202, 0.7326) 43.84%, rgba(255, 255, 255, 0.7326) 91.43%);
+border: 2px solid #C3C3C3;
+box-shadow: inset 0px 6px 11.3px rgba(0, 0, 0, 0.31);
+border-radius: 6px;
+
+
+/* Handle */
+
+position: absolute;
+left: 58.77%;
+right: 39.98%;
+top: 36.66%;
+bottom: 34.58%;
+
+filter: drop-shadow(-1px -1px 3px rgba(0, 0, 0, 0.39));
+
+
+/* Rectangle 2915 */
+
+position: absolute;
+left: 58.77%;
+right: 40.92%;
+top: 36.66%;
+bottom: 34.58%;
+
+background: #262626;
+border-radius: 2px;
+
+
+/* Rectangle 2929 */
+
+position: absolute;
+left: 59.71%;
+right: 39.98%;
+top: 36.66%;
+bottom: 34.58%;
+
+background: #262626;
+border-radius: 2px;
+
+
+/* 65.00 */
+
+position: absolute;
+width: 37px;
+left: 175px;
+top: 2px;
+bottom: 2px;
+
+font-family: 'Roboto Mono';
+font-style: normal;
+font-weight: 700;
+font-size: 12px;
+line-height: 16px;
+display: flex;
+align-items: center;
+text-align: center;
+
+color: #BBBCC4;
+
+
+
+/* LABEL */
+
+position: absolute;
+width: 37px;
+left: 9px;
+top: 2px;
+bottom: 2px;
+
+font-family: 'Roboto Mono';
+font-style: normal;
+font-weight: 700;
+font-size: 12px;
+line-height: 16px;
+display: flex;
+align-items: center;
+text-align: center;
+
+color: #222222;
+

@@ -1,4 +1,0 @@
-# Single-package project. Flat, real-directory node_modules (npm-like).
-nodeLinker: hoisted
-allowBuilds:
-  esbuild: true

@@ -1,12 +1,12 @@
 # ARTINOS v2 — Rebuild Plan
 
-The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.project.tsx` in the repository root) as a set of copy-pastable React units, following `.claude/skills/copy-pastable-reusable-react/SKILL.md`. It covers the contract every unit follows, the folder layout, a v1 → v2 inventory with the status of every item, the boundary audit and its fixes, and what is left.
+The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.project.tsx`, now archived in `legacy/v1/` and at the git tag `v1.4-final`) as a set of copy-pastable React units, following `.claude/skills/copy-pastable-reusable-react/SKILL.md`. It covers the contract every unit follows, the folder layout, a v1 → v2 inventory with the status of every item, the boundary audit and its fixes, and the cut-over.
 
-**Status as of 2026-09-21** (branch `v0.5-dock`):
+**Status as of 2026-09-22** (branch `v0.5-dock`): **complete.**
 
 - Phases 0–6 and **6A (boundary fixes)** are done. Every unit listed in [§6](#6-boundary-audit) can be deleted and the app still type-checks and builds.
 - Scope decision (2026-09-21): the extra features, panels, UI-kit remainder, Timeline, presets, VOLUMA and the automated-check work that the previous revision planned as phases 7–10 are **not needed** and have been dropped (listed in [§7](#7-inventory-v1--v2) as ✂).
-- **Left: phase 11, the cut-over** (v2 becomes the repository root). It is not started: it removes v1 from the working tree, and it touches untracked files that git cannot restore (see [§8](#8-phases)).
+- **Phase 11, the cut-over, is done:** v2 is the repository root; v1 is archived in `legacy/v1/` (see [§8](#8-phases)).
 
 ---
 
@@ -48,7 +48,7 @@ The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.p
 | Studio panels | 10 | ✅ |
 | UI kit | 29 + MetaBlock + NodeGraph | ✅ |
 | Boundary fixes (§6) | 8 | ✅ phase 6A |
-| Cut-over (v2 replaces the root) | — | ⬜ phase 11 |
+| Cut-over (v2 replaces the root) | — | ✅ phase 11 |
 
 ---
 
@@ -176,11 +176,14 @@ Features never read the store; the app passes values as props.
 ## 4. Folder layout
 
 ```text
-v2/
+(repository root)
 ├── index.html · package.json · pnpm-workspace.yaml · tsconfig.json · vite.config.ts
 ├── CLAUDE.md          the rules; points at the skill
+├── .claude/           the skill + launch config
 ├── public/            backgrounds/ hdr/ models/ draco/ mediapipe/{wasm,models}
 ├── docs/PLAN.md       this file
+├── docs/reference/    PRD, visual references, design zips
+├── legacy/v1/         the archived v1 workspace (not built)
 └── src/
     ├── main.tsx
     ├── app/                         host and systems; never edited to add a feature
@@ -377,17 +380,21 @@ Glass material folder (spectral transmission, backdrop + clean passes, dispersio
 | 6 | Glass, media, MIDI, gamepad, tilt, camera, text, gizmo, light, SSS, graph effect, Graph panel | ✅ |
 | 6A | Boundary fixes (§6) | ✅ |
 | 7–10 | Extra features, panels, UI kit, timeline, examples, automated checks | ✂ not needed |
-| 11 | Cut-over: v2 becomes the repository root | ⬜ |
+| 11 | Cut-over: v2 becomes the repository root | ✅ |
 
 ### Phase 11 — cut-over
 
-1. Tag the current v1 state (e.g. `v1.4-final`) so it stays reachable.
-2. Move `v2/*` to the repository root (keeping git history with `git mv`).
-3. Remove v1: `packages/`, root `src/`, `tests/`, `scripts/`, `.upgrade-backup/`, `tsconfig.app.json`, the root `pnpm-lock.yaml`/`package.json`, and the old `docs/` (keep the PRD and the design specification under `docs/reference/`).
-4. Point `.claude/launch.json` at the root and re-run `pnpm install`, `pnpm typecheck` and `pnpm build`.
-5. Merge to `main` through a PR.
+Done 2026-09-22:
 
-Before starting, decide what happens to the untracked files git cannot restore: `artinos-ui-design-specification/` and the new images under `packages/ui/VISUAL_REFERENCES/` (removing `packages/` would delete them for good); and the untracked v2 features `objects/Content.tsx`, `scene/Light.tsx` and `scene/Shadows.tsx`, which should be committed first. Another session also runs a dev server from `v2/` on port 5190, and moving the folder will stop it.
+1. Tagged the v1 state as `v1.4-final` (commit `baf93f4`).
+2. Moved `v2/*` to the repository root with `git mv`, keeping history.
+3. Archived v1 in `legacy/v1/` with `git mv` instead of deleting it (`packages/`, `src/`, `tests/`, `scripts/`, `public/`, `docs/*.md`, configs and lockfile). It is not part of the build or the typecheck.
+4. Moved the PRD, `VISUAL_REFERENCES` (tracked and untracked images) and the two design zips to `docs/reference/`.
+5. Pointed `.claude/launch.json` at the root (`artinos` on 5190, `artinos-alt` on 5191).
+
+Left on disk, untracked or ignored, for you to delete when convenient: `v2/` (only `node_modules/` and `dist/` remain), `packages/ui/VISUAL_REFERENCES/` (locked by Windows during the move; its contents are already copied to `docs/reference/visual-references/`), the per-package `node_modules/`/`dist/` under `packages/`, `.upgrade-backup/`, `vite.log` and `tsconfig.app.tsbuildinfo`. `artinos-ui-design-specification/` stays at the root (it was in use during the move).
+
+Still to do when you want it: merge to `main` through a PR.
 
 ---
 
