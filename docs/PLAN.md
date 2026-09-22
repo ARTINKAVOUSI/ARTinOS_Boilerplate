@@ -392,7 +392,11 @@ Done 2026-09-22:
 4. Moved the PRD, `VISUAL_REFERENCES` (tracked and untracked images) and the two design zips to `docs/reference/`.
 5. Pointed `.claude/launch.json` at the root (`artinos` on 5190, `artinos-alt` on 5191).
 
-Left on disk, untracked or ignored, for you to delete when convenient: `v2/` (only `node_modules/` and `dist/` remain), `packages/ui/VISUAL_REFERENCES/` (locked by Windows during the move; its contents are already copied to `docs/reference/visual-references/`), the per-package `node_modules/`/`dist/` under `packages/`, `.upgrade-backup/`, `vite.log` and `tsconfig.app.tsbuildinfo`. `artinos-ui-design-specification/` stays at the root (it was in use during the move).
+6. Deleted the leftovers: the old `v2/` and `packages/` folders (build output only by then), `.upgrade-backup/`, `vite.log` and `tsconfig.app.tsbuildinfo`.
+
+The root now holds only the project: `src/ public/ docs/ .claude/ index.html package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json vite.config.ts CLAUDE.md README.md`, plus `legacy/v1/` and the separate `artinos-ui-design-specification/` app (untracked, its own launch entry).
+
+`legacy/v1/` is kept rather than deleted. Everything in it is also in the `v1.4-final` tag, so it can be dropped at any time with `git rm -r legacy`.
 
 Still to do when you want it: merge to `main` through a PR.
 
