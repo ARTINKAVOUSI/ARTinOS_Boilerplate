@@ -53,8 +53,6 @@ export function ControlInput({ name, control, value, onChange }: { name: string;
           step={control.step}
           decimals={decimalsFor(control.step)}
           unit={control.unit}
-          layout="paired"
-          labelWidth="var(--pn-label-w, 104px)"
           toggleable={false}
           indicator={false}
           onChange={onChange}

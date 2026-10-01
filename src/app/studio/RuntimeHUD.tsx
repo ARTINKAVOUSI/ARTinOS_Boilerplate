@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { features } from '../registry'
 import { compactNumber, useRuntime } from '../runtime'
@@ -49,11 +49,20 @@ function useAnchor(open: boolean, hud: React.RefObject<HTMLDivElement | null>, b
     const place = () => {
       const rect = dock.getBoundingClientRect()
       const height = bar.current?.offsetHeight ?? 0
-      // above the dock when there is room, else below it; never over its strip
-      const width = Math.min(window.innerWidth - 16, Math.max(rect.width - 16, 560))
-      const left = Math.min(window.innerWidth - width - 8, Math.max(8, rect.left + 8))
+      const { innerWidth: vw, innerHeight: vh } = window
+      // A side dock: the bar runs along the bottom of the free side beside it.
+      if (rect.height > rect.width * 1.2) {
+        const onRight = rect.left + rect.width / 2 > vw / 2
+        const left = onRight ? 8 : rect.right + 8
+        const width = Math.max(320, (onRight ? rect.left : vw - rect.right) - 16)
+        setStyle({ left, top: vh - height - 8, width })
+        return
+      }
+      // A band: above it when there is room, else below it; never over its strip.
+      const width = Math.min(vw - 16, Math.max(rect.width - 16, 560))
+      const left = Math.min(vw - width - 8, Math.max(8, rect.left + 8))
       const above = rect.top - height - 8
-      const top = above >= 8 ? above : Math.min(window.innerHeight - height - 8, rect.bottom + 8)
+      const top = above >= 8 ? above : Math.min(vh - height - 8, rect.bottom + 8)
       setStyle({ left, top, width })
     }
     place()
@@ -69,11 +78,23 @@ function useAnchor(open: boolean, hud: React.RefObject<HTMLDivElement | null>, b
   return style
 }
 
+/** One instrument in the bar: a caps name (and a quiet reading beside it) over one row of content. */
+function Group({ name, meta, className, children }: { name: string; meta?: ReactNode; className?: string; children: ReactNode }) {
+  return (
+    <section className={className ? `hud-bar__group ${className}` : 'hud-bar__group'} aria-label={name}>
+      <header>
+        <span>{name}</span>
+        {meta}
+      </header>
+      <div className="hud-bar__row">{children}</div>
+    </section>
+  )
+}
+
 /**
  * The runtime readout in the dock strip, and the studio bar it opens: one slim
- * sheet along the dock. The first row is telemetry (frame rate and frame time
- * with their history, renderer load, the diagnostic overlays, the quality
- * tier); the second is the studio itself (theme, interface, layout).
+ * instrument strip along the dock — performance, renderer load, the diagnostic
+ * overlays, the quality tier, the theme and the studio's own switches.
  */
 export function RuntimeHUD() {
   const stats = useRuntime()
@@ -132,133 +153,103 @@ export function RuntimeHUD() {
         el.scrollLeft += event.deltaY
       }}
     >
-      <section className="hud-bar__cell hud-bar__status">
-        <header title="Performance">
-          {Icons.activity}
-          <em>{HEALTH_WORD[health]}</em>
-        </header>
-        <p title={`Pixel ratio ${stats.renderer.pixelRatio.toFixed(2)}×`}>
-          <span>{backend}</span>
-          <span>
-            {stats.renderer.width}×{stats.renderer.height}
-          </span>
-        </p>
-      </section>
-
-      <section className="hud-bar__cell hud-bar__graph">
-        <div className="hud-bar__figure">
+      <Group name="Performance" className="hud-bar__perf" meta={<em className="hud-bar__health">{HEALTH_WORD[health]}</em>}>
+        <span className="hud-bar__fps" title={`${fps} frames per second`}>
           <strong>{fps}</strong>
           <small>fps</small>
-        </div>
-        <Sparkline className="hud-bar__spark" values={stats.fpsHistory} min={0} max={Math.max(TARGET_FPS, ...stats.fpsHistory)} threshold={TARGET_FPS} width={200} height={36} label="Frame rate, last 15 seconds" />
-      </section>
+        </span>
+        <span className="hud-bar__frame" title={`${stats.frameMs.toFixed(2)} ms per frame; the ${TARGET_FPS} fps budget is ${BUDGET_MS.toFixed(1)} ms`}>
+          <b>
+            {stats.frameMs.toFixed(1)}
+            <small>ms</small>
+          </b>
+          <span data-over={budget > 1 || undefined}>{Math.round(budget * 100)}%</span>
+        </span>
+        <Sparkline className="hud-bar__spark" values={stats.fpsHistory} min={0} max={Math.max(TARGET_FPS, ...stats.fpsHistory)} threshold={TARGET_FPS} width={160} height={26} tone={health === 'good' ? 'live' : 'warm'} label="Frame rate, last 15 seconds" />
+      </Group>
 
-      <section className="hud-bar__cell hud-bar__graph">
-        <div className="hud-bar__figure">
-          <strong>{stats.frameMs.toFixed(1)}</strong>
-          <small>ms</small>
-          <span data-over={budget > 1 || undefined}>{Math.round(budget * 100)}% budget</span>
-        </div>
-        <Sparkline className="hud-bar__spark" values={stats.history} min={0} max={50} threshold={BUDGET_MS} width={200} height={36} tone={budget > 1.5 ? 'warm' : 'live'} label={`Frame time, last ${stats.history.length} frames`} />
-      </section>
-
-      <section className="hud-bar__cell hud-bar__load">
+      <Group name="Renderer" className="hud-bar__renderer" meta={<span title={`Pixel ratio ${stats.renderer.pixelRatio.toFixed(2)}×`}>{backend} · {stats.renderer.width}×{stats.renderer.height}</span>}>
         {[
-          ['Calls', compactNumber(stats.renderer.calls)],
-          ['Tris', compactNumber(stats.renderer.triangles)],
-          ['Geos', String(stats.renderer.geometries)],
-          ['Tex', String(stats.renderer.textures)],
+          ['calls', compactNumber(stats.renderer.calls)],
+          ['tris', compactNumber(stats.renderer.triangles)],
+          ['geo', String(stats.renderer.geometries)],
+          ['tex', String(stats.renderer.textures)],
         ].map(([label, value]) => (
-          <span key={label}>
-            <small>{label}</small>
+          <span key={label} className="hud-bar__stat">
             <b>{value}</b>
+            <small>{label}</small>
           </span>
         ))}
-      </section>
+      </Group>
 
       {diagnostics.length > 0 && (
-        <section className="hud-bar__cell hud-bar__overlays">
-          <small className="hud-bar__label">Overlays</small>
-          <div>
-            {diagnostics.map(feature => {
-              const on = Boolean(states[feature.id]?.enabled)
-              return (
-                <button
-                  key={feature.id}
-                  type="button"
-                  className="hud-bar__chip"
-                  aria-pressed={on}
-                  title={`${feature.description ?? feature.label}\nSettings: Inspector panel`}
-                  onClick={() => studio.setEnabled(feature.id, !on)}
-                >
-                  <i aria-hidden />
-                  {feature.label.replace(/ (HUD|Monitor|Inspector)$/, '')}
-                </button>
-              )
-            })}
-          </div>
-        </section>
+        <Group name="Overlays" className="hud-bar__overlays">
+          {diagnostics.map(feature => {
+            const on = Boolean(states[feature.id]?.enabled)
+            return (
+              <button key={feature.id} type="button" className="hud-bar__toggle" aria-pressed={on} title={`${feature.description ?? feature.label}\nSettings: Inspector panel`} onClick={() => studio.setEnabled(feature.id, !on)}>
+                <i aria-hidden />
+                {feature.label.replace(/ (HUD|Monitor|Inspector)$/, '')}
+              </button>
+            )
+          })}
+        </Group>
       )}
 
       {hasRender && (
-        <section className="hud-bar__cell hud-bar__quality">
-          <header>
-            <small className="hud-bar__label">Quality</small>
-            <small>pixel ratio ≤ {ratio.toFixed(2)}</small>
-          </header>
+        <Group name="Quality" className="hud-bar__quality" meta={<span title="Pixel-ratio ceiling">≤ {ratio.toFixed(2)}×</span>}>
           <Segmented<Tier>
             label="Quality tier"
             value={tier}
             onChange={value => studio.setValue('scene.render', 'maxPixelRatio', TIERS.find(entry => entry.value === value)!.ratio)}
             options={TIERS.map(({ value, label }) => ({ value, label }))}
           />
-        </section>
+        </Group>
       )}
 
-      <section className="hud-bar__cell hud-bar__themes">
-        <small className="hud-bar__label">Theme</small>
-        <div role="radiogroup" aria-label="Theme">
+      <Group name="Theme" meta={<span>{THEME_META[ui.theme as keyof typeof THEME_META]?.label.replace(/ Frost$/, '') ?? ui.theme}</span>}>
+        <span role="radiogroup" aria-label="Theme" className="hud-bar__swatches">
           {GLASS_THEMES.map(theme => {
             const meta = THEME_META[theme]
             return (
-              <button key={theme} type="button" role="radio" aria-checked={ui.theme === theme} aria-label={meta.label} className="hud-bar__theme" title={`${meta.label}: ${meta.description}`} onClick={() => studio.setUI({ theme })}>
-                <span aria-hidden>
-                  {meta.swatch.map((color, index) => (
-                    <i key={index} style={{ background: color }} />
-                  ))}
-                </span>
-                {meta.label.replace(/ Frost$/, '')}
-              </button>
+              <button
+                key={theme}
+                type="button"
+                role="radio"
+                aria-checked={ui.theme === theme}
+                aria-label={meta.label}
+                className="hud-bar__swatch"
+                title={`${meta.label}: ${meta.description}`}
+                style={{ '--_a': meta.swatch[0], '--_b': meta.swatch[1], '--_c': meta.swatch[2] } as CSSProperties}
+                onClick={() => studio.setUI({ theme })}
+              />
             )
           })}
-        </div>
-      </section>
+        </span>
+      </Group>
 
-      <section className="hud-bar__cell hud-bar__view">
-        <small className="hud-bar__label">View</small>
-        <div>
-          <label className="hud-bar__switch" title="Show the controls a feature marks advanced">
-            Advanced
-            <Switch variant="compact" label="Show advanced controls" value={ui.advanced} onChange={advanced => studio.setUI({ advanced })} />
-          </label>
-          <button
-            type="button"
-            className="hud-bar__key"
-            onClick={() => {
-              setOpen(false)
-              studio.setUI({ visible: false })
-            }}
-            title="Hide the interface; press H to bring it back"
-          >
-            Hide <Kbd keys={['H']} />
-          </button>
-          <span className="hud-bar__resets">
-            <PresetMenu />
+      <Group name="Studio" className="hud-bar__studio">
+        <label className="hud-bar__text" title="Show the controls a feature marks advanced">
+          <span className="hud-bar__label-text">Advanced</span>
+          <Switch variant="compact" label="Show advanced controls" value={ui.advanced} onChange={advanced => studio.setUI({ advanced })} />
+        </label>
+        <button
+          type="button"
+          className="hud-bar__text hud-bar__hide"
+          onClick={() => {
+            setOpen(false)
+            studio.setUI({ visible: false })
+          }}
+          title="Hide the interface; press H to bring it back"
+        >
+          <span className="hud-bar__label-text">Hide</span> <Kbd keys={['H']} />
+        </button>
+        <span className="hud-bar__tools">
+          <PresetMenu />
           <IconButton label="Reset the dock layout" icon={Icons.layout} filled onClick={resetDockLayout} />
           <IconButton label="Reset every feature to its defaults" icon={Icons.reset} filled className="hud-bar__danger" onClick={() => studio.resetAll()} />
-          </span>
-        </div>
-      </section>
+        </span>
+      </Group>
     </div>
   )
 

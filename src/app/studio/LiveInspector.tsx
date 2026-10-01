@@ -180,8 +180,6 @@ function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
             min={0}
             max={Math.max(4, object.intensity * 2)}
             step={0.01}
-            layout="paired"
-            labelWidth="var(--pn-label-w, 104px)"
             toggleable={false}
             indicator={false}
             onChange={value => {
@@ -199,8 +197,6 @@ function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
             max={10}
             step={0.01}
             bipolar
-            layout="paired"
-            labelWidth="var(--pn-label-w, 104px)"
             toggleable={false}
             indicator={false}
             onChange={value => {

@@ -1,16 +1,5 @@
 import { Component, Suspense, type ReactNode } from 'react'
 
-type Listener = (id: string, error: Error) => void
-const listeners = new Set<Listener>()
-
-/** Subscribe to feature crashes (the studio turns them into toasts). */
-export function onFeatureError(listener: Listener) {
-  listeners.add(listener)
-  return () => {
-    listeners.delete(listener)
-  }
-}
-
 interface Props {
   id: string
   children: ReactNode
@@ -34,8 +23,8 @@ export class FeatureBoundary extends Component<Props & { resetKey?: string }, { 
   }
 
   componentDidCatch(error: Error) {
+    // The console capture turns this into a studio toast.
     console.error(`[features] ${this.props.id} crashed`, error)
-    listeners.forEach(listener => listener(this.props.id, error))
   }
 
   render() {

@@ -1,20 +1,19 @@
-/* The telemetry bar the dock's runtime readout opens: one slim sheet of the
-   dock's glass, cut into cells that sit in one row on a wide dock and wrap on
-   a narrow one. Type follows the panels: mono caps labels, mono figures. */
+/* The studio bar the dock's runtime readout opens: one strip of the dock's
+   glass holding six instruments. No boxes inside the glass — instruments are
+   divided by hairlines, and every one reads the same way: a caps name with a
+   quiet reading beside it, over one 26px row of content on a shared baseline. */
 
 .hud-bar {
-  --_edge: rgba(255, 255, 255, 0.1);
-  --_edge-top: rgba(255, 255, 255, 0.16);
-  --_cell: rgba(255, 255, 255, 0.04);
-  --_caps: 500 8.5px/1.2 var(--ar-control-font, var(--ui-num));
+  --_line: rgba(255, 255, 255, 0.12);
+  --_caps: 500 8.5px/1 var(--ar-control-font, var(--ui-num));
+  --_row: 26px;
   position: fixed;
   z-index: 90;
+  container: hud-bar / inline-size;
   box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
   align-items: stretch;
-  gap: 6px;
-  padding: 7px;
+  padding: 0 4px;
   border: 1px solid var(--ui-pane-border);
   border-radius: var(--ui-radius, 12px);
   background: var(--ui-pane-sheen), var(--ui-pane-tint);
@@ -24,7 +23,13 @@
   font: 300 12px/1.3 var(--ui-font);
   color: var(--ui-text);
   text-shadow: var(--ar-panel-text-shadow, none);
-  animation: hud-bar-in 160ms var(--ui-ease);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  animation: hud-bar-in 180ms var(--ui-ease);
+}
+.hud-bar::-webkit-scrollbar {
+  display: none;
 }
 @keyframes hud-bar-in {
   from {
@@ -38,357 +43,263 @@
   }
 }
 
-.hud-bar__cell {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
+/* ── an instrument ───────────────────────────────────────────────────────── */
+.hud-bar__group {
+  position: relative;
+  flex: none;
+  display: grid;
+  grid-template-rows: auto var(--_row);
+  row-gap: 8px;
+  align-content: center;
   min-width: 0;
-  min-height: 62px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: var(--_cell);
-  box-shadow: inset 0 0 0 1px var(--_edge), inset 0 1px 0 var(--_edge-top);
+  padding: 11px 14px 12px;
 }
-.hud-bar__label,
-.hud-bar__status header b,
-.hud-bar__load small,
-.hud-bar__quality header small {
-  font: var(--_caps);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ui-text-meta);
+.hud-bar__group + .hud-bar__group::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--_line) 22%, var(--_line) 78%, transparent);
 }
-
-/* status: performance · health word · backend line */
-.hud-bar__status {
-  flex: 0 0 auto;
-}
-.hud-bar__status header {
+.hud-bar__group > header {
   display: flex;
   align-items: center;
-  gap: 7px;
-}
-.hud-bar__status header svg {
-  width: 12px;
+  justify-content: space-between;
+  gap: 14px;
   height: 12px;
+  white-space: nowrap;
+}
+.hud-bar__group > header > span:first-child {
+  font: var(--_caps);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--ui-text-meta);
 }
-.hud-bar__status em {
-  padding: 2px 7px 1px;
-  border-radius: 999px;
-  font: var(--_caps);
-  font-style: normal;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-shadow: none;
-}
-.hud-bar[data-health='good'] .hud-bar__status em {
-  background: color-mix(in srgb, var(--ui-accent) 16%, transparent);
-  color: var(--ui-accent);
-}
-.hud-bar[data-health='warn'] .hud-bar__status em {
-  background: color-mix(in srgb, var(--ui-warn) 16%, transparent);
-  color: var(--ui-warn);
-}
-.hud-bar[data-health='bad'] .hud-bar__status em {
-  background: color-mix(in srgb, var(--ui-fault) 16%, transparent);
-  color: var(--ui-fault);
-}
-.hud-bar__status p {
-  display: flex;
-  gap: 10px;
-  margin: 0;
-  font: 300 11px var(--ui-num);
+.hud-bar__group > header > :not(:first-child) {
+  font: 400 10px/1 var(--ui-num);
   font-variant-numeric: tabular-nums;
-  color: var(--ui-text);
-}
-.hud-bar__status p span + span {
   color: var(--ui-text-label);
 }
-
-/* graphs: a figure beside its history */
-.hud-bar__graph {
-  flex: 1 1 200px;
-  flex-direction: row;
+.hud-bar__row {
+  display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
 }
-.hud-bar__figure {
-  display: grid;
-  grid-template-columns: auto auto;
+
+/* ── performance: the figure, the frame time, the history ────────────────── */
+.hud-bar__perf {
+  flex: 1 1 auto;
+  min-width: 220px;
+}
+.hud-bar__perf .hud-bar__row {
+  gap: 14px;
+}
+.hud-bar__health {
+  padding: 2px 7px 1px;
+  border-radius: 999px;
+  font: var(--_caps) !important;
+  font-style: normal;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+  text-shadow: none;
+  color: var(--ui-accent) !important;
+  background: color-mix(in srgb, var(--ui-accent) 15%, transparent);
+}
+.hud-bar[data-health='warn'] .hud-bar__health {
+  color: var(--ui-warn) !important;
+  background: color-mix(in srgb, var(--ui-warn) 15%, transparent);
+}
+.hud-bar[data-health='bad'] .hud-bar__health {
+  color: var(--ui-fault) !important;
+  background: color-mix(in srgb, var(--ui-fault) 15%, transparent);
+}
+.hud-bar__fps {
+  display: inline-flex;
   align-items: baseline;
-  column-gap: 4px;
-  row-gap: 2px;
-  flex: none;
+  gap: 4px;
 }
-.hud-bar__figure strong {
-  font: 300 22px/1 var(--ui-num);
+.hud-bar__fps strong {
+  font: 300 25px/1 var(--ui-num);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--ui-text-strong);
+}
+.hud-bar small {
+  font: var(--_caps);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.hud-bar__frame {
+  display: grid;
+  gap: 3px;
+  padding-left: 12px;
+  border-left: 1px solid var(--_line);
+}
+.hud-bar__frame b {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font: 400 12px/1 var(--ui-num);
   font-variant-numeric: tabular-nums;
   color: var(--ui-text-strong);
 }
-.hud-bar__figure small {
-  font: var(--_caps);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.hud-bar__frame > span {
+  font: 400 9.5px/1 var(--ui-num);
+  font-variant-numeric: tabular-nums;
   color: var(--ui-text-meta);
 }
-.hud-bar__figure span {
-  grid-column: 1 / -1;
-  font: 300 10.5px var(--ui-num);
-  color: var(--ui-text-label);
-}
-.hud-bar__figure span[data-over] {
+.hud-bar__frame > span[data-over] {
   color: var(--ui-warn);
 }
 .hud-bar__spark {
-  flex: 1;
-  min-width: 80px;
-  width: 100%;
-  height: 36px;
+  flex: 1 1 0;
+  min-width: 64px;
+  max-width: 220px;
+  height: var(--_row);
 }
 
-/* load: four small figures */
-.hud-bar__load {
-  flex: 0 0 auto;
-  display: grid;
-  grid-template-columns: repeat(4, auto);
-  align-items: center;
-  column-gap: 16px;
+/* ── renderer: four readings ─────────────────────────────────────────────── */
+.hud-bar__renderer .hud-bar__row {
+  gap: 12px;
 }
-.hud-bar__load span {
-  display: grid;
+.hud-bar__stat {
+  display: inline-flex;
+  align-items: baseline;
   gap: 4px;
 }
-.hud-bar__load b {
-  font: 300 13px var(--ui-num);
+.hud-bar__stat b {
+  font: 400 13px/1 var(--ui-num);
   font-variant-numeric: tabular-nums;
   color: var(--ui-text-strong);
 }
 
-/* overlays: chips that switch the diagnostic features */
-.hud-bar__overlays {
-  flex: 0 1 auto;
-}
-.hud-bar__overlays > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.hud-bar__chip {
+/* ── overlays: toggles with a lamp ───────────────────────────────────────── */
+.hud-bar__toggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 22px;
-  padding: 0 9px 0 8px;
+  gap: 7px;
+  height: 24px;
+  padding: 0 10px 0 9px;
   border: 0;
   border-radius: 999px;
-  background: var(--ar-trough, rgba(0, 0, 0, 0.24));
+  background: var(--ar-trough, rgba(0, 0, 0, 0.22));
   box-shadow: var(--ar-well, inset 0 0 0 1px rgba(255, 255, 255, 0.1));
-  font: 300 11px var(--ui-font);
+  font: 300 11.5px/1 var(--ui-font);
   color: var(--ui-text-label);
   text-shadow: inherit;
-  white-space: nowrap;
   cursor: pointer;
-  transition: color 120ms ease, background 120ms ease;
+  transition: color 140ms ease, background 140ms ease;
 }
-.hud-bar__chip i {
+.hud-bar__toggle i {
   width: 5px;
   height: 5px;
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px var(--ui-text-meta);
+  transition: background 140ms ease, box-shadow 140ms ease;
 }
-.hud-bar__chip:hover {
+.hud-bar__toggle:hover,
+.hud-bar__toggle[aria-pressed='true'] {
   color: var(--ui-text-strong);
 }
-.hud-bar__chip[aria-pressed='true'] {
-  color: var(--ui-text-strong);
-}
-.hud-bar__chip[aria-pressed='true'] i {
+.hud-bar__toggle[aria-pressed='true'] i {
   background: var(--ui-accent);
-  box-shadow: 0 0 6px var(--ui-accent-line);
-}
-.hud-bar__chip:focus-visible {
-  outline: none;
-  box-shadow: var(--ar-well, none), var(--ar-focus-ring, 0 0 0 2px var(--ui-accent));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-accent) 22%, transparent), 0 0 8px var(--ui-accent);
 }
 
-/* quality: the tier switch */
-.hud-bar__quality {
-  flex: 0 1 300px;
-  min-width: 250px;
-}
-.hud-bar__quality header {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-.hud-bar__quality header small:last-child {
-  letter-spacing: 0.08em;
-  text-transform: none;
+/* ── quality ─────────────────────────────────────────────────────────────── */
+.hud-bar__quality .ar-segmented {
+  width: 212px;
 }
 
-/* ── one row, always ─────────────────────────────────────────────────────
-   Every cell keeps one height; the graphs give up width first. A window too
-   narrow for the whole row scrolls it sideways instead of wrapping it. */
-.hud-bar {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-}
-.hud-bar::-webkit-scrollbar {
-  display: none;
-}
-.hud-bar__cell {
-  flex-shrink: 0;
-  padding: 8px 11px;
-}
-.hud-bar__graph {
-  flex: 1 1 150px;
-  flex-shrink: 1;
-  min-width: 140px;
-  gap: 10px;
-}
-.hud-bar__spark {
-  min-width: 40px;
-}
-.hud-bar__status p {
-  gap: 8px;
-}
-
-/* load: a 2 × 2 of small figures */
-.hud-bar__load {
-  grid-template-columns: repeat(2, auto);
-  column-gap: 14px;
-  row-gap: 4px;
-}
-.hud-bar__load span {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-/* chip, theme and view rows share one height */
-.hud-bar__overlays > div,
-.hud-bar__themes > div,
-.hud-bar__view > div,
-.hud-bar__reset > div {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 5px;
-}
-.hud-bar__quality {
-  flex: 0 0 236px;
-  min-width: 0;
-}
-
-.hud-bar__theme {
+/* ── theme: two-tone swatches; the active one wears a ring ───────────────── */
+.hud-bar__swatches {
   display: inline-flex;
-  align-items: center;
-  gap: 7px;
+  gap: 8px;
+}
+.hud-bar__swatch {
+  position: relative;
+  width: 22px;
   height: 22px;
-  padding: 0 9px 0 7px;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
-  background: var(--ar-trough, rgba(0, 0, 0, 0.24));
-  box-shadow: var(--ar-well, inset 0 0 0 1px rgba(255, 255, 255, 0.1));
-  font: 300 11px var(--ui-font);
-  color: var(--ui-text-label);
-  text-shadow: inherit;
-  white-space: nowrap;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--_b) 0 50%, var(--_a) 50% 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 1px 3px rgba(0, 0, 0, 0.3);
   cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease;
 }
-.hud-bar__theme > span {
-  display: flex;
-  gap: 2px;
+.hud-bar__swatch::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--_c);
+  opacity: 0;
+  transition: opacity 140ms ease;
 }
-.hud-bar__theme i {
-  width: 7px;
-  height: 7px;
-  border-radius: 2px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+.hud-bar__swatch:hover {
+  transform: scale(1.06);
 }
-.hud-bar__theme:hover,
-.hud-bar__theme[aria-checked='true'] {
-  color: var(--ui-text-strong);
+.hud-bar__swatch[aria-checked='true'] {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 0 0 2px rgba(0, 0, 0, 0.25), 0 0 0 3.5px var(--ui-accent);
 }
-.hud-bar__theme[aria-checked='true'] {
-  box-shadow: var(--ar-well, none), inset 0 0 0 1px var(--ui-accent);
-}
-.hud-bar__theme:focus-visible {
-  outline: none;
-  box-shadow: var(--ar-well, none), var(--ar-focus-ring, 0 0 0 2px var(--ui-accent));
+.hud-bar__swatch[aria-checked='true']::after {
+  opacity: 1;
 }
 
-.hud-bar__view > div {
+/* ── studio: switches, then the tools ────────────────────────────────────── */
+.hud-bar__studio .hud-bar__row {
   gap: 12px;
 }
-.hud-bar__switch,
-.hud-bar__key {
+.hud-bar__text {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   padding: 0;
   border: 0;
   background: none;
-  font: 300 11px var(--ui-font);
+  font: 300 11.5px/1 var(--ui-font);
   color: var(--ui-text-label);
   text-shadow: inherit;
-  white-space: nowrap;
 }
-.hud-bar__switch .ar-switch--compact {
+.hud-bar__text .ar-switch--compact {
   --ar-h: 22px;
 }
-button.hud-bar__key {
+.hud-bar__hide {
   cursor: pointer;
 }
-button.hud-bar__key:hover {
+.hud-bar__hide:hover {
   color: var(--ui-text-strong);
 }
 .hud-bar .ar-kbd kbd {
   min-width: 18px;
   height: 18px;
 }
-.hud-bar__resets {
+.hud-bar__tools {
   display: inline-flex;
   gap: 4px;
+  padding-left: 12px;
+  border-left: 1px solid var(--_line);
 }
-.hud-bar__resets .ar-icon-button {
+.hud-bar__tools .ar-icon-button {
   --_size: 24px;
 }
-.hud-bar__resets .hud-bar__danger:hover {
+.hud-bar__danger:hover {
   color: var(--ui-fault);
 }
 
-/* fitting the whole row in a common laptop width */
-.hud-bar {
-  gap: 5px;
-  padding: 6px;
-}
-.hud-bar__cell {
-  padding: 8px 10px;
-}
-.hud-bar__graph {
-  flex-basis: 110px;
-  min-width: 100px;
-}
-.hud-bar__figure strong {
-  font-size: 20px;
-}
-.hud-bar__quality {
-  flex-basis: 228px;
-}
-.hud-bar__chip {
-  padding: 0 8px 0 7px;
-}
-.hud-bar__view > div {
-  gap: 10px;
+/* focus, shared */
+.hud-bar :is(.hud-bar__toggle, .hud-bar__swatch, .hud-bar__hide):focus-visible {
+  outline: none;
+  box-shadow: var(--ar-focus-ring, 0 0 0 2px var(--ui-accent));
 }
 
-/* the row scrolls on a narrow window: fade the edge that has more beyond it */
+/* a window too narrow for the strip scrolls it: fade the edge that has more */
 .hud-bar[data-more~='end'] {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
   mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
@@ -400,4 +311,40 @@ button.hud-bar__key:hover {
 .hud-bar[data-more='start end'] {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
   mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+}
+
+/* ── narrower docks: secondary readings step out before anything scrolls ── */
+@container hud-bar (max-width: 1390px) {
+  .hud-bar__stat:nth-child(n + 3) {
+    display: none;
+  }
+}
+@container hud-bar (max-width: 1320px) {
+  .hud-bar__renderer {
+    display: none;
+  }
+}
+@container hud-bar (max-width: 1130px) {
+  .hud-bar__frame {
+    display: none;
+  }
+  .hud-bar__quality .ar-segmented {
+    width: 204px;
+  }
+  .hud-bar__perf {
+    min-width: 180px;
+  }
+}
+@container hud-bar (max-width: 1066px) {
+  .hud-bar__text > :is(span.hud-bar__label-text) {
+    display: none;
+  }
+  .hud-bar__perf {
+    min-width: 160px;
+  }
+}
+@container hud-bar (max-width: 960px) {
+  .hud-bar__overlays {
+    display: none;
+  }
 }

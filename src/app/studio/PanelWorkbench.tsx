@@ -1,4 +1,5 @@
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Button } from '../../ui/Button/Button'
 
 /**
  * The body structure every dock panel shares: a container-query scope that
@@ -42,20 +43,11 @@ class PanelErrorBoundary extends Component<{ title: string; children: ReactNode 
       <div className="artinos-workbench-empty" role="alert">
         <h3>{this.props.title} could not open</h3>
         <p>{this.state.error.message}</p>
-        <button type="button" className="artinos-button" onClick={() => this.setState({ error: null })}>
+        <Button size="sm" onClick={() => this.setState({ error: null })}>
           Retry panel
-        </button>
+        </Button>
       </div>
     )
   }
 }
-
-export function PanelEmpty({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
-  return (
-    <div className="artinos-workbench-empty">
-      <h3>{title}</h3>
-      <p>{description}</p>
-      {action}
-    </div>
-  )
-}
+
