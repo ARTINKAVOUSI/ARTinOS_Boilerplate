@@ -139,32 +139,31 @@
   text-transform: uppercase;
   color: var(--ui-text-meta);
 }
-.plate-workspace .artinos-workbench :is(.v2-section, .v2-group-title)::after {
+.plate-workspace .artinos-workbench :is(.v2-section)::after {
   content: '';
   flex: 1;
   height: 1px;
   background: linear-gradient(90deg, var(--pn-edge-lit), transparent 80%);
 }
-.plate-workspace .artinos-workbench :is(.v2-section, .v2-group-title) small {
+.plate-workspace .artinos-workbench :is(.v2-section) small {
   font: inherit;
   letter-spacing: 0.12em;
   color: var(--ui-text-ghost);
 }
-.plate-workspace .artinos-workbench :is(.v2-section, .v2-group-title):first-child {
+.plate-workspace .artinos-workbench :is(.v2-section):first-child {
   margin-top: 2px;
 }
 
 /* ── the surface: cards, tiles, entries, stats ──────────────────────────── */
 .plate-workspace .artinos-workbench .artinos-parameter-card,
 .plate-workspace .artinos-workbench .v2-tile,
-.plate-workspace .artinos-workbench .v2-stat,
 .plate-workspace .artinos-workbench .v2-entry {
   border-radius: var(--pn-radius);
   background: var(--pn-card);
   box-shadow: inset 0 0 0 1px var(--pn-edge), inset 0 1px 0 var(--pn-edge-top);
   transition: background 160ms ease, box-shadow 160ms ease;
 }
-.plate-workspace .artinos-workbench :is(.artinos-parameter-card, .v2-tile, .v2-entry, .v2-theme):hover {
+.plate-workspace .artinos-workbench :is(.artinos-parameter-card, .v2-tile, .v2-entry):hover {
   box-shadow: inset 0 0 0 1px var(--pn-edge-lit), inset 0 1px 0 var(--pn-edge-top);
 }
 .plate-workspace .artinos-workbench :is(.artinos-parameter-card, .v2-tile)[data-enabled] {
@@ -431,38 +430,6 @@
 }
 
 /* ── stats: one figure and its name ─────────────────────────────────────── */
-.plate-workspace .artinos-workbench .v2-stat {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-  padding: 12px 14px 13px;
-}
-.plate-workspace .artinos-workbench .v2-stat > span {
-  overflow: hidden;
-  font: var(--pn-caps);
-  letter-spacing: var(--pn-track);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  color: var(--ui-text-meta);
-}
-.plate-workspace .artinos-workbench .v2-stat > b {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  overflow: hidden;
-  font: var(--pn-figure);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: var(--ui-text-strong);
-}
-.plate-workspace .artinos-workbench .v2-stat > b small {
-  font: var(--pn-caps);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ui-text-meta);
-}
 .plate-workspace .artinos-workbench .ar-meter {
   height: 26px;
 }
@@ -717,8 +684,6 @@
   object-fit: cover;
 }
 
-/* ── appearance ─────────────────────────────────────────────────────────── */
-
 /* ── graph: what floats over the canvas reads at the same scale ─────────── */
 .artinos-panel-graph .artinos-graph-hint {
   font: var(--pn-meta, 300 10.5px/1.5 var(--ui-font));
@@ -820,13 +785,6 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-/* a figure that does not fit its stat shrinks before it truncates */
-.plate-workspace .artinos-workbench .v2-stat > b {
-  font-size: clamp(17px, 1.2cqi + 11px, 22px);
-}
-.plate-workspace .artinos-workbench .v2-stat > b small {
-  flex: none;
-}
 
 /* a kit colour field inside a labelled row: the row already names it */
 .plate-workspace .ar-prop .ar-color__label {
@@ -849,14 +807,6 @@
   background: color-mix(in srgb, var(--ui-fault) 16%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-fault) 40%, transparent);
   color: var(--ui-fault);
-}
-.plate-workspace .artinos-workbench .v2-stat > span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.plate-workspace .artinos-workbench .v2-stat > span > .v2-state {
-  letter-spacing: 0.12em;
 }
 /* a very narrow panel: the card's name wins over its caption */
 @container workbench (max-width: 300px) {
