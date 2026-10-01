@@ -1,21 +1,20 @@
-import { useState } from 'react'
 import type { PanelManifest } from '../app/panel'
 import { features } from '../app/registry'
-import { FeatureCard, type ControlFilter } from '../app/studio/FeatureCard'
-import { ControlsBar } from '../app/studio/ControlsBar'
+import { FeatureCard } from '../app/studio/FeatureCard'
+import { CardFlow } from '../app/studio/CardFlow'
 
 const GROUPS = ['Render', 'Camera', 'Atmosphere', 'Lighting', 'Ground'] as const
 const byGroup = GROUPS.map(group => ({ group, list: features.filter(feature => feature.kind === 'scene' && feature.group === group) })).filter(entry => entry.list.length)
-const count = byGroup.reduce((sum, entry) => sum + entry.list.length, 0)
 
+/**
+ * The scene: every card in one packed flow, ordered render → camera →
+ * atmosphere → lighting → ground, each card captioned with its group. One flow
+ * rather than a section per group, so a wide dock is filled edge to edge.
+ */
 function Scene() {
-  const [filter, setFilter] = useState<ControlFilter>('all')
   return (
     <div className="artinos-panel-suite">
-      <ControlsBar filter={filter} onFilter={setFilter} summary={`${count} SCENE FEATURES · SRC/FEATURES/SCENE`} />
-      <div className="artinos-parameter-cards">
-        {byGroup.flatMap(({ group, list }) => list.map(feature => <FeatureCard key={feature.id} feature={feature} filter={filter} caption={group} />))}
-      </div>
+      <CardFlow>{byGroup.flatMap(({ group, list }) => list.map(feature => <FeatureCard key={feature.id} feature={feature} caption={group} />))}</CardFlow>
     </div>
   )
 }

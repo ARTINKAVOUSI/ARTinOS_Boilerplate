@@ -12,7 +12,7 @@ feature, panel or port — it is the contract, not a suggestion.
 |---|---|---|---|
 | Feature (scene object, effect, input device, overlay, provider) | `src/features/**/Name.tsx` | one file exporting a component + a `feature` manifest | `import.meta.glob('../features/**/*.tsx')` in `src/app/registry.ts` |
 | Panel (a dock tab) | `src/panels/Name.tsx` | one file exporting a component + a `panel` manifest | `import.meta.glob('../panels/*.tsx')` in `src/app/panel.ts` |
-| UI component | `src/ui/Name/Name.tsx` (+ `Name.css`) | one folder, no imports outside itself | imported directly |
+| UI component | `src/ui/Name/Name.tsx` (+ `Name.css`), every component a sibling; `src/ui/system/` is the shared foundation (tokens, themes, anatomy, helpers) | one folder that imports only itself and `src/ui/system/`; `--ar-*` tokens, class prefix `ar-` (see `src/ui/README.md`) | imported directly |
 | System | `src/app/*.ts` | a plain module with an external store | imported directly |
 
 A manifest is what makes a file self-installing: `id`, `label`, `kind`, `group`,
@@ -28,7 +28,8 @@ if you find yourself editing a list to register something, the design is wrong.
    components, and files in its own folder.** A feature never imports another
    feature (the one declared host: effects and the glass material import
    `features/postfx/PostFX.tsx`); a panel never imports another panel; a
-   `src/ui` component never imports anything outside its own folder; and
+   `src/ui` component never imports anything outside its own folder and
+   `src/ui/system/` (the design system's foundation); and
    `src/app` never imports a feature, so deleting any feature can't break the
    host. Shared live state (the signal bus, the shared webcam) is a system in
    `src/app/`.
@@ -40,8 +41,9 @@ if you find yourself editing a list to register something, the design is wrong.
 4. **Modest duplication beats shared infrastructure.** A helper used by one
    effect lives in that effect.
 5. **Styling travels with the unit.** Component CSS sits beside the component
-   and is scoped to it. Studio tokens are the skin, and a `src/ui` component
-   must render correctly without them (local fallbacks for every CSS variable).
+   and is scoped to it. A `src/ui` component reads the system's `--ar-*`
+   tokens (`src/ui/system/system.css`, imported once); the studio skin in
+   `src/app/studio/skin` is layered on top and is never required.
 6. **R3F components mount inside the host's `<Canvas>`** and never create their
    own; graphics default to TSL on the WebGPU renderer.
 7. **Clean up everything on unmount** — loops, workers, subscriptions, GPU

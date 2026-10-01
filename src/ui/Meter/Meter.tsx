@@ -42,7 +42,7 @@ export function Meter({ value, min = 0, max = 1, label, valueText, peak = false,
   const text = valueText === undefined ? value.toFixed(2) : valueText
   return (
     <div
-      className={className ? `aui-meter ${className}` : 'aui-meter'}
+      className={className ? `ar-meter ${className}` : 'ar-meter'}
       data-tone={tone}
       role="meter"
       aria-label={label}
@@ -51,11 +51,11 @@ export function Meter({ value, min = 0, max = 1, label, valueText, peak = false,
       aria-valuenow={value}
       style={style}
     >
-      <span className="aui-meter__track">
-        <span className="aui-meter__fill" style={{ transform: `scaleX(${t})` }} />
-        {peak && <span ref={peakRef} className="aui-meter__peak" />}
+      <span className="ar-meter__track">
+        <span className="ar-meter__fill" style={{ transform: `scaleX(${t})` }} />
+        {peak && <span ref={peakRef} className="ar-meter__peak" />}
       </span>
-      {text !== null && <span className="aui-meter__value">{text}</span>}
+      {text !== null && <span className="ar-meter__value">{text}</span>}
     </div>
   )
 }

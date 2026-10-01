@@ -1,50 +1,65 @@
-.aui-menu {
-  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
-  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
-  --_rose: var(--ui-sig-rose, #e88f9b);
+/* Menu — a dropdown on the kit's floating list sheet (the same surface a
+   Select opens), with light rows and mono caps group labels. */
+:where(.ar-menu) {
+  --_r: var(--ar-radius, 7px);
+  --_bg: var(--ar-list-bg, var(--ar-float-bg, rgba(26, 27, 30, 0.94)));
+  --_backdrop: var(--ar-list-backdrop, blur(24px));
+  --_shadow: var(--ar-list-shadow, var(--ar-float-ring, inset 0 0 0 1px rgba(255, 255, 255, 0.1)), var(--ar-float-shadow, 0 10px 28px -12px rgba(0, 0, 0, 0.7)));
+  --_ink: var(--ar-list-ink, var(--ar-float-ink, #ededed));
+  --_ink-hi: var(--ar-list-ink-hi, var(--ar-float-ink, #ededed));
+  --_ink-low: var(--ar-float-ink-low, #858585);
+  --_hover: var(--ar-list-hover, var(--ar-bg-hover, rgba(255, 255, 255, 0.045)));
+  --_line: var(--ar-line, rgba(255, 255, 255, 0.085));
+  --_fault: var(--ar-fault, #f2606f);
+  --_face: var(--ar-font-ui, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --_mono: var(--ar-control-font, ui-monospace, SFMono-Regular, Consolas, monospace);
+}
+
+.ar-menu {
   position: fixed;
   z-index: 10000;
   box-sizing: border-box;
-  min-width: 170px;
+  min-width: 180px;
   max-height: 70vh;
-  padding: 4px;
+  padding: 5px;
   overflow: auto;
-  border-radius: 9px;
-  background: rgba(26, 27, 30, 0.86);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  font: 11px var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  border-radius: var(--_r);
+  background: var(--_bg);
+  -webkit-backdrop-filter: var(--_backdrop);
+  backdrop-filter: var(--_backdrop);
+  box-shadow: var(--_shadow);
+  font: 300 12px var(--_face);
   color: var(--_ink);
   outline: none;
   transition: opacity 100ms;
 }
-.aui-menu__item {
+.ar-menu__item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  height: 25px;
-  padding: 0 8px 0 5px;
+  gap: 8px;
+  height: 26px;
+  padding: 0 9px 0 7px;
   border-radius: 5px;
   cursor: default;
   user-select: none;
 }
-.aui-menu__item[data-active] {
-  background: rgba(255, 255, 255, 0.1);
+.ar-menu__item[data-active] {
+  background: var(--_hover);
+  color: var(--_ink-hi);
 }
-.aui-menu__item[aria-disabled] {
-  opacity: 0.38;
+.ar-menu__item[aria-disabled] {
+  opacity: 0.4;
 }
-.aui-menu__item[data-danger] {
-  color: var(--_rose);
+.ar-menu__item[data-danger] {
+  color: var(--_fault);
 }
-.aui-menu__icon {
+.ar-menu__icon {
   display: grid;
   place-items: center;
   width: 14px;
-  color: var(--_ink-3);
+  color: var(--_ink-low);
 }
-.aui-menu__icon svg {
+.ar-menu__icon svg {
   width: 12px;
   height: 12px;
   fill: none;
@@ -53,25 +68,29 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.aui-menu__text {
+.ar-menu__text {
   flex: 1;
   white-space: nowrap;
 }
-.aui-menu__shortcut {
+.ar-menu__shortcut {
   padding-left: 16px;
-  font-size: 10px;
-  color: var(--_ink-3);
+  font: 300 10.5px var(--_mono);
+  color: var(--_ink-low);
 }
-.aui-menu__separator {
+.ar-menu__separator {
   height: 1px;
   margin: 4px 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--_line);
 }
-.aui-menu__label {
-  padding: 6px 8px 3px 26px;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+.ar-menu__label {
+  padding: 7px 8px 3px 29px;
+  font: 500 8.5px var(--_mono);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--_ink-3);
+  color: var(--_ink-low);
+}
+
+/* ContextMenu adds no box of its own: wrapping a row never changes the layout */
+.ar-context {
+  display: contents;
 }

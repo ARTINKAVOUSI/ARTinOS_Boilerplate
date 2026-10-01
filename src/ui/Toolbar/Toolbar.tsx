@@ -19,7 +19,7 @@ export function Toolbar({ label, orientation = 'horizontal', floating = false, c
       role="toolbar"
       aria-label={label}
       aria-orientation={orientation}
-      className={className ? `aui-toolbar ${className}` : 'aui-toolbar'}
+      className={className ? `ar-toolbar ${className}` : 'ar-toolbar'}
       data-floating={floating || undefined}
       style={style}
     >
@@ -29,12 +29,12 @@ export function Toolbar({ label, orientation = 'horizontal', floating = false, c
 }
 
 export function ToolbarSeparator() {
-  return <span className="aui-toolbar__separator" role="separator" />
+  return <span className="ar-toolbar__separator" role="separator" />
 }
 
 /** Stretches to push the following items to the far end. */
 export function ToolbarSpacer() {
-  return <span className="aui-toolbar__spacer" />
+  return <span className="ar-toolbar__spacer" />
 }
 
 export default Toolbar

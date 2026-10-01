@@ -52,7 +52,7 @@ export function XYPad({ value, onChange, label, xRange = [-1, 1], yRange = [-1, 
   return (
     <div
       ref={pad}
-      className={className ? `aui-xypad ${className}` : 'aui-xypad'}
+      className={className ? `ar-xypad ${className}` : 'ar-xypad'}
       style={{ height, ['--x' as string]: tx, ['--y' as string]: ty, ...style }}
       role="slider"
       tabIndex={0}
@@ -75,10 +75,10 @@ export function XYPad({ value, onChange, label, xRange = [-1, 1], yRange = [-1, 
       }}
       onKeyDown={onKeyDown}
     >
-      <span className="aui-xypad__cross" data-axis="x" />
-      <span className="aui-xypad__cross" data-axis="y" />
-      <span className="aui-xypad__point" />
-      <span className="aui-xypad__readout">
+      <span className="ar-xypad__cross" data-axis="x" />
+      <span className="ar-xypad__cross" data-axis="y" />
+      <span className="ar-xypad__point" />
+      <span className="ar-xypad__readout">
         {value[0].toFixed(2)} · {value[1].toFixed(2)}
       </span>
     </div>

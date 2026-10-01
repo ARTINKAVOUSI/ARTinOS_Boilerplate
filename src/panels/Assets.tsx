@@ -73,13 +73,17 @@ function AssetCard({ asset }: { asset: Asset }) {
     },
   ]
   return (
-    <article className="artinos-asset-card">
-      <div className="artinos-asset-preview">{asset.type === 'image' ? <img src={asset.url} alt="" /> : <span>{asset.type.toUpperCase()}</span>}</div>
-      <b title={asset.name}>{asset.name}</b>
-      <small>
+    <article className="v2-entry">
+      <div className="v2-asset__preview">{asset.type === 'image' ? <img src={asset.url} alt="" /> : <span>{asset.type.toUpperCase()}</span>}</div>
+      <span className="v2-tile__name" title={asset.name}>
+        <span>{asset.name}</span>
+      </span>
+      <span className="v2-entry__actions">
+        <Menu align="end" items={items} trigger={<Button size="sm">Use…</Button>} />
+      </span>
+      <span className="v2-path">
         {asset.type} · {bytes(asset.size)}
-      </small>
-      <Menu items={items} trigger={<Button size="sm">Use…</Button>} />
+      </span>
     </article>
   )
 }
@@ -88,21 +92,21 @@ function Assets() {
   const list = useSyncExternalStore(subscribe, getAssets, getAssets)
   return (
     <div className="artinos-panel-suite">
-      <div className="artinos-dropzone">
-        <FileDrop
-          accept="image/*,.glb,.gltf,.cube"
-          title="Drop images, glTF models or .cube LUTs"
-          hint="Files stay in this browser session"
-          onFiles={files => {
-            assets = [...assets, ...files.map(file => ({ id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 7)}`, name: file.name, size: file.size, type: kindOf(file), url: URL.createObjectURL(file) }))]
-            emit()
-          }}
-        />
-      </div>
+      <FileDrop
+        accept="image/*,.glb,.gltf,.cube"
+        title="Drop images, glTF models or .cube LUTs"
+        hint="Or click to browse · files stay in this browser session"
+        onFiles={files => {
+          assets = [...assets, ...files.map(file => ({ id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 7)}`, name: file.name, size: file.size, type: kindOf(file), url: URL.createObjectURL(file) }))]
+          emit()
+        }}
+      />
       {list.length === 0 ? (
-        <div className="v2-empty">No assets yet. Imported files can become the backdrop, the environment, a model or a color grade.</div>
+        <div className="v2-empty">
+          <b>No assets yet</b>An imported file can become the backdrop, the environment, a model in the scene or a color grade.
+        </div>
       ) : (
-        <div className="artinos-asset-grid">
+        <div className="v2-entries">
           {list.map(asset => (
             <AssetCard key={asset.id} asset={asset} />
           ))}

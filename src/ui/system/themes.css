@@ -1,0 +1,67 @@
+/* ARTINOS UI — themes in this kit. Pick one with <ArtinosTheme theme="…"> or data-ar-theme.
+ *   studio        Studio
+ *   frost-deep    Deep Frost
+ *   frost-etched  Etched Frost
+ * A theme sets roles here and its control finish in materials.css. Anything a
+ * theme leaves out keeps the studio value from tokens.css.
+ */
+
+/* ---------- UNTINTED — clear transmission and frost in the default forms ----------
+ * All optical layers are achromatic. Panel tint is fully transparent; backdrop
+ * filters change diffusion only, never hue, saturation or brightness.
+ * Geometry, typography, density and motion inherit the default token values.
+ */
+[data-ar-theme='frost-etched'],
+[data-ar-theme='frost-deep'] {
+  --ar-bg-app: #303030;
+  --ar-bg-surface: rgba(255, 255, 255, 0.04);
+  --ar-bg-raised: rgba(255, 255, 255, 0.08);
+  --ar-bg-hover: rgba(255, 255, 255, 0.07);
+  --ar-bg-active: rgba(255, 255, 255, 0.12);
+  --ar-text-hi: #ffffff;
+  --ar-text-mid: #ededed;
+  --ar-text-low: #d4d4d4;
+  --ar-text-faint: #aeaeae;
+  --ar-text-ghost: #858585;
+  --ar-line-subtle: rgba(255, 255, 255, 0.12);
+  --ar-line: rgba(255, 255, 255, 0.22);
+  --ar-line-strong: rgba(255, 255, 255, 0.38);
+  /* the glass is untinted; the accents are the ARTINOS set (teal lifted for dark glass) */
+  --ar-signal: #4fd1ba;
+  --ar-signal-hi: #9eeede;
+  --ar-signal-line: rgba(79, 209, 186, 0.55);
+  --ar-signal-wash: rgba(79, 209, 186, 0.16);
+  --ar-signal-ink: #04120f;
+  --ar-bind: var(--ar-azure-500);
+  --ar-warn: var(--ar-amber-500);
+  --ar-fault: var(--ar-rose-500);
+  --ar-tick: rgba(255, 255, 255, 0.32);
+  --ar-tick-major: #d4d4d4;
+  --ar-shadow-well: inset 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.13);
+  --ar-rim: 0 1px 0 rgba(255, 255, 255, 0.06);
+  --ar-focus-ring: 0 0 0 1px #ffffff, 0 0 0 3px rgba(0, 0, 0, 0.45);
+  --ar-panel-tint: rgba(0, 0, 0, 0);
+  --ar-panel-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+  --ar-float-bg: rgba(28, 28, 28, 0.92);
+  --ar-float-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --ar-float-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.42);
+  --ar-float-ink: #ffffff;
+  --ar-float-ink-low: #c6c6c6;
+  color-scheme: dark;
+}
+
+/* ETCHED FROST — Fine etched glass. Light diffusion, translucent matte inserts and delicate satin edges. */
+[data-ar-theme='frost-etched'] {
+  --ar-bg-well: rgba(0, 0, 0, 0.18);
+  --ar-panel-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%);
+  --ar-panel-blur: blur(24px);
+  --ar-panel-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 18px 44px -24px rgba(0, 0, 0, 0.22);
+}
+
+/* DEEP FROST — Deep optical diffusion. The scene melts behind clear frost; dense satin inserts carry crisp charcoal numerals. */
+[data-ar-theme='frost-deep'] {
+  --ar-bg-well: rgba(0, 0, 0, 0.24);
+  --ar-panel-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 80%);
+  --ar-panel-blur: blur(72px);
+  --ar-panel-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 18px 44px -24px rgba(0, 0, 0, 0.38);
+}

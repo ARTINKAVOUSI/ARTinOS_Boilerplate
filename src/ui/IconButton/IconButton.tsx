@@ -20,7 +20,7 @@ export function IconButton({ label, icon, active, size = 'md', filled = false, c
       aria-label={label}
       title={label}
       aria-pressed={active}
-      className={className ? `aui-icon-button ${className}` : 'aui-icon-button'}
+      className={className ? `ar-icon-button ${className}` : 'ar-icon-button'}
       data-size={size === 'sm' ? 'sm' : undefined}
       data-filled={filled || undefined}
       {...rest}

@@ -12,7 +12,9 @@ export interface PropertyRowProps {
   status?: 'bound' | 'warn' | 'fault'
   /** Explains a fault in words, never colour alone. */
   message?: string
-  /** Shown only when the value differs from its default. */
+  /** The value differs from its default: a quiet dot in the margin, no width taken. */
+  modified?: boolean
+  /** A reset button in the row. Prefer `modified` and a context menu where space is tight. */
   onReset?: () => void
   /** Right-hand affordances, shown on hover or focus. */
   actions?: ReactNode
@@ -29,19 +31,19 @@ export interface PropertyRowProps {
  * PropertyRow — the Inspector's structural row: label, control, reset and
  * actions in one consistent arrangement. The row never owns the value.
  */
-export function PropertyRow({ label, children, binding, status, message, onReset, actions, density = 'default', highlighted = false, dataControl, disabled = false }: PropertyRowProps) {
+export function PropertyRow({ label, children, binding, status, message, modified = false, onReset, actions, density = 'default', highlighted = false, dataControl, disabled = false }: PropertyRowProps) {
   return (
-    <div className="aui-prop" data-density={density} data-state={status} data-control={dataControl} data-highlighted={highlighted || undefined} data-disabled={disabled || undefined}>
-      <div className="aui-prop__main">
-        <span className="aui-prop__label" title={label}>
+    <div className="ar-prop" data-density={density} data-state={status} data-control={dataControl} data-highlighted={highlighted || undefined} data-modified={modified || undefined} data-disabled={disabled || undefined}>
+      <div className="ar-prop__main">
+        <span className="ar-prop__label" title={label}>
           {label}
-          {binding && <em className="aui-prop__binding">{binding}</em>}
+          {binding && <em className="ar-prop__binding">{binding}</em>}
         </span>
-        <div className="aui-prop__control">{children}</div>
+        <div className="ar-prop__control">{children}</div>
         {(onReset || actions) && (
-          <div className="aui-prop__actions">
+          <div className="ar-prop__actions">
             {onReset && (
-              <button type="button" className="aui-prop__reset" onClick={onReset} aria-label={`Reset ${label}`} title="Reset to default">
+              <button type="button" className="ar-prop__reset" onClick={onReset} aria-label={`Reset ${label}`} title="Reset to default">
                 ⟲
               </button>
             )}
@@ -49,7 +51,7 @@ export function PropertyRow({ label, children, binding, status, message, onReset
           </div>
         )}
       </div>
-      {message && <p className="aui-prop__message">{message}</p>}
+      {message && <p className="ar-prop__message">{message}</p>}
     </div>
   )
 }

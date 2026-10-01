@@ -1,74 +1,82 @@
-import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react'
-import './Tabs.css'
+'use client';
+import { useLayoutEffect, useRef, useState } from 'react';
+import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useControllable } from '../system/hooks';
+import { normalizeOptions } from '../system/options';
+import type { OptionInput } from '../system/options';
+import { cx } from '../system/utils';
+import './Tabs.css';
 
-export interface TabItem<T extends string> {
-  value: T
-  label: ReactNode
-  /** Small count or status after the label. */
-  badge?: ReactNode
-  content?: ReactNode
+/* ARTINOS Tabs — a quiet text tab strip with a travelling underline. Renders the
+   tablist only; render the active panel yourself from `value`. Arrow keys,
+   Home and End move between tabs. */
+
+export interface TabsProps<V extends string = string> {
+  items: readonly OptionInput<V>[];
+  value?: V;
+  defaultValue?: V;
+  onChange?: (value: V) => void;
+  /** Accessible name of the tab list. */
+  label?: string;
+  /** Prefix for tab / panel ids: tab `${idBase}-tab-${value}`, panel `${idBase}-panel-${value}`. */
+  idBase?: string;
+  className?: string;
+  style?: CSSProperties;
 }
 
-export interface TabsProps<T extends string> {
-  value: T
-  items: readonly TabItem<T>[]
-  onChange: (value: T) => void
-  label: string
-  className?: string
-}
+export function Tabs<V extends string = string>({ items, value, defaultValue, onChange, label, idBase, className, style }: TabsProps<V>) {
+  const opts = normalizeOptions(items);
+  const [cur, pick] = useControllable<V>(value, defaultValue ?? opts[0]?.value, onChange);
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [bar, setBar] = useState<{ x: number; w: number } | null>(null);
+  const idx = Math.max(0, opts.findIndex((o) => o.value === cur));
 
-/**
- * Tabs — an underline tab strip with its panels. Arrow keys, Home and End
- * move between tabs (automatic activation). Items without `content` render
- * the strip only, so it can drive panels you place yourself.
- */
-export function Tabs<T extends string>({ value, items, onChange, label, className }: TabsProps<T>) {
-  const base = useId()
-  const refs = useRef<(HTMLButtonElement | null)[]>([])
-  const index = Math.max(0, items.findIndex(item => item.value === value))
-  const active = items[index]
+  useLayoutEffect(() => {
+    const el = refs.current[idx];
+    if (!el) return;
+    const place = () => setBar({ x: el.offsetLeft, w: el.offsetWidth });
+    place();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [idx, opts.length]);
 
-  const onKeyDown = (event: KeyboardEvent) => {
-    let next = index
-    if (event.key === 'ArrowRight') next = (index + 1) % items.length
-    else if (event.key === 'ArrowLeft') next = (index - 1 + items.length) % items.length
-    else if (event.key === 'Home') next = 0
-    else if (event.key === 'End') next = items.length - 1
-    else return
-    event.preventDefault()
-    onChange(items[next].value)
-    refs.current[next]?.focus()
-  }
+  const onKeyDown = (e: ReactKeyboardEvent) => {
+    const n = opts.length;
+    let j = e.key === 'ArrowRight' ? idx + 1 : e.key === 'ArrowLeft' ? idx - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1;
+    if (j === -1 && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    j = (j + n) % n;
+    if (opts[j].disabled) return;
+    pick(opts[j].value);
+    refs.current[j]?.focus();
+  };
 
   return (
-    <div className={className ? `aui-tabs ${className}` : 'aui-tabs'}>
-      <div role="tablist" aria-label={label} className="aui-tabs__list" onKeyDown={onKeyDown}>
-        {items.map((item, i) => (
-          <button
-            key={item.value}
-            ref={element => {
-              refs.current[i] = element
-            }}
-            type="button"
-            role="tab"
-            id={`${base}-tab-${i}`}
-            aria-selected={i === index}
-            aria-controls={item.content !== undefined ? `${base}-panel-${i}` : undefined}
-            tabIndex={i === index ? 0 : -1}
-            onClick={() => onChange(item.value)}
-          >
-            {item.label}
-            {item.badge != null && <span className="aui-tabs__badge">{item.badge}</span>}
-          </button>
-        ))}
-      </div>
-      {active?.content !== undefined && (
-        <div role="tabpanel" id={`${base}-panel-${index}`} aria-labelledby={`${base}-tab-${index}`} className="aui-tabs__panel">
-          {active.content}
-        </div>
-      )}
+    <div role="tablist" aria-label={label} className={cx('ar-tabs', className)} style={style} onKeyDown={onKeyDown}>
+      {opts.map((o, i) => (
+        <button
+          key={o.value}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          type="button"
+          role="tab"
+          id={idBase ? `${idBase}-tab-${o.value}` : undefined}
+          aria-controls={idBase ? `${idBase}-panel-${o.value}` : undefined}
+          aria-selected={i === idx}
+          tabIndex={i === idx ? 0 : -1}
+          disabled={o.disabled}
+          title={o.title}
+          onClick={() => pick(o.value)}
+          className="ar-tabs__tab"
+        >
+          {o.icon ? <span className="ar-icon">{o.icon}</span> : null}
+          {o.label}
+        </button>
+      ))}
+      {bar ? <i className="ar-tabs__bar" style={{ transform: `translateX(${bar.x}px)`, width: bar.w }} /> : null}
     </div>
-  )
+  );
 }
-
-export default Tabs

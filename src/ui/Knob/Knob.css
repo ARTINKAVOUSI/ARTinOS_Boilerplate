@@ -1,72 +1,74 @@
-:where(.aui-knob) {
-  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
-  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
-  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
-  --_active-a: var(--ui-active-a, rgba(255, 255, 255, 0.74));
-  --_sig: var(--ui-sig, #6fe3c0);
-  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
-  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
+/* Knob — a rotary control: a tick arc, a signal-filled value arc, the kit's
+   insert as the cap and its seam as the pointer. */
+:where(.ar-knob) {
+  --_tick: var(--ar-tick, rgba(255, 255, 255, 0.2));
+  --_signal: var(--ar-signal, #3cbca5);
+  --_cap: var(--ar-insert-cap, #d3d3cf);
+  --_seam: var(--ar-seam-active, #0b7a69);
+  --_mid: var(--ar-text-mid, #b4b4b4);
+  --_hi: var(--ar-text-hi, #ededed);
+  --_ring: var(--ar-focus-ring, 0 0 0 1px #86e3d3, 0 0 0 3px rgba(60, 188, 165, 0.18));
+  --_font: var(--ar-control-font, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
-.aui-knob {
+
+.ar-knob {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  font-family: var(--_face);
+  gap: 4px;
 }
-.aui-knob__dial {
-  cursor: ns-resize;
-  touch-action: none;
+.ar-knob__dial {
   border-radius: 50%;
   outline: none;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
 }
-.aui-knob__dial:focus-visible {
-  box-shadow: 0 0 0 1px var(--_sig);
+.ar-knob__dial:focus-visible {
+  box-shadow: var(--_ring);
 }
-.aui-knob svg {
+.ar-knob__dial svg {
   display: block;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
-.aui-knob__track {
+.ar-knob__track {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 3;
+  stroke: var(--_tick);
+  stroke-width: 2.5;
   stroke-linecap: round;
 }
-.aui-knob__value {
+.ar-knob__value {
   fill: none;
-  stroke: var(--_active-a);
-  stroke-width: 3;
+  stroke: var(--_signal);
+  stroke-width: 2.5;
   stroke-linecap: round;
 }
-.aui-knob__dial:active .aui-knob__value {
-  stroke: var(--_sig);
+.ar-knob__cap {
+  fill: var(--_cap);
+  stroke: rgba(0, 0, 0, 0.35);
+  stroke-width: 0.5;
 }
-.aui-knob__cap {
-  fill: rgba(255, 255, 255, 0.1);
-  stroke: var(--_edge);
-}
-.aui-knob__pointer {
-  stroke: var(--_ink);
-  stroke-width: 1.6;
+.ar-knob__pointer {
+  stroke: var(--_seam);
+  stroke-width: 2;
   stroke-linecap: round;
 }
-.aui-knob__text {
+.ar-knob__text {
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 1.2;
+  gap: 1px;
+  font: 500 8.5px var(--_font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--_mid);
 }
-.aui-knob__text span {
-  max-width: 100%;
-  overflow: hidden;
-  font-size: 9.5px;
-  color: var(--_ink-3);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.aui-knob__text b {
-  font: 400 9.5px var(--_num);
-  color: var(--_ink);
+.ar-knob__text b {
+  font: 300 11px var(--_font);
+  letter-spacing: 0;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--_hi);
 }

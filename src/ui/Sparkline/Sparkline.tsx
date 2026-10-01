@@ -39,7 +39,7 @@ export function Sparkline({ values, min, max, width = 120, height = 28, fill = t
 
   return (
     <svg
-      className={className ? `aui-sparkline ${className}` : 'aui-sparkline'}
+      className={className ? `ar-sparkline ${className}` : 'ar-sparkline'}
       data-tone={tone}
       width={width}
       height={height}
@@ -54,9 +54,9 @@ export function Sparkline({ values, min, max, width = 120, height = 28, fill = t
           <stop offset="1" stopColor="currentColor" stopOpacity="0" />
         </linearGradient>
       </defs>
-      {thresholdY !== null && <line className="aui-sparkline__threshold" x1="0" x2={width} y1={thresholdY} y2={thresholdY} />}
+      {thresholdY !== null && <line className="ar-sparkline__threshold" x1="0" x2={width} y1={thresholdY} y2={thresholdY} />}
       {fill && area && <path d={area} fill={`url(#${gradient})`} />}
-      {line && <path className="aui-sparkline__line" d={line} />}
+      {line && <path className="ar-sparkline__line" d={line} />}
     </svg>
   )
 }

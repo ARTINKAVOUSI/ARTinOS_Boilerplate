@@ -3,6 +3,7 @@
 
      tokens.css      core tokens and the component aliases derived from them
      worlds.css      the six material worlds (frost is the default)
+     frost-themes    the dock glass for the ARTINOS UI Deep / Etched Frost themes
      themes.css      [data-theme] overlays
      legacy.css      pre-workbench rules, in a low layer
      instrument.css  the previous component layer, in the same low band
@@ -16,6 +17,7 @@
 
 @import './tokens.css';
 @import './worlds.css';
+@import './frost-themes.css';
 @import './themes.css';
 @import './legacy.css' layer(artinos.legacy);
 @import './instrument.css' layer(artinos.instrument);

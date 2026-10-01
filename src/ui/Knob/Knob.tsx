@@ -55,9 +55,9 @@ export function Knob({ value, onChange, label, min = 0, max = 1, step = 0.01, de
   const angle = t * SWEEP - SWEEP / 2
 
   return (
-    <div className={className ? `aui-knob ${className}` : 'aui-knob'} style={{ width: size }}>
+    <div className={className ? `ar-knob ${className}` : 'ar-knob'} style={{ width: size }}>
       <div
-        className="aui-knob__dial"
+        className="ar-knob__dial"
         role="slider"
         tabIndex={0}
         aria-label={label}
@@ -90,14 +90,14 @@ export function Knob({ value, onChange, label, min = 0, max = 1, step = 0.01, de
         }}
       >
         <svg viewBox="0 0 40 40" aria-hidden>
-          <path className="aui-knob__track" d={arc(0, SWEEP)} />
-          {t > 0.002 && <path className="aui-knob__value" d={arc(0, t * SWEEP)} />}
-          <circle className="aui-knob__cap" cx="20" cy="20" r="10.5" />
-          <line className="aui-knob__pointer" x1="20" y1="20" x2="20" y2="12.5" transform={`rotate(${angle} 20 20)`} />
+          <path className="ar-knob__track" d={arc(0, SWEEP)} />
+          {t > 0.002 && <path className="ar-knob__value" d={arc(0, t * SWEEP)} />}
+          <circle className="ar-knob__cap" cx="20" cy="20" r="10.5" />
+          <line className="ar-knob__pointer" x1="20" y1="20" x2="20" y2="12.5" transform={`rotate(${angle} 20 20)`} />
         </svg>
       </div>
       {showLabel && (
-        <div className="aui-knob__text">
+        <div className="ar-knob__text">
           <span>{label}</span>
           <b>{value.toFixed(decimals)}</b>
         </div>

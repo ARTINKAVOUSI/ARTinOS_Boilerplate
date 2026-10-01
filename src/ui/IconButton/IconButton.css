@@ -1,21 +1,25 @@
-:where(.aui-icon-button) {
-  --_body: var(--ui-body, rgba(255, 255, 255, 0.085));
-  --_body-in: var(--ui-body-in, inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.14));
-  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
-  --_active-a: var(--ui-active-a, rgba(255, 255, 255, 0.74));
-  --_active-lit: var(--ui-active-lit, rgba(255, 255, 255, 0.92));
-  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
-  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
-  --_ink-active: var(--ui-ink-active, rgba(16, 20, 22, 0.82));
-  --_sig: var(--ui-sig, #6fe3c0);
-  --_radius: var(--ui-r-comp, 6px);
-  --_size: 23px;
+/* IconButton — a square icon action. Bare ink at rest, a hover wash, and the
+   kit's insert when pressed (a toggled tool). */
+:where(.ar-icon-button) {
+  --_size: var(--ar-h, 26px);
+  --_r: 6px;
+  --_ink: var(--ar-text-low, #858585);
+  --_ink-hi: var(--ar-text-hi, #ededed);
+  --_hover: var(--ar-bg-hover, rgba(255, 255, 255, 0.045));
+  --_insert: var(--ar-insert, linear-gradient(180deg, #dcdcd8 0%, #c9c9c4 100%));
+  --_insert-shadow: var(--ar-insert-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 0 0.5px rgba(0, 0, 0, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3));
+  --_insert-ink: var(--ar-insert-ink, #121212);
+  --_trough: var(--ar-trough, rgba(0, 0, 0, 0.42));
+  --_well: var(--ar-well, inset 0 1px 1px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.045));
+  --_ring: var(--ar-focus-ring, 0 0 0 1px #86e3d3, 0 0 0 3px rgba(60, 188, 165, 0.18));
+  --_ease: var(--ar-ease, cubic-bezier(0.2, 0.7, 0.2, 1));
 }
-.aui-icon-button[data-size='sm'] {
-  --_size: 18px;
+.ar-icon-button[data-size='sm'] {
+  --_size: 22px;
+  --_r: 5px;
 }
 
-.aui-icon-button {
+.ar-icon-button {
   box-sizing: border-box;
   display: inline-grid;
   place-items: center;
@@ -25,38 +29,42 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: var(--_radius);
+  border-radius: var(--_r);
   background: none;
-  color: var(--_ink-3);
+  color: var(--_ink);
+  text-shadow: var(--ar-base-text-shadow, none);
   cursor: pointer;
-  transition: background 140ms, color 140ms, box-shadow 140ms;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms var(--_ease), color 120ms var(--_ease), box-shadow 120ms var(--_ease);
 }
-.aui-icon-button svg {
+.ar-icon-button svg {
   width: 13px;
   height: 13px;
 }
-.aui-icon-button[data-size='sm'] svg {
-  width: 11px;
-  height: 11px;
+.ar-icon-button[data-size='sm'] svg {
+  width: 12px;
+  height: 12px;
 }
-.aui-icon-button[data-filled] {
-  background: var(--_body);
-  box-shadow: var(--_body-in), inset 0 0 0 1px var(--_edge);
+/* drawn as a well at rest, for toolbars over a bright scene */
+.ar-icon-button[data-filled] {
+  background: var(--_trough);
+  box-shadow: var(--_well);
 }
-.aui-icon-button:hover {
-  background: var(--_body);
-  color: var(--_ink);
+.ar-icon-button:hover {
+  background: var(--_hover);
+  color: var(--_ink-hi);
 }
-.aui-icon-button[aria-pressed='true'] {
-  background: linear-gradient(180deg, var(--_active-lit), var(--_active-a));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  color: var(--_ink-active);
+.ar-icon-button[aria-pressed='true'] {
+  background: var(--_insert);
+  box-shadow: var(--_insert-shadow);
+  color: var(--_insert-ink);
+  text-shadow: var(--ar-insert-text-shadow, none);
 }
-.aui-icon-button:focus-visible {
-  outline: 1px solid var(--_sig);
-  outline-offset: 1px;
+.ar-icon-button:focus-visible {
+  outline: none;
+  box-shadow: var(--_ring);
 }
-.aui-icon-button:disabled {
+.ar-icon-button:disabled {
   opacity: 0.35;
   cursor: default;
 }

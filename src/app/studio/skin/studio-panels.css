@@ -30,12 +30,6 @@
 .artinos-parameter-card-body{display:grid}
 .artinos-workbench .artinos-property-actions{opacity:1}
 .artinos-workbench .artinos-property-row[data-visibility-state=revealed]{outline:1px solid var(--ui-accent);outline-offset:1px;border-radius:var(--ui-radius-control)}
-.artinos-workbench .artinos-property-menu{position:relative}
-.artinos-property-menu>summary{display:grid;place-items:center;width:15px;height:22px;list-style:none;font-size:11px;color:var(--ui-text-ghost);cursor:pointer}
-.artinos-property-menu>summary:hover{color:var(--ui-text-strong)}
-.artinos-property-menu>summary::-webkit-details-marker{display:none}
-.artinos-property-menu[open]>summary{color:var(--ui-accent)}
-.artinos-property-menu>div{position:absolute;right:0;top:100%;z-index:20;display:flex;gap:2px;padding:3px;border:1px solid var(--ui-pane-border);border-radius:var(--ui-radius-control);background:var(--ui-command-sheen),var(--ui-float);-webkit-backdrop-filter:blur(var(--ui-command-blur));backdrop-filter:blur(var(--ui-command-blur));box-shadow:var(--ui-float-shadow)}
 .artinos-inspector-presets{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:6px}
 .artinos-inspector-presets>.artinos-field{flex:1 1 220px;margin:0}
 

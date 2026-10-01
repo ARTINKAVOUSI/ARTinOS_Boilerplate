@@ -29,7 +29,7 @@ export interface StudioState {
   /** Named snapshots of `features`. */
   presets: Record<string, Record<string, FeatureState>>
   /** `advanced` reveals the controls a manifest marks advanced, as v1's Advanced switch did. */
-  ui: { visible: boolean; world: string; favorites: string[]; pins: string[]; advanced: boolean }
+  ui: { visible: boolean; theme: string; advanced: boolean }
   reveal: RevealTarget | null
 }
 
@@ -59,7 +59,7 @@ function reconcile(saved: Record<string, FeatureState> | undefined): Record<stri
 }
 
 function load(): StudioState {
-  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, world: 'frost', favorites: [], pins: [], advanced: false }, reveal: null }
+  const fallback: StudioState = { features: initialFeatures(), presets: {}, ui: { visible: true, theme: 'frost-deep', advanced: false }, reveal: null }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return fallback
@@ -68,7 +68,8 @@ function load(): StudioState {
     return {
       features: reconcile(parsed.features),
       presets: parsed.presets ?? {},
-      ui: { ...fallback.ui, ...parsed.ui },
+      // Only the keys the studio still has; an older save may carry favorites or pins.
+      ui: { visible: parsed.ui?.visible ?? fallback.ui.visible, theme: parsed.ui?.theme ?? fallback.ui.theme, advanced: parsed.ui?.advanced ?? fallback.ui.advanced },
       reveal: null,
     }
   } catch {
@@ -184,13 +185,6 @@ export const studio = {
   /** Point the panels at one control: the owning card opens and the row is highlighted. */
   reveal(featureId: string, control?: string) {
     commit({ ...state, reveal: { featureId, control, at: Date.now() } })
-  },
-
-  /** Star or pin one control, keyed `featureId:control`. */
-  toggleMark(kind: 'favorites' | 'pins', key: string) {
-    const list = state.ui[kind]
-    const next = list.includes(key) ? list.filter(item => item !== key) : [...list, key]
-    commit({ ...state, ui: { ...state.ui, [kind]: next } })
   },
 
   setUI(patch: Partial<StudioState['ui']>) {

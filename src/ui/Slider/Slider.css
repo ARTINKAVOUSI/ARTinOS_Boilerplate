@@ -1,150 +1,520 @@
-/* Slider — a softer body with a denser active insert moving through it. */
+/* ARTINOS UI — Slider + RangeSlider.
+   Position arrives as three numbers set inline on the track (0..1):
+     --ar-lo / --ar-hi  the active span · --ar-p  the seam · --_sd  seam side (-1 · 0 · 1)
+   Registered so a programmatic change glides fill, seam and ink clip together. */
 
-:where(.aui-slider) {
-  --_body: var(--ui-body, rgba(255, 255, 255, 0.085));
-  --_body-in: var(--ui-body-in, inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.14));
-  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
-  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
-  --_active-a: var(--ui-active-a, rgba(255, 255, 255, 0.74));
-  --_active-b: var(--ui-active-b, rgba(255, 255, 255, 0.5));
-  --_active-lit: var(--ui-active-lit, rgba(255, 255, 255, 0.92));
-  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
-  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
-  --_ink-active: var(--ui-ink-active, rgba(16, 20, 22, 0.82));
-  --_seam: var(--ui-seam, rgba(16, 20, 22, 0.6));
-  --_well: var(--ui-well, rgba(0, 0, 0, 0.16));
-  --_sig: var(--ui-sig, #6fe3c0);
-  --_h: var(--ui-h-comp, 23px);
-  --_radius: var(--ui-r-comp, 6px);
-  --_face: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
-  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
-  --_ease: var(--ui-ease, cubic-bezier(0.2, 0.7, 0.25, 1));
-  --_mid: var(--ui-t-mid, 190ms);
-}
+@property --ar-lo { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --ar-hi { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --ar-p { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --ar-p2 { syntax: '<number>'; inherits: true; initial-value: 0; }
 
-.aui-slider {
+.ar-slider {
   position: relative;
-  box-sizing: border-box;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
   min-width: 0;
-  height: var(--_h);
-  border-radius: var(--_radius);
-  background: var(--_body);
-  box-shadow: var(--_body-in), inset 0 0 0 1px var(--_edge);
-  overflow: hidden;
-  isolation: isolate;
-  cursor: ew-resize;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: none;
   outline: none;
-  font: 11px/1 var(--_face);
-  color: var(--_ink);
-  transition: box-shadow var(--_mid) var(--_ease);
+  -webkit-tap-highlight-color: transparent;
 }
-.aui-slider[data-size='sm'] {
-  height: 19px;
-  font-size: 10.5px;
-}
-.aui-slider:hover {
-  box-shadow: var(--_body-in), inset 0 0 0 1px var(--_edge-lit);
-}
-.aui-slider:focus-visible {
-  box-shadow: var(--_body-in), inset 0 0 0 1px color-mix(in srgb, var(--_sig) 60%, transparent), 0 0 0 3px color-mix(in srgb, var(--_sig) 24%, transparent);
-}
-.aui-slider[data-disabled] {
-  opacity: 0.45;
+
+.ar-slider__track {
+  --_w: calc(100% - 2 * var(--ar-inset));
+  --_x0: calc(var(--ar-inset) + var(--ar-lo) * var(--_w));
+  --_x1: calc(var(--ar-inset) + var(--ar-hi) * var(--_w));
+  flex: 1;
+  overflow: hidden;
+  touch-action: pan-y;
   cursor: default;
+  transition:
+    box-shadow var(--ar-dur-state) var(--ar-ease),
+    --ar-lo var(--ar-dur-state) var(--ar-ease),
+    --ar-hi var(--ar-dur-state) var(--ar-ease),
+    --ar-p var(--ar-dur-state) var(--ar-ease),
+    --ar-p2 var(--ar-dur-state) var(--ar-ease);
+}
+/* the semantic value is immediate under the hand */
+.ar-slider[data-mode] .ar-slider__track {
+  transition-duration: var(--ar-dur-state), 0s, 0s, 0s, 0s;
+}
+.ar-slider[data-mode][data-quant] .ar-slider__track {
+  transition-duration: var(--ar-dur-state), var(--ar-dur-value), var(--ar-dur-value), var(--ar-dur-value), var(--ar-dur-value);
+}
+.ar-slider[data-mode] .ar-slider__track:not(.ar-slider__track--gradient) {
+  box-shadow: var(--ar-well), inset 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+.ar-slider:focus-visible .ar-slider__track {
+  box-shadow: var(--ar-well), var(--ar-focus-ring);
 }
 
-.aui-slider__fill {
-  position: absolute;
-  inset: 1px auto 1px 1px;
-  width: max(8px, calc(var(--t) * 100% - 2px));
-  border-radius: calc(var(--_radius) - 1.5px);
-  background: linear-gradient(180deg, var(--_active-lit) 0%, var(--_active-a) 42%, var(--_active-b) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 2px rgba(0, 0, 0, 0.12);
-  transition: filter var(--_mid) var(--_ease);
+/* cursors say which territory is under the pointer */
+.ar-slider[data-zone='seam'] .ar-slider__track,
+.ar-slider[data-zone='value'] .ar-slider__track,
+.ar-slider[data-mode] .ar-slider__track {
+  cursor: ew-resize;
 }
-.aui-slider[data-dragging] .aui-slider__fill {
-  filter: brightness(1.07);
+.ar-slider[data-variant='ruler'] .ar-slider__track { cursor: grab; }
+.ar-slider[data-variant='ruler'][data-zone='value'] .ar-slider__track { cursor: ew-resize; }
+.ar-slider[data-mode='ruler'] .ar-slider__track { cursor: grabbing; }
+.ar-slider[data-off] .ar-slider__track { cursor: default; }
+
+/* ---------- paired layout: label outside ---------- */
+.ar-slider__side {
+  flex: none;
+  width: var(--_lw, 106px);
 }
 
-.aui-slider__seam {
+/* ---------- active insert ---------- */
+.ar-slider__fill {
   position: absolute;
-  top: 5px;
-  bottom: 5px;
-  left: calc(var(--t) * 100%);
-  width: 1.5px;
-  margin-left: -4px;
-  border-radius: 2px;
-  background: var(--_seam);
-  opacity: 0.55;
+  top: var(--ar-inset);
+  bottom: var(--ar-inset);
+  left: var(--_x0);
+  width: calc(var(--_x1) - var(--_x0));
+  transform-origin: 50% 50%;
+  transition:
+    transform 260ms var(--ar-ease) 40ms,
+    opacity 200ms var(--ar-ease) 40ms,
+    filter 200ms var(--ar-ease);
+}
+.ar-slider[data-zone] .ar-slider__fill,
+.ar-slider[data-mode] .ar-slider__fill {
+  filter: brightness(1.035);
+}
+.ar-slider[data-mode] .ar-slider__fill {
+  box-shadow: var(--ar-insert-shadow), inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+/* off: energy drains out of the instrument */
+.ar-slider[data-off] .ar-slider__fill,
+.ar-slider[data-off] .ar-slider__cell[data-lit] {
+  transform: scaleY(0.1);
+  opacity: 0;
+  filter: saturate(0) brightness(0.7);
+  transition:
+    transform var(--ar-dur-surface) var(--ar-ease-exit),
+    opacity 240ms var(--ar-ease-exit),
+    filter 160ms var(--ar-ease-exit);
+}
+.ar-slider__offline {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--_x0) + 3px);
+  width: max(0px, calc(var(--_x1) - var(--_x0) - 6px));
+  height: 1px;
+  margin-top: -0.5px;
+  background: var(--ar-off-ink);
+  opacity: 0;
   pointer-events: none;
-  transition: opacity var(--_mid), background var(--_mid);
+  transition: opacity var(--ar-dur-surface) var(--ar-ease);
 }
-.aui-slider:hover .aui-slider__seam {
-  opacity: 0.9;
-}
-.aui-slider[data-dragging] .aui-slider__seam {
-  opacity: 1;
-  background: var(--_sig);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--_sig) 40%, transparent);
+.ar-slider[data-off] .ar-slider__offline {
+  opacity: 0.8;
+  transition-delay: 90ms;
 }
 
-.aui-slider__text {
+/* ---------- stepped cells ---------- */
+.ar-slider__cells {
+  position: absolute;
+  inset: var(--ar-inset);
+  display: flex;
+  gap: 2px;
+}
+.ar-slider__cell {
+  flex: 1;
+  border-radius: var(--ar-cell-radius, max(2px, calc(var(--_ir) - 1px)));
+  background: var(--ar-cell);
+  box-shadow: var(--ar-cell-shadow);
+  transform-origin: 50% 50%;
+  transition: background 90ms var(--ar-ease);
+}
+.ar-slider__cell[data-lit] {
+  background: var(--ar-insert);
+  mix-blend-mode: var(--ar-insert-blend);
+  -webkit-backdrop-filter: var(--ar-insert-backdrop);
+  backdrop-filter: var(--ar-insert-backdrop);
+  box-shadow: var(--ar-cell-insert-shadow);
+  transition:
+    transform 260ms var(--ar-ease) 40ms,
+    opacity 200ms var(--ar-ease) 40ms,
+    filter 200ms var(--ar-ease);
+}
+
+/* ---------- marks: detents, step ticks, bipolar origin ---------- */
+.ar-slider__mark {
+  position: absolute;
+  bottom: 3px;
+  left: calc(var(--ar-inset) + var(--_m) * var(--_w));
+  width: 1px;
+  height: 3px;
+  margin-left: -0.5px;
+  background: rgba(128, 128, 128, 0.7);
+  pointer-events: none;
+}
+.ar-slider__mark--step { background: rgba(128, 128, 128, 0.45); }
+.ar-slider__mark--origin {
+  top: 3px;
+  bottom: 3px;
+  height: auto;
+  background: rgba(128, 128, 128, 0.35);
+}
+.ar-slider__track--gradient .ar-slider__mark { background: rgba(0, 0, 0, 0.4); }
+
+/* ---------- the seam: the handle is the end of the material ---------- */
+.ar-seam {
+  --_c: var(--ar-seam);
+  position: absolute;
+  top: 50%;
+  left: clamp(
+    calc(var(--ar-inset) + 3px),
+    /* set in from the fill end by --ar-seam-offset, never past the middle of a short fill */
+    calc(var(--ar-inset) + var(--ar-p) * var(--_w) + var(--_sd, -1) * min(var(--ar-seam-offset), (var(--ar-hi) - var(--ar-lo)) * var(--_w) * 0.5)),
+    calc(100% - var(--ar-inset) - 3px)
+  );
+  width: var(--ar-seam-w);
+  height: calc(var(--_h) * var(--ar-seam-scale) - 1px);
+  transform: translate(-50%, -50%);
+  border-radius: 1px;
+  background: linear-gradient(90deg, var(--_c) 0 var(--ar-seam-a), transparent var(--ar-seam-a) var(--ar-seam-b), var(--_c) var(--ar-seam-b));
+  box-shadow: var(--ar-seam-edge);
+  filter: var(--ar-seam-drop);
+  pointer-events: none;
+  transition:
+    height var(--ar-dur-state) var(--ar-ease),
+    box-shadow 160ms var(--ar-ease),
+    filter 160ms var(--ar-ease),
+    opacity var(--ar-dur-surface) var(--ar-ease);
+}
+.ar-slider[data-zone='seam'] .ar-slider__seam { --_c: var(--ar-seam-hover); }
+.ar-slider[data-status] .ar-slider__seam { --_c: var(--_status); }
+.ar-slider[data-hot] .ar-slider__seam {
+  --_c: var(--ar-seam-active);
+  height: calc(var(--_h) * var(--ar-seam-scale-hot) - 1px);
+  box-shadow: var(--ar-seam-glow);
+  filter: var(--ar-seam-drop-hot);
+}
+.ar-slider[data-flash='snap'] .ar-slider__seam { --_c: var(--ar-signal-hi); }
+.ar-slider[data-off] .ar-slider__seam {
+  --_c: var(--ar-off-ink);
+  height: 6px;
+  box-shadow: none;
+  filter: none;
+}
+
+/* gradient track seam: dark on the scale, centred on the value */
+.ar-slider__seam--grad {
+  --_c: var(--ar-grad-seam);
+  height: calc(var(--_h) * var(--ar-grad-seam-scale) + 2px);
+  box-shadow: var(--ar-grad-seam-edge);
+}
+.ar-slider[data-hot] .ar-slider__seam--grad {
+  --_c: var(--ar-grad-seam-hot);
+  height: calc(var(--_h) * var(--ar-grad-seam-scale) + 2px);
+  box-shadow: var(--ar-grad-seam-glow);
+}
+
+/* ---------- label + readout, twice: base ink, and insert ink clipped to the fill ---------- */
+.ar-slider__content {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 8px;
+  gap: var(--ar-gap);
+  padding: 0 var(--ar-pad-x);
   pointer-events: none;
 }
-.aui-slider__text[data-ink='on'] {
-  color: var(--_ink-active);
-  clip-path: inset(0 calc(100% - var(--t) * 100%) 0 0);
+.ar-slider__content--over {
+  clip-path: inset(0 calc(100% - var(--_x1)) 0 var(--_x0));
+  transition: opacity 200ms var(--ar-ease);
 }
-.aui-slider__text[data-ink='off'] {
-  color: var(--_ink-2);
-  clip-path: inset(0 0 0 calc(var(--t) * 100%));
+/* the base ink is cut away where the insert covers it, so a glyph is drawn once,
+   in one ink — no light fringe bleeding round dark text on pale inserts */
+.ar-slider__content--base {
+  clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, var(--_x0) 0, var(--_x1) 0, var(--_x1) 100%, var(--_x0) 100%, var(--_x0) 0);
 }
-.aui-slider__name {
+.ar-slider[data-off] .ar-slider__content--base { clip-path: none; }
+.ar-slider[data-off] .ar-slider__content--over { opacity: 0; }
+
+.ar-slider__label {
+  flex: 0 1 auto;
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  padding-right: 1px;
 }
-.aui-slider__value {
-  font-family: var(--_num);
-  font-size: 10.5px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
+.ar-slider__readout {
+  margin-left: auto;
+  flex: none;
+  color: var(--ar-value-ink);
+  text-shadow: var(--ar-base-text-shadow);
+  transition: color var(--ar-dur-state) var(--ar-ease);
 }
-.aui-slider__text[data-ink='off'] .aui-slider__value {
-  color: var(--_ink);
+.ar-slider__readout .ar-roll__unit { color: var(--ar-unit-ink); }
+.ar-slider[data-mode='scrub'] .ar-slider__readout:not(.ar-slider__readout--over),
+.ar-slider[data-zone='value'] .ar-slider__readout:not(.ar-slider__readout--over) {
+  color: var(--ar-value-ink-hi);
 }
-.aui-slider__value i {
-  margin-left: 2px;
-  font-style: normal;
-  opacity: 0.6;
+.ar-slider__readout--over {
+  color: var(--ar-insert-ink);
+  text-shadow: var(--ar-insert-text-shadow);
+}
+.ar-slider__readout--over .ar-roll__unit { color: var(--ar-insert-unit-ink); }
+.ar-slider[data-off] .ar-slider__label:not(.ar-text--over),
+.ar-slider[data-off] .ar-slider__side,
+.ar-slider[data-off] .ar-slider__readout {
+  color: var(--ar-off-ink);
 }
 
-.aui-slider__input {
-  position: absolute;
-  inset: 2px;
-  z-index: 2;
-  width: calc(100% - 4px);
-  padding: 0 6px;
-  border: 0;
-  border-radius: calc(var(--_radius) - 2px);
-  background: var(--_well);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--_sig) 60%, transparent);
-  font: 10.5px var(--_num);
-  text-align: right;
-  color: var(--_ink);
-  outline: none;
-  backdrop-filter: blur(8px);
+/* ---------- status: subtle, integrated ---------- */
+.ar-slider[data-status='bound'] { --_status: var(--ar-bind); }
+.ar-slider[data-status='automated'] { --_status: var(--ar-signal); }
+.ar-slider[data-status='warn'] { --_status: var(--ar-warn); }
+.ar-slider[data-status='fault'] { --_status: var(--ar-fault); }
+.ar-slider[data-status] .ar-dot[data-on] {
+  background: var(--_status);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--_status) 60%, transparent);
 }
+.ar-slider[data-status='automated'] .ar-dot[data-on] {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--_status) 35%, transparent);
+}
+
+/* ---------- gradient variant ---------- */
+.ar-slider__track--gradient {
+  box-shadow: var(--ar-rim);
+}
+.ar-slider:focus-visible .ar-slider__track--gradient { box-shadow: var(--ar-rim), var(--ar-focus-ring); }
+.ar-slider__grad,
+.ar-slider__sheen,
+.ar-slider__gradwell {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ar-slider__grad {
+  transition: filter 260ms var(--ar-ease), opacity 260ms var(--ar-ease);
+}
+.ar-slider[data-zone] .ar-slider__grad,
+.ar-slider[data-mode] .ar-slider__grad { filter: brightness(1.04); }
+.ar-slider[data-off] .ar-slider__grad {
+  filter: saturate(0.12) brightness(0.42);
+  opacity: 0.8;
+  transition-timing-function: var(--ar-ease-exit);
+}
+.ar-slider__sheen { background: var(--ar-grad-sheen); }
+.ar-slider__gradwell {
+  border-radius: inherit;
+  box-shadow: var(--ar-grad-well);
+}
+.ar-slider__track--gradient [data-ink='dark'] { color: var(--ar-grad-ink-dark); text-shadow: none; }
+.ar-slider__track--gradient [data-ink='light'] { color: var(--ar-grad-ink-light); text-shadow: none; }
+.ar-slider__track--gradient .ar-roll__unit { color: inherit; }
+.ar-slider__track--gradient .ar-slider__readout { font-weight: var(--ar-value-weight); }
+.ar-slider[data-mode='scrub'] .ar-slider__track--gradient .ar-slider__readout { font-weight: max(500, var(--ar-value-weight)); }
+.ar-slider[data-off] .ar-slider__track--gradient .ar-slider__label { color: var(--ar-text-mid); }
+
+/* ---------- ruler variant: the scale moves beneath a fixed index ---------- */
+.ar-slider[data-variant='ruler'] .ar-slider__track {
+  --_h: calc(var(--ar-h) + 4px);
+  display: flex;
+  align-items: center;
+}
+.ar-slider__lead {
+  display: flex;
+  align-items: center;
+  gap: var(--ar-gap);
+  flex: none;
+  max-width: 40%;
+  padding-left: var(--ar-pad-x);
+  pointer-events: none;
+}
+.ar-slider__view {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  margin: 0 4px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  pointer-events: none;
+}
+.ar-slider__tail {
+  flex: none;
+  display: flex;
+  padding-right: var(--ar-pad-x);
+  pointer-events: none;
+}
+.ar-slider__tail .ar-slider__readout { margin-left: 0; }
+.ar-ruler {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  transition: opacity 260ms var(--ar-ease);
+}
+.ar-slider[data-off] .ar-ruler { opacity: 0.42; transition-timing-function: var(--ar-ease-exit); }
+.ar-ruler__minor { stroke: var(--ar-ruler-minor); stroke-width: 1; }
+.ar-ruler__major { stroke: var(--ar-ruler-ink); stroke-width: 1.2; }
+.ar-ruler__mark { stroke: var(--ar-text-hi); stroke-width: 1.5; }
+.ar-ruler__num {
+  fill: var(--ar-ruler-ink);
+  font-family: var(--ar-control-font);
+  font-size: 8.5px;
+  font-weight: var(--ar-value-weight);
+}
+.ar-ruler__index,
+.ar-ruler__foot,
+.ar-plot__point,
+.ar-plot__foot,
+.ar-plot__head {
+  --_ic: var(--ar-index);
+  position: absolute;
+  background: var(--_ic);
+  pointer-events: none;
+  transition: background var(--ar-dur-state) var(--ar-ease), box-shadow 160ms var(--ar-ease);
+}
+.ar-slider[data-hot] :is(.ar-ruler__index, .ar-ruler__foot, .ar-plot__point, .ar-plot__foot, .ar-plot__head),
+.ar-slider[data-mode='scrub'] :is(.ar-ruler__index, .ar-ruler__foot, .ar-plot__point, .ar-plot__foot, .ar-plot__head) {
+  --_ic: var(--ar-seam-active);
+}
+.ar-slider[data-off] :is(.ar-ruler__index, .ar-ruler__foot, .ar-plot__point, .ar-plot__foot, .ar-plot__head) {
+  --_ic: var(--ar-off-ink);
+}
+.ar-slider[data-hot] :is(.ar-ruler__index, .ar-plot__point, .ar-plot__head) {
+  box-shadow: 0 0 6px var(--ar-signal-line);
+}
+.ar-ruler__index {
+  top: 12px;
+  bottom: 6px;
+  width: 1.5px;
+  margin-left: -0.75px;
+  border-radius: 1px;
+}
+.ar-ruler__foot {
+  bottom: 2px;
+  width: 3px;
+  height: 3px;
+  margin-left: -1.5px;
+  border-radius: 50%;
+}
+
+/* ---------- curve / wave: data on the surface ---------- */
+.ar-slider__track--tall {
+  --_h: calc(var(--ar-h) * 2 + 6px);
+  border-radius: calc(var(--_r) + 1px);
+}
+.ar-slider__corner {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--ar-gap);
+  pointer-events: none;
+}
+.ar-slider__corner--label { left: 10px; top: 7px; }
+.ar-slider__corner--value { right: 10px; top: 5px; }
+.ar-slider__corner--value .ar-slider__readout { margin-left: 0; }
+.ar-slider__plot {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 22px;
+  bottom: 8px;
+  pointer-events: none;
+  transition: opacity 260ms var(--ar-ease);
+}
+.ar-slider__plot svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.ar-slider[data-off] .ar-slider__plot { opacity: 0.45; transition-timing-function: var(--ar-ease-exit); }
+.ar-plot__base { fill: none; stroke: var(--ar-plot); stroke-width: 1.1; stroke-linejoin: round; }
+.ar-plot__live { fill: none; stroke: var(--ar-plot-hi); stroke-width: 1.25; stroke-linejoin: round; }
+.ar-plot__drop { stroke: var(--_ic, var(--ar-index)); stroke-width: 1; stroke-dasharray: 2 2.5; }
+.ar-plot__point { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; }
+.ar-plot__foot { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; }
+.ar-plot__head { top: -3px; bottom: -2px; width: 1.5px; margin-left: -0.75px; border-radius: 1px; }
+
+/* ---------- range: two seams, the active one speaks ---------- */
+.ar-slider__seam--lo { --ar-p: var(--ar-lo); --_sd: 1; }
+.ar-slider__seam--hi { --ar-p: var(--ar-hi); --_sd: -1; }
+.ar-range[data-active='lo'] .ar-slider__seam--hi,
+.ar-range[data-active='hi'] .ar-slider__seam--lo {
+  --_c: var(--ar-seam);
+  height: calc(var(--_h) * var(--ar-seam-scale) - 1px);
+  box-shadow: var(--ar-seam-edge);
+  filter: var(--ar-seam-drop);
+}
+.ar-range__thumb {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  outline: none;
+}
+.ar-range__sep { margin: 0 0.35em; opacity: 0.55; }
+
+/* ---------- precision HUD (portalled to <body>) ---------- */
+.ar-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 110ms var(--ar-ease-exit, ease-in);
+}
+.ar-hud[data-leaving] { opacity: 0; }
+.ar-hud__guide {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke: var(--ar-signal-hi, #7fe3d4);
+  stroke-width: 1;
+}
+.ar-hud__fill { fill: var(--ar-signal-hi, #7fe3d4); stroke: none; }
+.ar-hud__pill {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+  background: var(--ar-float-bg, rgba(18, 18, 18, 0.8));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--ar-float-ring, inset 0 0 0 1px rgba(255, 255, 255, 0.1)), var(--ar-float-shadow, 0 8px 20px -8px rgba(0, 0, 0, 0.6));
+  font-family: var(--ar-font-num, ui-monospace, monospace);
+}
+.ar-hud__pill--swatch { padding: 3px 8px 3px 3px; gap: 7px; }
+.ar-hud__text { font-size: 11px; font-weight: 300; color: var(--ar-float-ink, #f4f4f4); }
+.ar-hud__ratio { font-size: 9px; font-weight: 500; letter-spacing: 0.08em; color: var(--ar-float-ink-low, #919191); }
+.ar-hud__ratio[data-fine] { color: var(--ar-signal-hi, #7fe3d4); }
+.ar-hud__swatch { width: 14px; height: 14px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22); }
+.ar-hud__caption { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; color: var(--ar-float-ink, #f4f4f4); }
+
+/* ---------- typed entry: the readout as a field (double-click the value, or Enter / F2) ---------- */
+.ar-slider__edit {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 11ch;
+  max-width: 100%;
+  height: calc(var(--ar-h) - 2 * var(--ar-inset) - 4px);
+  padding: 0 6px;
+  border-radius: max(3px, calc(var(--_ir) - 1px));
+  background: var(--ar-float-bg);
+  color: var(--ar-float-ink);
+  box-shadow: inset 0 0 0 1px var(--ar-signal-line), 0 0 0 2px var(--ar-signal-wash);
+  font-family: var(--ar-control-font);
+  font-size: calc(var(--ar-value-size) + var(--ar-value-bump));
+  font-weight: var(--ar-value-weight);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  text-shadow: none;
+  pointer-events: auto;
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.ar-slider__edit::selection { background: var(--ar-signal-wash); }
+.ar-range .ar-slider__edit { width: 17ch; }
+.ar-slider[data-editing] .ar-slider__readout--over { visibility: hidden; }
+.ar-slider[data-editing] .ar-slider__readout { pointer-events: auto; }
+/* the base layer is normally cut away under the fill — the field must stay whole */
+.ar-slider[data-editing] .ar-slider__content--base { clip-path: none; }

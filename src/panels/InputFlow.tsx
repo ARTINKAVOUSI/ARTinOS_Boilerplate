@@ -2,10 +2,10 @@ import { useState } from 'react'
 import type { PanelManifest } from '../app/panel'
 import { features } from '../app/registry'
 import { studio, useStudio, type StudioState } from '../app/store'
-import { FeatureCard } from '../app/studio/FeatureCard'
+import { FeatureTile } from '../app/studio/FeatureTile'
+import { PanelBar } from '../app/studio/PanelBar'
 import { useSignalSnapshot } from '../app/signals'
-import { Tabs } from '../ui/Tabs/Tabs'
-import { Toggle } from '../ui/Toggle/Toggle'
+import { Segmented } from '../ui/Segmented/Segmented'
 import { Meter } from '../ui/Meter/Meter'
 import { TextField } from '../ui/TextField/TextField'
 
@@ -22,85 +22,74 @@ function Devices() {
   const states = useStudio(selectFeatures)
   return (
     <>
-      <div className="artinos-input-grid">
+      <div className="v2-tiles">
         {inputs.map(feature => {
           const state = states[feature.id]
           if (!state) return null
           const arming = ARMING[feature.id]
           const live = state.enabled && (!arming || state.values[arming.key] === arming.on)
           return (
-            <div key={feature.id} className="artinos-device">
-              <span>
-                <b>{feature.label}</b>
-                <small>{feature.description}</small>
-                <small className={live ? 'state-on' : ''}>{live ? 'LIVE' : state.enabled && arming ? 'READY · OFF' : state.enabled ? 'LIVE' : 'DISABLED'}</small>
-              </span>
-              <Toggle
-                label={`${feature.label} ${arming ? 'capture' : 'enabled'}`}
-                checked={live}
-                onChange={value => {
-                  if (!arming) return studio.setEnabled(feature.id, value)
-                  if (value) studio.setEnabled(feature.id, true)
-                  studio.setValue(feature.id, arming.key, value ? arming.on : arming.off)
-                }}
-              />
-            </div>
+            <FeatureTile
+              key={feature.id}
+              feature={feature}
+              on={live}
+              state={{ label: live ? 'Live' : state.enabled && arming ? 'Ready' : 'Off', live }}
+              onToggle={value => {
+                if (!arming) return studio.setEnabled(feature.id, value)
+                if (value) studio.setEnabled(feature.id, true)
+                studio.setValue(feature.id, arming.key, value ? arming.on : arming.off)
+              }}
+            />
           )
         })}
       </div>
-      <p className="artinos-device-note">Microphone and camera ask for permission the first time they start. Values reach reactive objects through the signal bus.</p>
-      <div className="artinos-parameter-cards">
-        {inputs.map(feature => (
-          <FeatureCard key={feature.id} feature={feature} />
-        ))}
-      </div>
+      <p className="v2-note">Microphone and camera ask for permission the first time they start. Values reach reactive objects through the signal bus.</p>
     </>
   )
 }
 
-function Signals() {
-  const [query, setQuery] = useState('')
+function Signals({ query }: { query: string }) {
   const signals = useSignalSnapshot(15).filter(([name]) => name.includes(query.trim()))
+  if (signals.length === 0) {
+    return (
+      <div className="v2-empty">
+        <b>{query.trim() ? 'No signal matches' : 'The bus is quiet'}</b>
+        {query.trim() ? `Nothing on the bus is named like “${query.trim()}”.` : 'Start a device and its signals appear here, live.'}
+      </div>
+    )
+  }
   return (
-    <div className="artinos-signals-panel">
-      <div className="v2-panel-bar">
-        <TextField type="search" size="sm" value={query} onChange={setQuery} label="Filter signals" placeholder="Filter signals, e.g. audio" />
-        <span className="v2-spacer" />
-        <span className="artinos-panel-summary">{signals.length} LIVE</span>
-      </div>
-      {signals.length === 0 && <div className="v2-empty">No signals yet. Start a device.</div>}
-      <div className="artinos-input-grid">
-        {signals.map(([name, value]) => (
-          <div key={name} className="artinos-signal-row">
-            <div className="v2-panel-bar" style={{ margin: 0 }}>
-              <span>{name}</span>
-              <span className="v2-spacer" />
-              <output>{value.toFixed(3)}</output>
-            </div>
-            <Meter label={name} value={Math.abs(value)} max={name.includes('wheel') ? 10 : 1} valueText={null} />
-          </div>
-        ))}
-      </div>
+    <div className="v2-tiles">
+      {signals.map(([name, value]) => (
+        <div key={name} className="v2-tile">
+          <span className="v2-path">{name}</span>
+          <output>{value.toFixed(3)}</output>
+          <Meter label={name} value={Math.abs(value)} max={name.includes('wheel') ? 10 : 1} valueText={null} />
+        </div>
+      ))}
     </div>
   )
 }
 
 function InputFlow() {
   const [view, setView] = useState<'devices' | 'signals'>('devices')
+  const [query, setQuery] = useState('')
   return (
     <div className="artinos-inputflow-workspace">
-      <Tabs
-        label="InputFlow views"
-        value={view}
-        onChange={setView}
-        items={[
-          { value: 'devices', label: 'Devices', badge: inputs.length },
-          { value: 'signals', label: 'Signals' },
-        ]}
-      />
-      <div className="artinos-inputflow-content" style={{ paddingTop: 8 }}>
-        {view === 'devices' ? <Devices /> : <Signals />}
-      </div>
+      <PanelBar>
+        <Segmented
+          label="InputFlow view"
+          value={view}
+          onChange={setView}
+          options={[
+            { value: 'devices', label: 'Devices' },
+            { value: 'signals', label: 'Signals' },
+          ]}
+        />
+        {/* Filters the live bus, which the palette cannot do — not the studio search. */}
+        {view === 'signals' && <TextField type="search" size="sm" value={query} onChange={setQuery} label="Filter signals" placeholder="Filter signals" />}
+      </PanelBar>
+      {view === 'devices' ? <Devices /> : <Signals query={query} />}
     </div>
   )
 }

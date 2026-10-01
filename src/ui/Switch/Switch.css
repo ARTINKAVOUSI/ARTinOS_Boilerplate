@@ -1,0 +1,69 @@
+/* ARTINOS UI — Switch. Built on the system anatomy (src/ui/system). */
+
+/* ---------- Switch: shutter ---------- */
+.ar-switch {
+  cursor: pointer;
+}
+.ar-switch__shutter {
+  position: absolute;
+  top: var(--ar-inset);
+  bottom: var(--ar-inset);
+  left: var(--ar-inset);
+  width: calc(50% - var(--ar-inset) - 1px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 var(--ar-pad-x);
+  transition:
+    left 280ms var(--ar-ease),
+    filter var(--ar-dur-surface) var(--ar-ease);
+}
+.ar-switch[data-on] .ar-switch__shutter {
+  left: calc(50% + 1px);
+}
+.ar-switch__text {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+/* ---------- Switch: compact knob ---------- */
+.ar-switch--compact {
+  --_kw: calc(var(--_h) - 2 * var(--ar-inset) + 4px);
+  width: calc(var(--ar-h) * 1.9);
+  flex: none;
+}
+.ar-switch__knob {
+  position: absolute;
+  top: var(--ar-inset);
+  bottom: var(--ar-inset);
+  left: var(--ar-inset);
+  width: var(--_kw);
+  display: grid;
+  place-items: center;
+  transition:
+    left 240ms var(--ar-ease),
+    filter var(--ar-dur-surface) var(--ar-ease);
+}
+.ar-switch[data-on] .ar-switch__knob {
+  left: calc(100% - var(--ar-inset) - var(--_kw));
+}
+/* on: a vertical signal seam · off: a small ring */
+.ar-switch__mark {
+  width: 2px;
+  height: 42%;
+  border-radius: 1px;
+  background: var(--ar-seam);
+  transition: all var(--ar-dur-surface) var(--ar-ease);
+}
+.ar-switch[data-on] .ar-switch__mark {
+  background: var(--ar-seam-active);
+  box-shadow: 0 0 5px var(--ar-signal-line);
+}
+.ar-switch:not([data-on]) .ar-switch__mark {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset 0 0 0 1.2px var(--ar-seam);
+}

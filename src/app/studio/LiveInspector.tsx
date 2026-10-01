@@ -6,7 +6,7 @@ import { studio, useFeatureState } from '../store'
 import { signalBus, useSignalSnapshot } from '../signals'
 import { PropertyRow } from '../../ui/PropertyRow/PropertyRow'
 import { Slider } from '../../ui/Slider/Slider'
-import { Toggle } from '../../ui/Toggle/Toggle'
+import { Switch } from '../../ui/Switch/Switch'
 import { Sparkline } from '../../ui/Sparkline/Sparkline'
 import { Button } from '../../ui/Button/Button'
 import { ControlInput, labelOf } from './ControlField'
@@ -124,7 +124,7 @@ function FeatureInspector({ id }: { id: string }) {
     <>
       <p className="artinos-graph-hint">{feature.description ?? feature.path}</p>
       <PropertyRow label="Enabled">
-        <Toggle size="sm" label={`${feature.label} enabled`} checked={state.enabled} onChange={value => studio.setEnabled(id, value)} />
+        <Switch variant="compact" label={`${feature.label} enabled`} value={state.enabled} onChange={value => studio.setEnabled(id, value)} />
       </PropertyRow>
       {Object.entries(feature.controls ?? {}).map(([name, control]) => (
         <PropertyRow key={name} label={labelOf(name, control)} onReset={() => studio.setValue(id, name, control.value)}>
@@ -164,10 +164,9 @@ function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
         <span className="artinos-effect-status">{object.type}</span>
       </PropertyRow>
       <PropertyRow label="Visible">
-        <Toggle
-          size="sm"
+        <Switch variant="compact"
           label={`${name} visible`}
-          checked={object.visible !== false}
+          value={object.visible !== false}
           onChange={value => {
             object.visible = value
           }}
@@ -181,6 +180,10 @@ function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
             min={0}
             max={Math.max(4, object.intensity * 2)}
             step={0.01}
+            layout="paired"
+            labelWidth="var(--pn-label-w, 104px)"
+            toggleable={false}
+            indicator={false}
             onChange={value => {
               object.intensity = value
             }}
@@ -195,6 +198,11 @@ function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
             min={-10}
             max={10}
             step={0.01}
+            bipolar
+            layout="paired"
+            labelWidth="var(--pn-label-w, 104px)"
+            toggleable={false}
+            indicator={false}
             onChange={value => {
               const next = { ...{ x: object.position.x, y: object.position.y, z: object.position.z }, [axis]: value }
               object.position.set(next.x, next.y, next.z)

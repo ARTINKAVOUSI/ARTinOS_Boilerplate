@@ -1,64 +1,76 @@
-:where(.aui-xypad) {
-  --_well: var(--ui-well, rgba(0, 0, 0, 0.16));
-  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
-  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
-  --_ink-3: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
-  --_sig: var(--ui-sig, #6fe3c0);
-  --_radius: var(--ui-r-comp, 6px);
-  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
+/* XYPad — a 2D field cut as a well, a tick crosshair and an insert point with
+   the signal seam at its centre. */
+:where(.ar-xypad) {
+  --_r: var(--ar-radius, 7px);
+  --_trough: var(--ar-trough, rgba(0, 0, 0, 0.42));
+  --_well: var(--ar-well, inset 0 1px 1px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.045));
+  --_tick: var(--ar-tick, rgba(255, 255, 255, 0.2));
+  --_insert: var(--ar-insert, linear-gradient(180deg, #dcdcd8 0%, #c9c9c4 100%));
+  --_insert-shadow: var(--ar-insert-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 0 0.5px rgba(0, 0, 0, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3));
+  --_seam: var(--ar-seam-active, #0b7a69);
+  --_low: var(--ar-text-low, #858585);
+  --_ring: var(--ar-focus-ring, 0 0 0 1px #86e3d3, 0 0 0 3px rgba(60, 188, 165, 0.18));
+  --_font: var(--ar-control-font, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
-.aui-xypad {
+
+.ar-xypad {
   position: relative;
   box-sizing: border-box;
-  min-width: 0;
-  border-radius: var(--_radius);
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 25% 25%,
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 25% 25%,
-    var(--_well);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 0 0 1px var(--_edge);
+  width: 100%;
   overflow: hidden;
+  border-radius: var(--_r);
+  background: var(--_trough);
+  box-shadow: var(--_well);
+  outline: none;
   cursor: crosshair;
   touch-action: none;
-  outline: none;
+  user-select: none;
 }
-.aui-xypad:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--_sig);
+.ar-xypad:focus-visible {
+  box-shadow: var(--_well), var(--_ring);
 }
-.aui-xypad__cross {
+.ar-xypad__cross {
   position: absolute;
-  background: color-mix(in srgb, var(--_sig) 35%, transparent);
+  background: var(--_tick);
   pointer-events: none;
 }
-.aui-xypad__cross[data-axis='x'] {
-  top: calc((1 - var(--y)) * 100%);
-  left: 0;
-  right: 0;
-  height: 1px;
-}
-.aui-xypad__cross[data-axis='y'] {
-  left: calc(var(--x) * 100%);
+.ar-xypad__cross[data-axis='x'] {
   top: 0;
   bottom: 0;
+  left: calc(var(--x, 0.5) * 100%);
   width: 1px;
 }
-.aui-xypad__point {
+.ar-xypad__cross[data-axis='y'] {
+  left: 0;
+  right: 0;
+  top: calc((1 - var(--y, 0.5)) * 100%);
+  height: 1px;
+}
+.ar-xypad__point {
   position: absolute;
-  top: calc((1 - var(--y)) * 100%);
-  left: calc(var(--x) * 100%);
-  width: 11px;
-  height: 11px;
-  margin: -5.5px 0 0 -5.5px;
+  left: calc(var(--x, 0.5) * 100%);
+  top: calc((1 - var(--y, 0.5)) * 100%);
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 2px var(--_sig), 0 0 12px color-mix(in srgb, var(--_sig) 60%, transparent);
+  background: var(--_insert);
+  box-shadow: var(--_insert-shadow);
+  transform: translate(-50%, -50%);
   pointer-events: none;
 }
-.aui-xypad__readout {
+.ar-xypad__point::after {
+  content: '';
   position: absolute;
-  right: 6px;
-  bottom: 4px;
-  font: 9px var(--_num);
-  color: var(--_ink-3);
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--_seam);
+}
+.ar-xypad__readout {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  font: 300 10.5px var(--_font);
+  font-variant-numeric: tabular-nums;
+  color: var(--_low);
   pointer-events: none;
 }

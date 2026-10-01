@@ -20,7 +20,7 @@ const glyph = (key: string) => {
 /** Kbd — a keyboard shortcut hint. */
 export function Kbd({ keys, className }: KbdProps) {
   return (
-    <span className={className ? `aui-kbd ${className}` : 'aui-kbd'}>
+    <span className={className ? `ar-kbd ${className}` : 'ar-kbd'}>
       {keys.map((key, i) => (
         <kbd key={i}>{glyph(key)}</kbd>
       ))}

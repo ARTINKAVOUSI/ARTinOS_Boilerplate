@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import type { PanelManifest } from '../app/panel'
 import { consoleStore, useConsoleEntries, type LogLevel } from '../app/console'
+import { PanelBar } from '../app/studio/PanelBar'
 import { TextField } from '../ui/TextField/TextField'
 import { Select } from '../ui/Select/Select'
 import { Button } from '../ui/Button/Button'
-import { Toggle } from '../ui/Toggle/Toggle'
+import { Switch } from '../ui/Switch/Switch'
 
 const LEVELS = ['all', 'error', 'warn', 'info', 'log'] as const
+const title = (value: string) => value[0].toUpperCase() + value.slice(1)
 
 function Console() {
   const entries = useConsoleEntries()
@@ -19,41 +21,44 @@ function Console() {
 
   return (
     <div className="artinos-panel-suite">
-      <div className="v2-panel-bar">
+      {/* The same toolbar row every panel has: it rides in the dock strip when there is room. */}
+      <PanelBar>
         {/* Filters the captured log, which the palette cannot do — not the studio search. */}
         <TextField type="search" size="sm" value={query} onChange={setQuery} label="Filter messages" placeholder="Filter messages" />
         <Select
-          size="sm"
+          appearance="well"
           label="Level"
           value={level}
           onChange={setLevel}
-          options={LEVELS.map(value => ({ value, label: value === 'all' ? `All · ${entries.length}` : `${value} · ${count(value)}` }))}
+          options={LEVELS.map(value => ({ value, label: value === 'all' ? `All · ${entries.length}` : `${title(value)} · ${count(value)}` }))}
         />
-        <span className="v2-spacer" />
         <label className="v2-inline-toggle">
           Pause
-          <Toggle
-            size="sm"
+          <Switch
+            variant="compact"
             label="Pause capture"
-            checked={paused}
+            value={paused}
             onChange={value => {
               consoleStore.setPaused(value)
               setPaused(value)
             }}
           />
         </label>
-        <Button size="sm" onClick={() => consoleStore.clear()}>
+        <Button size="sm" disabled={!entries.length} onClick={() => consoleStore.clear()}>
           Clear
         </Button>
-      </div>
+      </PanelBar>
       {visible.length === 0 ? (
-        <div className="v2-empty">{entries.length ? 'No message matches.' : 'Nothing logged yet.'}</div>
+        <div className="v2-empty">
+          <b>{entries.length ? 'No message matches' : 'Nothing logged yet'}</b>
+          {entries.length ? 'Nothing in the log fits this filter and level.' : 'Warnings, errors and console output from the runtime land here as they happen.'}
+        </div>
       ) : (
         <div className="artinos-console-entries">
           {visible.map(entry => (
             <details key={entry.id} className={`artinos-console-entry log-${entry.level}`}>
               <summary>
-                <time>{new Date(entry.time).toLocaleTimeString()}</time>
+                <time>{new Date(entry.time).toLocaleTimeString([], { hour12: false })}</time>
                 <b>{entry.level}</b>
                 <b>{entry.source}</b>
                 <span>{entry.message}</span>

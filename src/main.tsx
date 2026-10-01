@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './ui/system/system.css'
 import './app/studio/skin/skin.css'
 import './app/app.css'
 import { installConsoleCapture } from './app/console'

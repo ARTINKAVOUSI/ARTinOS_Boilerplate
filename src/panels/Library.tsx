@@ -3,17 +3,28 @@ import { panels, type PanelManifest } from '../app/panel'
 import { features } from '../app/registry'
 import { studio, useStudio, type StudioState } from '../app/store'
 import { Select } from '../ui/Select/Select'
-import { Toggle } from '../ui/Toggle/Toggle'
+import { Switch } from '../ui/Switch/Switch'
 import { IconButton } from '../ui/IconButton/IconButton'
 import { useToast } from '../ui/Toast/Toast'
 import { Icons } from '../app/studio/icons'
 import { PanelBar } from '../app/studio/PanelBar'
 
-// File names only — nothing here is loaded.
-const uiComponents = Object.keys(import.meta.glob('../ui/*/*.tsx')).map(path => {
-  const name = path.split('/').at(-1)!.replace('.tsx', '')
-  return { id: `ui.${name}`, label: name, kind: 'ui component', path: path.replace('../', 'src/'), description: `Copy the src/ui/${path.split('/')[2]}/ folder.` }
-}).filter(entry => entry.label !== 'index' && !entry.path.includes('/MetaBlock/react'))
+// File names only — nothing here is loaded. One entry per component folder:
+// the file named after its folder (src/ui/Slider/Slider.tsx), plus MetaBlock's entry.
+const uiComponents = Object.keys(import.meta.glob(['../ui/*/*.tsx', '../ui/MetaBlock/index.ts', '!../ui/system/*']))
+  .map(path => {
+    const folder = path.split('/')[2]
+    const file = path.split('/').at(-1)!.replace(/\.tsx?$/, '')
+    return { folder, file, path }
+  })
+  .filter(({ folder, file }) => folder === file || folder === 'MetaBlock')
+  .map(({ folder, path }) => ({
+    id: `ui.${folder}`,
+    label: folder,
+    kind: 'ui component',
+    path: path.replace('../', 'src/'),
+    description: `Copy the src/ui/${folder}/ folder; src/ui/system/ comes once with the first one.`,
+  }))
 
 type Entry = { id: string; label: string; kind: string; path: string; description?: string; featureId?: string }
 
@@ -35,19 +46,19 @@ function Library() {
   return (
     <div className="artinos-panel-suite">
       <PanelBar>
-        <Select size="sm" label="Kind" value={kind} onChange={setKind} options={KINDS.map(value => ({ value, label: value === 'all' ? 'Everything' : value }))} />
+        <Select appearance="well" label="Kind" value={kind} onChange={setKind} options={KINDS.map(value => ({ value, label: value === 'all' ? 'Everything' : value }))} />
         <span className="artinos-panel-summary v2-bar-summary">
           {features.length} FEATURES · {panels.length} PANELS · {uiComponents.length} UI COMPONENTS · COPY A FILE OR FOLDER TO REUSE IT
         </span>
       </PanelBar>
-      <div className="artinos-parameter-cards">
+      <div className="v2-entries">
         {visible.map(entry => (
-          <div key={entry.id} className="artinos-module-card artinos-parameter-card">
-            <div className="v2-panel-bar" style={{ margin: 0 }}>
-              <span className="artinos-module-head">
-                <b>{entry.label}</b> <small className="artinos-effect-cost">{entry.kind}</small>
-              </span>
-              <span className="v2-spacer" />
+          <div key={entry.id} className="v2-entry">
+            <span className="v2-tile__name">
+              <span>{entry.label}</span>
+              <em className="v2-state">{entry.kind}</em>
+            </span>
+            <span className="v2-entry__actions">
               <IconButton
                 size="sm"
                 label={`Copy path of ${entry.label}`}
@@ -58,13 +69,13 @@ function Library() {
                 }}
               />
               {entry.featureId && states[entry.featureId] && (
-                <Toggle size="sm" label={`${entry.label} enabled`} checked={states[entry.featureId].enabled} onChange={value => studio.setEnabled(entry.featureId!, value)} />
+                <Switch variant="compact" label={`${entry.label} enabled`} value={states[entry.featureId].enabled} onChange={value => studio.setEnabled(entry.featureId!, value)} />
               )}
-            </div>
-            <p>
-              {entry.description ? `${entry.description} · ` : ''}
-              <code>{entry.path}</code>
-            </p>
+            </span>
+            {entry.description && <p>{entry.description}</p>}
+            <span className="v2-path" title={entry.path}>
+              {entry.path}
+            </span>
           </div>
         ))}
       </div>

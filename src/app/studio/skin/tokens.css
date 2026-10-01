@@ -25,35 +25,35 @@
 /* 1 — CORE ---------------------------------------------------------------- */
 :root {
   /* signal (accent) */
-  --ui-sig: #6fe3c0;                        /* live / manipulation / bound */
-  --ui-sig-warm: #e8b27a;                   /* automation / modified       */
-  --ui-sig-rose: #e88f9b;                   /* warning                     */
-  --ui-sig-soft: rgba(111, 227, 192, 0.24);
-  --ui-sig-line: rgba(111, 227, 192, 0.55);
+  --ui-sig: var(--ar-signal, #3cbca5);      /* the kit's signal: teal, one hue for live / bound / focus */
+  --ui-sig-warm: var(--ar-warn, #e0a34e);   /* automation / modified       */
+  --ui-sig-rose: var(--ar-fault, #f2606f);  /* warning                     */
+  --ui-sig-soft: var(--ar-signal-wash, rgba(60, 188, 165, 0.14));
+  --ui-sig-line: var(--ar-signal-line, rgba(60, 188, 165, 0.5));
 
   /* ink */
   --ui-ink: rgba(255, 255, 255, 0.94);
-  --ui-ink-2: rgba(255, 255, 255, 0.66);
-  --ui-ink-3: rgba(255, 255, 255, 0.4);
-  --ui-ink-4: rgba(255, 255, 255, 0.24);
+  --ui-ink-2: rgba(255, 255, 255, 0.76);
+  --ui-ink-3: rgba(255, 255, 255, 0.54);
+  --ui-ink-4: rgba(255, 255, 255, 0.34);
 
   /* geometry — radius is adaptive, never universal */
   --ui-r-panel: 12px;
-  --ui-r-comp: 6px;
+  --ui-r-comp: 7px;
   --ui-r-active: 5px;
   --ui-r-micro: 4px;
 
   /* density */
-  --ui-h-comp: 23px;
-  --ui-h-comp-sm: 19px;
-  --ui-gap-row: 3px;
-  --ui-pad-panel: 9px;
-  --ui-label-w: 62px;
-  --ui-label-w-wide: 74px;
+  --ui-h-comp: 26px;
+  --ui-h-comp-sm: 22px;
+  --ui-gap-row: 4px;
+  --ui-pad-panel: 14px;
+  --ui-label-w: 96px;
+  --ui-label-w-wide: 112px;
 
-  /* type */
-  --ui-face: 'Inter', 'SF Pro Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --ui-num: 'SF Mono', ui-monospace, 'Roboto Mono', Menlo, monospace;
+  /* type — the ARTINOS UI kit's faces, so the studio and its controls read as one */
+  --ui-face: var(--ar-font-ui, 'Chivo', system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --ui-num: var(--ar-font-num, 'Chivo Mono', ui-monospace, SFMono-Regular, Consolas, monospace);
 
   /* motion — mass, spring and damping are overridden per material world */
   --ui-ease: cubic-bezier(0.2, 0.7, 0.25, 1);
@@ -164,7 +164,7 @@
   --ui-pane-border: var(--ui-edge);
   --ui-pane-shadow: var(--ui-depth), inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
   --ui-pane-shadow-raised: var(--ui-pane-shadow);
-  --ui-pane-head-h: 32px;
+  --ui-pane-head-h: 36px;
 
   /* capsule */
   --ui-range-border: var(--ui-edge);
@@ -278,15 +278,15 @@
   --font-ui: var(--ui-face);
   --font-num: var(--ui-num);
 
-  --type-display: 600 28px/1.1 var(--ui-face);
-  --type-title: 560 12px/1.2 var(--ui-face);
-  --type-hero: 500 20px/1 var(--ui-face);
-  --type-panel: 560 12px/1 var(--ui-face);
-  --type-section: 400 9.5px/1 var(--ui-face);
-  --type-body: 400 11px/1.5 var(--ui-face);
-  --type-label: 400 11px/1.3 var(--ui-face);
-  --type-value: 400 10.5px/1.2 var(--ui-num);
-  --type-readout: 400 10.5px/1.2 var(--ui-num);
+  --type-display: 200 28px/1.1 var(--ui-face);
+  --type-title: 300 14px/1.3 var(--ui-face);
+  --type-hero: 300 22px/1.1 var(--ui-num);
+  --type-panel: 300 13.5px/1.3 var(--ui-face);
+  --type-section: 500 9px/1.3 var(--ui-num);
+  --type-body: 300 12px/1.5 var(--ui-face);
+  --type-label: 300 12px/1.35 var(--ui-face);
+  --type-value: 300 11.5px/1.3 var(--ui-num);
+  --type-readout: 300 11.5px/1.3 var(--ui-num);
 
   --bg-app: var(--ui-scene);
   --bg-stage: var(--ui-scene);
@@ -373,7 +373,7 @@
   --row-gap: var(--ui-gap-row);
   --panel-header-h: var(--ui-pane-head-h);
   --command-bar-h: var(--ui-appbar-h);
-  --tab-strip-h: 27px;
+  --tab-strip-h: 36px;
   --safe-area: 12px;
 
   --dur-layout: var(--ui-t-slow);

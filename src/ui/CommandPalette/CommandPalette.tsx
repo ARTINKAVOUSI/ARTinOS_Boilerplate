@@ -101,9 +101,9 @@ export function CommandPalette({ commands, open, onOpenChange, hotkey = { key: '
 
   let lastGroup: string | undefined
   return createPortal(
-    <div className="aui-palette" onPointerDown={event => event.target === event.currentTarget && onOpenChange(false)}>
-      <div className="aui-palette__dialog" role="dialog" aria-modal="true" aria-label="Command palette">
-        <div className="aui-palette__search">
+    <div className="ar-palette" onPointerDown={event => event.target === event.currentTarget && onOpenChange(false)}>
+      <div className="ar-palette__dialog" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div className="ar-palette__search">
           <svg viewBox="0 0 16 16" aria-hidden>
             <circle cx="7" cy="7" r="4.5" />
             <path d="M10.5 10.5L14 14" />
@@ -112,8 +112,8 @@ export function CommandPalette({ commands, open, onOpenChange, hotkey = { key: '
             ref={input}
             role="combobox"
             aria-expanded="true"
-            aria-controls="aui-palette-list"
-            aria-activedescendant={results[active] ? `aui-cmd-${results[active].id}` : undefined}
+            aria-controls="ar-palette-list"
+            aria-activedescendant={results[active] ? `ar-cmd-${results[active].id}` : undefined}
             placeholder={placeholder}
             value={query}
             onChange={event => {
@@ -130,26 +130,26 @@ export function CommandPalette({ commands, open, onOpenChange, hotkey = { key: '
             }}
           />
         </div>
-        <div ref={list} id="aui-palette-list" role="listbox" className="aui-palette__list">
-          {results.length === 0 && <div className="aui-palette__empty">No matching commands</div>}
+        <div ref={list} id="ar-palette-list" role="listbox" className="ar-palette__list">
+          {results.length === 0 && <div className="ar-palette__empty">No matching commands</div>}
           {results.map((command, index) => {
             const heading = !query && command.group !== lastGroup ? command.group : undefined
             lastGroup = command.group
             return (
               <div key={command.id}>
-                {heading && <div className="aui-palette__group">{heading}</div>}
+                {heading && <div className="ar-palette__group">{heading}</div>}
                 <div
-                  id={`aui-cmd-${command.id}`}
+                  id={`ar-cmd-${command.id}`}
                   role="option"
                   aria-selected={index === active}
                   data-active={index === active || undefined}
-                  className="aui-palette__item"
+                  className="ar-palette__item"
                   onPointerMove={() => setActive(index)}
                   onClick={() => run(command)}
                 >
-                  <span className="aui-palette__icon">{command.icon}</span>
-                  <span className="aui-palette__label">{command.label}</span>
-                  {query && command.group && <span className="aui-palette__meta">{command.group}</span>}
+                  <span className="ar-palette__icon">{command.icon}</span>
+                  <span className="ar-palette__label">{command.label}</span>
+                  {query && command.group && <span className="ar-palette__meta">{command.group}</span>}
                   {command.shortcut && <kbd>{command.shortcut}</kbd>}
                 </div>
               </div>

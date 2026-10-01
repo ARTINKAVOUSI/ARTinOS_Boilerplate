@@ -1,111 +1,141 @@
-:where(.aui-prop) {
-  --_row: var(--ui-row, 23px);
-  --_label-w: var(--ui-label-w, 62px);
-  --_label: var(--ui-text-label, rgba(255, 255, 255, 0.66));
-  --_ghost: var(--ui-text-ghost, rgba(255, 255, 255, 0.24));
-  --_strong: var(--ui-text-strong, #fff);
-  --_meta: var(--ui-text-meta, rgba(255, 255, 255, 0.4));
-  --_bind: var(--ui-bind, #6fe3c0);
-  --_warn: var(--ui-warn, #e8b27a);
-  --_fault: var(--ui-fault, #e88f9b);
-  --_accent: var(--ui-accent, #6fe3c0);
-  --_face: var(--ui-font, system-ui, -apple-system, 'Segoe UI', sans-serif);
+/* PropertyRow — the inspector row: a label column (the kit Field's width),
+   the control, and reset and actions that appear on hover. The row never owns
+   the value; it only arranges. */
+:where(.ar-prop) {
+  --_row: var(--ar-h, 26px);
+  --_label-w: var(--ar-field-label-w, 104px);
+  --_label: var(--ar-text-mid, #b4b4b4);
+  --_ghost: var(--ar-text-faint, #5f5f5f);
+  --_hi: var(--ar-text-hi, #ededed);
+  --_meta: var(--ar-text-low, #858585);
+  --_bind: var(--ar-bind, #8fb8d9);
+  --_warn: var(--ar-warn, #e0a34e);
+  --_fault: var(--ar-fault, #f2606f);
+  --_signal: var(--ar-signal, #3cbca5);
+  --_hover: var(--ar-bg-hover, rgba(255, 255, 255, 0.045));
+  --_face: var(--ar-font-ui, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --_mono: var(--ar-control-font, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
 
-.aui-prop {
+.ar-prop {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  margin-bottom: 3px;
   font-family: var(--_face);
 }
-.aui-prop__main {
+.ar-prop__main {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
   min-height: var(--_row);
 }
-.aui-prop__control {
+.ar-prop__control {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
 }
-.aui-prop__control > * {
+.ar-prop__control > * {
   flex: 1;
   min-width: 0;
 }
-.aui-prop__control > .aui-toggle {
+.ar-prop__control > .ar-switch--compact {
   flex: 0 0 auto;
 }
-.aui-prop__label {
+.ar-prop__label {
   flex: 0 0 var(--_label-w);
   overflow: hidden;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.35;
   color: var(--_label);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 /* the control names itself in the default density */
-.aui-prop[data-density='default'] .aui-prop__label {
+.ar-prop[data-density='default'] .ar-prop__label {
   display: none;
 }
-.aui-prop[data-density='multiline'] .aui-prop__main {
+.ar-prop[data-density='multiline'] .ar-prop__main {
   flex-wrap: wrap;
 }
-.aui-prop[data-density='multiline'] .aui-prop__label {
+.ar-prop[data-density='multiline'] .ar-prop__label {
   flex: 1 0 100%;
 }
-.aui-prop__binding {
-  margin-left: 5px;
-  font-size: 8px;
+.ar-prop__binding {
+  margin-left: 6px;
+  font: 500 8.5px var(--_mono);
   font-style: normal;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--_bind);
 }
-.aui-prop__actions {
+.ar-prop__actions {
   display: flex;
   align-items: center;
   gap: 2px;
   opacity: 0;
   transition: opacity 150ms;
 }
-.aui-prop:hover .aui-prop__actions,
-.aui-prop:focus-within .aui-prop__actions {
+.ar-prop:hover .ar-prop__actions,
+.ar-prop:focus-within .ar-prop__actions {
   opacity: 1;
 }
-.aui-prop__reset {
-  width: 15px;
+.ar-prop__reset {
+  width: 22px;
   height: 22px;
   padding: 0;
   border: 0;
+  border-radius: 5px;
   background: none;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--_ghost);
   cursor: pointer;
+  transition: background 120ms, color 120ms;
 }
-.aui-prop__reset:hover {
-  color: var(--_strong);
+.ar-prop__reset:hover {
+  background: var(--_hover);
+  color: var(--_hi);
 }
-.aui-prop__message {
-  margin: 0 0 0 calc(var(--_label-w) + 5px);
-  font-size: 9px;
+.ar-prop__message {
+  margin: 0 0 0 calc(var(--_label-w) + 10px);
+  font-size: 10.5px;
+  line-height: 1.5;
   color: var(--_meta);
 }
-.aui-prop[data-state='fault'] .aui-prop__message {
+.ar-prop[data-state='fault'] .ar-prop__message {
   color: var(--_fault);
 }
-.aui-prop[data-state='warn'] .aui-prop__message {
+.ar-prop[data-state='warn'] .ar-prop__message {
   color: var(--_warn);
 }
-.aui-prop[data-highlighted] {
-  border-radius: 6px;
-  outline: 1px solid var(--_accent);
-  outline-offset: 1px;
+.ar-prop[data-highlighted] {
+  border-radius: 8px;
+  outline: 1px solid var(--_signal);
+  outline-offset: 2px;
 }
-.aui-prop[data-disabled] {
+.ar-prop[data-disabled] {
   opacity: 0.45;
   pointer-events: none;
+}
+
+/* modified: the label brightens and a signal dot sits in the margin, outside
+   the row box, so the control keeps its width */
+.ar-prop[data-modified] .ar-prop__label {
+  color: var(--_hi);
+}
+.ar-prop[data-modified] > .ar-prop__main::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -9px;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--_signal);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--_signal) 60%, transparent);
 }

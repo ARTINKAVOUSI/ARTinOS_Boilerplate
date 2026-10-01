@@ -1,8 +1,8 @@
 import { createContext, useContext, useLayoutEffect, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
-/** Below this, the dock strip is already full of tabs, search and the HUD. */
-const HOIST_WIDTH = 900
+/** Below this, the dock strip is already full of tabs, search and the HUD; the bar stays in the panel body. */
+const HOIST_WIDTH = 1700
 
 /** The panel currently being rendered, so its bar can find its own dock slot. */
 export const PanelIdContext = createContext<string | null>(null)
@@ -37,6 +37,10 @@ export function PanelBar({ className, children }: { className?: string; children
     return () => observer.disconnect()
   }, [panelId])
 
-  const bar = <div className={`v2-panel-bar ${className ?? ''}`.trim()}>{children}</div>
+  const bar = (
+    <div className={`v2-panel-bar ${className ?? ''}`.trim()} data-head>
+      {children}
+    </div>
+  )
   return host ? createPortal(bar, host) : bar
 }

@@ -1,0 +1,25 @@
+/* The dock glass for the two ARTINOS UI frost themes.
+   `data-ar-theme` sits on <html> (DockShell) next to the kit's own tokens; these
+   rules retune the studio's frost world to match. Both frosts are untinted: the
+   glass diffuses the scene but never shifts its hue, so saturation stays at 1.
+   Imported after worlds.css — same specificity, so the later block wins. */
+
+[data-ar-theme='frost-deep'] {
+  --ui-glass: rgba(255, 255, 255, 0.06);
+  --ui-glass-top: rgba(255, 255, 255, 0.12);
+  --ui-blur: 72px;
+  --ui-sat: 1;
+  --ui-edge: rgba(255, 255, 255, 0.2);
+  --ui-edge-lit: rgba(255, 255, 255, 0.28);
+  --ui-depth: 0 18px 44px -24px rgba(0, 0, 0, 0.38);
+}
+
+[data-ar-theme='frost-etched'] {
+  --ui-glass: rgba(255, 255, 255, 0.07);
+  --ui-glass-top: rgba(255, 255, 255, 0.16);
+  --ui-blur: 24px;
+  --ui-sat: 1;
+  --ui-edge: rgba(255, 255, 255, 0.2);
+  --ui-edge-lit: rgba(255, 255, 255, 0.32);
+  --ui-depth: 0 18px 44px -24px rgba(0, 0, 0, 0.22);
+}

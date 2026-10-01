@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { MetaBlockWorkspace, MetaBlockWorkspaceView, useWorkspaceRevision, type GroupChromeContext, type MetaBlockGroup, type MetaBlockInstance } from '../../ui/MetaBlock'
 import { CommandPalette, type Command } from '../../ui/CommandPalette/CommandPalette'
+import { GLASS_THEMES, THEME_META } from '../../ui/system/utils'
 import { panels, type DiscoveredPanel } from '../panel'
 import { features } from '../registry'
 import type { DiscoveredFeature } from '../feature'
@@ -12,9 +13,11 @@ import { RuntimeHUD } from './RuntimeHUD'
 import { ConsoleToast } from './ConsoleToast'
 import { DOCK_LAYOUT_KEY as PERSIST_KEY, resetDockLayout } from './layout'
 import { Icons } from './icons'
+import { DockMenu } from './DockMenu'
 // After the engine's own stylesheet: binds its variables to the studio tokens.
 import './skin/chrome.css'
 import './dock.css'
+import './panels.css'
 
 /** Which panel shows a feature's controls — each panel claims its own. */
 function panelFor(feature: DiscoveredFeature) {
@@ -22,7 +25,6 @@ function panelFor(feature: DiscoveredFeature) {
 }
 
 const DOCK_SIZE = { left: 0.22, right: 0.24, bottom: 0.36 } as const
-const WORLDS = ['frost', 'clear', 'satin', 'graphite', 'opal', 'monolith'] as const
 const selectUI = (state: StudioState) => state.ui
 
 /**
@@ -97,8 +99,9 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
   const [paletteOpen, setPaletteOpen] = useState(false)
 
   useEffect(() => {
-    document.documentElement.dataset.world = ui.world
-  }, [ui.world])
+    // On <html>, so the kit's portalled lists and HUDs inherit the theme like everything else.
+    document.documentElement.dataset.arTheme = ui.theme
+  }, [ui.theme])
 
   // Persist on every change, coalesced to a frame so drags stay off localStorage.
   useEffect(() => {
@@ -133,7 +136,7 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
-      if (target?.closest('input, textarea, select, [contenteditable="true"]') || event.metaKey || event.ctrlKey || event.altKey) return
+      if ((target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]')) || event.metaKey || event.ctrlKey || event.altKey) return
       if (event.key === 'h' || event.key === 'H') studio.setUI({ visible: !studio.getState().ui.visible })
     }
     window.addEventListener('keydown', onKey)
@@ -153,7 +156,7 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
       { id: 'layout.redo', label: 'Redo layout change', group: 'Layout', run: () => workspace.redo() },
       { id: 'layout.reset', label: 'Reset dock layout', group: 'Layout', run: resetDockLayout },
       { id: 'ui.toggle', label: 'Hide / show interface', group: 'View', shortcut: 'H', run: () => studio.setUI({ visible: !studio.getState().ui.visible }) },
-      ...WORLDS.map(world => ({ id: `world.${world}`, label: `Material world: ${world}`, group: 'View', run: () => studio.setUI({ world }) })),
+      ...GLASS_THEMES.map(theme => ({ id: `theme.${theme}`, label: `Theme: ${THEME_META[theme].label}`, group: 'View', run: () => studio.setUI({ theme }) })),
       { id: 'reset.all', label: 'Reset every feature', group: 'Features', run: () => studio.resetAll() },
       ...features.flatMap(feature => {
         const group = feature.kind === 'effect' ? 'Effects' : (feature.group ?? 'Features')
@@ -290,7 +293,7 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
   return (
     <>
       <div className="artinos-metablock-shell plate-workspace" data-ui-hidden={!ui.visible || undefined}>
-        <MetaBlockWorkspaceView workspace={workspace} renderBlock={renderBlock} renderGroupChrome={renderGroupChrome} renderGroupFooter={renderGroupFooter} padding={10} gap={8} />
+        <MetaBlockWorkspaceView workspace={workspace} renderBlock={renderBlock} renderGroupChrome={renderGroupChrome} renderGroupFooter={renderGroupFooter} renderContextMenu={context => <DockMenu {...context} />} padding={10} gap={8} />
         <BrandChip context={byId.get(focused)?.title ?? 'Studio'} />
         <ConsoleToast onOpen={() => openPanel('console')} />
         {!ui.visible && <div className="v2-ui-hint">Press H to show the interface</div>}

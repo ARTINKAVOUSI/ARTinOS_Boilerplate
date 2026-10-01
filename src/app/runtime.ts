@@ -5,7 +5,7 @@ import type { WebGPURenderer } from 'three/webgpu'
 /**
  * Live runtime facts the studio chrome reads: the renderer, the backend in use,
  * and a rolling frame-time history. One rAF sampler feeds every reader (the
- * dock HUD, the Telemetry panel), so opening more of them costs nothing extra.
+ * dock HUD and its telemetry bar), so opening more of them costs nothing extra.
  */
 
 export interface RendererStats {

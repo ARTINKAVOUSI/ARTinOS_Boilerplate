@@ -30,7 +30,7 @@ export function Dialog({ open, onClose, title, description, footer, width = 380,
   return (
     <dialog
       ref={ref}
-      className="aui-dialog"
+      className="ar-dialog"
       style={{ width }}
       onCancel={event => {
         event.preventDefault()
@@ -42,13 +42,13 @@ export function Dialog({ open, onClose, title, description, footer, width = 380,
       }}
     >
       {open && (
-        <div className="aui-dialog__surface">
-          <header className="aui-dialog__head">
+        <div className="ar-dialog__surface">
+          <header className="ar-dialog__head">
             <h2>{title}</h2>
             {description && <p>{description}</p>}
           </header>
-          {children && <div className="aui-dialog__body">{children}</div>}
-          {footer && <footer className="aui-dialog__foot">{footer}</footer>}
+          {children && <div className="ar-dialog__body">{children}</div>}
+          {footer && <footer className="ar-dialog__foot">{footer}</footer>}
         </div>
       )}
     </dialog>

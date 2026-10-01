@@ -12,7 +12,7 @@ import { useSignalSnapshot } from '../app/signals'
 import { Select } from '../ui/Select/Select'
 import { Segmented } from '../ui/Segmented/Segmented'
 import { IconButton } from '../ui/IconButton/IconButton'
-import { Toggle } from '../ui/Toggle/Toggle'
+import { Switch } from '../ui/Switch/Switch'
 import { PanelBar } from '../app/studio/PanelBar'
 import { Icons } from '../app/studio/icons'
 import { Button } from '../ui/Button/Button'
@@ -119,7 +119,6 @@ function Graph() {
       {/* The toolbar rides in the dock strip, like every other panel's. */}
       <PanelBar>
         <Segmented<Mode>
-          size="sm"
           label="Graph mode"
           value={mode}
           onChange={setMode}
@@ -130,7 +129,7 @@ function Graph() {
         />
         {mode === 'edit' && documents.length > 0 && (
           <Select
-            size="sm"
+            appearance="well"
             label="Graph"
             value={active?.id ?? ''}
             onChange={setActiveId}
@@ -139,10 +138,10 @@ function Graph() {
         )}
         {mode === 'edit' && active && (
           <>
-            <Select<GraphDomain> size="sm" label="Domain" value={active.domain} onChange={domain => graphs.setDomain(active.id, domain)} options={GRAPH_DOMAINS.map(domain => ({ value: domain, label: domain }))} />
+            <Select<GraphDomain> appearance="well" label="Domain" value={active.domain} onChange={domain => graphs.setDomain(active.id, domain)} options={GRAPH_DOMAINS.map(domain => ({ value: domain, label: domain }))} />
             <label className="v2-inline-toggle">
               Run
-              <Toggle size="sm" label={`Run ${active.name}`} checked={active.running} disabled={errors > 0 && !active.running} onChange={value => graphs.setRunning(active.id, value)} />
+              <Switch variant="compact" label={`Run ${active.name}`} value={active.running} disabled={errors > 0 && !active.running} onChange={value => graphs.setRunning(active.id, value)} />
             </label>
             <Badge tone={!active.running ? 'neutral' : errors ? 'danger' : 'live'}>{!active.running ? 'paused' : errors ? `${errors} error${errors > 1 ? 's' : ''}` : 'live'}</Badge>
           </>
@@ -300,7 +299,7 @@ function GraphLibrary({
         </button>
       ))}
       <div className="artinos-graph-hint">New graph</div>
-      <Select size="sm" label="Template" value={template} onChange={setTemplate} options={GRAPH_TEMPLATES.map(item => ({ value: item.id, label: `${item.name} · ${item.domain}` }))} />
+      <Select appearance="well" label="Template" value={template} onChange={setTemplate} options={GRAPH_TEMPLATES.map(item => ({ value: item.id, label: `${item.name} · ${item.domain}` }))} />
       <div className="v2-panel-bar">
         <Button size="sm" variant="primary" onClick={() => onCreate(template)}>
           Create

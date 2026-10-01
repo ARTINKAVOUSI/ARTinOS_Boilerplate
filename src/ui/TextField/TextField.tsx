@@ -29,8 +29,8 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   const leading = icon ?? (search ? SearchIcon : null)
   const showClear = (clearable ?? search) && value.length > 0
   return (
-    <span className={className ? `aui-text ${className}` : 'aui-text'} data-size={size === 'sm' ? 'sm' : undefined}>
-      {leading && <span className="aui-text__icon">{leading}</span>}
+    <span className={className ? `ar-textfield ${className}` : 'ar-textfield'} data-size={size === 'sm' ? 'sm' : undefined}>
+      {leading && <span className="ar-textfield__icon">{leading}</span>}
       <input
         ref={ref}
         type={search ? 'text' : type}
@@ -48,7 +48,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
         {...rest}
       />
       {showClear && (
-        <button type="button" className="aui-text__clear" aria-label="Clear" onClick={() => onChange('')}>
+        <button type="button" className="ar-textfield__clear" aria-label="Clear" onClick={() => onChange('')}>
           <svg viewBox="0 0 10 10" aria-hidden>
             <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" />
           </svg>

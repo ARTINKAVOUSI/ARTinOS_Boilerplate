@@ -1,0 +1,10 @@
+/* ARTINOS UI — the system. Import once at the app root:
+     import './ui/system/system.css'
+   It carries what every component shares: the typefaces, the tokens, the
+   themes, the control finishes and the anatomy (well · insert · seam · text).
+   Each component folder then imports its own stylesheet. */
+@import './fonts.css';
+@import './tokens.css';
+@import './themes.css';
+@import './materials.css';
+@import './anatomy.css';

@@ -36,7 +36,7 @@ export function FileDrop({ onFiles, accept, multiple = true, title = 'Drop files
   return (
     <button
       type="button"
-      className={className ? `aui-filedrop ${className}` : 'aui-filedrop'}
+      className={className ? `ar-filedrop ${className}` : 'ar-filedrop'}
       data-over={over || undefined}
       disabled={disabled}
       onClick={() => input.current?.click()}
@@ -54,8 +54,8 @@ export function FileDrop({ onFiles, accept, multiple = true, title = 'Drop files
       <svg viewBox="0 0 20 20" aria-hidden>
         <path d="M10 13V4M6.5 7.5L10 4l3.5 3.5M4 13v2.5h12V13" />
       </svg>
-      <span className="aui-filedrop__title">{title}</span>
-      {hint && <span className="aui-filedrop__hint">{hint}</span>}
+      <span className="ar-filedrop__title">{title}</span>
+      {hint && <span className="ar-filedrop__hint">{hint}</span>}
       <input
         ref={input}
         type="file"

@@ -1,18 +1,16 @@
-import { useMemo, useState } from 'react'
 import type { PanelManifest } from '../app/panel'
 import { features, findFeature, inspectors } from '../app/registry'
-import { FeatureCard, type ControlFilter } from '../app/studio/FeatureCard'
-import { ControlsBar } from '../app/studio/ControlsBar'
+import { FeatureCard } from '../app/studio/FeatureCard'
+import { CardFlow } from '../app/studio/CardFlow'
 import { studio, useStudio, type StudioState } from '../app/store'
 
 /** Groups other panels own. Everything else is project content and lands here. */
-const ELSEWHERE = new Set(['Render', 'Camera', 'Atmosphere', 'Lighting', 'Ground', 'Input', 'Diagnostics'])
+const ELSEWHERE = new Set(['Render', 'Camera', 'Atmosphere', 'Lighting', 'Ground', 'Input'])
 const projectFeatures = features.filter(feature => feature.kind !== 'effect' && feature.kind !== 'canvas-provider' && !ELSEWHERE.has(feature.group ?? ''))
 
 const selectFeatures = (state: StudioState) => state.features
 
 function Inspector() {
-  const [filter, setFilter] = useState<ControlFilter>('all')
   // Sections feature folders ship for themselves (v1's glass diagnostics), each
   // shown for the first of its features that is switched on.
   const states = useStudio(selectFeatures)
@@ -20,13 +18,10 @@ function Inspector() {
     const target = inspector.features.find(id => findFeature(id) && states[id]?.enabled)
     return target ? [{ inspector, target }] : []
   })
-  const controlCount = useMemo(() => projectFeatures.reduce((sum, feature) => sum + Object.keys(feature.controls ?? {}).length, 0), [])
 
   return (
     <div className="artinos-panel-suite artinos-inspector-suite">
-      <ControlsBar filter={filter} onFilter={setFilter} summary={`${projectFeatures.length} OBJECTS · ${controlCount} CONTROLS · SRC/FEATURES/OBJECTS`} />
-      {filter === 'all' &&
-        sections.map(({ inspector, target }) => (
+      {sections.map(({ inspector, target }) => (
           <inspector.component
             key={inspector.id}
             featureId={target}
@@ -36,13 +31,15 @@ function Inspector() {
           />
         ))}
       {projectFeatures.length === 0 ? (
-        <div className="v2-empty">No project features. Add a file under src/features/objects.</div>
-      ) : (
-        <div className="artinos-parameter-cards">
-          {projectFeatures.map(feature => (
-            <FeatureCard key={feature.id} feature={feature} filter={filter} />
-          ))}
+        <div className="v2-empty">
+          <b>No project objects</b>Add a file under src/features/objects that exports a feature manifest and it appears here.
         </div>
+      ) : (
+        <CardFlow>
+          {projectFeatures.map(feature => (
+            <FeatureCard key={feature.id} feature={feature} />
+          ))}
+        </CardFlow>
       )}
     </div>
   )

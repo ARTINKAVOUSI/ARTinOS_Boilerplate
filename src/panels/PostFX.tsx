@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { PanelManifest } from '../app/panel'
 import { byKind, findFeature } from '../app/registry'
 import { studio, useStudio, type StudioState } from '../app/store'
 import { useRuntime } from '../app/runtime'
 import { FeatureCard } from '../app/studio/FeatureCard'
-import { ControlInput, labelOf } from '../app/studio/ControlField'
+import { CardFlow } from '../app/studio/CardFlow'
+import { FeatureTile } from '../app/studio/FeatureTile'
 import { Icons } from '../app/studio/icons'
 import { PanelBar } from '../app/studio/PanelBar'
 import { Select } from '../ui/Select/Select'
 import { Segmented } from '../ui/Segmented/Segmented'
-import { Toggle } from '../ui/Toggle/Toggle'
+import { Switch } from '../ui/Switch/Switch'
 import { IconButton } from '../ui/IconButton/IconButton'
-import { PropertyRow } from '../ui/PropertyRow/PropertyRow'
 import type { DiscoveredFeature } from '../app/feature'
 
 const effects = byKind('effect')
@@ -20,52 +20,8 @@ const selectFeatures = (state: StudioState) => state.features
 const selectReveal = (state: StudioState) => state.reveal
 const words = (value: string) => value.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase())
 
-/** One effect in the browser: switch, name, category · cost, expandable controls. */
-function EffectRow({ effect }: { effect: DiscoveredFeature }) {
-  const states = useStudio(selectFeatures)
-  const reveal = useStudio(selectReveal)
-  const state = states[effect.id]
-  const [open, setOpen] = useState(false)
-  const row = useRef<HTMLDivElement>(null)
-  const mine = reveal?.featureId === effect.id ? reveal : null
-
-  // Opened from the command palette: expand the row and bring it into view.
-  useEffect(() => {
-    if (!mine) return
-    setOpen(true)
-    row.current?.scrollIntoView({ block: 'nearest' })
-  }, [mine?.at])
-
-  if (!state) return null
-  const controls = Object.entries(effect.controls ?? {})
-  return (
-    <div ref={row} className={`artinos-effect ${state.enabled ? 'is-enabled' : ''}`}>
-      <div className="artinos-effect-head">
-        <button type="button" className="artinos-effect-expand" aria-expanded={open} onClick={() => setOpen(value => !value)} title={effect.path}>
-          <span className="artinos-effect-name">
-            <b>{effect.label}</b> <small>{words(effect.category ?? '')}</small>
-          </span>
-          <span className="artinos-effect-cost">
-            {effect.cost}
-            {effect.webgpuOnly ? ' · WebGPU' : ''}
-          </span>
-          {controls.length > 0 && Icons.chevronDown}
-        </button>
-        <Toggle size="sm" label={`${effect.label} enabled`} checked={state.enabled} onChange={value => studio.setEnabled(effect.id, value)} />
-      </div>
-      {open && (
-        <div className="artinos-effect-body">
-          {controls.length === 0 && <div className="artinos-effect-status">No settings.</div>}
-          {controls.map(([name, control]) => (
-            <PropertyRow key={name} label={labelOf(name, control)} density={control.type === 'number' ? 'default' : 'compact'}>
-              <ControlInput name={name} control={control} value={state.values[name]} onChange={value => studio.setValue(effect.id, name, value)} />
-            </PropertyRow>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+/** What an effect costs and needs, in a few quiet words. */
+const captionOf = (effect: DiscoveredFeature) => [effect.cost && `${effect.cost.replace('-', ' ')} cost`, effect.webgpuOnly && 'WebGPU only'].filter(Boolean).join(' · ') || words(effect.category ?? '')
 
 function PostFX() {
   const states = useStudio(selectFeatures)
@@ -89,14 +45,15 @@ function PostFX() {
         .sort((a, b) => (states[a.id]?.order ?? a.order ?? 500) - (states[b.id]?.order ?? b.order ?? 500)),
     [states],
   )
-  const browse = effects.filter(effect => category === 'all' || effect.category === category)
+  const shelves = CATEGORIES.filter(name => name !== 'all' && (category === 'all' || category === name))
+    .map(name => ({ name, list: effects.filter(effect => effect.category === name) }))
+    .filter(shelf => shelf.list.length)
   const bypassed = host ? !states[host.id]?.enabled : true
 
   return (
     <div className="artinos-panel-suite">
       <PanelBar className="artinos-postfx-commandbar">
         <Segmented
-          size="sm"
           label="View"
           value={view}
           onChange={setView}
@@ -106,13 +63,13 @@ function PostFX() {
           ]}
         />
         {view === 'browse' && (
-          <Select size="sm" label="Category" value={category} onChange={setCategory} options={CATEGORIES.map(value => ({ value, label: value === 'all' ? 'All categories' : words(value) }))} />
+          <Select appearance="well" label="Category" value={category} onChange={setCategory} options={CATEGORIES.map(value => ({ value, label: value === 'all' ? 'All categories' : words(value) }))} />
         )}
         <span className="v2-spacer" />
         {host && (
           <label className="v2-inline-toggle">
             Pipeline
-            <Toggle size="sm" label="Post-processing enabled" checked={!bypassed} onChange={value => studio.setEnabled(host.id, value)} />
+            <Switch variant="compact" label="Post-processing enabled" value={!bypassed} onChange={value => studio.setEnabled(host.id, value)} />
           </label>
         )}
       </PanelBar>
@@ -121,13 +78,17 @@ function PostFX() {
 
       {view === 'stack' ? (
         active.length === 0 ? (
-          <div className="v2-empty">No active effects. Switch to Browse to add some.</div>
+          <div className="v2-empty">
+            <b>The stack is empty</b>
+            Effects run in the order they are listed here. Switch to Browse and turn some on.
+          </div>
         ) : (
-          <div className="artinos-parameter-cards">
+          <CardFlow>
             {active.map((effect, index) => (
               <FeatureCard
                 key={effect.id}
                 feature={effect}
+                ordinal={index + 1}
                 extra={
                   <>
                     <IconButton size="sm" label={`Move ${effect.label} earlier`} icon={Icons.up} disabled={index === 0} onClick={() => studio.moveEffect(effect.id, -1)} />
@@ -136,15 +97,24 @@ function PostFX() {
                 }
               />
             ))}
-          </div>
+          </CardFlow>
         )
       ) : (
-        <div className="artinos-postfx-grid">
-          {browse.map(effect => (
-            <EffectRow key={effect.id} effect={effect} />
+        <>
+          {shelves.map(shelf => (
+            <section key={shelf.name}>
+              <h3 className="v2-section">
+                {words(shelf.name)} <small>{shelf.list.length}</small>
+              </h3>
+              <div className="v2-tiles">
+                {shelf.list.map(effect => (
+                  <FeatureTile key={effect.id} feature={effect} caption={captionOf(effect)} />
+                ))}
+              </div>
+            </section>
           ))}
-          {browse.length === 0 && <div className="v2-empty">No effect in this category.</div>}
-        </div>
+          {shelves.length === 0 && <div className="v2-empty">No effect in this category.</div>}
+        </>
       )}
     </div>
   )

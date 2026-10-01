@@ -1,0 +1,974 @@
+/* Panel contents — one design for what is inside every dock panel.
+
+   The dock, its strip and the chrome around a panel are dock.css; every rule
+   here is scoped to a panel body (.artinos-workbench). Inside, one system —
+   the ARTINOS UI kit's own, so the studio and its controls read as one:
+
+     type     caps    9px   Chivo Mono 500, tracked, uppercase — section titles,
+                            captions, tags, stat labels, meta
+              meta    10.5px Chivo 300 — notes and secondary lines
+              label   12px  Chivo 300 — row labels, body text
+              name    13.5px Chivo 300, white — card, tile and entry names
+              figure  22px  Chivo Mono 300 — readouts
+     height   every control is 26px; small actions are 22px
+     space    4 · 8 · 12 · 16 · 24
+     surface  a card is a quiet 10px-radius surface with a hairline ring and a
+              lit top edge; a well is a shade darker than the pane
+
+   A panel is built from a handful of blocks — a section title, cards (feature
+   cards, tiles, entries, stats), a note and an empty state — so every panel
+   reads the same way whatever it holds. Everything is measured against the
+   panel's own width (the `workbench` container), so a side dock, a bottom dock
+   and a floating window each get the arrangement that fits them. */
+
+.artinos-workbench,
+.artinos-workbench-content {
+  --pn-caps: 500 9px/1.3 var(--ui-num);
+  --pn-meta: 300 10.5px/1.5 var(--ui-font);
+  --pn-label: 300 12px/1.35 var(--ui-font);
+  --pn-name: 300 13.5px/1.3 var(--ui-font);
+  --pn-figure: 300 22px/1.1 var(--ui-num);
+  --pn-track: 0.18em;
+  --pn-card: rgba(255, 255, 255, 0.04);
+  --pn-card-on: rgba(255, 255, 255, 0.065);
+  --pn-edge: rgba(255, 255, 255, 0.1);
+  --pn-edge-lit: rgba(255, 255, 255, 0.2);
+  --pn-edge-top: rgba(255, 255, 255, 0.16);
+  --pn-well: rgba(0, 0, 0, 0.16);
+  --pn-rule: rgba(255, 255, 255, 0.08);
+  --pn-radius: 10px;
+  --pn-gap: 12px;
+  --pn-label-w: 104px;
+  --ui-label-w: var(--pn-label-w);
+  --ar-field-label-w: var(--pn-label-w);
+  --ui-row: 26px;
+}
+.artinos-workbench {
+  font: var(--pn-label);
+  color: var(--ui-text);
+  text-shadow: var(--ar-panel-text-shadow, none);
+}
+.plate-workspace .artinos-panel-body {
+  padding: 14px 16px 18px;
+}
+.plate-workspace .artinos-workbench .artinos-panel-suite,
+.plate-workspace .artinos-workbench .artinos-inputflow-workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ── controls: one height, one label column ─────────────────────────────── */
+.plate-workspace .artinos-workbench .ar-icon-button {
+  --_size: 26px;
+}
+.plate-workspace .artinos-workbench .ar-icon-button[data-size='sm'] {
+  --_size: 22px;
+}
+.plate-workspace .artinos-workbench .ar-icon-button[data-size='sm'] svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* the row: label column · control · reset and actions */
+.plate-workspace .artinos-workbench .ar-prop {
+  margin: 0;
+}
+.plate-workspace .artinos-workbench .ar-prop__main {
+  gap: 10px;
+  min-height: 26px;
+}
+.plate-workspace .artinos-workbench .ar-prop__label {
+  flex: 0 0 var(--pn-label-w);
+  font: var(--pn-label);
+  color: var(--ui-text-label);
+}
+.plate-workspace .artinos-workbench .ar-prop__control > .ar-switch--compact {
+  flex: none;
+}
+.plate-workspace .artinos-workbench .ar-prop__actions {
+  gap: 2px;
+}
+.plate-workspace .artinos-workbench .ar-prop__reset {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--ui-text-meta);
+  transition: background 120ms ease, color 120ms ease;
+}
+.plate-workspace .artinos-workbench .ar-prop__reset:hover {
+  background: var(--ui-hover-wash);
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .ar-prop__message {
+  margin-left: calc(var(--pn-label-w) + 10px);
+  font: var(--pn-meta);
+}
+.plate-workspace .artinos-workbench .ar-prop[data-highlighted] {
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+/* a paired slider's label is the row's label column: same width, same face */
+.plate-workspace .artinos-workbench .ar-slider[data-layout='paired'] {
+  gap: 10px;
+}
+.plate-workspace .artinos-workbench .ar-slider__side {
+  width: var(--pn-label-w);
+  font: var(--pn-label);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ui-text-label);
+  text-shadow: inherit;
+}
+/* a vector is three fields on one line */
+.plate-workspace .artinos-workbench .v2-vector {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* ── section title ──────────────────────────────────────────────────────── */
+.plate-workspace .artinos-workbench .v2-section,
+.plate-workspace .artinos-workbench .v2-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 0 10px;
+  font: var(--pn-caps);
+  letter-spacing: var(--pn-track);
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench :is(.v2-section, .v2-group-title)::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--pn-edge-lit), transparent 80%);
+}
+.plate-workspace .artinos-workbench :is(.v2-section, .v2-group-title) small {
+  font: inherit;
+  letter-spacing: 0.12em;
+  color: var(--ui-text-ghost);
+}
+.plate-workspace .artinos-workbench :is(.v2-section, .v2-group-title):first-child,
+.plate-workspace .artinos-workbench .v2-block:first-child > :is(.v2-section, .v2-group-title) {
+  margin-top: 2px;
+}
+.plate-workspace .artinos-workbench .v2-block + .v2-block {
+  margin-top: 6px;
+}
+
+/* ── the surface: cards, tiles, entries, stats ──────────────────────────── */
+.plate-workspace .artinos-workbench .artinos-parameter-card,
+.plate-workspace .artinos-workbench .v2-tile,
+.plate-workspace .artinos-workbench .v2-stat,
+.plate-workspace .artinos-workbench .v2-entry,
+.plate-workspace .artinos-workbench .v2-theme {
+  border-radius: var(--pn-radius);
+  background: var(--pn-card);
+  box-shadow: inset 0 0 0 1px var(--pn-edge), inset 0 1px 0 var(--pn-edge-top);
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+.plate-workspace .artinos-workbench :is(.artinos-parameter-card, .v2-tile, .v2-entry, .v2-theme):hover {
+  box-shadow: inset 0 0 0 1px var(--pn-edge-lit), inset 0 1px 0 var(--pn-edge-top);
+}
+.plate-workspace .artinos-workbench :is(.artinos-parameter-card, .v2-tile)[data-enabled] {
+  background: var(--pn-card-on);
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card[data-revealed] {
+  box-shadow: inset 0 0 0 1px var(--ui-accent-line), 0 0 0 3px var(--ui-accent-wash);
+}
+
+/* feature cards are packed into columns by CardFlow (shortest column first),
+   so a wide dock is filled edge to edge whatever the cards' heights */
+.plate-workspace .artinos-workbench .artinos-parameter-cards {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.plate-workspace .artinos-workbench .v2-flow__item {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.plate-workspace .artinos-workbench .v2-flow__item[data-animate] {
+  transition: transform 220ms var(--ui-ease);
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0 14px 12px;
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0;
+  font: var(--pn-name);
+  letter-spacing: 0;
+  color: var(--ui-text);
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-head::after {
+  display: none;
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-head b {
+  font: inherit;
+  color: inherit;
+}
+.plate-workspace .artinos-workbench .v2-feature-card[data-enabled] .v2-card-title b,
+.plate-workspace .artinos-workbench .artinos-parameter-card:not(.v2-feature-card) .artinos-parameter-card-head b {
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-head small {
+  order: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  font: var(--pn-caps);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-card-actions {
+  order: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.plate-workspace .artinos-workbench .v2-card-actions .ar-icon-button {
+  opacity: 0.8;
+}
+.plate-workspace .artinos-workbench .v2-card-actions .ar-icon-button:hover {
+  opacity: 1;
+}
+/* the name folds its card; the chevron says so */
+.plate-workspace .artinos-workbench .v2-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+.plate-workspace .artinos-workbench .v2-card-title::before {
+  content: '';
+  flex: none;
+  width: 5px;
+  height: 5px;
+  margin: 0 2px 0 1px;
+  border-right: 1.2px solid var(--ui-text-meta);
+  border-bottom: 1.2px solid var(--ui-text-meta);
+  rotate: 45deg;
+  translate: 0 -1px;
+  transition: rotate 180ms ease, translate 180ms ease;
+}
+.plate-workspace .artinos-workbench .v2-card-title[aria-expanded='false']::before {
+  rotate: -45deg;
+  translate: -1px 0;
+}
+.plate-workspace .artinos-workbench .v2-card-title:hover b {
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .v2-card-ordinal {
+  font: var(--pn-caps);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ui-text-ghost);
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-body {
+  display: grid;
+  gap: 4px;
+  padding-top: 2px;
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-body[data-muted] {
+  opacity: 0.5;
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-body .ar-prop {
+  margin: 0;
+}
+/* a group of controls inside a card */
+.plate-workspace .artinos-workbench .v2-control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 4px;
+  font: var(--pn-caps);
+  letter-spacing: var(--pn-track);
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-control-group::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--pn-rule);
+}
+.plate-workspace .artinos-workbench .v2-control-group:first-child {
+  margin-top: 4px;
+}
+
+/* ── tiles: a device, a signal, an effect in the catalogue ──────────────── */
+.plate-workspace .artinos-workbench .v2-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  align-items: start;
+  gap: 10px;
+}
+.plate-workspace .artinos-workbench .v2-tile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 3px 12px;
+  min-width: 0;
+  padding: 11px 12px 11px 14px;
+}
+.plate-workspace .artinos-workbench .v2-tile__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font: var(--pn-name);
+  color: var(--ui-text);
+}
+.plate-workspace .artinos-workbench .v2-tile[data-enabled] .v2-tile__name {
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .v2-tile__name > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.plate-workspace .artinos-workbench .v2-tile > small {
+  grid-column: 1;
+  overflow: hidden;
+  font: var(--pn-meta);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-tile > :is(.v2-tile__end, output) {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plate-workspace .artinos-workbench .v2-tile > output {
+  font: 300 13px var(--ui-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .v2-tile > .v2-path {
+  grid-column: 1;
+  font-size: 11px;
+  color: var(--ui-text-label);
+}
+.plate-workspace .artinos-workbench .v2-tile > .ar-meter {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+.plate-workspace .artinos-workbench .v2-tile__body {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--pn-rule);
+}
+.plate-workspace .artinos-workbench .v2-tile__body .ar-prop {
+  margin: 0;
+}
+.plate-workspace .artinos-workbench .v2-tile__fold {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--ui-text-meta);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, rotate 180ms ease;
+}
+.plate-workspace .artinos-workbench .v2-tile__fold:hover {
+  background: var(--ui-hover-wash);
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .v2-tile__fold[aria-expanded='true'] {
+  rotate: 180deg;
+}
+.plate-workspace .artinos-workbench .v2-tile__fold svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* a small status word beside a name */
+.plate-workspace .artinos-workbench .v2-state {
+  flex: none;
+  padding: 2px 7px 1px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px var(--pn-edge);
+  font: var(--pn-caps);
+  font-size: 8.5px;
+  font-style: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+  text-shadow: none;
+}
+.plate-workspace .artinos-workbench .v2-state[data-tone='live'] {
+  background: color-mix(in srgb, var(--ui-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-accent) 40%, transparent);
+  color: var(--ui-accent);
+}
+
+/* ── stats: one figure and its name ─────────────────────────────────────── */
+.plate-workspace .artinos-workbench .v2-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: var(--pn-gap);
+}
+.plate-workspace .artinos-workbench .v2-stat {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 14px 13px;
+}
+.plate-workspace .artinos-workbench .v2-stat > span {
+  overflow: hidden;
+  font: var(--pn-caps);
+  letter-spacing: var(--pn-track);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-stat > b {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  overflow: hidden;
+  font: var(--pn-figure);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .v2-stat > b small {
+  font: var(--pn-caps);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-chart {
+  display: block;
+  width: 100%;
+  height: 72px;
+  margin: 4px 0 2px;
+}
+.plate-workspace .artinos-workbench .ar-meter {
+  height: 26px;
+}
+.plate-workspace .artinos-workbench .ar-meter__value {
+  min-width: 40px;
+  font: 300 11px var(--ui-num);
+  color: var(--ui-text);
+}
+
+/* ── entries: the library and the assets ────────────────────────────────── */
+.plate-workspace .artinos-workbench .v2-entries {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 10px;
+}
+.plate-workspace .artinos-workbench .v2-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-content: start;
+  min-width: 0;
+  padding: 12px 12px 12px 14px;
+}
+.plate-workspace .artinos-workbench .v2-entry__actions {
+  grid-row: 1;
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plate-workspace .artinos-workbench .v2-entry > p {
+  grid-column: 1 / -1;
+  display: -webkit-box;
+  margin: 2px 0 0;
+  overflow: hidden;
+  font: var(--pn-label);
+  line-height: 1.45;
+  color: var(--ui-text-label);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.plate-workspace .artinos-workbench .v2-path {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  font: 300 10.5px/1.5 var(--ui-num);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text-meta);
+}
+
+/* ── the log ────────────────────────────────────────────────────────────── */
+.plate-workspace .artinos-workbench .artinos-console-entries {
+  display: grid;
+  gap: 0;
+  max-height: none;
+  overflow: hidden;
+  border-radius: var(--pn-radius);
+  background: var(--pn-well);
+  box-shadow: inset 0 0 0 1px var(--pn-edge);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry {
+  border: 0;
+  border-left: 2px solid transparent;
+}
+.plate-workspace .artinos-workbench .artinos-console-entry + .artinos-console-entry {
+  box-shadow: inset 0 1px 0 var(--pn-rule);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry.log-warn {
+  border-left-color: var(--ui-warn);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry.log-error {
+  border-left-color: var(--ui-fault);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry summary {
+  display: grid;
+  grid-template-columns: 64px 52px 84px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px 0 12px;
+  font: var(--pn-label);
+  list-style: none;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.plate-workspace .artinos-workbench .artinos-console-entry summary::-webkit-details-marker {
+  display: none;
+}
+.plate-workspace .artinos-workbench .artinos-console-entry summary:hover {
+  background: var(--ui-hover-wash);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry summary span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry time {
+  font: 300 10.5px var(--ui-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry summary b {
+  overflow: hidden;
+  font: var(--pn-caps);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry.log-warn summary b:first-of-type {
+  color: var(--ui-warn);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry.log-error summary b:first-of-type {
+  color: var(--ui-fault);
+}
+.plate-workspace .artinos-workbench .artinos-console-entry pre {
+  margin: 0;
+  padding: 4px 14px 14px 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 300 11px/1.6 var(--ui-num);
+  color: var(--ui-text-label);
+}
+
+/* ── notes, notices and empty states ────────────────────────────────────── */
+.plate-workspace .artinos-workbench .v2-note {
+  max-width: 64ch;
+  margin: 10px 2px 0;
+  font: var(--pn-meta);
+  font-size: 11px;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .artinos-parameter-card-body > .v2-note {
+  margin: 6px 0 2px;
+}
+.plate-workspace .artinos-workbench .v2-empty {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 28px 16px;
+  border: 1px dashed var(--pn-edge-lit);
+  border-radius: var(--pn-radius);
+  font: var(--pn-label);
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-empty b {
+  font: var(--pn-name);
+  color: var(--ui-text);
+}
+.plate-workspace .artinos-workbench .artinos-panel-notice {
+  margin: 0 0 var(--pn-gap);
+  padding: 9px 14px;
+  border: 0;
+  border-radius: var(--pn-radius);
+  background: color-mix(in srgb, var(--ui-accent) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-accent) 35%, transparent);
+  font: var(--pn-label);
+  color: var(--ui-text);
+}
+.plate-workspace .artinos-workbench .artinos-panel-notice.is-error {
+  background: color-mix(in srgb, var(--ui-fault) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-fault) 40%, transparent);
+  color: var(--ui-fault);
+}
+.plate-workspace .artinos-workbench .artinos-workbench-empty h3 {
+  font: var(--pn-name);
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .artinos-workbench-empty p {
+  font: var(--pn-label);
+  color: var(--ui-text-meta);
+}
+
+/* ── the panel's own toolbar, when it sits in the body ──────────────────── */
+.plate-workspace .artinos-workbench .v2-panel-bar[data-head] {
+  gap: 10px 14px;
+  margin: 0 0 14px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--pn-rule);
+}
+.plate-workspace .artinos-workbench .v2-panel-bar > .ar-textfield {
+  flex: 1 1 220px;
+  min-width: 160px;
+  max-width: 360px;
+}
+.plate-workspace .artinos-workbench .v2-panel-bar > .ar-select {
+  width: 168px;
+}
+.plate-workspace .artinos-workbench .v2-panel-bar > .ar-segmented {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 200px;
+}
+.plate-workspace .artinos-workbench .v2-panel-bar .ar-icon-button[data-size='sm'] {
+  --_size: 26px;
+}
+.plate-workspace .artinos-workbench .v2-bar-summary {
+  min-width: 0;
+  overflow: hidden;
+  font: var(--pn-caps);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text-ghost);
+}
+.plate-workspace .v2-inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 300 11.5px var(--ui-font);
+  color: var(--ui-text-label);
+}
+
+/* ── assets ─────────────────────────────────────────────────────────────── */
+.plate-workspace .artinos-workbench .ar-filedrop {
+  gap: 6px;
+  min-height: 104px;
+  margin-bottom: var(--pn-gap);
+  border-color: var(--pn-edge-lit);
+  border-radius: var(--pn-radius);
+  background: var(--pn-well);
+  font: var(--pn-name);
+  color: var(--ui-text);
+}
+.plate-workspace .artinos-workbench .ar-filedrop__hint {
+  font: var(--pn-meta);
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-asset__preview {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 6px;
+  overflow: hidden;
+  border-radius: 7px;
+  background: var(--pn-well);
+  box-shadow: inset 0 0 0 1px var(--pn-edge);
+  font: var(--pn-caps);
+  letter-spacing: var(--pn-track);
+  color: var(--ui-text-meta);
+}
+.plate-workspace .artinos-workbench .v2-asset__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── appearance ─────────────────────────────────────────────────────────── */
+.plate-workspace .artinos-workbench .v2-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  align-items: stretch;
+  gap: var(--pn-gap);
+}
+.plate-workspace .artinos-workbench .v2-grid > .artinos-parameter-card {
+  display: block;
+  margin: 0;
+}
+.plate-workspace .artinos-workbench .v2-themes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 2px 0 4px;
+}
+.plate-workspace .artinos-workbench .v2-theme {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px 11px;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+.plate-workspace .artinos-workbench .v2-theme[aria-checked='true'] {
+  background: var(--pn-card-on);
+  box-shadow: inset 0 0 0 1px var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .v2-theme:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+.plate-workspace .artinos-workbench .v2-theme__swatch {
+  display: flex;
+  gap: 4px;
+  height: 14px;
+}
+.plate-workspace .artinos-workbench .v2-theme__swatch i {
+  flex: 1;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+.plate-workspace .artinos-workbench .v2-theme b {
+  font: var(--pn-label);
+  color: var(--ui-text-strong);
+}
+.plate-workspace .artinos-workbench .v2-theme small {
+  display: -webkit-box;
+  overflow: hidden;
+  font: var(--pn-meta);
+  color: var(--ui-text-meta);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.plate-workspace .artinos-workbench .v2-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font: var(--pn-label);
+  color: var(--ui-text-label);
+}
+.plate-workspace .artinos-workbench .v2-keys > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.plate-workspace .artinos-workbench .v2-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+/* ── graph: what floats over the canvas reads at the same scale ─────────── */
+.artinos-panel-graph .artinos-graph-hint {
+  font: var(--pn-meta, 300 10.5px/1.5 var(--ui-font));
+  font-size: 11px;
+}
+.artinos-panel-graph .artinos-graph-overlay > header b {
+  font: var(--pn-caps, 500 9px/1.3 var(--ui-num));
+  letter-spacing: var(--pn-track, 0.18em);
+  text-transform: uppercase;
+}
+.artinos-panel-graph .artinos-graph-overlay-body {
+  gap: 8px;
+  padding: 12px 14px 14px;
+  font: var(--pn-label, 300 12px/1.35 var(--ui-font));
+}
+.artinos-panel-graph .artinos-gdiagnostic {
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font: var(--pn-label, 300 12px/1.35 var(--ui-font));
+}
+.artinos-panel-graph .artinos-graph-overlay-body .artinos-graph-hint {
+  position: static;
+  max-width: none;
+  margin: 0;
+  line-height: 1.5;
+  pointer-events: auto;
+}
+.artinos-panel-graph .artinos-graph-overlay-body .artinos-effect-status {
+  font: var(--pn-label, 300 12px/1.35 var(--ui-font));
+}
+.artinos-panel-graph .artinos-graph-overlay-body .v2-panel-bar {
+  gap: 8px;
+}
+
+/* ── the panel's width decides the arrangement ──────────────────────────── */
+@container workbench (max-width: 720px) {
+  .plate-workspace .artinos-workbench .v2-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container workbench (max-width: 560px) {
+  .artinos-workbench-content {
+    --pn-label-w: 84px;
+    --pn-gap: 10px;
+  }
+  .plate-workspace .artinos-panel-body {
+    padding: 12px 12px 16px;
+  }
+  .plate-workspace .artinos-workbench .artinos-parameter-card {
+    padding: 0 12px 10px;
+  }
+  .plate-workspace .artinos-workbench .v2-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .plate-workspace .artinos-workbench .artinos-console-entry summary {
+    grid-template-columns: 56px 44px minmax(0, 1fr);
+    gap: 10px;
+    padding: 6px 12px 6px 10px;
+  }
+  .plate-workspace .artinos-workbench .artinos-console-entry summary > b:nth-of-type(2) {
+    display: none;
+  }
+  .plate-workspace .artinos-workbench .artinos-console-entry summary > span {
+    grid-column: 1 / -1;
+    white-space: normal;
+  }
+  .plate-workspace .artinos-workbench .v2-panel-bar > .ar-select,
+  .plate-workspace .artinos-workbench .v2-panel-bar > .ar-segmented {
+    flex: 1 1 160px;
+    width: auto;
+    min-width: 0;
+  }
+  .plate-workspace .artinos-workbench .v2-bar-summary {
+    display: none;
+  }
+}
+@container workbench (max-width: 300px) {
+  .artinos-workbench-content {
+    --pn-label-w: 100%;
+  }
+  .plate-workspace .artinos-workbench .ar-prop__main {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .plate-workspace .artinos-workbench .ar-prop__label {
+    flex: 1 0 100%;
+  }
+  .plate-workspace .artinos-workbench .ar-slider[data-layout='paired'] {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .plate-workspace .artinos-workbench .ar-prop__message {
+    margin-left: 0;
+  }
+  .plate-workspace .artinos-workbench .v2-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .plate-workspace .artinos-workbench .v2-themes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* names come first: a long kind tag truncates before the name does */
+.plate-workspace .artinos-workbench .v2-tile__name > span {
+  flex: 0 1 auto;
+}
+.plate-workspace .artinos-workbench .v2-tile__name > .v2-state {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 55%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* a figure that does not fit its stat shrinks before it truncates */
+.plate-workspace .artinos-workbench .v2-stat > b {
+  font-size: clamp(17px, 1.2cqi + 11px, 22px);
+}
+.plate-workspace .artinos-workbench .v2-stat > b small {
+  flex: none;
+}
+
+/* a kit colour field inside a labelled row: the row already names it */
+.plate-workspace .ar-prop .ar-color__label {
+  display: none;
+}
+.plate-workspace .ar-prop .ar-color[data-labelled] {
+  padding-left: 0;
+}
+.plate-workspace .ar-prop .ar-color[data-labelled] .ar-color__swatch {
+  flex: 1 1 auto;
+}
+
+/* status words in the warm and fault tones */
+.plate-workspace .artinos-workbench .v2-state[data-tone='warn'] {
+  background: color-mix(in srgb, var(--ui-warn) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-warn) 40%, transparent);
+  color: var(--ui-warn);
+}
+.plate-workspace .artinos-workbench .v2-state[data-tone='fault'] {
+  background: color-mix(in srgb, var(--ui-fault) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-fault) 40%, transparent);
+  color: var(--ui-fault);
+}
+.plate-workspace .artinos-workbench .v2-stat > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plate-workspace .artinos-workbench .v2-stat > span > .v2-state {
+  letter-spacing: 0.12em;
+}
+/* a very narrow panel: the card's name wins over its caption */
+@container workbench (max-width: 300px) {
+  .plate-workspace .artinos-workbench .artinos-parameter-card-head small {
+    display: none;
+  }
+}

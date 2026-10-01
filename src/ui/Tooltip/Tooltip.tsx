@@ -92,7 +92,7 @@ export function Tooltip({ content, children, side = 'top', delay = 450 }: Toolti
             ref={tip}
             id={id}
             role="tooltip"
-            className="aui-tooltip"
+            className="ar-tooltip"
             style={{ left: position?.left ?? -9999, top: position?.top ?? -9999, opacity: position ? 1 : 0 }}
           >
             {content}

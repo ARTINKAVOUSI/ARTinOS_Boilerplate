@@ -1,0 +1,369 @@
+/* ARTINOS UI — control finishes: the default (studio) block, the optional
+ * data-ar-material / `material` overrides, and the finish of each theme in this kit.
+ * `initial` on a token means "not set here": components derive it from density.
+ */
+
+/* ---------- DEFAULT (studio) — satin insert in a shallow neutral well. Every finish
+   and theme below starts from this block and states only what differs. ---------- */
+:root,
+[data-ar-theme],
+[data-ar-material] {
+  /* type */
+  --ar-control-font: var(--ar-font-num);
+  --ar-label-weight: 500;
+  --ar-value-weight: 300;
+  --ar-label-tracking: 0.13em;
+  --ar-label-case: uppercase;
+  --ar-label-bump: 0px;
+  --ar-value-bump: 0px;
+
+  /* well */
+  --ar-trough: var(--ar-bg-well);
+  --ar-trough-backdrop: none;
+  --ar-well: var(--ar-shadow-well), var(--ar-rim);
+  --ar-inset: 2px;
+  --ar-radius: 7px;
+  --ar-insert-radius: 6px;
+
+  /* insert */
+  --ar-insert: linear-gradient(180deg, #dcdcd8 0%, #c9c9c4 100%);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 0 0.5px rgba(0, 0, 0, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3);
+  --ar-insert-backdrop: none;
+  --ar-insert-blend: normal;
+  --ar-insert-ink: #121212;
+  --ar-insert-unit-ink: rgba(0, 0, 0, 0.5);
+  --ar-insert-text-shadow: none;
+  --ar-insert-off-filter: grayscale(1) brightness(0.68) contrast(0.92);
+
+  /* ink on the well */
+  --ar-label-ink: var(--ar-text-mid);
+  --ar-value-ink: color-mix(in srgb, var(--ar-text-hi) 90%, transparent);
+  --ar-value-ink-hi: var(--ar-text-hi);
+  --ar-unit-ink: var(--ar-text-faint);
+  --ar-off-ink: var(--ar-text-faint);
+  --ar-dim-ink: var(--ar-text-mid);
+  --ar-base-text-shadow: none;
+
+  /* seam — the handle. Single line by default; a/b carve it into a double line. */
+  --ar-seam: rgba(0, 0, 0, 0.38);
+  --ar-seam-hover: rgba(0, 0, 0, 0.62);
+  /* the live seam sits ON the insert: a deepened mix of the signal, so it reads on pale inserts */
+  --ar-seam-active: color-mix(in srgb, var(--ar-signal) 78%, #000);
+  --ar-seam-edge: 1px 0 0 rgba(255, 255, 255, 0.35);
+  --ar-seam-glow: 0 0 0 0.5px var(--ar-seam-active), 0 0 6px var(--ar-signal-line);
+  --ar-seam-drop: none;
+  --ar-seam-drop-hot: none;
+  --ar-seam-w: 2px;
+  --ar-seam-offset: 8px;
+  --ar-seam-a: 100%;
+  --ar-seam-b: 100%;
+  --ar-seam-scale: 0.38;
+  --ar-seam-scale-hot: 0.46;
+
+  /* stepped cells */
+  --ar-cell: rgba(255, 255, 255, 0.03);
+  --ar-cell-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+  --ar-cell-insert-shadow: var(--ar-insert-shadow);
+  --ar-cell-radius: initial;
+
+  /* gradient track */
+  --ar-grad-well: inset 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+  --ar-grad-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 46%, rgba(0, 0, 0, 0.12));
+  --ar-grad-seam: rgba(20, 20, 20, 0.72);
+  --ar-grad-seam-hot: #141414;
+  --ar-grad-seam-edge: 1px 0 0 rgba(255, 255, 255, 0.55);
+  --ar-grad-seam-glow: 0 0 0 1px rgba(255, 255, 255, 0.55), 0 0 6px rgba(255, 255, 255, 0.4);
+  --ar-grad-seam-scale: 0.46;
+  --ar-grad-ink-dark: #141414;
+  --ar-grad-ink-light: #f4f4f4;
+
+  /* ruler / plots */
+  --ar-ruler-ink: var(--ar-tick-major);
+  --ar-ruler-minor: var(--ar-tick);
+  --ar-index: var(--ar-text-hi);
+  --ar-plot: var(--ar-text-faint);
+  --ar-plot-hi: var(--ar-text-hi);
+
+  /* LED — the seam of a switch or chip */
+  --ar-led-on: var(--ar-seam-active);
+  --ar-led-off: #bebebe;
+  --ar-led-glow: var(--ar-signal-line);
+
+  /* colour swatch + list panel */
+  --ar-swatch-rim: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 0 0 1px rgba(0, 0, 0, 0.26), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --ar-list-bg: var(--ar-float-bg);
+  --ar-list-backdrop: blur(30px);
+  --ar-list-shadow: var(--ar-float-ring), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+  --ar-list-insert: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  --ar-list-insert-blend: normal;
+  --ar-list-insert-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  --ar-list-ink: var(--ar-float-ink);
+  --ar-list-ink-hi: var(--ar-float-ink);
+  --ar-list-text-shadow: none;
+  --ar-list-hover: var(--ar-bg-hover);
+}
+
+/* ---------- UNTINTED — finishes on the unmodified default control anatomy ----------
+ * Intentionally do not override radius, inset, fonts, tracking, weights, seam
+ * dimensions or density. Explicit material overrides retain their own finish.
+ */
+[data-ar-theme='frost-etched']:not([data-ar-material]),
+[data-ar-theme='frost-deep']:not([data-ar-material]) {
+  --ar-trough: var(--ar-bg-well);
+  --ar-trough-backdrop: blur(4px);
+  --ar-well: var(--ar-shadow-well), var(--ar-rim);
+  --ar-insert-blend: normal;
+  --ar-insert-ink: #ffffff;
+  --ar-insert-unit-ink: #e6e6e6;
+  --ar-insert-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+  --ar-insert-off-filter: opacity(0.45);
+  --ar-label-ink: var(--ar-text-mid);
+  --ar-value-ink: var(--ar-text-hi);
+  --ar-value-ink-hi: var(--ar-text-hi);
+  --ar-unit-ink: var(--ar-text-low);
+  --ar-off-ink: var(--ar-text-faint);
+  --ar-dim-ink: var(--ar-text-low);
+  --ar-base-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --ar-seam: rgba(255, 255, 255, 0.62);
+  --ar-seam-hover: #ffffff;
+  --ar-seam-active: #ffffff;
+  --ar-seam-edge: 1px 0 0 rgba(0, 0, 0, 0.25);
+  --ar-seam-glow: 0 0 0 0.5px rgba(255, 255, 255, 0.38);
+  --ar-cell: rgba(255, 255, 255, 0.035);
+  --ar-cell-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --ar-led-on: var(--ar-signal);
+  --ar-led-off: rgba(128, 128, 128, 0.6);
+  --ar-led-glow: var(--ar-signal-line);
+  --ar-grad-well: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  --ar-grad-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 55%);
+  --ar-swatch-rim: inset 0 0 0 1px rgba(255, 255, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ar-list-bg: var(--ar-float-bg);
+  --ar-list-backdrop: blur(24px);
+  --ar-list-shadow: var(--ar-float-ring), var(--ar-float-shadow);
+  --ar-list-insert: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+  --ar-list-insert-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  --ar-list-ink: var(--ar-float-ink);
+  --ar-list-ink-hi: #ffffff;
+  --ar-list-text-shadow: none;
+  --ar-list-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* ETCHED FROST */
+[data-ar-theme='frost-etched']:not([data-ar-material]) {
+  --ar-insert: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.14) 100%);
+  --ar-insert-backdrop: blur(14px);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 0 0 1px rgba(255, 255, 255, 0.24), inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* DEEP FROST */
+[data-ar-theme='frost-deep']:not([data-ar-material]) {
+  --ar-insert: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.59) 100%);
+  --ar-insert-backdrop: blur(32px);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.54), inset 0 0 0 1px rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(255, 255, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.18);
+  --ar-insert-ink: #191919;
+  --ar-insert-unit-ink: #484848;
+  --ar-insert-text-shadow: none;
+  --ar-seam: rgba(0, 0, 0, 0.42);
+  --ar-seam-hover: #161616;
+  --ar-seam-active: #161616;
+  --ar-seam-edge: 1px 0 0 rgba(255, 255, 255, 0.6);
+  --ar-seam-glow: 0 0 0 0.5px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- ADVANCED OVERRIDES — base finishes for data-ar-material / the material prop ---------- */
+
+/* OPTICAL — the prototype insert: polished translucent, warm, dark ink. */
+[data-ar-material='optical'] {
+  --ar-insert: linear-gradient(180deg, rgba(240, 238, 234, 0.95) 0%, rgba(216, 213, 207, 0.92) 52%, rgba(198, 194, 188, 0.9) 100%);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.38), 0 0 0 0.5px rgba(0, 0, 0, 0.28);
+  --ar-insert-ink: #161616;
+  --ar-seam: rgba(0, 0, 0, 0.44);
+  --ar-seam-hover: rgba(0, 0, 0, 0.66);
+  --ar-seam-edge: 1px 0 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ---------- glass family (frost · milk · clear · tint · smoked) — shared well ----------
+   A theme-aware recess so text on the trough keeps ≥4.5:1 over any canvas, and a
+   halo text-shadow that follows the app ground. */
+[data-ar-material='frost'],
+[data-ar-material='clear'],
+[data-ar-material='smoked'],
+[data-ar-material='milk'],
+[data-ar-material='tint'] {
+  --ar-trough: color-mix(in srgb, var(--ar-bg-app) 34%, transparent);
+  --ar-trough-backdrop: blur(18px) saturate(1.1);
+  --ar-well: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 0 rgba(255, 255, 255, 0.07);
+  --ar-value-weight: 500;
+  --ar-label-ink: color-mix(in srgb, var(--ar-text-hi) 88%, transparent);
+  --ar-value-ink: color-mix(in srgb, var(--ar-text-hi) 88%, transparent);
+  --ar-unit-ink: color-mix(in srgb, var(--ar-text-hi) 70%, transparent);
+  --ar-dim-ink: color-mix(in srgb, var(--ar-text-hi) 72%, transparent);
+  --ar-base-text-shadow: 0 1px 2px color-mix(in srgb, var(--ar-bg-app) 70%, transparent);
+  --ar-insert-text-shadow: 0 1px 2px color-mix(in srgb, var(--ar-bg-app) 60%, transparent);
+}
+
+/* FROST — frosted glass: milky, blurred, grain-broken. */
+[data-ar-material='frost'] {
+  --ar-insert: var(--ar-frost-grain), linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(246, 247, 248, 0.5) 48%, rgba(236, 238, 240, 0.44) 52%, rgba(255, 255, 255, 0.58) 100%);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.26), 0 0 0 0.5px rgba(0, 0, 0, 0.16);
+  --ar-insert-backdrop: blur(16px) saturate(1.25) brightness(1.1);
+  --ar-insert-ink: #141414;
+  --ar-insert-unit-ink: rgba(20, 20, 20, 0.58);
+  --ar-insert-text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.55);
+  --ar-seam: rgba(0, 0, 0, 0.46);
+  --ar-seam-hover: rgba(0, 0, 0, 0.72);
+  --ar-seam-edge: 1px 0 0 rgba(255, 255, 255, 0.7);
+}
+
+/* CLEAR — clear glass: almost no body, all edge — a highlight rim and a refraction line. */
+[data-ar-material='clear'] {
+  --ar-insert: linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.13) 38%, rgba(255, 255, 255, 0.06) 60%, rgba(255, 255, 255, 0.08) 82%, rgba(255, 255, 255, 0.18) 100%);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(255, 255, 255, 0.22), inset 1px 0 0 rgba(255, 255, 255, 0.26), inset -1px 0 0 rgba(255, 255, 255, 0.26), inset 0 2px 5px -2px rgba(255, 255, 255, 0.28), 0 1px 2px rgba(0, 0, 0, 0.38), 0 0 0 0.5px rgba(0, 0, 0, 0.3);
+  --ar-insert-backdrop: blur(1.5px) saturate(1.7) brightness(1.2) contrast(1.06);
+  --ar-insert-ink: var(--ar-text-hi);
+  --ar-insert-unit-ink: var(--ar-text-mid);
+  --ar-seam: color-mix(in srgb, var(--ar-text-hi) 82%, transparent);
+  --ar-seam-hover: var(--ar-text-hi);
+  --ar-seam-edge: 0 0 0 0.5px rgba(0, 0, 0, 0.3);
+}
+
+/* SMOKED — dark tinted glass, white ink. */
+[data-ar-material='smoked'] {
+  --ar-insert: linear-gradient(180deg, rgba(62, 62, 66, 0.74) 0%, rgba(22, 22, 24, 0.7) 50%, rgba(12, 12, 14, 0.72) 52%, rgba(38, 38, 42, 0.72) 100%);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.5);
+  --ar-insert-backdrop: blur(8px) saturate(1.1) brightness(0.78);
+  --ar-insert-ink: #ffffff;
+  --ar-insert-unit-ink: rgba(255, 255, 255, 0.62);
+  --ar-insert-text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+  --ar-seam: rgba(255, 255, 255, 0.6);
+  --ar-seam-hover: rgba(255, 255, 255, 0.9);
+  --ar-seam-edge: 1px 0 0 rgba(0, 0, 0, 0.45);
+  --ar-insert-off-filter: grayscale(1) brightness(0.85);
+}
+
+/* MILK — dense frosted glass: almost opaque, softly grained, bright. Reads on any canvas. */
+[data-ar-material='milk'] {
+  --ar-insert: var(--ar-frost-grain), linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 247, 248, 0.84) 50%, rgba(238, 240, 242, 0.82) 52%, rgba(255, 255, 255, 0.88) 100%);
+  --ar-insert-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0, 0, 0, 0.06), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8), 0 1px 4px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(0, 0, 0, 0.14);
+  --ar-insert-backdrop: blur(24px) saturate(1.15);
+  --ar-insert-ink: #121416;
+  --ar-insert-unit-ink: rgba(18, 20, 22, 0.56);
+  --ar-insert-text-shadow: none;
+  --ar-seam: rgba(0, 0, 0, 0.4);
+  --ar-seam-hover: rgba(0, 0, 0, 0.68);
+  --ar-seam-edge: 1px 0 0 rgba(255, 255, 255, 0.9);
+}
+
+/* TINT — coloured glass: the insert takes the theme's signal hue, white ink. */
+[data-ar-material='tint'] {
+  --ar-insert:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.06) 46%, rgba(255, 255, 255, 0) 54%, rgba(255, 255, 255, 0.12) 100%),
+    color-mix(in srgb, var(--ar-signal) 42%, transparent);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 0 1px color-mix(in srgb, var(--ar-signal) 55%, transparent), inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 12px -4px var(--ar-signal-line);
+  --ar-insert-backdrop: blur(10px) saturate(1.5) brightness(0.95);
+  --ar-insert-ink: #ffffff;
+  --ar-insert-unit-ink: rgba(255, 255, 255, 0.7);
+  --ar-insert-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --ar-seam: rgba(255, 255, 255, 0.72);
+  --ar-seam-hover: #ffffff;
+  --ar-seam-active: #ffffff;
+  --ar-seam-edge: 0 0 0 0.5px rgba(0, 0, 0, 0.3);
+  --ar-led-on: var(--ar-signal);
+}
+
+/* METAL — brushed precision metal: fine vertical grain, hard highlight. */
+[data-ar-material='metal'] {
+  --ar-insert: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 1px, rgba(0, 0, 0, 0.035) 1px 2px), linear-gradient(180deg, #e6e7e9 0%, #bdbfc2 46%, #9c9ea2 54%, #cfd1d4 100%);
+  --ar-insert-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.25), inset 0 0 0 0.5px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.45);
+  --ar-insert-ink: #141414;
+  --ar-insert-unit-ink: rgba(0, 0, 0, 0.55);
+  --ar-seam: rgba(0, 0, 0, 0.55);
+  --ar-seam-hover: rgba(0, 0, 0, 0.8);
+  --ar-seam-edge: 1px 0 0 rgba(255, 255, 255, 0.65);
+}
+
+/* ---------- REFERENCE FAMILY (soft · reference) — the Figma source, literally ----------
+   Recessed blurred well (inset 0 4 4 .43), #C3C3C3-rimmed polished bar, double-line
+   handle with a -1/-1/3 drop shadow, mono 700. */
+[data-ar-material='soft'],
+[data-ar-material='reference'] {
+  --ar-control-font: 'Roboto Mono', var(--ar-font-num);
+  --ar-label-weight: 700;
+  --ar-value-weight: 700;
+  --ar-label-tracking: 0;
+  --ar-label-bump: 2.5px;
+  --ar-value-bump: 1px;
+
+  /* the Figma well is 1% black; 14% keeps its ink legible over bright canvases */
+  --ar-trough: rgba(0, 0, 0, 0.14);
+  --ar-trough-backdrop: blur(30px);
+  --ar-base-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --ar-well: inset 0 4px 4px rgba(0, 0, 0, 0.43), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --ar-inset: 1px;
+
+  --ar-label-ink: #bbbcc4;
+  --ar-value-ink: #bbbcc4;
+  --ar-value-ink-hi: #e6e7ec;
+  --ar-unit-ink: #bbbcc4;
+  --ar-dim-ink: color-mix(in srgb, #bbbcc4 80%, transparent);
+
+  --ar-seam-w: 4px;
+  --ar-seam-a: 1.2px;
+  --ar-seam-b: 2.8px;
+  --ar-seam-scale: 0.3;
+  --ar-seam-scale-hot: 0.36;
+  --ar-seam-edge: none;
+  --ar-seam-glow: none;
+  --ar-seam-drop: drop-shadow(-1px -1px 3px rgba(0, 0, 0, 0.39));
+  --ar-seam-drop-hot: drop-shadow(0 0 3px var(--ar-signal-line));
+
+  --ar-cell: linear-gradient(181.66deg, rgba(194, 194, 194, 0.2871) 1.18%, rgba(237, 237, 237, 0.1485) 18.25%, rgba(204, 202, 202, 0.0198) 43.84%, rgba(31, 31, 31, 0.2178) 91.43%);
+  --ar-cell-shadow: inset 0 0 0 1px rgba(184, 184, 184, 0.3), inset 0 6px 11.3px rgba(0, 0, 0, 0.31);
+  --ar-cell-insert-shadow: inset 0 0 0 1px #c3c3c3, inset 0 6px 11.3px rgba(0, 0, 0, 0.31);
+
+  --ar-grad-well: inset 0 4px 4px rgba(0, 0, 0, 0.43);
+  --ar-grad-sheen: none;
+  --ar-grad-seam: #262626;
+  --ar-grad-seam-hot: var(--ar-seam-active);
+  --ar-grad-seam-edge: none;
+  --ar-grad-seam-glow: none;
+  --ar-grad-seam-scale: 0.62;
+  --ar-grad-ink-dark: #222222;
+  --ar-grad-ink-light: #d7d7d7;
+
+  --ar-ruler-ink: #bbbcc4;
+  --ar-index: #e6e7ec;
+
+  --ar-swatch-rim: inset 0 0 0 2px #6d6969, inset 0 6px 11.3px rgba(0, 0, 0, 0.31);
+  --ar-list-bg: rgba(0, 0, 0, 0.3);
+  --ar-list-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.43), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+  --ar-list-insert: linear-gradient(181.66deg, rgba(212, 212, 212, 0.99) 1.18%, rgba(237, 237, 237, 0.99) 18.25%, rgba(204, 202, 202, 0.7326) 43.84%, rgba(255, 255, 255, 0.7326) 91.43%);
+  --ar-list-insert-blend: soft-light;
+  --ar-list-insert-shadow: inset 0 0 0 1px #c3c3c3;
+  --ar-list-ink: #bbbcc4;
+  --ar-list-ink-hi: #ffffff;
+  --ar-list-text-shadow: 1px 1px 0 rgba(51, 51, 51, 0.78);
+  --ar-list-hover: rgba(255, 255, 255, 0.07);
+}
+
+/* SOFT — the reference bar in soft-light blend: the canvas colours the insert. */
+[data-ar-material='soft'] {
+  --ar-insert: linear-gradient(181.66deg, rgba(212, 212, 212, 0.99) 1.18%, rgba(237, 237, 237, 0.99) 18.25%, rgba(204, 202, 202, 0.7326) 43.84%, rgba(255, 255, 255, 0.7326) 91.43%);
+  --ar-insert-blend: soft-light;
+  --ar-insert-shadow: inset 0 0 0 1px #c3c3c3;
+  --ar-insert-ink: #bbbcc4;
+  --ar-insert-unit-ink: #bbbcc4;
+  --ar-insert-text-shadow: 1px 1px 0 rgba(51, 51, 51, 0.78);
+  --ar-seam: #bbbcc4;
+  --ar-seam-hover: #e6e7ec;
+}
+
+/* REFERENCE — the polished reference bar, dark ink. */
+[data-ar-material='reference'] {
+  --ar-insert: linear-gradient(181.66deg, rgba(212, 212, 212, 0.99) 1.18%, rgba(237, 237, 237, 0.99) 18.25%, rgba(204, 202, 202, 0.7326) 43.84%, rgba(255, 255, 255, 0.7326) 91.43%);
+  --ar-insert-shadow: inset 0 0 0 2px #c3c3c3, inset 0 6px 11.3px rgba(0, 0, 0, 0.31);
+  --ar-insert-ink: #222222;
+  --ar-insert-unit-ink: rgba(34, 34, 34, 0.7);
+  --ar-seam: #262626;
+  --ar-seam-hover: #0e0e0e;
+}

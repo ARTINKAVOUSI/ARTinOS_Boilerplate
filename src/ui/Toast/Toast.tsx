@@ -42,7 +42,7 @@ export function ToastProvider({ children, placement = 'bottom-right' }: { childr
     <ToastContext.Provider value={notify}>
       {children}
       {createPortal(
-        <div className="aui-toasts" data-placement={placement} role="status" aria-live="polite">
+        <div className="ar-toasts" data-placement={placement} role="status" aria-live="polite">
           {toasts.map(toast => (
             <ToastItem key={toast.id} toast={toast} onDismiss={dismiss} />
           ))}
@@ -63,16 +63,16 @@ function ToastItem({ toast, onDismiss }: { toast: ToastEntry; onDismiss: (id: nu
     return () => clearTimeout(timer)
   }, [duration, paused, onDismiss, id])
   return (
-    <div className="aui-toast" data-tone={toast.tone ?? 'neutral'} onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
-      <span className="aui-toast__dot" aria-hidden />
-      <div className="aui-toast__text">
+    <div className="ar-toast" data-tone={toast.tone ?? 'neutral'} onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
+      <span className="ar-toast__dot" aria-hidden />
+      <div className="ar-toast__text">
         <strong>{toast.title}</strong>
         {toast.description && <span>{toast.description}</span>}
       </div>
       {toast.action && (
         <button
           type="button"
-          className="aui-toast__action"
+          className="ar-toast__action"
           onClick={() => {
             toast.action!.onClick()
             onDismiss(id)
@@ -81,7 +81,7 @@ function ToastItem({ toast, onDismiss }: { toast: ToastEntry; onDismiss: (id: nu
           {toast.action.label}
         </button>
       )}
-      <button type="button" className="aui-toast__close" aria-label="Dismiss" onClick={() => onDismiss(id)}>
+      <button type="button" className="ar-toast__close" aria-label="Dismiss" onClick={() => onDismiss(id)}>
         <svg viewBox="0 0 10 10" aria-hidden>
           <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" />
         </svg>

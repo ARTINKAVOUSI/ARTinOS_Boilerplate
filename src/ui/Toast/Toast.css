@@ -1,4 +1,8 @@
-.aui-toasts {
+/* Toasts — brief notices on the kit's floating surface; the tone is one dot. */
+:where(.ar-toasts) {
+  --_face: var(--ar-font-ui, system-ui, -apple-system, 'Segoe UI', sans-serif);
+}
+.ar-toasts {
   position: fixed;
   z-index: 10001;
   display: flex;
@@ -6,52 +10,70 @@
   gap: 6px;
   width: min(340px, calc(100vw - 32px));
   pointer-events: none;
-  font-family: var(--ui-face, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  font-family: var(--_face);
 }
-.aui-toasts[data-placement='bottom-right'] {
+.ar-toasts[data-placement='bottom-right'] {
   right: 16px;
   bottom: 16px;
 }
-.aui-toasts[data-placement='top-right'] {
+.ar-toasts[data-placement='top-right'] {
   top: 16px;
   right: 16px;
 }
-.aui-toasts[data-placement='bottom-center'] {
+.ar-toasts[data-placement='bottom-center'] {
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.aui-toast {
-  --_tone: rgba(255, 255, 255, 0.6);
+:where(.ar-toast) {
+  --_r: var(--ar-radius-panel, 12px);
+  --_bg: var(--ar-float-bg, rgba(26, 27, 30, 0.94));
+  --_ring: var(--ar-float-ring, inset 0 0 0 1px rgba(255, 255, 255, 0.1));
+  --_shadow: var(--ar-float-shadow, 0 10px 28px -12px rgba(0, 0, 0, 0.7));
+  --_ink: var(--ar-float-ink, #ededed);
+  --_ink-low: var(--ar-float-ink-low, #858585);
+  --_hover: var(--ar-bg-hover, rgba(255, 255, 255, 0.045));
+  --_mono: var(--ar-control-font, ui-monospace, SFMono-Regular, Consolas, monospace);
+  --_ease: var(--ar-ease, cubic-bezier(0.2, 0.7, 0.2, 1));
+  --_tone: var(--ar-text-low, #858585);
+}
+.ar-toast[data-tone='success'] {
+  --_tone: var(--ar-signal, #3cbca5);
+}
+.ar-toast[data-tone='warning'] {
+  --_tone: var(--ar-warn, #e0a34e);
+}
+.ar-toast[data-tone='error'] {
+  --_tone: var(--ar-fault, #f2606f);
+}
+
+.ar-toast {
   display: flex;
   align-items: flex-start;
   gap: 9px;
   padding: 10px 8px 10px 12px;
-  border-radius: 10px;
-  background: rgba(26, 27, 30, 0.86);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  color: var(--ui-ink, rgba(255, 255, 255, 0.94));
+  border-radius: var(--_r);
+  background: var(--_bg);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  box-shadow: var(--_ring), var(--_shadow);
+  color: var(--_ink);
   pointer-events: auto;
-  animation: aui-toast-in 200ms cubic-bezier(0.2, 0.7, 0.25, 1);
+  animation: ar-toast-in 200ms var(--_ease);
 }
-.aui-toast[data-tone='success'] { --_tone: var(--ui-sig, #6fe3c0); }
-.aui-toast[data-tone='warning'] { --_tone: var(--ui-sig-warm, #e8b27a); }
-.aui-toast[data-tone='error'] { --_tone: var(--ui-sig-rose, #e88f9b); }
-@keyframes aui-toast-in {
+@keyframes ar-toast-in {
   from {
     opacity: 0;
     transform: translateY(8px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .aui-toast {
+  .ar-toast {
     animation: none;
   }
 }
-.aui-toast__dot {
+.ar-toast__dot {
   flex: 0 0 auto;
   width: 6px;
   height: 6px;
@@ -60,38 +82,39 @@
   background: var(--_tone);
   box-shadow: 0 0 8px var(--_tone);
 }
-.aui-toast__text {
+.ar-toast__text {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  font-size: 11.5px;
+  font-size: 12px;
+  font-weight: 300;
   line-height: 1.4;
 }
-.aui-toast__text strong {
-  font-weight: 600;
+.ar-toast__text strong {
+  font-weight: 500;
 }
-.aui-toast__text span {
-  color: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
+.ar-toast__text span {
+  color: var(--_ink-low);
 }
-.aui-toast__action {
+.ar-toast__action {
   flex: 0 0 auto;
   height: 22px;
-  padding: 0 8px;
+  padding: 0 9px;
   border: 0;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 500;
+  background: var(--_hover);
+  font: 500 9px var(--_mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: inherit;
   cursor: pointer;
 }
-.aui-toast__action:hover {
-  background: rgba(255, 255, 255, 0.16);
+.ar-toast__action:hover {
+  filter: brightness(1.3);
 }
-.aui-toast__close {
+.ar-toast__close {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
@@ -101,14 +124,14 @@
   border: 0;
   border-radius: 5px;
   background: none;
-  color: var(--ui-ink-3, rgba(255, 255, 255, 0.4));
+  color: var(--_ink-low);
   cursor: pointer;
 }
-.aui-toast__close:hover {
-  color: var(--ui-ink, #fff);
-  background: rgba(255, 255, 255, 0.08);
+.ar-toast__close:hover {
+  background: var(--_hover);
+  color: var(--_ink);
 }
-.aui-toast__close svg {
+.ar-toast__close svg {
   width: 9px;
   height: 9px;
   fill: none;

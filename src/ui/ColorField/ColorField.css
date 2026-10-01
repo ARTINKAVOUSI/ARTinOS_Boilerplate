@@ -1,96 +1,109 @@
-:where(.aui-color) {
-  --_well: var(--ui-well, rgba(0, 0, 0, 0.16));
-  --_edge: var(--ui-edge, rgba(255, 255, 255, 0.17));
-  --_edge-lit: var(--ui-edge-lit, rgba(255, 255, 255, 0.55));
-  --_ink: var(--ui-ink, rgba(255, 255, 255, 0.94));
-  --_sig: var(--ui-sig, #6fe3c0);
-  --_h: var(--ui-h-comp, 23px);
-  --_radius: var(--ui-r-comp, 6px);
-  --_num: var(--ui-num, ui-monospace, 'SF Mono', Menlo, monospace);
-}
+/* ARTINOS UI — ColorField. Built on the system anatomy (src/ui/system). */
 
-.aui-color {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
+/* ---------- ColorField ---------- */
+.ar-color {
+  display: flex;
+  align-items: stretch;
+}
+.ar-color[data-labelled] {
+  padding-left: var(--ar-pad-x);
+}
+.ar-color__label {
+  flex: 1 1 auto;
   min-width: 0;
+  align-self: center;
+  padding-right: 8px;
 }
-.aui-color[data-disabled] {
-  opacity: 0.45;
-}
-.aui-color__well {
+.ar-color__swatch {
   position: relative;
-  box-sizing: border-box;
+  flex: 0 0 48%;
+  margin: var(--ar-inset);
   display: flex;
   align-items: center;
+  padding: 0 8px;
   gap: 6px;
-  height: var(--_h);
-  padding: 0 7px 0 3px;
-  border-radius: var(--_radius);
-  background: var(--_well);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px var(--_edge);
+  border-radius: var(--_ir);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--ar-swatch-rim);
 }
-.aui-color__well:hover {
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px var(--_edge-lit);
+.ar-color:not([data-labelled]) .ar-color__swatch {
+  flex: 1 1 auto;
 }
-.aui-color__well:focus-within {
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px color-mix(in srgb, var(--_sig) 65%, transparent);
-}
-.aui-color__swatch {
-  flex: 0 0 auto;
-  width: 26px;
-  height: calc(var(--_h) - 6px);
-  border-radius: calc(var(--_radius) - 2px);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 1px 2px rgba(0, 0, 0, 0.25);
-}
-/* The native picker sits invisibly over the swatch. */
-.aui-color input[type='color'] {
+/* checkerboard shows through when alpha < 1 */
+.ar-color__swatch::before {
+  content: '';
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 26px;
-  height: calc(var(--_h) - 6px);
-  padding: 0;
-  border: 0;
+  inset: 0;
+  background: repeating-conic-gradient(#8a8a8a 0 25%, #c8c8c8 0 50%) 0 0 / 8px 8px;
+  opacity: calc(1 - var(--_a));
+}
+.ar-color__paint {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 48%, rgba(0, 0, 0, 0.1)),
+    color-mix(in srgb, var(--_c) calc(var(--_a) * 100%), transparent);
+  transition: background 180ms var(--ar-ease);
+  pointer-events: none;
+}
+.ar-color__native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
   cursor: pointer;
 }
-.aui-color__hex {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: 10.5px var(--_num);
-  text-align: right;
-  text-transform: lowercase;
-  color: var(--_ink);
+.ar-color__hex,
+.ar-color__alpha {
+  position: relative;
+  z-index: 1;
+  font-size: calc(var(--ar-label-size) + var(--ar-label-bump));
+  font-weight: var(--ar-label-weight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ar-color__hex {
+  all: unset;
+  position: relative;
+  z-index: 1;
+  box-sizing: content-box;
+  width: 7ch;
+  margin: 0 auto;
+  padding: 1px 2px;
+  border-radius: 3px;
+  text-align: center;
+  font-family: var(--ar-control-font);
+  font-size: calc(var(--ar-label-size) + var(--ar-label-bump));
+  font-weight: var(--ar-label-weight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: text;
+}
+.ar-color__hex:focus {
+  background: rgba(0, 0, 0, 0.18);
+}
+.ar-color__alpha {
+  flex: none;
+  cursor: ew-resize;
   outline: none;
+  border-radius: 3px;
+  padding: 1px 2px;
+  font-variant-numeric: tabular-nums;
 }
-.aui-color__swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+.ar-color__alpha:focus-visible {
+  box-shadow: var(--ar-focus-ring);
 }
-.aui-color__swatches button {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-  cursor: pointer;
-  transition: transform 120ms;
+.ar-color:not([data-labelled]) .ar-color__hex {
+  margin: 0 auto 0 0;
 }
-.aui-color__swatches button:hover {
-  transform: scale(1.12);
-}
-.aui-color__swatches button[aria-pressed='true'] {
-  box-shadow: 0 0 0 1.5px var(--_ink), inset 0 0 0 1px rgba(0, 0, 0, 0.3);
-}
-.aui-color__swatches button:focus-visible {
-  outline: 1px solid var(--_sig);
-  outline-offset: 2px;
+.ar-color__swatch[data-ink='dark'] { color: #1c1c1c; }
+.ar-color__swatch[data-ink='light'] { color: #ededed; }
+.ar-color__native:focus-visible ~ .ar-color__paint,
+.ar-color__swatch:has(.ar-color__native:focus-visible) {
+  box-shadow: var(--ar-swatch-rim), var(--ar-focus-ring);
 }

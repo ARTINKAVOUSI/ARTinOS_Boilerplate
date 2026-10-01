@@ -17,15 +17,15 @@ export function Button({ variant = 'default', size = 'md', icon, trailing, block
   return (
     <button
       type={type}
-      className={className ? `aui-button ${className}` : 'aui-button'}
+      className={className ? `ar-button ${className}` : 'ar-button'}
       data-variant={variant === 'default' ? undefined : variant}
       data-size={size === 'sm' ? 'sm' : undefined}
       data-block={block || undefined}
       {...rest}
     >
-      {icon && <span className="aui-button__icon">{icon}</span>}
-      {children != null && <span className="aui-button__label">{children}</span>}
-      {trailing && <span className="aui-button__trailing">{trailing}</span>}
+      {icon && <span className="ar-button__icon">{icon}</span>}
+      {children != null && <span className="ar-button__label">{children}</span>}
+      {trailing && <span className="ar-button__trailing">{trailing}</span>}
     </button>
   )
 }

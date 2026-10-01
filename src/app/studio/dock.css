@@ -12,6 +12,19 @@
 .plate-search-entry > svg {
   flex: 0 0 auto;
 }
+/* PropertyRow grows every control to fill its column; a kit compact switch keeps its own size. */
+.ar-prop__control > .ar-switch--compact {
+  flex: none;
+}
+
+/* A count beside a kit <Tabs> label (the kit's tab items take any node as label). */
+.v2-tab-count {
+  margin-left: 4px;
+  font-size: 0.85em;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
 .artinos-panel-toolbar {
   display: flex;
   align-items: center;
@@ -68,14 +81,11 @@
   align-items: center;
   gap: 2px;
 }
-.v2-card-actions .aui-icon-button {
+.v2-card-actions .ar-icon-button {
   opacity: 0.7;
 }
 .v2-feature-card .artinos-parameter-card-body[data-muted] {
   opacity: 0.45;
-}
-.v2-feature-card .artinos-property-menu > div {
-  z-index: 40;
 }
 
 /* panel toolbars */
@@ -86,13 +96,17 @@
   gap: 6px 12px;
   margin: 0 0 8px;
 }
-.v2-panel-bar > .aui-text {
+.v2-panel-bar > .ar-textfield {
   flex: 1 1 200px;
   min-width: 140px;
   max-width: 420px;
 }
-.v2-panel-bar > .aui-select {
-  width: 120px;
+.v2-panel-bar > .ar-select {
+  width: 140px;
+}
+.v2-panel-bar > .ar-segmented {
+  flex: 0 1 auto;
+  min-width: 160px;
 }
 .v2-panel-bar .v2-spacer {
   flex: 1;
@@ -388,4 +402,293 @@
 }
 .v2-control-group:first-child {
   margin-top: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   The dock chrome in the same scale as the panels (panels.css). Same dock,
+   same strip, same MetaBlock behaviour — only the type, the heights and the
+   spacing change, so the strip, the HUD and the brand chip stop competing
+   with what is inside the panels.
+     tabs      11.5px light, white underline on the active one
+     controls  26px, the kit's height
+     captions  9px mono caps, tracked
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.plate-workspace .plate-dock-toolbar {
+  gap: 14px;
+  height: var(--ui-pane-head-h, 36px);
+  min-height: var(--ui-pane-head-h, 36px);
+  padding: 0 12px 0 16px;
+  font: 300 12px var(--ui-font);
+  text-shadow: var(--ar-panel-text-shadow, none);
+}
+.plate-workspace .plate-dock-tabs {
+  gap: 18px;
+}
+.plate-workspace .plate-dock-tabs > button {
+  gap: 6px;
+  margin-bottom: -1px;
+  border-bottom: 1.5px solid transparent;
+  font: 300 11.5px/1 var(--ui-font);
+  letter-spacing: 0.01em;
+  color: var(--ui-text-summary);
+  text-shadow: inherit;
+  transition: color 130ms var(--ui-ease), border-color 130ms var(--ui-ease);
+}
+.plate-workspace .plate-dock-tabs > button:hover {
+  color: var(--ui-text-label);
+}
+.plate-workspace .plate-dock-tabs > button:is(.is-active, [aria-selected='true']) {
+  border-bottom-color: var(--ui-accent);
+  font-weight: 300;
+  color: var(--ui-text-strong);
+}
+.plate-workspace .plate-dock-tabs > button:focus-visible {
+  outline: 1px solid var(--ui-focus);
+  outline-offset: -4px;
+  border-radius: 4px;
+}
+
+.plate-workspace .plate-search-entry {
+  gap: 8px;
+  flex: 0 1 220px;
+  min-width: 150px;
+  max-width: 260px;
+  height: 26px;
+  padding: 0 9px 0 10px;
+  border-radius: 7px;
+  font: 300 11.5px var(--ui-font);
+  color: var(--ui-text-meta);
+  text-shadow: inherit;
+}
+.plate-workspace .plate-search-entry > span {
+  font: inherit;
+  color: var(--ui-text-meta);
+}
+.plate-workspace .plate-search-entry > kbd {
+  font: 500 9px var(--ui-num);
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+.plate-workspace .plate-search-entry > svg {
+  width: 12px;
+  height: 12px;
+}
+
+.plate-workspace .plate-toolbar-cluster {
+  gap: 14px;
+}
+.plate-workspace .artinos-workspace-expand {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 6px;
+  transition: background 120ms ease, color 120ms ease;
+}
+.plate-workspace .artinos-workspace-expand:hover {
+  background: var(--ui-hover-wash);
+}
+.plate-workspace .artinos-workspace-expand svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* the active panel's toolbar, riding in the strip */
+.plate-workspace .plate-panel-slot > .v2-panel-bar {
+  gap: 12px;
+}
+.plate-workspace .plate-panel-slot .v2-bar-summary {
+  display: none;
+}
+.plate-workspace .plate-panel-slot > .v2-panel-bar > .ar-textfield {
+  flex: 0 1 200px;
+  min-width: 140px;
+}
+.plate-workspace .plate-panel-slot > .v2-panel-bar > .ar-textfield[data-size='sm'] {
+  height: 26px;
+}
+.plate-workspace .plate-panel-slot > .v2-panel-bar > .ar-select {
+  width: 156px;
+}
+.plate-workspace .plate-panel-slot > .v2-panel-bar > .ar-segmented {
+  flex: none;
+  width: auto;
+  min-width: 190px;
+}
+.plate-workspace .plate-panel-slot .ar-icon-button[data-size='sm'] {
+  --_size: 26px;
+}
+.plate-workspace .plate-panel-slot .ar-icon-button[data-size='sm'] svg {
+  width: 13px;
+  height: 13px;
+}
+.plate-workspace .plate-panel-slot .ar-badge {
+  height: 20px;
+  font: 500 9px var(--ui-num);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* the runtime HUD: mono figures, caps units */
+.plate-toolbar-status .artinos-hud-summary {
+  gap: 12px;
+  color: var(--ui-text);
+}
+.plate-toolbar-status .artinos-hud-backend {
+  gap: 6px;
+}
+.plate-toolbar-status .artinos-hud-backend i {
+  width: 4px;
+  height: 4px;
+}
+.plate-toolbar-status .artinos-hud-backend b,
+.plate-toolbar-status .artinos-hud-quality,
+.plate-toolbar-status .artinos-hud-quality small,
+.plate-toolbar-status .artinos-hud-readout small {
+  font: 500 9px var(--ui-num);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.plate-toolbar-status .artinos-hud-readout {
+  gap: 4px;
+}
+.plate-toolbar-status .artinos-hud-readout strong {
+  font: 300 12.5px var(--ui-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-strong);
+}
+.plate-toolbar-status .artinos-hud-quality {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.plate-toolbar-status .artinos-hud-quality b {
+  font: 500 9px var(--ui-num);
+  letter-spacing: 0.14em;
+  color: var(--ui-text-label);
+}
+.plate-toolbar-status .artinos-hud-micrograph {
+  width: 54px;
+  height: 16px;
+}
+.plate-toolbar-status .artinos-hud-chevron svg {
+  width: 11px;
+  height: 11px;
+}
+@media (max-width: 1180px) {
+  .plate-toolbar-status .artinos-hud-micrograph,
+  .plate-toolbar-status .artinos-hud-quality {
+    display: none;
+  }
+}
+
+/* a detached (floating) panel's head */
+.artinos-metablock-shell .artinos-metablock-panel-header {
+  gap: 12px;
+  min-height: var(--ui-pane-head-h, 36px);
+  padding: 0 8px 0 14px;
+}
+.artinos-panel-toolbar {
+  gap: 2px;
+}
+.artinos-panel-toolbar > button {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+.artinos-panel-toolbar > button svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* the brand chip */
+.plate-workspace > .plate-brand-chip {
+  gap: 10px;
+  height: 30px;
+  padding: 0 14px;
+}
+.plate-workspace > .plate-brand-chip b {
+  font: 500 10px var(--ui-num);
+  letter-spacing: 0.22em;
+}
+.plate-workspace > .plate-brand-chip .plate-brand-context {
+  font: 300 11.5px var(--ui-font);
+  color: var(--ui-text-label);
+}
+
+/* small print elsewhere in the chrome */
+.v2-ui-hint {
+  font: 300 11px var(--ui-font);
+  letter-spacing: 0.02em;
+}
+.plate-console-toast {
+  font: 300 11.5px var(--ui-font);
+}
+.plate-console-toast-open {
+  font: 500 9px var(--ui-num);
+  letter-spacing: 0.12em;
+}
+.artinos-metablock-shell .mb-context-menu {
+  font-family: var(--ui-font);
+}
+.artinos-metablock-shell .mb-context-menu button {
+  font-size: 12px;
+  font-weight: 300;
+}
+.artinos-metablock-shell .mb-context-menu button small {
+  font-size: 10.5px;
+  font-weight: 300;
+}
+
+/* When the strip is too narrow for every tab, the tab row scrolls; a soft
+   fade at its end says so instead of a hard clip. */
+@media (max-width: 1180px) {
+  .plate-workspace .plate-dock-tabs {
+    gap: 16px;
+    padding-right: 20px;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+}
+
+/* The engine's layer is isolated, so its menus can never rise above the brand
+   chip beside it. While a menu is open, the whole layer sits above the chip. */
+.artinos-metablock-shell .mb-workspace-root:has(.mb-context-menu-host) {
+  z-index: 40;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Floating sheets wear the dock's glass. Menus (the dock's panel menu, a
+   row's right-click menu, Presets), Select lists, the search palette,
+   dialogs, toasts and tooltips are portalled outside the dock, so they would
+   otherwise fall back to the kit's dark sheet. Here they take the pane's own
+   tint, sheen, blur, edge light and ink, like the studio bar. The components
+   keep their neutral fallbacks for use outside the studio.
+   ══════════════════════════════════════════════════════════════════════════ */
+html :is(.dock-menu, .ar-menu, .ar-list, .ar-palette__dialog, .ar-dialog, .ar-toast, .ar-tooltip) {
+  --_ink: var(--ui-text);
+  --_ink-low: var(--ui-text-meta);
+  --_hover: var(--ui-hover-wash);
+  --_line: var(--ui-line);
+  --ar-list-ink: var(--ui-text);
+  --ar-list-ink-hi: var(--ui-text-strong);
+  --ar-list-hover: var(--ui-hover-wash);
+  border: 1px solid var(--ui-pane-border);
+  background: var(--ui-pane-sheen), var(--ui-pane-tint);
+  -webkit-backdrop-filter: blur(var(--ui-blur)) saturate(var(--ui-sat));
+  backdrop-filter: blur(var(--ui-blur)) saturate(var(--ui-sat));
+  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow);
+  color: var(--ui-text);
+  text-shadow: var(--ar-panel-text-shadow, none);
+}
+/* the glass list keeps its lit insert band, but lighter over the frost */
+html .ar-list__insert {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+/* a dialog dims the scene less, so its glass still reads as glass */
+html .ar-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.28);
 }

@@ -1,29 +1,14 @@
 import { useRef, useState } from 'react'
 import { studio, useStudio, type StudioState } from '../store'
 import { TextField } from '../../ui/TextField/TextField'
-import { Select } from '../../ui/Select/Select'
 import { Menu, type MenuEntry } from '../../ui/Menu/Menu'
 import { Button } from '../../ui/Button/Button'
 import { Dialog } from '../../ui/Dialog/Dialog'
 import { useToast } from '../../ui/Toast/Toast'
-import type { ControlFilter } from './FeatureCard'
-import { PanelBar } from './PanelBar'
-import { Toggle } from '../../ui/Toggle/Toggle'
+import { IconButton } from '../../ui/IconButton/IconButton'
 import { Icons } from './icons'
 
 const selectPresets = (state: StudioState) => state.presets
-const selectAdvanced = (state: StudioState) => state.ui.advanced
-
-/** v1's Advanced switch: reveals the controls a feature marks advanced. */
-function AdvancedSwitch() {
-  const advanced = useStudio(selectAdvanced)
-  return (
-    <label className="v2-inline-toggle">
-      Advanced
-      <Toggle size="sm" label="Show advanced controls" checked={advanced} onChange={value => studio.setUI({ advanced: value })} />
-    </label>
-  )
-}
 
 function download(name: string, text: string) {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
@@ -31,7 +16,7 @@ function download(name: string, text: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
-/** Save, load, export and import whole-studio looks. */
+/** Save, load, export and import whole-studio looks, from one bookmark button. */
 export function PresetMenu() {
   const toast = useToast()
   const presets = useStudio(selectPresets)
@@ -61,7 +46,7 @@ export function PresetMenu() {
 
   return (
     <>
-      <Menu align="end" items={items} trigger={<Button size="sm" icon={Icons.bookmark}>Presets</Button>} />
+      <Menu align="end" items={items} trigger={<IconButton label="Presets: save, load, export or import a look" icon={Icons.bookmark} filled />} />
       <Dialog
         open={saving}
         onClose={() => setSaving(false)}
@@ -98,33 +83,5 @@ export function PresetMenu() {
         }}
       />
     </>
-  )
-}
-
-/**
- * The toolbar control panels share: which controls to show, and the presets
- * menu. Searching lives in the dock's own search (⌘K), so no panel carries a
- * search field of its own, and the rest rides in the dock's tab bar rather
- * than spending a row of the panel.
- */
-export function ControlsBar({ filter, onFilter, summary }: { filter: ControlFilter; onFilter: (value: ControlFilter) => void; summary?: string }) {
-  return (
-    <PanelBar>
-      <Select<ControlFilter>
-        size="sm"
-        label="Show"
-        value={filter}
-        onChange={onFilter}
-        options={[
-          { value: 'all', label: 'All controls' },
-          { value: 'favorites', label: 'Favorites' },
-          { value: 'pinned', label: 'Pinned' },
-        ]}
-      />
-      <AdvancedSwitch />
-      {summary && <span className="artinos-panel-summary v2-bar-summary">{summary}</span>}
-      <span className="v2-spacer" />
-      <PresetMenu />
-    </PanelBar>
   )
 }

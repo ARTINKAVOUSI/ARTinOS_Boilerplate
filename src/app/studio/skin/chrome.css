@@ -53,12 +53,19 @@
 .artinos-metablock-shell .mb-group-footer { display: none; }
 .artinos-metablock-shell .mb-block-scroll::-webkit-scrollbar-thumb { background: var(--ui-line-strong); }
 
-/* A block's wrapper is a region of its pane. */
+/* A block's wrapper is a region of its pane: no surface and no second
+   backdrop of its own. The legacy rule gives it blur(24px) saturate(125%),
+   which stacked on the pane's frost tinted the scene warm. */
 .artinos-metablock-shell .artinos-panel {
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  /* the legacy rule also sets min-width: 280px, which spills a narrow side
+     dock past its edge; a panel always fits the dock it is in */
+  min-width: 0;
 }
 
 /* Floating group head: the pane head with a tab strip. */

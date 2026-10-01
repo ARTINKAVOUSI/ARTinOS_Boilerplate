@@ -1,0 +1,166 @@
+/* ARTINOS UI — token layer.
+ *
+ * Three layers, each reading only the one above it:
+ *   1. primitives  raw values, private to this file        (--ar-ink-*, --ar-teal-*)
+ *   2. roles       what a colour/size means                (--ar-bg-well, --ar-text-hi, --ar-signal)
+ *   3. control     what a capsule is made of (per material) (--ar-insert, --ar-seam, --ar-trough)
+ *
+ * Pick a theme with data-ar-theme (or <ArtinosTheme theme>) — it sets roles
+ * (themes.css) and the control finish (materials.css):
+ *   studio (default) · studio-light · optical · reference · glass · glass-light ·
+ *   glass-dark · crystal · frost · frost-light · frost-dark · ice ·
+ *   pane · pane-light · lucid · gallery · satin · monolith · opal · graphite ·
+ *   onyx · sapphire · platinum · diamond · emerald · rose-gold · cognac · amethyst ·
+ *   champagne · pearl · alabaster · porcelain · jade · moonstone · cashmere · velvet
+ * Optional, independent: data-ar-density = dense · standard (default) · comfort.
+ * Advanced: data-ar-material overrides a theme's control finish.
+ */
+
+/* ---------- 1 · primitives ---------- */
+:root {
+  --ar-ink-void: #090909;
+  --ar-ink-stage: #0e0e0e;
+  --ar-ink-surface: #141414;
+  --ar-ink-raised: #191919;
+  --ar-ink-edge: #212121;
+
+  --ar-paper-void: #eeeeee;
+  --ar-paper-stage: #e0e0e0;
+  --ar-paper-surface: #f6f6f6;
+  --ar-paper-raised: #ffffff;
+
+  --ar-chalk-hi: #f4f4f4;
+  --ar-chalk-mid: #bfbfbf;
+  --ar-chalk-low: #919191;
+  --ar-chalk-faint: #686868;
+  --ar-chalk-ghost: #555555;
+
+  --ar-slate-hi: #131313;
+  --ar-slate-mid: #2e2e2e;
+  --ar-slate-low: #4d4d4d;
+  --ar-slate-faint: #616161;
+
+  --ar-teal-300: #7fe3d4;
+  --ar-teal-500: #2fb39c;
+  --ar-teal-700: #0b7a69;
+  --ar-amber-500: #e0a34e;
+  --ar-rose-500: #f2606f;
+  --ar-azure-500: #8fb8d9;
+
+  /* grain for frosted materials: fractal noise, 5% white */
+  --ar-frost-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- 2 · roles (studio — the default theme) ----------
+   Re-declared at every theme boundary so a nested theme starts from a
+   complete set; themes.css then reassigns what differs. */
+:root,
+[data-ar-theme] {
+  /* ground */
+  --ar-bg-app: #101112;
+  --ar-bg-surface: #16171a;
+  --ar-bg-raised: #1c1d20;
+  --ar-bg-hover: rgba(255, 255, 255, 0.045);
+  --ar-bg-active: rgba(255, 255, 255, 0.08);
+  --ar-bg-well: rgba(0, 0, 0, 0.42);
+
+  /* text — five steps of recession */
+  --ar-text-hi: #ededed;
+  --ar-text-mid: #b4b4b4;
+  --ar-text-low: #858585;
+  --ar-text-faint: #5f5f5f;
+  --ar-text-ghost: #4a4a4a;
+
+  /* hairlines */
+  --ar-line-subtle: rgba(255, 255, 255, 0.055);
+  --ar-line: rgba(255, 255, 255, 0.085);
+  --ar-line-strong: rgba(255, 255, 255, 0.13);
+
+  /* signal — meaning, never decoration. One hue per state. */
+  --ar-signal: #3cbca5;
+  --ar-signal-hi: #86e3d3;
+  --ar-signal-line: rgba(60, 188, 165, 0.5);
+  --ar-signal-wash: rgba(60, 188, 165, 0.14);
+  --ar-signal-ink: #04120f; /* text on a solid signal fill */
+  --ar-bind: var(--ar-azure-500);
+  --ar-warn: var(--ar-amber-500);
+  --ar-fault: var(--ar-rose-500);
+
+  --ar-tick: rgba(255, 255, 255, 0.2);
+  --ar-tick-major: var(--ar-text-low);
+
+  /* elevation: e0 recessed = editable, float = portalled chrome */
+  --ar-shadow-well: inset 0 1px 1px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+  --ar-rim: 0 1px 0 rgba(255, 255, 255, 0.035);
+  --ar-focus-ring: 0 0 0 1px var(--ar-signal-hi), 0 0 0 3px rgba(60, 188, 165, 0.18);
+
+  /* panel — the card that hosts controls (solid in studio themes, glass in the others) */
+  --ar-panel-tint: #16171a;
+  --ar-panel-sheen: linear-gradient(transparent, transparent);
+  --ar-panel-blur: none;
+  --ar-panel-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 0 rgba(0, 0, 0, 0.4), 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+  /* halo under free text (titles, field labels) — frost turns it on so ink holds over bright canvases */
+  --ar-panel-text-shadow: none;
+
+  /* floating layers (precision HUD, list panel) */
+  --ar-float-bg: rgba(26, 27, 30, 0.94);
+  --ar-float-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --ar-float-shadow: 0 10px 28px -12px rgba(0, 0, 0, 0.7);
+  --ar-float-ink: #ededed;
+  --ar-float-ink-low: #858585;
+
+  /* type */
+  --ar-font-ui: Chivo, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ar-font-num: 'Chivo Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  /* radii — four steps only */
+  --ar-radius-control: 5px;
+  --ar-radius-card: 8px;
+  --ar-radius-panel: 12px;
+  --ar-radius-shell: 16px;
+
+  /* motion — named by what moves */
+  --ar-dur-value: 70ms;
+  --ar-dur-state: 130ms;
+  --ar-dur-surface: 220ms;
+  --ar-dur-layout: 380ms;
+  --ar-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ar-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ar-ease-roll: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: dark;
+}
+
+/* ---------- density ---------- */
+:root,
+[data-ar-density='standard'] {
+  --ar-h: 26px;
+  --ar-label-size: 10px;
+  --ar-value-size: 11.5px;
+  --ar-pad-x: 9px;
+  --ar-gap: 7px;
+}
+[data-ar-density='dense'] {
+  --ar-h: 24px;
+  --ar-label-size: 9.5px;
+  --ar-value-size: 11px;
+  --ar-pad-x: 8px;
+  --ar-gap: 6px;
+}
+[data-ar-density='comfort'] {
+  --ar-h: 30px;
+  --ar-label-size: 10.5px;
+  --ar-value-size: 12.5px;
+  --ar-pad-x: 11px;
+  --ar-gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  [data-ar-theme] {
+    --ar-dur-value: 0ms;
+    --ar-dur-state: 0ms;
+    --ar-dur-surface: 0ms;
+    --ar-dur-layout: 0ms;
+  }
+}

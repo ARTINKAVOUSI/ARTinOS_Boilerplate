@@ -1,0 +1,264 @@
+/* The dock's panel menu — the system's floating sheet, with placement drawn as
+   small workspace diagrams instead of words. Every value reads the ARTINOS UI
+   tokens (src/ui/system), with the kit's studio values as fallbacks. */
+
+.dock-menu {
+  --_bg: var(--ar-float-bg, rgba(26, 27, 30, 0.94));
+  --_ring: var(--ar-float-ring, inset 0 0 0 1px rgba(255, 255, 255, 0.1));
+  --_shadow: var(--ar-float-shadow, 0 10px 28px -12px rgba(0, 0, 0, 0.7));
+  --_ink: var(--ar-float-ink, #ededed);
+  --_ink-low: var(--ar-float-ink-low, #858585);
+  --_hover: var(--ar-list-hover, rgba(255, 255, 255, 0.08));
+  --_line: var(--ar-line, rgba(255, 255, 255, 0.085));
+  --_trough: var(--ar-trough, rgba(0, 0, 0, 0.28));
+  --_well: var(--ar-well, inset 0 1px 1px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.045));
+  --_signal: var(--ar-signal, #3cbca5);
+  --_fault: var(--ar-fault, #f2606f);
+  --_ring-focus: var(--ar-focus-ring, 0 0 0 1px #86e3d3, 0 0 0 3px rgba(60, 188, 165, 0.18));
+  --_face: var(--ar-font-ui, system-ui, sans-serif);
+  --_mono: var(--ar-control-font, ui-monospace, monospace);
+
+  box-sizing: border-box;
+  display: grid;
+  gap: 8px;
+  width: 244px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--_bg);
+  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
+  box-shadow: var(--_ring), var(--_shadow), 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+  font: 300 12px/1.3 var(--_face);
+  color: var(--_ink);
+  animation: dock-menu-in 150ms var(--ar-ease, cubic-bezier(0.2, 0.7, 0.2, 1));
+}
+@keyframes dock-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-menu {
+    animation: none;
+  }
+}
+
+/* ── head: the panel's name, its posture as a tag ──────────────────────── */
+.dock-menu__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid var(--_line);
+}
+.dock-menu__head b {
+  font: 300 13.5px/1.2 var(--_face);
+  color: var(--_ink);
+}
+.dock-menu__head em,
+.dock-menu__head small {
+  font: 500 8.5px var(--_mono);
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--_ink-low);
+}
+.dock-menu__head em {
+  padding: 2px 6px 1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--_signal) 14%, transparent);
+  color: var(--_signal);
+}
+.dock-menu__head small {
+  margin-left: auto;
+}
+
+/* ── placement: label · four diagrams ──────────────────────────────────── */
+.dock-menu__place {
+  display: grid;
+  gap: 5px;
+}
+.dock-menu__row,
+.dock-menu__attach {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.dock-menu__label {
+  font: 500 8.5px var(--_mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--_ink-low);
+}
+.dock-menu__tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+.dock-menu__tile {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: var(--_trough);
+  box-shadow: var(--_well);
+  color: var(--_ink-low);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+.dock-menu__diagram {
+  width: 30px;
+  height: 22px;
+}
+.dock-menu__frame {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.45;
+}
+.dock-menu__shape rect {
+  fill: currentColor;
+  opacity: 0.55;
+  transition: fill 120ms ease, opacity 120ms ease;
+}
+.dock-menu__shape rect[data-dashed] {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-dasharray: 2 1.5;
+  opacity: 0.8;
+}
+.dock-menu__tile:hover,
+.dock-menu__tile:focus-visible {
+  background: var(--_hover);
+  color: var(--_ink);
+  outline: none;
+}
+.dock-menu__tile:hover .dock-menu__shape rect:not([data-dashed]),
+.dock-menu__tile:focus-visible .dock-menu__shape rect:not([data-dashed]) {
+  fill: var(--_signal);
+  opacity: 1;
+}
+.dock-menu__tile:hover .dock-menu__shape rect[data-dashed],
+.dock-menu__tile:focus-visible .dock-menu__shape rect[data-dashed] {
+  stroke: var(--_signal);
+  opacity: 1;
+}
+.dock-menu__tile:focus-visible {
+  box-shadow: var(--_ring-focus);
+}
+
+/* ── actions: icon · label · key ───────────────────────────────────────── */
+.dock-menu__actions {
+  display: grid;
+  gap: 1px;
+  padding-top: 6px;
+  border-top: 1px solid var(--_line);
+}
+.dock-menu__action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 28px;
+  padding: 0 8px 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--_ink);
+  cursor: pointer;
+}
+.dock-menu__action:hover,
+.dock-menu__action:focus-visible {
+  background: var(--_hover);
+  outline: none;
+}
+.dock-menu__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  color: var(--_ink-low);
+}
+.dock-menu__icon svg {
+  width: 13px;
+  height: 13px;
+}
+.dock-menu__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.dock-menu__action kbd {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: var(--_trough);
+  box-shadow: var(--_well);
+  font: 500 9px/18px var(--_mono);
+  text-align: center;
+  color: var(--_ink-low);
+}
+.dock-menu__action[data-primary],
+.dock-menu__action[data-primary] .dock-menu__icon {
+  color: var(--_signal);
+}
+.dock-menu__danger {
+  margin-top: -2px;
+  color: var(--_fault);
+}
+.dock-menu__danger .dock-menu__icon {
+  color: var(--_fault);
+}
+.dock-menu__actions + .dock-menu__danger,
+.dock-menu__attach + .dock-menu__danger {
+  border-top: 1px solid var(--_line);
+  border-radius: 0 0 6px 6px;
+  padding-top: 1px;
+  height: 30px;
+}
+
+/* ── attach targets as chips ───────────────────────────────────────────── */
+.dock-menu__attach {
+  padding-top: 7px;
+  border-top: 1px solid var(--_line);
+}
+.dock-menu__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.dock-menu__chip {
+  height: 22px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--_trough);
+  box-shadow: var(--_well);
+  font: 300 11px var(--_face);
+  color: var(--_ink);
+  cursor: pointer;
+}
+.dock-menu__chip:hover,
+.dock-menu__chip:focus-visible {
+  background: var(--_hover);
+  outline: none;
+}
+.dock-menu__chip[data-primary] {
+  box-shadow: var(--_well), inset 0 0 0 1px var(--_signal);
+  color: var(--_signal);
+}
+
+.dock-menu button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

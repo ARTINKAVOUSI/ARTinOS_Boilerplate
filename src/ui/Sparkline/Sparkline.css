@@ -1,26 +1,31 @@
-:where(.aui-sparkline) {
-  --_ink-2: var(--ui-ink-2, rgba(255, 255, 255, 0.66));
-  --_ink-4: var(--ui-ink-4, rgba(255, 255, 255, 0.24));
-  --_sig: var(--ui-sig, #6fe3c0);
-  --_warm: var(--ui-sig-warm, #e8b27a);
+/* Sparkline — a trend line in the signal hue; a threshold reads as a tick. */
+:where(.ar-sparkline) {
+  --_signal: var(--ar-signal, #3cbca5);
+  --_warn: var(--ar-warn, #e0a34e);
+  --_low: var(--ar-text-low, #858585);
+  --_tick: var(--ar-tick, rgba(255, 255, 255, 0.2));
 }
-.aui-sparkline {
+.ar-sparkline {
   display: block;
   max-width: 100%;
   overflow: visible;
-  color: var(--_sig);
+  color: var(--_signal);
 }
-.aui-sparkline[data-tone='warm'] { color: var(--_warm); }
-.aui-sparkline[data-tone='neutral'] { color: var(--_ink-2); }
-.aui-sparkline__line {
+.ar-sparkline[data-tone='warm'] {
+  color: var(--_warn);
+}
+.ar-sparkline[data-tone='neutral'] {
+  color: var(--_low);
+}
+.ar-sparkline__line {
   fill: none;
   stroke: currentColor;
   stroke-width: 1.25;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
-.aui-sparkline__threshold {
-  stroke: var(--_ink-4);
+.ar-sparkline__threshold {
+  stroke: var(--_tick);
   stroke-width: 1;
   stroke-dasharray: 2 3;
   vector-effect: non-scaling-stroke;

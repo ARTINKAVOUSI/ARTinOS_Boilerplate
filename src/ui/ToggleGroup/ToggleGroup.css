@@ -1,0 +1,44 @@
+/* ARTINOS UI — ToggleGroup. Built on the system anatomy (src/ui/system). */
+
+/* ---------- ToggleGroup ---------- */
+.ar-toggles {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  padding: var(--ar-inset);
+}
+.ar-toggles[data-labelled] {
+  padding-left: var(--ar-pad-x);
+}
+.ar-toggles__label {
+  margin-right: auto;
+  flex: 0 1 auto;
+  min-width: 0;
+  align-self: center;
+  padding-right: 8px;
+}
+.ar-toggles__chip {
+  flex: 1;
+  gap: 7px;
+  padding: 0 10px;
+}
+.ar-toggles[data-labelled] .ar-toggles__chip {
+  flex: none;
+}
+.ar-toggles__chip[data-icon] {
+  flex: none;
+  width: calc(var(--_h) * 1.5);
+  padding: 0;
+}
+/* an off icon chip recedes into the well instead of draining */
+.ar-toggles__chip[data-icon][data-off] {
+  background: transparent;
+  box-shadow: none;
+  filter: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--ar-dim-ink);
+}
+.ar-toggles__chip:focus-visible {
+  box-shadow: var(--ar-insert-shadow), var(--ar-focus-ring);
+}

@@ -29,7 +29,7 @@ The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.p
 | 2-line effect wrappers plus a separate catalog | One file per effect: component, props, docs and studio controls together |
 | `*.project.tsx` manifests listing parameters, graphs and bindings | Features discovered from `src/features/**` |
 | UI kit that needed the global `theme.css` and a kernel/registry | Each component folder has its own scoped CSS with fallbacks; no kernel |
-| `@artinos/metablock` package + `MetaBlockShell` with a hard-coded panel list | The same engine as one folder (`src/ui/MetaBlock/`); panels discovered from `src/panels/` |
+| `@artinos/metablock` package + `MetaBlockShell` with a hard-coded panel list | The same engine as one folder (`src/ui/workspace/MetaBlock/`); panels discovered from `src/panels/` |
 | Parameter changes rebuilt the whole pipeline | Numeric effect settings are live GPU uniforms (`useUniform`) |
 
 ---
@@ -46,7 +46,7 @@ The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.p
 | Input devices | 8 | ✅ pointer, keyboard, microphone, hands, camera, MIDI, gamepad, tilt |
 | Overlays | 2 | ✅ Stats HUD, Signal Monitor |
 | Studio panels | 10 | ✅ |
-| UI kit | 29 + MetaBlock + NodeGraph | ✅ |
+| UI kit | ARTINOS UI (13) + 17 + MetaBlock + NodeGraph | ✅ |
 | Boundary fixes (§6) | 8 | ✅ phase 6A |
 | Cut-over (v2 replaces the root) | — | ✅ phase 11 |
 
@@ -192,10 +192,11 @@ Features never read the store; the app passes values as props.
     │   ├── graphs.ts live-graph.ts node-preview.ts
     │   ├── Stage.tsx App.tsx FeatureBoundary.tsx app.css
     │   └── studio/  DockShell RuntimeHUD ConsoleToast PanelWorkbench PanelBar FeatureCard
-    │                ControlsBar ControlField LiveInspector layout icons dock.css
+    │                PresetMenu DockMenu ControlField LiveInspector CardFlow layout icons dock.css panels.css components.css
     │                skin/  the original ARTINOS stylesheet
-    ├── panels/      10: Inspector Scene PostFX InputFlow Graph Assets Library Console Telemetry Appearance
-    ├── ui/          31 component folders (<Name>/<Name>.tsx + <Name>.css, incl. MetaBlock/, NodeGraph/) + theme/
+    ├── panels/      8: Inspector Scene PostFX InputFlow Graph Assets Library Console (telemetry and appearance live in the studio bar)
+    ├── ui/          one flat system (README.md): system/ (tokens, themes, anatomy, helpers) + one sibling
+    │                folder per component, <Name>/<Name>.tsx + <Name>.css — 29 components incl. MetaBlock, NodeGraph
     └── features/
         ├── canvas/WebGPUCanvas.tsx
         ├── postfx/PostFX.tsx  effects/*.tsx (46)
@@ -226,8 +227,8 @@ Features never read the store; the app passes values as props.
 | Unit | Copy | Also needs |
 |---|---|---|
 | UI component | `src/ui/<Name>/` | `react`, `react-dom` (optional `ui/theme/theme.css`) |
-| Docking engine | `src/ui/MetaBlock/` | `react` |
-| Node graph editor | `src/ui/NodeGraph/` | `react`, `three` (GPU domain) |
+| Docking engine | `src/ui/workspace/MetaBlock/` | `react` |
+| Node graph editor | `src/ui/workspace/NodeGraph/` | `react`, `three` (GPU domain) |
 | PostFX effect | `features/postfx/PostFX.tsx` + `effects/<Effect>.tsx` | `three`, `@react-three/fiber`; mount `<PostFX>` in your canvas |
 | Scene feature | `features/scene/<Name>.tsx` | `three`, R3F; drei for Camera, Controls, Environment, BackdropImage, Gizmo |
 | Glass | `features/objects/glass/` minus `GlassInspector.*`, + `PostFX.tsx` | `three`, R3F |
@@ -252,7 +253,7 @@ Found by tracing every import in `src/` on 2026-09-21; all fixed the same day (p
 | A4 | `app/studio/GlassInspector.tsx` imported glass files; deleting the glass folder broke the Inspector panel. | Moved to `objects/glass/GlassInspector.tsx` (+ its CSS, out of `dock.css`) as an `inspector` export; the Inspector panel renders inspectors generically. |
 | A5 | `GlassMaterial` imported a glass-specific hook from PostFX. | Uses `usePostFXPass('glass', glassPasses)` from the declared host. |
 | A6 | `MediaPlane` imported `features/input/webcam`. | Moved to `src/app/webcam.ts`. |
-| A7 | `ui/NodeGraph/LiveGraphView` imported `NumberField` and `Toggle` from sibling folders. | Local native inputs styled by `NodeGraph.css` (`.ngraph-number`, `.ngraph-check`). |
+| A7 | `ui/workspace/NodeGraph/LiveGraphView` imported `NumberField` and `Toggle` from sibling folders. | Local native inputs styled by `NodeGraph.css` (`.ngraph-number`, `.ngraph-check`). |
 | A8 | `GraphEffect` could only read the studio's compiled graphs. | Optional `node` prop and a header note. |
 
 Also: `ThreeInspector` (kind `scene`) moved from `overlays/` to `scene/`; the stray empty file `v2/1` deleted; stale path comments fixed. The remaining `any` casts (GlassMaterial 4, transmission-nodes 1, MetaBlock core 3) are where `@types/three` 0.185 lacks the node-material and pass members they touch; they stay.
@@ -282,8 +283,8 @@ Legend: ✅ done · ✂ not ported (by design, or not needed per the 2026-09-21 
 | `@artinos/modules` | `features/scene`, `features/postfx/effects`, `features/objects` | ✅ |
 | `@artinos/inputflow` | `features/input/*` | ✅ 8 devices (the rest ✂, §7.5) |
 | `@artinos/ui` | `src/ui/*` | ✅ 29 components (the rest ✂, §7.8) |
-| `@artinos/graph` | `src/ui/NodeGraph/` + `app/graphs.ts` etc. | ✅ |
-| `@artinos/metablock` | `src/ui/MetaBlock/` | ✅ (`MetaBlendPreview` ✂, unused) |
+| `@artinos/graph` | `src/ui/workspace/NodeGraph/` + `app/graphs.ts` etc. | ✅ |
+| `@artinos/metablock` | `src/ui/workspace/MetaBlock/` | ✅ (`MetaBlendPreview` ✂, unused) |
 | `src/*.project.tsx` | features | ✅ ui-platform as the default scene; default, persian-garden, VOLUMA ✂ |
 
 ### 7.2 PostFX — 46 ✅
@@ -358,9 +359,13 @@ Glass material folder (spectral transmission, backdrop + clean passes, dispersio
 
 ✂ Scene Tree, Object Inspector, History, Bindings, Timeline/Automation, UI DevTools, Quality, Project, Interaction, MinimalShell, Agent.
 
-### 7.8 UI kit — 29 ✅ + MetaBlock + NodeGraph
+### 7.8 UI kit — ARTINOS UI + 17 ✅ + MetaBlock + NodeGraph
 
-`Badge Button Checkbox ColorField CommandPalette Dialog Field FileDrop IconButton Kbd Knob Menu Meter NumberField Panel PropertyRow Section Segmented Select Slider Sparkline Tabs TextField Toast Toggle Toolbar Tooltip VectorField XYPad`, plus `theme/theme.css` (optional tokens and six worlds).
+**Controls (2026-09-28):** the ARTINOS UI package (since 2026-09-30 folded into the flat `src/ui/`, see below) exported with its own `artinos.mjs export` (themes `frost-deep`, `frost-etched`, every component): `Slider RangeSlider NumberField Switch ToggleGroup Segmented ColorField Select Panel Section Field Tabs RollingValue`. `main.tsx` imports its `artinos.css` once; `DockShell` puts `data-ar-theme` on `<html>` from `studio.ui.theme` (Appearance panel); `app/studio/skin/frost-themes.css` retunes the dock glass per theme. They replace the old `Slider Toggle Select Segmented Tabs Panel ColorField VectorField NumberField Section Field Checkbox` folders (a vector control is three kit `NumberField`s). Re-export over the folder with `--force` to add themes; the only local edit is the `as` tag narrowing in `core/Theme.tsx` and `layout/Panel.tsx` (R3F's JSX augmentation makes `ElementType` uncallable).
+
+**One system (2026-09-30):** `src/ui/` is flat. `src/ui/system/` holds the foundation (fonts, tokens, themes, materials, the shared anatomy CSS, and the helpers `utils` `hooks` `options` `Theme` `RollingValue`) and is imported once as `system.css`; every component is a sibling folder that imports only itself and `../system/`: the kit controls (`Slider` with `RangeSlider`, `NumberField Switch ToggleGroup Segmented ColorField Select Panel Tabs`, each with its own stylesheet split out of the kit's shared ones) and the rest (`Badge Button CommandPalette Dialog FileDrop IconButton Kbd Knob Menu Meter PropertyRow Sparkline TextField Toast Toolbar Tooltip XYPad`, rebuilt on the same tokens and anatomy, `ar-` prefix), plus `MetaBlock` and `NodeGraph`. The kit's barrel `index.ts` is gone; its docs moved to `docs/ui/`. `theme/theme.css` is gone. The studio accent is the signal teal (`--ui-sig: var(--ar-signal)`).
+
+**Studio scale (2026-09-29):** the studio reads as one system with the kit. `skin/tokens.css` points `--ui-face` / `--ui-num` at the kit's Chivo / Chivo Mono, sets the control height to 26px (small 22px) and lifts the ink. `app/studio/panels.css` is the one design for panel contents — caps 9px mono · meta 10.5 · label 12 · name 13.5 · figure 22, one card surface, a 104px label column that a paired kit slider shares, container queries per panel width — and `dock.css` restyles the strip (11.5px tabs with a white underline, 26px search, mono HUD). Rows are `PropertyRow` + a kit control; sliders use `layout="paired"` so every row has the same label column. Feature cards are packed by `CardFlow` (shortest column first, 320–600px columns, never more columns than cards), because CSS `columns` balances by height and one tall card left the rest of a wide dock empty; every other grid is `auto-fit`, so tiles, stats and entries fill the panel edge to edge. `components.css` puts the studio's own `src/ui` components (Button, TextField, IconButton, Meter, Kbd, Badge, Menu, Dialog, Toast) on the kit's material — buttons are insert chips like a segmented option, text fields are wells, menus are the kit's floating sheet — so nothing in a panel has a style of its own. The `--pn-*` scale variables sit on `.artinos-workbench-content`, not on the container itself, because a container query cannot restyle its own container.
 
 ✂ The v1 remainder (RadioGroup, Combobox, Accordion, ColorWheel/Area, GradientEditor, CurveEditor, EnvelopeEditor, Joystick, Waveform, Dial, RangeSlider, Popover, ContextMenu, Drawer, virtual lists, TreeView, KeyCapture, …), the kernel (`lattice`, `physics`, `schema`, `serialization`, `registry`), `token-graph`, the devtools provider, `headless/*` hooks, the v1 shell (replaced by MetaBlock + `DockShell`) and the `showcase`/`UIStudio`.
 
@@ -473,3 +478,6 @@ Delete the file or folder. `reconcile()` drops its saved state; the dock drops i
 - Chrome, WebGPU: default scene 60 fps; all 44 effects switched on one at a time, first and behind Saturation, with no errors; a stacked chain (Glass Rings + Sky + GodRays + GTAO + TRAA + Bloom + Vignette + FXAA) renders; scene features, every Environment/Lighting preset, both projections and every navigation mode toggle cleanly.
 - UI with real input: slider drag, keys, typed values, double-click reset, Add-effect menu, ⌘K palette, 375 px width. Dock: all panels open, drag-out floats, "Return to its dock" restores the tab position.
 - Bugs fixed then: canvas MSAA vs SSAA/TRAA/TAAU/RecurrentDenoise; Chromatic Aberration centre; SSR metal/roughness buffer; Recurrent Denoise `raw`; God Rays waiting for the shadow map; texture input for God Rays/SSR/MotionBlur when not first; three.js Inspector show/hide and timestamp queries; `onCommit?.(set(x))` skipping `set()`; palette depending on rAF; app root scrolled by focus; Scene cards in one column; MetaBlock pointer capture on inactive pointers.
+
+
+**Studio bar (2026-09-30):** the dock strip's runtime readout (`app/studio/RuntimeHUD.tsx`) opens one slim bar along the dock that replaces the Telemetry and Appearance panels: health and backend, frame rate and frame time with history and the 60 fps budget, renderer load, the Diagnostics overlays as chips (their settings live in the Inspector), the quality tier, the theme, Advanced, Hide, Presets and the two resets. It is always one row; a narrow window scrolls it sideways (wheel) with a fade on the side that has more. Panels no longer carry a toolbar row. Control rows have no inline buttons: right-click a row for reset, copy and paste (`ContextMenu` in `ui/Menu`), and a modified value shows as a teal dot in the margin. The dock's own panel menu is drawn by `app/studio/DockMenu.tsx` through the engine's `renderContextMenu`: placement as small workspace diagrams.
