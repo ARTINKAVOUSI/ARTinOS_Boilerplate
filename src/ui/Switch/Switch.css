@@ -58,7 +58,7 @@
 }
 .ar-switch[data-on] .ar-switch__mark {
   background: var(--ar-seam-active);
-  box-shadow: 0 0 5px var(--ar-signal-line);
+  box-shadow: var(--ar-seam-glow, 0 0 5px var(--ar-signal-line));
 }
 .ar-switch:not([data-on]) .ar-switch__mark {
   width: 6px;
