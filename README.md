@@ -2,7 +2,7 @@
 
 A React 19 / React Three Fiber 10 / three.js WebGPU boilerplate in which every capability is a copy-pastable file or folder. Add one by pasting it in, remove it by deleting it — nothing else in the project changes either way.
 
-Out of the box: 46 PostFX effects, 17 scene features, 8 objects plus the glass material, 8 input devices, 2 overlays, 8 studio panels, the ARTINOS UI system (26 components, the MetaBlock docking engine and the node graph).
+Out of the box: 46 PostFX effects, 16 scene features, 8 objects plus the glass material, 8 input devices, 2 overlays, 8 studio panels, the ARTINOS UI system (26 components, the MetaBlock docking engine and the node graph).
 
 ```sh
 pnpm install
@@ -15,7 +15,9 @@ pnpm build
 
 A MetaBlock dock with one tab per panel — Inspector, Scene, PostFX, InputFlow, Graph, Assets, Library, Console. Tabs drag out to float, split, merge or dock on any edge; right-click a tab strip for placement drawn as diagrams. The layout is saved.
 
-The readout at the right of the dock strip opens the **studio bar**: frame rate and history, renderer load, the diagnostic overlays, the quality tier, the theme, and the studio's own switches (advanced controls, hide, presets, resets).
+The readout at the right of the dock strip opens the **studio bar**: frame rate and history, renderer load, the quality tier, the theme, and the studio's own switches (advanced controls, hide, presets, resets).
+
+The **Console** panel holds the runtime log and a built-in renderer profiler (the useful half of three.js's Inspector, `src/app/profiler.ts`): every render and compute pass of a frame with its CPU and GPU time, and GPU memory by kind. It measures only while one of its views is open.
 
 Keys: `H` hides the interface · `Ctrl/⌘ K` opens the command palette (panels, features, any control by name) · on a slider, Shift for fine control, double-click to reset, Enter to type · right-click a control row to reset, copy or paste its value.
 

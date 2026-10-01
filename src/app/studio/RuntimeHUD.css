@@ -1,5 +1,5 @@
 /* The studio bar the dock's runtime readout opens: one strip of the dock's
-   glass holding six instruments. No boxes inside the glass — instruments are
+   glass holding five instruments. No boxes inside the glass — instruments are
    divided by hairlines, and every one reads the same way: a caps name with a
    quiet reading beside it, over one 26px row of content on a shared baseline. */
 
@@ -159,7 +159,7 @@
 .hud-bar__spark {
   flex: 1 1 0;
   min-width: 64px;
-  max-width: 220px;
+  max-width: 420px;
   height: var(--_row);
 }
 
@@ -176,39 +176,6 @@
   font: 400 13px/1 var(--ui-num);
   font-variant-numeric: tabular-nums;
   color: var(--ui-text-strong);
-}
-
-/* ── overlays: toggles with a lamp ───────────────────────────────────────── */
-.hud-bar__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 24px;
-  padding: 0 10px 0 9px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--ar-trough, rgba(0, 0, 0, 0.22));
-  box-shadow: var(--ar-well, inset 0 0 0 1px rgba(255, 255, 255, 0.1));
-  font: 300 11.5px/1 var(--ui-font);
-  color: var(--ui-text-label);
-  text-shadow: inherit;
-  cursor: pointer;
-  transition: color 140ms ease, background 140ms ease;
-}
-.hud-bar__toggle i {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px var(--ui-text-meta);
-  transition: background 140ms ease, box-shadow 140ms ease;
-}
-.hud-bar__toggle:hover,
-.hud-bar__toggle[aria-pressed='true'] {
-  color: var(--ui-text-strong);
-}
-.hud-bar__toggle[aria-pressed='true'] i {
-  background: var(--ui-accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-accent) 22%, transparent), 0 0 8px var(--ui-accent);
 }
 
 /* ── quality ─────────────────────────────────────────────────────────────── */
@@ -294,7 +261,7 @@
 }
 
 /* focus, shared */
-.hud-bar :is(.hud-bar__toggle, .hud-bar__swatch, .hud-bar__hide):focus-visible {
+.hud-bar :is(.hud-bar__swatch, .hud-bar__hide):focus-visible {
   outline: none;
   box-shadow: var(--ar-focus-ring, 0 0 0 2px var(--ui-accent));
 }
@@ -314,17 +281,17 @@
 }
 
 /* ── narrower docks: secondary readings step out before anything scrolls ── */
-@container hud-bar (max-width: 1390px) {
+@container hud-bar (max-width: 1150px) {
   .hud-bar__stat:nth-child(n + 3) {
     display: none;
   }
 }
-@container hud-bar (max-width: 1320px) {
+@container hud-bar (max-width: 1080px) {
   .hud-bar__renderer {
     display: none;
   }
 }
-@container hud-bar (max-width: 1130px) {
+@container hud-bar (max-width: 890px) {
   .hud-bar__frame {
     display: none;
   }
@@ -335,16 +302,11 @@
     min-width: 180px;
   }
 }
-@container hud-bar (max-width: 1066px) {
+@container hud-bar (max-width: 820px) {
   .hud-bar__text > :is(span.hud-bar__label-text) {
     display: none;
   }
   .hud-bar__perf {
     min-width: 160px;
-  }
-}
-@container hud-bar (max-width: 960px) {
-  .hud-bar__overlays {
-    display: none;
   }
 }

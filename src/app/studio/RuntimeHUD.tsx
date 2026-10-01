@@ -25,10 +25,7 @@ type Tier = (typeof TIERS)[number]['value']
 const TARGET_FPS = 60
 const BUDGET_MS = 1000 / TARGET_FPS
 
-/** Overlays that exist to diagnose (a feature in the Diagnostics group): toggled from the bar. */
-const diagnostics = features.filter(feature => feature.group === 'Diagnostics')
 const hasRender = features.some(feature => feature.id === 'scene.render')
-const selectFeatures = (state: StudioState) => state.features
 const selectUI = (state: StudioState) => state.ui
 
 const healthOf = (fps: number) => (fps >= TARGET_FPS * 0.9 ? 'good' : fps >= TARGET_FPS * 0.65 ? 'warn' : 'bad')
@@ -93,13 +90,13 @@ function Group({ name, meta, className, children }: { name: string; meta?: React
 
 /**
  * The runtime readout in the dock strip, and the studio bar it opens: one slim
- * instrument strip along the dock — performance, renderer load, the diagnostic
- * overlays, the quality tier, the theme and the studio's own switches.
+ * instrument strip along the dock — performance, renderer load, the quality
+ * tier, the theme and the studio's own switches. Pass timings and memory live
+ * in the Console panel.
  */
 export function RuntimeHUD() {
   const stats = useRuntime()
   const render = useFeatureState('scene.render')
-  const states = useStudio(selectFeatures)
   const ui = useStudio(selectUI)
   const [open, setOpen] = useState(false)
   const hud = useRef<HTMLDivElement>(null)
@@ -181,20 +178,6 @@ export function RuntimeHUD() {
           </span>
         ))}
       </Group>
-
-      {diagnostics.length > 0 && (
-        <Group name="Overlays" className="hud-bar__overlays">
-          {diagnostics.map(feature => {
-            const on = Boolean(states[feature.id]?.enabled)
-            return (
-              <button key={feature.id} type="button" className="hud-bar__toggle" aria-pressed={on} title={`${feature.description ?? feature.label}\nSettings: Inspector panel`} onClick={() => studio.setEnabled(feature.id, !on)}>
-                <i aria-hidden />
-                {feature.label.replace(/ (HUD|Monitor|Inspector)$/, '')}
-              </button>
-            )
-          })}
-        </Group>
-      )}
 
       {hasRender && (
         <Group name="Quality" className="hud-bar__quality" meta={<span title="Pixel-ratio ceiling">≤ {ratio.toFixed(2)}×</span>}>

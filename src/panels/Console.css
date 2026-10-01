@@ -1,0 +1,174 @@
+/* Console panel — the profiler views. Same scale as every panel (panels.css):
+   caps labels, mono figures, a well for tables, hairline rows. */
+
+.console-view {
+  display: grid;
+  gap: var(--pn-gap, 12px);
+  min-width: 0;
+}
+
+/* ── figures: a caps name, a mono reading, an optional history ───────────── */
+.console-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.console-figure {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px 11px;
+  border-radius: var(--pn-radius, 10px);
+  background: var(--pn-card, rgba(255, 255, 255, 0.04));
+  box-shadow: inset 0 0 0 1px var(--pn-edge, rgba(255, 255, 255, 0.1)), inset 0 1px 0 var(--pn-edge-top, rgba(255, 255, 255, 0.16));
+}
+.console-figure small {
+  font: var(--pn-caps);
+  letter-spacing: var(--pn-track, 0.18em);
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.console-figure strong {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font: var(--pn-figure);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-strong);
+}
+.console-figure strong span {
+  font: var(--pn-caps);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.console-figure .ar-sparkline {
+  width: 100%;
+  height: 24px;
+}
+
+/* ── tables: a well with hairline rows ───────────────────────────────────── */
+.console-table {
+  --_cols: minmax(0, 1fr) 64px 64px minmax(80px, 28%);
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--pn-radius, 10px);
+  background: var(--pn-well, rgba(0, 0, 0, 0.16));
+  box-shadow: inset 0 0 0 1px var(--pn-edge, rgba(255, 255, 255, 0.1));
+}
+.console-table__head,
+.console-table__row {
+  display: grid;
+  grid-template-columns: var(--_cols);
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px 0 12px;
+}
+.console-table__head {
+  min-height: 30px;
+  font: var(--pn-caps);
+  letter-spacing: var(--pn-track, 0.18em);
+  text-transform: uppercase;
+  color: var(--ui-text-meta);
+}
+.console-table__row {
+  min-height: 30px;
+  box-shadow: inset 0 1px 0 var(--pn-rule, rgba(255, 255, 255, 0.08));
+  font: 300 11px/1 var(--ui-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text);
+}
+.console-table__row:hover {
+  background: var(--ui-hover-wash);
+}
+.console-table__head > :nth-child(2),
+.console-table__head > :nth-child(3),
+.console-table__row > :nth-child(2),
+.console-table__row > :nth-child(3) {
+  text-align: right;
+}
+.console-table__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-left: calc(var(--depth, 0) * 14px);
+  overflow: hidden;
+  font: var(--pn-label);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ui-text-strong);
+}
+.console-table__row[data-depth]:not([data-depth='0']) .console-table__name {
+  color: var(--ui-text);
+}
+.console-table__row[data-depth]:not([data-depth='0']) .console-table__name::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 1px;
+  margin-left: -10px;
+  background: var(--ui-text-meta);
+  opacity: 0.6;
+}
+.console-table__name em {
+  padding: 2px 6px 1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ui-warn) 14%, transparent);
+  font: var(--pn-caps);
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ui-warn);
+}
+.console-table__row[data-empty] {
+  color: var(--ui-text-meta);
+}
+.console-table__row[data-empty] .console-table__name {
+  color: var(--ui-text-label);
+}
+.console-table__empty {
+  padding: 14px 12px;
+  font: var(--pn-meta);
+  color: var(--ui-text-meta);
+}
+
+/* a share bar: CPU in the signal hue, GPU stacked under it in the warm hue */
+.console-bar {
+  display: grid;
+  gap: 2px;
+  height: 8px;
+  align-content: center;
+}
+.console-bar i {
+  display: block;
+  height: 3px;
+  min-width: 1px;
+  border-radius: 2px;
+  background: var(--ui-accent);
+  opacity: 0.85;
+}
+.console-bar i[data-gpu] {
+  background: var(--ui-warn);
+}
+.console-memory .console-bar i {
+  height: 4px;
+}
+
+/* a narrow dock: the share column steps out first */
+@container workbench (max-width: 420px) {
+  .console-table {
+    --_cols: minmax(0, 1fr) 56px 56px;
+  }
+  .console-bar,
+  .console-table__head > :nth-child(4) {
+    display: none;
+  }
+}
+
+/* the view switch keeps every name whole */
+.plate-workspace .v2-panel-bar > .ar-well.ar-segmented.console-views {
+  flex: none;
+  width: 288px;
+}

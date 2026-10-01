@@ -730,55 +730,6 @@
   color: var(--text-low);
 }
 
-/* ── THREE INSPECTOR ──────────────────────────────────────────────────────
-   Sanctioned third-party UI (AGENTS.md rule 2). We do not restyle its markup;
-   we feed it our roles through the variables it already exposes, and we pin it
-   inside its panel so its `position-bottom` mode cannot span the shell. */
-
-.plate-workspace .three-inspector {
-  --font-family: var(--font-ui);
-  --font-mono: var(--font-num);
-
-  --profiler-background: transparent;
-  --profiler-header-background: transparent;
-  --profiler-header: var(--text-hi);
-  --profiler-border: var(--line-subtle);
-
-  --color-accent: var(--sig-live);
-  --color-green: var(--sig-live);
-  --color-yellow: var(--sig-warn);
-  --color-red: var(--sig-fault);
-  --color-fps: var(--sig-live-hi);
-}
-
-/* its panels are absolutely positioned; keep them in the card that hosts them */
-.plate-workspace .artinos-panel .three-inspector,
-.plate-workspace .artinos-panel .profiler-panel {
-  position: absolute;
-  inset: 0;
-  max-width: 100%;
-  overflow: auto;
-}
-/* the floating toggle and mini-panel are ours to suppress — the panel *is* the surface */
-.plate-workspace .profiler-toggle,
-.plate-workspace .profiler-mini-panel {
-  display: none !important;
-}
-
-.plate-workspace .three-inspector .tab-btn {
-  border-radius: 3px;
-  font-family: var(--font-num);
-  font-size: 9px;
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--text-low);
-}
-.plate-workspace .three-inspector .tab-btn.active,
-.plate-workspace .three-inspector .tab-btn[aria-selected='true'] {
-  background: var(--bg-active);
-  color: var(--text-hi);
-}
-
 /* --text-faint is reserved for units, counts and timestamps. These three are
    none of those: a collapse affordance, a zoom control and empty-state prose.
    Interactive glyphs and instructions must stay legible. */
@@ -861,26 +812,6 @@
 /* ── THIRD-PARTY CONSOLE ──────────────────────────────────────────────────
    The Three Inspector renders its own console markup inside our panel with no
    layout of its own, so the rows collapsed onto each other. Give it flow. */
-
-.plate-workspace .console-log {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3) 0;
-  font-family: var(--font-num);
-  font-size: 10.5px;
-  line-height: 1.6;
-}
-.plate-workspace .console-log > * {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  min-height: 18px;
-  padding: 2px var(--space-2);
-  border-radius: 3px;
-  color: var(--text-mid);
-  word-break: break-word;
-}
 .plate-workspace .log-message { flex: 1; min-width: 0; }
 .plate-workspace .log-icon { flex: 0 0 auto; opacity: 0.75; }
 .plate-workspace .log-count-badge {

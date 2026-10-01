@@ -41,7 +41,7 @@ The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.p
 | App core (contract, discovery, store, boundaries, stage) | — | ✅ |
 | Canvas + PostFX host (with pass providers) | — | ✅ |
 | PostFX effects | 46 | ✅ 44 v1 effects + SubsurfaceScattering + GraphEffect |
-| Scene features | 17 | ✅ incl. Light, Shadows, Gizmo, three.js Inspector |
+| Scene features | 16 | ✅ incl. Light, Shadows, Gizmo (the three.js Inspector became the Console's profiler views) |
 | Objects / materials | 8 + glass folder | ✅ |
 | Input devices | 8 | ✅ pointer, keyboard, microphone, hands, camera, MIDI, gamepad, tilt |
 | Overlays | 2 | ✅ Stats HUD, Signal Monitor |
@@ -305,7 +305,7 @@ Fixed compared to v1: SSR/SSGI/GTAO composite as three.js documents; Outline bui
 
 ### 7.3 Scene — 17 ✅
 
-RenderSettings · Shadows · Camera (8 framings, persp/ortho) · Controls (orbit / map / trackball / camera-controls / none) · Environment · Background · BackdropImage · Sky · Stars · Fog · Lighting (8 rigs, Kelvin) · Light (ambient, hemisphere, directional, point, spot, IES, probe) · Ground · ContactShadow · Grid · Gizmo · ThreeInspector.
+RenderSettings · Shadows · Camera (8 framings, persp/ortho) · Controls (orbit / map / trackball / camera-controls / none) · Environment · Background · BackdropImage · Sky · Stars · Fog · Lighting (8 rigs, Kelvin) · Light (ambient, hemisphere, directional, point, spot, IES, probe) · Ground · ContactShadow · Grid · Gizmo.
 
 ✂ Water, Reflector, AdaptiveQuality (the HUD keeps its manual quality tiers), v1 `View` (multi-viewport). v1 `Presentation`, `Stage`, `CameraTarget` are covered by Camera framings + Controls.
 
@@ -353,8 +353,8 @@ Glass material folder (spectral transmission, backdrop + clean passes, dispersio
 | Graph | GraphPanel + graph/* |
 | Assets | AssetBrowserPanel, ResourcesPanel |
 | Library | ModulesPanel |
-| Console | ConsolePanel |
-| *studio bar* (`app/studio/RuntimeHUD.tsx`, not a panel) | TelemetryPanel, ThreeInspectorPanel; appearance settings |
+| Console | ConsolePanel, ThreeInspectorPanel (Performance and Memory views) |
+| *studio bar* (`app/studio/RuntimeHUD.tsx`, not a panel) | TelemetryPanel; appearance settings |
 
 ✂ Scene Tree, Object Inspector, History, Bindings, Timeline/Automation, UI DevTools, Quality, Project, Interaction, MinimalShell, Agent.
 
@@ -482,3 +482,5 @@ Delete the file or folder. `reconcile()` drops its saved state; the dock drops i
 **Studio bar (2026-09-30):** the dock strip's runtime readout (`app/studio/RuntimeHUD.tsx`) opens one slim bar along the dock that replaces the Telemetry and Appearance panels: health and backend, frame rate and frame time with history and the 60 fps budget, renderer load, the Diagnostics overlays as chips (their settings live in the Inspector), the quality tier, the theme, Advanced, Hide, Presets and the two resets. It is always one row: hairline-divided instruments, each a caps name over one 26px row; on a narrower dock, container-query steps drop secondary readings (geometry and texture counts, then the renderer group, then frame time, labels and overlays) before it falls back to scrolling. Beside a side dock it runs along the free side. Panels no longer carry a toolbar row. Control rows have no inline buttons: right-click a row for reset, copy and paste (`ContextMenu` in `ui/Menu`), and a modified value shows as a teal dot in the margin. The dock's own panel menu is drawn by `app/studio/DockMenu.tsx` through the engine's `renderContextMenu`: placement as small workspace diagrams.
 
 **Cleanup (v0.6, 2026-09-30):** the studio skin (`app/studio/skin/`) went from 26 stylesheets to five — `skin.css` (entry), `tokens.css` (the `--ui-*` tokens, Frost, the two frost themes, state overrides), `base.css` (the earlier rule sets in the `artinos.legacy` / `artinos.instrument` layers), `components.css` (shell and panel layout) and `chrome.css` (the MetaBlock bridge). About 4,800 lines of CSS were removed: every rule whose selector named a class or a `data-*` attribute no code renders (the six material worlds and eight `data-theme` themes were never set; the old `artinos-*` component library is gone). Each step was checked with a computed-style fingerprint of every panel and the studio bar — no visible change. Also removed: `FeatureBoundary`'s unused crash listeners (the console capture already toasts), `PanelEmpty`, unused icons, `.npmrc` (pnpm reads `nodeLinker` from `pnpm-workspace.yaml`).
+
+**Profiler (v0.6, 2026-10-01):** three.js's Inspector overlay (`features/scene/ThreeInspector.tsx`) is gone; its useful half lives in the studio. `app/profiler.ts` subclasses three's headless `RendererInspector` — the renderer calls it around every frame and every render/compute pass — averages each pass's CPU and GPU time by call id, reads `renderer.info.memory`, and publishes a snapshot four times a second. It attaches only while something subscribes, and turns GPU timestamp queries off again when the last reader leaves. The Console panel shows it as two views beside the log: **Performance** (frame rate, CPU, GPU and idle with history; every pass as a tree with CPU, GPU and its share of the frame) and **Memory** (total GPU memory with history; count and size per kind). The studio bar lost its Overlays group; Stats HUD and Signal Monitor are still switched from the Inspector panel.

@@ -6,20 +6,18 @@ import { glassOptics, refractedAngle } from './glass-optics'
 import { glassMonitor } from './glass-capture'
 import './GlassInspector.css'
 
-const THREE_INSPECTOR = 'overlay.three-inspector'
-
 /**
  * Glass optics & monitoring — v1's reference glass diagnostics, embedded in the
  * Inspector and reading the same controls the glass card edits.
  *
  * The chart plots the shader's real RGB IOR spread against incident angle, in
  * either direction; the readouts are the optics those values imply; the monitor
- * rows are what the glass capture passes are doing right now.
+ * rows are what the glass capture passes are doing right now. Per-pass GPU
+ * times for the capture passes are in the Console panel's Performance view.
  */
-export function GlassInspector({ values, peer, setEnabled }: FeatureInspectorProps) {
+export function GlassInspector({ values, peer }: FeatureInspectorProps) {
   const monitor = useSyncExternalStore(glassMonitor.subscribe, glassMonitor.get, glassMonitor.get)
   const { fps } = useRuntime()
-  const threeInspector = peer(THREE_INSPECTOR)
   const [exiting, setExiting] = useState(false)
 
   const read = (name: string, fallback: number) => {
@@ -120,11 +118,6 @@ export function GlassInspector({ values, peer, setEnabled }: FeatureInspectorPro
           <dd>{monitor.taps}</dd>
         </dl>
       </div>
-      {threeInspector && (
-        <Button size="sm" aria-expanded={threeInspector.enabled} onClick={() => setEnabled(THREE_INSPECTOR, !threeInspector.enabled)}>
-          {threeInspector.enabled ? 'Hide' : 'Show'} renderer monitor
-        </Button>
-      )}
       {!peer('postfx') && <p>Enable the renderer pipeline for clean and backside capture monitoring.</p>}
     </details>
   )
