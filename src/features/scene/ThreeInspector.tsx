@@ -33,6 +33,10 @@ export function ThreeInspector({ open = false }: ThreeInspectorProps) {
     return () => {
       instance.domElement.remove()
       renderer.inspector = new InspectorBase()
+      // Detaching leaves the old instance without a renderer, but work it
+      // queued (a timestamp read on the next frame) still runs and reads it.
+      // Keep it pointed at the live renderer so that work finishes normally.
+      instance.setRenderer(renderer)
       // Timestamp queries pile up unresolved once nothing reads them.
       const backend = (renderer as unknown as { backend?: { trackTimestamp?: boolean } }).backend
       if (backend) backend.trackTimestamp = false
