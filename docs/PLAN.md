@@ -29,7 +29,7 @@ The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.p
 | 2-line effect wrappers plus a separate catalog | One file per effect: component, props, docs and studio controls together |
 | `*.project.tsx` manifests listing parameters, graphs and bindings | Features discovered from `src/features/**` |
 | UI kit that needed the global `theme.css` and a kernel/registry | Each component folder has its own scoped CSS with fallbacks; no kernel |
-| `@artinos/metablock` package + `MetaBlockShell` with a hard-coded panel list | The same engine as one folder (`src/ui/workspace/MetaBlock/`); panels discovered from `src/panels/` |
+| `@artinos/metablock` package + `MetaBlockShell` with a hard-coded panel list | The same engine as one folder (`src/ui/MetaBlock/`); panels discovered from `src/panels/` |
 | Parameter changes rebuilt the whole pipeline | Numeric effect settings are live GPU uniforms (`useUniform`) |
 
 ---
@@ -133,7 +133,7 @@ export const panel: PanelManifest = {
 }
 ```
 
-Discovered with `import.meta.glob('../panels/*.tsx')`. Every body is wrapped in `PanelWorkbench` (portrait/landscape container, `--panel-height`, error boundary with Retry). Panels share only `src/app/studio/` building blocks (`FeatureCard`, `ControlsBar`, `ControlInput`, `PanelBar`, `icons`), never each other.
+Discovered with `import.meta.glob('../panels/*.tsx')`. Every body is wrapped in `PanelWorkbench` (portrait/landscape container, `--panel-height`, error boundary with Retry). Panels share only `src/app/studio/` building blocks (`FeatureCard`, `CardFlow`, `ControlInput`, `PanelBar`, `PresetMenu`, `icons`), never each other.
 
 ### 3.4 Discovery (`src/app/registry.ts`)
 
@@ -226,9 +226,9 @@ Features never read the store; the app passes values as props.
 
 | Unit | Copy | Also needs |
 |---|---|---|
-| UI component | `src/ui/<Name>/` | `react`, `react-dom` (optional `ui/theme/theme.css`) |
-| Docking engine | `src/ui/workspace/MetaBlock/` | `react` |
-| Node graph editor | `src/ui/workspace/NodeGraph/` | `react`, `three` (GPU domain) |
+| UI component | `src/ui/<Name>/` | `react`, `react-dom`, and `src/ui/system/` (import `system.css` once) |
+| Docking engine | `src/ui/MetaBlock/` | `react` |
+| Node graph editor | `src/ui/NodeGraph/` | `react`, `three` (GPU domain) |
 | PostFX effect | `features/postfx/PostFX.tsx` + `effects/<Effect>.tsx` | `three`, `@react-three/fiber`; mount `<PostFX>` in your canvas |
 | Scene feature | `features/scene/<Name>.tsx` | `three`, R3F; drei for Camera, Controls, Environment, BackdropImage, Gizmo |
 | Glass | `features/objects/glass/` minus `GlassInspector.*`, + `PostFX.tsx` | `three`, R3F |
@@ -283,8 +283,8 @@ Legend: ✅ done · ✂ not ported (by design, or not needed per the 2026-09-21 
 | `@artinos/modules` | `features/scene`, `features/postfx/effects`, `features/objects` | ✅ |
 | `@artinos/inputflow` | `features/input/*` | ✅ 8 devices (the rest ✂, §7.5) |
 | `@artinos/ui` | `src/ui/*` | ✅ 29 components (the rest ✂, §7.8) |
-| `@artinos/graph` | `src/ui/workspace/NodeGraph/` + `app/graphs.ts` etc. | ✅ |
-| `@artinos/metablock` | `src/ui/workspace/MetaBlock/` | ✅ (`MetaBlendPreview` ✂, unused) |
+| `@artinos/graph` | `src/ui/NodeGraph/` + `app/graphs.ts` etc. | ✅ |
+| `@artinos/metablock` | `src/ui/MetaBlock/` | ✅ (`MetaBlendPreview` ✂, unused) |
 | `src/*.project.tsx` | features | ✅ ui-platform as the default scene; default, persian-garden, VOLUMA ✂ |
 
 ### 7.2 PostFX — 46 ✅
@@ -342,7 +342,7 @@ Glass material folder (spectral transmission, backdrop + clean passes, dispersio
 | History, bindings, automation, agent API | ✂ (the dock keeps its layout undo; signal → parameter routing is done with graphs in the Graph panel) |
 | Interactions / commands | ✅ the command palette; v1 action registry ✂ |
 
-### 7.7 Studio panels — 10 ✅
+### 7.7 Studio panels — 8 ✅ + the studio bar
 
 | Panel | Replaces v1 |
 |---|---|
@@ -354,8 +354,7 @@ Glass material folder (spectral transmission, backdrop + clean passes, dispersio
 | Assets | AssetBrowserPanel, ResourcesPanel |
 | Library | ModulesPanel |
 | Console | ConsolePanel |
-| Telemetry | TelemetryPanel, ThreeInspectorPanel |
-| Appearance | — |
+| *studio bar* (`app/studio/RuntimeHUD.tsx`, not a panel) | TelemetryPanel, ThreeInspectorPanel; appearance settings |
 
 ✂ Scene Tree, Object Inspector, History, Bindings, Timeline/Automation, UI DevTools, Quality, Project, Interaction, MinimalShell, Agent.
 
@@ -450,7 +449,7 @@ Removed: `three-stdlib`, `lucide-react` (inline SVG icons).
 
 1. Create `src/panels/<Name>.tsx` with a component and a `panel` manifest.
 2. Build it from `app/studio/` blocks and `src/ui` components; keep panel state inside the file.
-3. Save. If an older saved layout is active, reset it (Appearance panel).
+3. Save. If an older saved layout is active, reset it (studio bar → reset layout).
 
 ### Removing anything
 
@@ -480,4 +479,6 @@ Delete the file or folder. `reconcile()` drops its saved state; the dock drops i
 - Bugs fixed then: canvas MSAA vs SSAA/TRAA/TAAU/RecurrentDenoise; Chromatic Aberration centre; SSR metal/roughness buffer; Recurrent Denoise `raw`; God Rays waiting for the shadow map; texture input for God Rays/SSR/MotionBlur when not first; three.js Inspector show/hide and timestamp queries; `onCommit?.(set(x))` skipping `set()`; palette depending on rAF; app root scrolled by focus; Scene cards in one column; MetaBlock pointer capture on inactive pointers.
 
 
-**Studio bar (2026-09-30):** the dock strip's runtime readout (`app/studio/RuntimeHUD.tsx`) opens one slim bar along the dock that replaces the Telemetry and Appearance panels: health and backend, frame rate and frame time with history and the 60 fps budget, renderer load, the Diagnostics overlays as chips (their settings live in the Inspector), the quality tier, the theme, Advanced, Hide, Presets and the two resets. It is always one row; a narrow window scrolls it sideways (wheel) with a fade on the side that has more. Panels no longer carry a toolbar row. Control rows have no inline buttons: right-click a row for reset, copy and paste (`ContextMenu` in `ui/Menu`), and a modified value shows as a teal dot in the margin. The dock's own panel menu is drawn by `app/studio/DockMenu.tsx` through the engine's `renderContextMenu`: placement as small workspace diagrams.
+**Studio bar (2026-09-30):** the dock strip's runtime readout (`app/studio/RuntimeHUD.tsx`) opens one slim bar along the dock that replaces the Telemetry and Appearance panels: health and backend, frame rate and frame time with history and the 60 fps budget, renderer load, the Diagnostics overlays as chips (their settings live in the Inspector), the quality tier, the theme, Advanced, Hide, Presets and the two resets. It is always one row: hairline-divided instruments, each a caps name over one 26px row; on a narrower dock, container-query steps drop secondary readings (geometry and texture counts, then the renderer group, then frame time, labels and overlays) before it falls back to scrolling. Beside a side dock it runs along the free side. Panels no longer carry a toolbar row. Control rows have no inline buttons: right-click a row for reset, copy and paste (`ContextMenu` in `ui/Menu`), and a modified value shows as a teal dot in the margin. The dock's own panel menu is drawn by `app/studio/DockMenu.tsx` through the engine's `renderContextMenu`: placement as small workspace diagrams.
+
+**Cleanup (v0.6, 2026-09-30):** the studio skin (`app/studio/skin/`) went from 26 stylesheets to five — `skin.css` (entry), `tokens.css` (the `--ui-*` tokens, Frost, the two frost themes, state overrides), `base.css` (the earlier rule sets in the `artinos.legacy` / `artinos.instrument` layers), `components.css` (shell and panel layout) and `chrome.css` (the MetaBlock bridge). About 4,800 lines of CSS were removed: every rule whose selector named a class or a `data-*` attribute no code renders (the six material worlds and eight `data-theme` themes were never set; the old `artinos-*` component library is gone). Each step was checked with a computed-style fingerprint of every panel and the studio bar — no visible change. Also removed: `FeatureBoundary`'s unused crash listeners (the console capture already toasts), `PanelEmpty`, unused icons, `.npmrc` (pnpm reads `nodeLinker` from `pnpm-workspace.yaml`).

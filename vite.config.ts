@@ -12,7 +12,7 @@ export default defineConfig({
   build: {
     target: 'es2022',
     // Three WebGPU + TSL is one engine chunk by design.
-    chunkSizeWarningLimit: 3000,
+    chunkSizeWarningLimit: 3500,
     rollupOptions: {
       output: {
         manualChunks(id) {

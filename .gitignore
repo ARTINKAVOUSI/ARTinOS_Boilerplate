@@ -1,13 +1,14 @@
 node_modules
-.upgrade-backup/
 dist
 .vite
 .env
 *.local
 *.log
 *.tsbuildinfo
-qa-*.png
 *.zip
 .DS_Store
-.design-ref/
-Design system premium refinement-handoff/
+
+# local reference material kept beside the project, never committed
+UI template/
+artinos-ui-design-specification/
+qa-*.png
