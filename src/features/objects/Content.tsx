@@ -1,5 +1,14 @@
-import { Billboard, Html, Image, Text, Text3D } from '@react-three/drei/legacy'
+import { lazy } from 'react'
+import { Billboard, Html, Text3D } from '@react-three/drei'
 import type { Feature } from '../../app/feature'
+
+// Image and SDF Text exist only in drei 11's WebGL-only legacy entry (a GLSL ShaderMaterial and
+// troika). Its webgpu entry has a node-material Image but imports WebGLCubeRenderTarget, which
+// three 0.185's three/webgpu does not export, so it cannot be bundled. The legacy entry loads the
+// first time one of these modes renders, so it stays out of startup.
+// Destructured, so the bundler keeps only these two exports of the legacy entry.
+const Image = lazy(() => import('@react-three/drei/legacy').then(({ Image }) => ({ default: Image })))
+const Text = lazy(() => import('@react-three/drei/legacy').then(({ Text }) => ({ default: Text })))
 
 export type ContentMode = 'text' | 'text3d' | 'html' | 'image' | 'billboard'
 
@@ -21,7 +30,10 @@ export interface ContentProps {
  * Content — v1's content module: SDF text, extruded 3D text, an HTML label
  * pinned in the scene, an image plane, or text that always faces the camera.
  *
- * Mount inside a <Canvas>. Requires @react-three/drei (its legacy entry).
+ * Mount inside a <Canvas>, under a <Suspense>. Requires @react-three/drei.
+ * `text`, `billboard`, `image`, and `text3d` without a font use drei's legacy
+ * entry (troika SDF Text, a GLSL Image), which draws only on the WebGL
+ * renderer; `html` and `text3d` with a font work on WebGPU.
  */
 export function Content({ mode = 'text', text = 'ARTINOS', src = '', font = '', fontSize = 0.35, color = '#ffffff', position = [0, 1.6, 0], center = true }: ContentProps) {
   if (mode === 'html') {

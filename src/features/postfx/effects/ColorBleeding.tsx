@@ -1,4 +1,4 @@
-import { vec4 } from 'three/tsl'
+import { convertToTexture, vec4 } from 'three/tsl'
 import { colorBleeding } from 'three/addons/tsl/display/CRT.js'
 import type { Feature } from '../../../app/feature'
 import { usePostFXEffect, useUniform } from '../PostFX'
@@ -19,7 +19,9 @@ export interface ColorBleedingProps {
  */
 export function ColorBleeding({ id = 'color-bleeding', enabled = true, order = 661, amount = 0.002 }: ColorBleedingProps) {
   const amountU = useUniform(amount)
-  usePostFXEffect(id, { enabled, order, build: ({ input }) => vec4(colorBleeding(input.rgb, amountU), input.a) })
+  // The input is resolved to a texture here rather than inside colorBleeding, so
+  // the render target is part of the chain and is freed with it.
+  usePostFXEffect(id, { enabled, order, build: ({ input }) => vec4(colorBleeding(convertToTexture(input), amountU), input.a) })
   return null
 }
 
@@ -33,6 +35,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 661,
   enabled: false,
+  description: 'Horizontal analogue-video colour smear; red trails furthest',
   component: ColorBleeding,
   controls: {
     amount: { type: 'number', value: 0.002, min: 0, max: 0.01, step: 0.0001 },

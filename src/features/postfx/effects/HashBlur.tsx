@@ -1,3 +1,4 @@
+import { convertToTexture } from 'three/tsl'
 import { hashBlur } from 'three/addons/tsl/display/hashBlur.js'
 import type { Feature } from '../../../app/feature'
 import { usePostFXEffect, useUniform } from '../PostFX'
@@ -21,7 +22,9 @@ export interface HashBlurProps {
 export function HashBlur({ id = 'hash-blur', enabled = true, order = 352, amount = 0.08, repeats = 32 }: HashBlurProps) {
   const amountU = useUniform(amount)
   const repeatsU = useUniform(repeats)
-  usePostFXEffect(id, { enabled, order, build: ({ input }) => hashBlur(input, amountU, { repeats: repeatsU } as Parameters<typeof hashBlur>[2]) })
+  // The input is resolved to a texture here rather than inside hashBlur, so the
+  // render target is part of the chain and is freed with it.
+  usePostFXEffect(id, { enabled, order, build: ({ input }) => hashBlur(convertToTexture(input), amountU, { repeats: repeatsU } as Parameters<typeof hashBlur>[2]) })
   return null
 }
 
@@ -35,6 +38,7 @@ export const feature: Feature = {
   cost: 'medium',
   order: 352,
   enabled: false,
+  description: 'Stochastic frosted-glass blur from randomly scattered samples',
   component: HashBlur,
   controls: {
     amount: { type: 'number', value: 0.08, min: 0, max: 0.5, step: 0.005 },

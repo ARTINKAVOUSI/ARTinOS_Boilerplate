@@ -10,7 +10,7 @@ export interface GaussianBlurProps {
   order?: number
   /** Sample spacing. */
   radius?: number
-  /** Kernel width. */
+  /** Kernel width, rounded to 0.5 (it is baked into the shader). */
   sigma?: number
 }
 
@@ -21,7 +21,10 @@ export interface GaussianBlurProps {
  */
 export function GaussianBlur({ id = 'gaussian-blur', enabled = true, order = 350, radius = 3, sigma = 2 }: GaussianBlurProps) {
   const radiusU = useUniform(radius)
-  usePostFXEffect(id, { enabled, order, build: ({ input }) => gaussianBlur(input, vec2(radiusU, radiusU), sigma) }, [sigma])
+  // Structural: every new value rebuilds the chain, and a slider drag delivers
+  // fractions, so snap to the control's step to rebuild a handful of times.
+  const kernel = Math.round(sigma * 2) / 2
+  usePostFXEffect(id, { enabled, order, build: ({ input }) => gaussianBlur(input, vec2(radiusU, radiusU), kernel) }, [kernel])
   return null
 }
 
@@ -35,9 +38,10 @@ export const feature: Feature = {
   cost: 'high',
   order: 350,
   enabled: false,
+  description: 'Smooth full-frame Gaussian blur',
   component: GaussianBlur,
   controls: {
     radius: { type: 'number', value: 3, min: 0.1, max: 12, step: 0.1 },
-    sigma: { type: 'number', value: 2, min: 0.5, max: 8, step: 0.1 },
+    sigma: { type: 'number', value: 2, min: 0.5, max: 8, step: 0.5 },
   },
 }

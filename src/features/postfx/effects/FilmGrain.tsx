@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 800,
   enabled: false,
+  description: 'Animated photographic noise over the image',
   component: FilmGrain,
   controls: {
     intensity: { type: 'number', value: 0.12, min: 0, max: 1, step: 0.005 },

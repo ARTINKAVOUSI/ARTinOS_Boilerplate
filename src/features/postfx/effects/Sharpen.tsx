@@ -34,6 +34,7 @@ export const feature: Feature = {
   cost: 'medium',
   order: 406,
   enabled: false,
+  description: 'Contrast-adaptive sharpening, with optional noise suppression',
   component: Sharpen,
   controls: {
     sharpness: { type: 'number', value: 0.35, min: 0, max: 2, step: 0.01 },

@@ -44,6 +44,9 @@ function initialFeatures(): Record<string, FeatureState> {
   return result
 }
 
+/** A `blob:` URL (a file dropped into the Library's Assets) dies with the page that made it. */
+const deadAfterReload = (value: unknown) => typeof value === 'string' && value.startsWith('blob:')
+
 /** Merge persisted state over defaults, dropping features and controls that no longer exist. */
 function reconcile(saved: Record<string, FeatureState> | undefined): Record<string, FeatureState> {
   const base = initialFeatures()
@@ -52,7 +55,7 @@ function reconcile(saved: Record<string, FeatureState> | undefined): Record<stri
     const previous = saved[id]
     if (!previous) continue
     const values = { ...state.values }
-    for (const key of Object.keys(values)) if (key in (previous.values ?? {})) values[key] = previous.values[key]
+    for (const key of Object.keys(values)) if (key in (previous.values ?? {}) && !deadAfterReload(previous.values[key])) values[key] = previous.values[key]
     base[id] = { enabled: previous.enabled ?? state.enabled, values, order: previous.order ?? state.order }
   }
   return base
@@ -80,19 +83,42 @@ function load(): StudioState {
 let state = load()
 const listeners = new Set<() => void>()
 let saveTimer: ReturnType<typeof setTimeout> | undefined
+/** When the first unsaved change happened, so a steady stream of changes still gets saved. */
+let dirtySince = 0
+
+function save() {
+  clearTimeout(saveTimer)
+  saveTimer = undefined
+  dirtySince = 0
+  try {
+    // `reveal` is a one-off request to the panels, not something to restore.
+    const { features, presets, ui } = state
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: VERSION, features, presets, ui }))
+  } catch {
+    /* storage unavailable — the session still works */
+  }
+}
+
+// Saving is debounced; write the last change out if the page goes away first.
+if (typeof window !== 'undefined') window.addEventListener('pagehide', () => saveTimer !== undefined && save())
 
 function commit(next: StudioState) {
   state = next
   listeners.forEach(listener => listener())
+  // Debounced, but never put off for more than a second: a control a graph keeps
+  // driving would otherwise postpone the save forever.
+  const now = Date.now()
+  dirtySince ||= now
   clearTimeout(saveTimer)
-  saveTimer = setTimeout(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: VERSION, ...state }))
-    } catch {
-      /* storage unavailable — the session still works */
-    }
-  }, 150)
+  saveTimer = setTimeout(save, now - dirtySince > 1000 ? 0 : 150)
 }
+
+/** Chain position of an effect: the studio's override, else its manifest, else the host default. */
+export const effectOrder = (id: string, states = state.features) => states[id]?.order ?? findFeature(id)?.order ?? 500
+
+let lastReveal = 0
+/** How long a palette jump stays live: long enough for the panel to open and act on it. */
+const REVEAL_MS = 2500
 
 const subscribe = (listener: () => void) => {
   listeners.add(listener)
@@ -112,7 +138,7 @@ export const studio = {
 
   setValue(id: string, key: string, value: ControlValue) {
     const current = state.features[id]
-    if (!current) return
+    if (!current || Object.is(current.values[key], value)) return
     commit({ ...state, features: { ...state.features, [id]: { ...current, values: { ...current.values, [key]: value } } } })
   },
 
@@ -140,7 +166,7 @@ export const studio = {
   moveEffect(id: string, direction: -1 | 1) {
     const effects = features
       .filter(feature => feature.kind === 'effect' && state.features[feature.id]?.enabled)
-      .map(feature => ({ id: feature.id, order: state.features[feature.id]?.order ?? feature.order ?? 500 }))
+      .map(feature => ({ id: feature.id, order: effectOrder(feature.id) }))
       .sort((a, b) => a.order - b.order)
     const index = effects.findIndex(effect => effect.id === id)
     const swap = effects[index + direction]
@@ -182,13 +208,21 @@ export const studio = {
     commit({ ...state, features: reconcile(parsed.features) })
   },
 
-  /** Point the panels at one control: the owning card opens and the row is highlighted. */
+  /**
+   * Point the panels at one control: the owning card opens and the row is
+   * highlighted. A one-off request, cleared after a moment, so a panel opened
+   * later does not replay it and the highlight does not stay forever.
+   */
   reveal(featureId: string, control?: string) {
-    commit({ ...state, reveal: { featureId, control, at: Date.now() } })
+    const at = (lastReveal = Math.max(Date.now(), lastReveal + 1))
+    commit({ ...state, reveal: { featureId, control, at } })
+    setTimeout(() => state.reveal?.at === at && commit({ ...state, reveal: null }), REVEAL_MS)
   },
 
   setUI(patch: Partial<StudioState['ui']>) {
-    commit({ ...state, ui: { ...state.ui, ...patch } })
+    const ui = { ...state.ui, ...patch }
+    if (ui.visible === state.ui.visible && ui.theme === state.ui.theme && ui.advanced === state.ui.advanced) return
+    commit({ ...state, ui })
   },
 }
 

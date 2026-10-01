@@ -8,7 +8,7 @@
  * the viewport and the render pipeline that draws them.
  */
 import { features } from './registry'
-import { studio } from './store'
+import { effectOrder, studio } from './store'
 import { graphs, parameterId } from './graphs'
 import { runtime } from './runtime'
 import { signalBus } from './signals'
@@ -16,7 +16,7 @@ import { pipelineStages } from './pipeline-stages'
 import { drivenParameters, fieldValue } from '../ui/NodeGraph/graph'
 import { LIVE_COLUMN_STEP, measureLiveNode, type LiveControl, type LiveEdge, type LiveGraph, type LiveNode } from '../ui/NodeGraph/LiveGraphView'
 
-export const LIVE_COLUMNS = ['Input', 'Logic', 'Parameters', 'Scene', 'Render']
+const LIVE_COLUMNS = ['Input', 'Logic', 'Parameters', 'Scene', 'Render']
 const ROW_GAP = 18
 const SIGNAL_LIMIT = 14
 const SCENE_LIMIT = 14
@@ -24,25 +24,10 @@ const SCENE_LIMIT = 14
 const MOVING_MS = 600
 
 // The objects the scene column shows, by node id, for the inspector and controls.
+// Rebuilt with the graph, so a removed object is never kept alive or edited.
 const liveObjects = new Map<string, Record<string, unknown>>()
 export const liveObject = (nodeId: string) => liveObjects.get(nodeId)
 const short = (value: number) => (Number.isFinite(value) ? (Math.abs(value) >= 1000 ? value.toFixed(0) : value.toFixed(3)) : '—')
-
-/** Which MRT attachment an effect asks the pipeline for — the same list the host uses. */
-const NEEDS: Record<string, readonly string[]> = {
-  'effect.ssao': ['normal', 'depth'],
-  'effect.ssgi': ['normal', 'depth'],
-  'effect.ssr': ['normal', 'depth', 'metalRoughness'],
-  'effect.motion-blur': ['velocity'],
-  'effect.traa': ['velocity'],
-  'effect.taau': ['velocity', 'depth'],
-  'effect.depth-of-field': ['depth'],
-  'effect.god-rays': ['depth'],
-  'effect.screen-space-shadows': ['depth', 'normal'],
-  'effect.subsurface': ['depth'],
-  'effect.denoise': ['normal', 'depth'],
-  'effect.recurrent-denoise': ['normal', 'depth', 'velocity'],
-}
 
 /** What a live node stands for, so the inspector can edit it rather than describe it. */
 export type LiveTarget =
@@ -83,6 +68,7 @@ export function buildLiveGraph(): LiveGraph {
   const edges: LiveEdge[] = []
   const cursor = [0, 0, 0, 0, 0]
   targets.clear()
+  liveObjects.clear()
 
   const place = (node: Omit<LiveNode, 'x' | 'y' | 'height' | 'controls' | 'preview'> & { controls?: LiveControl[]; preview?: 'value' | 'render' | 'none'; target?: LiveTarget }) => {
     const controls = node.controls ?? []
@@ -145,8 +131,11 @@ export function buildLiveGraph(): LiveGraph {
     const feature = features.find(item => item.id === featureId)
     const control = feature?.controls?.[name]
     if (!feature || !control) continue
+    // The node reads the live, driven value; its `base` control is the value set by hand.
     const value = values(featureId)[name] ?? control.value
     const number = typeof value === 'number' ? value : null
+    const base = graphs.getAuthored(id) ?? value
+    const baseNumber = typeof base === 'number' ? base : null
     place({
       id: `parameter:${id}`,
       kind: 'parameter',
@@ -158,27 +147,27 @@ export function buildLiveGraph(): LiveGraph {
       preview: number !== null ? 'value' : 'none',
       target: { kind: 'parameter', id },
       controls:
-        number !== null
+        baseNumber !== null
           ? [
               {
                 kind: 'number',
                 id,
                 label: 'base',
-                value: number,
+                value: baseNumber,
                 min: control.type === 'number' ? (control.min ?? 0) : 0,
-                max: control.type === 'number' ? (control.max ?? Math.max(1, number * 2)) : Math.max(1, number * 2),
+                max: control.type === 'number' ? (control.max ?? Math.max(1, baseNumber * 2)) : Math.max(1, baseNumber * 2),
                 step: control.type === 'number' ? (control.step ?? 0.01) : 0.01,
               },
             ]
-          : typeof value === 'boolean'
-            ? [{ kind: 'boolean', id, label: 'base', value }]
-            : [{ kind: 'readout', id, label: 'base', value: String(value) }],
+          : typeof base === 'boolean'
+            ? [{ kind: 'boolean', id, label: 'base', value: base }]
+            : [{ kind: 'readout', id, label: 'base', value: String(base) }],
     })
     for (const document of running) if (drivenParameters(document.graph).includes(id)) link(`graph:${document.id}`, `parameter:${id}`)
   }
 
   // ── Scene: the real objects in the viewport ─────────────────────────────
-  type SceneThing = { name?: string; type?: string; visible?: boolean; intensity?: number; isMesh?: boolean; isLight?: boolean; isCamera?: boolean; parent?: SceneThing | null }
+  type SceneThing = { uuid: string; name?: string; type?: string; visible?: boolean; intensity?: number; isMesh?: boolean; isLight?: boolean; isCamera?: boolean; parent?: SceneThing | null }
   const objects: SceneThing[] = []
   let meshes = 0
   let lights = 0
@@ -191,9 +180,11 @@ export function buildLiveGraph(): LiveGraph {
     if (thing.isMesh || thing.isLight || thing.isCamera) objects.push(thing)
   })
   const shown = objects.slice(0, SCENE_LIMIT)
+  // By uuid, so a node keeps standing for the same object when others come and go.
+  const objectIds = shown.map(object => `object:${object.uuid}`)
   shown.forEach((object, index) => {
     const kindLabel = object.isMesh ? 'mesh' : object.isLight ? 'light' : 'camera'
-    const id = `object:${index}`
+    const id = objectIds[index]
     place({
       id,
       kind: 'object',
@@ -214,7 +205,7 @@ export function buildLiveGraph(): LiveGraph {
   for (const id of driven) {
     const featureId = id.split(':')[0]
     const feature = features.find(item => item.id === featureId)
-    if (feature && feature.kind !== 'effect') for (let index = 0; index < shown.length; index++) link(`parameter:${id}`, `object:${index}`)
+    if (feature && feature.kind !== 'effect') for (const objectId of objectIds) link(`parameter:${id}`, objectId)
   }
 
   // ── Render: the pipeline in the order it actually runs ───────────────────
@@ -230,12 +221,14 @@ export function buildLiveGraph(): LiveGraph {
     preview: 'render',
     target: { kind: 'pass', id: 'pass:scene' },
   })
-  shown.forEach((_, index) => link(`object:${index}`, scenePass.id))
+  for (const objectId of objectIds) link(objectId, scenePass.id)
 
-  // The G-buffer targets the pipeline actually rendered this build.
-  const published = new Set(pipelineStages.getStages().map(stage => stage.id))
+  // The G-buffer targets the pipeline actually rendered this build, and what each effect read from them.
+  const stages = pipelineStages.getStages()
+  const published = new Set(stages.map(stage => stage.id))
+  const reads = new Map(stages.filter(stage => stage.reads).map(stage => [liveNodeForStage(stage.id), stage.reads!]))
   const attachments: string[] = []
-  for (const attachment of ['depth', 'normal', 'velocity', 'metalRoughness']) {
+  for (const attachment of ['depth', 'normal', 'velocity', 'metalRoughness', 'diffuse']) {
     if (!published.has(`pass:${attachment}`)) continue
     attachments.push(attachment)
     place({ id: `pass:${attachment}`, kind: 'pass', title: attachment, subtitle: 'g-buffer', column: 4, preview: 'render', target: { kind: 'pass', id: `pass:${attachment}` } })
@@ -244,7 +237,7 @@ export function buildLiveGraph(): LiveGraph {
 
   const active = features
     .filter(feature => feature.kind === 'effect' && on(feature.id))
-    .sort((a, b) => (state.features[a.id]?.order ?? a.order ?? 500) - (state.features[b.id]?.order ?? b.order ?? 500))
+    .sort((a, b) => effectOrder(a.id, state.features) - effectOrder(b.id, state.features))
 
   let previous = scenePass.id
   for (const feature of active) {
@@ -260,8 +253,8 @@ export function buildLiveGraph(): LiveGraph {
       controls: [{ kind: 'boolean', id: 'enabled', label: 'enabled', value: true }, ...controlsOf(feature.id, values(feature.id), feature.controls)],
     })
     link(previous, node.id)
-    // Effects that read an attachment are wired from it, as in the original.
-    for (const attachment of attachments) if ((NEEDS[feature.id] ?? []).includes(attachment)) link(`pass:${attachment}`, node.id)
+    // Effects that read an attachment are wired from it.
+    for (const attachment of attachments) if (reads.get(node.id)?.includes(attachment)) link(`pass:${attachment}`, node.id)
     for (const id of driven) if (id.startsWith(`${feature.id}:`)) link(`parameter:${id}`, node.id)
     previous = node.id
   }
@@ -311,8 +304,9 @@ export function applyLiveControl(nodeId: string, controlId: string, value: numbe
     studio.setEnabled(id, !!value)
     return
   }
-  if (nodeId === 'pass:scene' && controlId === 'enabled') {
-    studio.setEnabled('postfx', !!value)
+  // A driven parameter's `base` is the value set by hand, which its graph returns to when it stops.
+  if (kind === 'parameter' && typeof value !== 'string') {
+    graphs.setAuthored(controlId, value)
     return
   }
   // Everything else addresses a control directly: `feature.id:control`.

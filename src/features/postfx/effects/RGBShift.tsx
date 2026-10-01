@@ -44,6 +44,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 610,
   enabled: false,
+  description: 'Offsets the red and blue channels in opposite directions',
   component: RGBShift,
   controls: {
     amount: { type: 'number', value: 0.003, min: 0, max: 0.05, step: 0.0001 },

@@ -8,7 +8,7 @@ export interface BackgroundProps {
 }
 
 /** Background — a solid scene background colour. An Environment with `background` draws over it. */
-export function Background({ color = '#15171a' }: BackgroundProps) {
+export function Background({ color = '#1a1c1f' }: BackgroundProps) {
   const scene = useThree(state => state.scene)
   useEffect(() => {
     const previous = scene.background
@@ -29,6 +29,7 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Atmosphere',
   order: 15,
+  description: 'A solid scene background colour',
   component: Background,
   controls: {
     color: { type: 'color', value: '#1a1c1f' },

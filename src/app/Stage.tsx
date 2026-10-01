@@ -5,22 +5,41 @@ import { WebGPUCanvas, type RendererBackend } from '../features/canvas/WebGPUCan
 import type { DiscoveredFeature } from './feature'
 import { FeatureBoundary } from './FeatureBoundary'
 import { byKind } from './registry'
-import { useStudio, type FeatureState } from './store'
+import { useFeatureState } from './store'
 import { runtime } from './runtime'
 import { nodePreviews } from './node-preview'
 import { pipelineStages } from './pipeline-stages'
 import { signalBus } from './signals'
 
-const selectFeatures = (state: { features: Record<string, FeatureState> }) => state.features
-
-/** Render one feature with its current values, isolated from the others. */
-export function renderFeature(feature: DiscoveredFeature, state: FeatureState | undefined, extra?: Record<string, unknown>, children?: ReactNode) {
+/**
+ * One feature, mounted while it is switched on and isolated from the others.
+ * It reads only its own state, so dragging a slider re-renders that feature
+ * alone, never the scene around it.
+ */
+export function FeatureMount({ feature, extra }: { feature: DiscoveredFeature; extra?: Record<string, unknown> }) {
+  const state = useFeatureState(feature.id)
+  if (!state?.enabled) return null
   const Component = feature.component
-  const props = { ...state?.values, ...extra }
+  // Effects take their chain position from the studio, which can reorder them.
+  const order = feature.kind === 'effect' ? { order: state.order ?? feature.order } : null
   return (
-    <FeatureBoundary key={feature.id} id={feature.id} resetKey={JSON.stringify(state?.values)}>
-      <Component {...props}>{children}</Component>
+    // A new values object is a new attempt after a crash.
+    <FeatureBoundary id={feature.id} resetKey={state.values}>
+      <Component {...state.values} {...order} {...extra} />
     </FeatureBoundary>
+  )
+}
+
+/** A canvas provider (the PostFX host): always mounted, so switching it off never remounts the scene. */
+function ProviderMount({ feature, children }: { feature: DiscoveredFeature; children: ReactNode }) {
+  const state = useFeatureState(feature.id)
+  // Attachments the Graph panel wants rendered for its previews.
+  const attachments = useSyncExternalStore(pipelineStages.subscribeWanted, pipelineStages.getWanted, pipelineStages.getWanted)
+  const Provider = feature.component
+  return (
+    <Provider {...state?.values} enabled={!!state?.enabled} attachments={attachments} onStages={pipelineStages.publish}>
+      {children}
+    </Provider>
   )
 }
 
@@ -53,39 +72,24 @@ export interface StageProps {
 }
 
 /**
- * The 3D view: every enabled scene feature, and every enabled effect inside
- * the canvas providers (the PostFX pipeline).
+ * The 3D view: every scene feature, and every effect inside the canvas
+ * providers (the PostFX pipeline). The tree is built once; each feature
+ * mounts and unmounts itself as it is switched on and off.
  */
 export function Stage({ onReady }: StageProps) {
-  const states = useStudio(selectFeatures)
-  // Attachments the Graph panel wants rendered for its previews.
-  const attachments = useSyncExternalStore(pipelineStages.subscribeWanted, pipelineStages.getWanted, pipelineStages.getWanted)
-
   const tree = useMemo(() => {
-    const on = (feature: DiscoveredFeature) => states[feature.id]?.enabled
-    const scene = sceneFeatures.filter(on).map(feature => renderFeature(feature, states[feature.id]))
     // Effects only exist inside the pipeline host; without it they are skipped, not broken.
-    const effects = canvasProviders.some(provider => provider.id === 'postfx')
-      ? effectFeatures.filter(on).map(feature => renderFeature(feature, states[feature.id], { order: states[feature.id]?.order ?? feature.order }))
-      : null
-
-    let content: ReactNode = (
-      <>
-        {scene}
-        {effects}
-      </>
-    )
-    // Providers stay mounted when switched off (they get `enabled`), so the scene never remounts.
+    const effects = canvasProviders.some(provider => provider.id === 'postfx') ? effectFeatures : []
+    let content: ReactNode = [...sceneFeatures, ...effects].map(feature => <FeatureMount key={feature.id} feature={feature} />)
     for (const provider of [...canvasProviders].reverse()) {
-      const Provider = provider.component
       content = (
-        <Provider key={provider.id} {...states[provider.id]?.values} enabled={on(provider)} attachments={attachments} onStages={pipelineStages.publish}>
+        <ProviderMount key={provider.id} feature={provider}>
           {content}
-        </Provider>
+        </ProviderMount>
       )
     }
     return content
-  }, [states, attachments])
+  }, [])
 
   // No MSAA: the pipeline renders to its own targets, and temporal/SSAA passes
   // need single-sample depth. FXAA / SMAA / TRAA do the anti-aliasing.

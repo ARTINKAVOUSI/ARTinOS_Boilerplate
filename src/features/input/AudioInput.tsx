@@ -22,7 +22,7 @@ export interface AudioInputProps {
  * Browsers only allow audio after a user gesture; turning `source` on from a
  * click satisfies that.
  */
-export function AudioInput({ children, source = 'off', gain = 1, smoothing = 0.72, onStatus }: AudioInputProps) {
+export function AudioInput({ children, source = 'off', gain = 1.4, smoothing = 0.72, onStatus }: AudioInputProps) {
   const bus = useSignals()
   useSignalCleanup('audio')
   // Tuning changes apply live instead of restarting the microphone.
@@ -54,7 +54,15 @@ export function AudioInput({ children, source = 'off', gain = 1, smoothing = 0.7
           return
         }
         const context = new AudioContext()
+        // Until the loop runs, `stop` releases just these two, so switching off or unmounting
+        // during resume() leaves no live microphone or open context behind.
+        stop = () => {
+          stream.getTracks().forEach(track => track.stop())
+          void context.close()
+        }
         await context.resume()
+        // The cleanup has already called the `stop` above.
+        if (cancelled) return
         const input = context.createMediaStreamSource(stream)
         const analyser = context.createAnalyser()
         analyser.fftSize = 2048
@@ -103,9 +111,6 @@ export function AudioInput({ children, source = 'off', gain = 1, smoothing = 0.7
           bus.set('audio.beat', beat)
           frame = requestAnimationFrame(tick)
         }
-        frame = requestAnimationFrame(tick)
-        report('on')
-
         stop = () => {
           cancelAnimationFrame(frame)
           input.disconnect()
@@ -113,9 +118,13 @@ export function AudioInput({ children, source = 'off', gain = 1, smoothing = 0.7
           stream.getTracks().forEach(track => track.stop())
           void context.close()
         }
+        frame = requestAnimationFrame(tick)
+        report('on')
       })
       .catch(error => {
         if (cancelled) return
+        stop()
+        stop = () => {}
         console.warn('[audio] microphone unavailable', error)
         report('denied')
       })

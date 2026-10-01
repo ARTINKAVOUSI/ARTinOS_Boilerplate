@@ -409,9 +409,11 @@ export function Slider(props: SliderProps) {
     pulse(next ? 'on' : 'off', 320);
   };
 
-  /* wheel: guarded — edits only a focused, enabled slider */
-  const wheelRef = useRef({ nudge, enabled });
-  wheelRef.current = { nudge, enabled };
+  /* wheel: guarded — edits only a focused, enabled slider. onCommit is "once, on
+     release", so a run of wheel steps commits once, 250 ms after the last. */
+  const commitWheel = () => onCommit?.(live.current);
+  const wheelRef = useRef({ nudge, enabled, commitWheel });
+  wheelRef.current = { nudge, enabled, commitWheel };
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -421,6 +423,8 @@ export function Slider(props: SliderProps) {
       if (!dv) return;
       e.preventDefault();
       wheelRef.current.nudge(dv > 0 ? 1 : -1, e);
+      clearTimeout(timers.current.w);
+      timers.current.w = setTimeout(() => wheelRef.current.commitWheel(), 250);
     };
     el.addEventListener('wheel', h, { passive: false });
     return () => el.removeEventListener('wheel', h);

@@ -21,6 +21,11 @@
   font-size: 11px;
   outline: none;
 }
+/* The root takes the keyboard shortcuts: show when it holds keyboard focus. */
+.ngraph:focus-visible {
+  outline: 1px solid var(--ar-signal, var(--ng-accent));
+  outline-offset: -1px;
+}
 
 /* ── toolbar ─────────────────────────────────────────────────────────────── */
 .ngraph-toolbar {

@@ -55,12 +55,17 @@ export function PointerInput({ children, decay = 6 }: PointerInputProps) {
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerdown', onDown, { passive: true })
     window.addEventListener('pointerup', onUp, { passive: true })
+    // A cancelled touch or a lost window focus never sends pointerup, so `pointer.down` would stick.
+    window.addEventListener('pointercancel', onUp, { passive: true })
+    window.addEventListener('blur', onUp)
     window.addEventListener('wheel', onWheel, { passive: true })
     frame = requestAnimationFrame(tick)
     return () => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      window.removeEventListener('blur', onUp)
       window.removeEventListener('wheel', onWheel)
       cancelAnimationFrame(frame)
     }

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { connectionError, createNode, edgesInto, inputsOf, outputsOf, topologicalOrder, type GraphDefinition, type GraphEdge, type GraphNode } from './graph'
+import { connectionError, createNode, edgesInto, topologicalOrder, type GraphDefinition, type GraphEdge, type GraphNode } from './graph'
 
 const HISTORY_LIMIT = 60
 const PASTE_OFFSET = 28
@@ -222,9 +222,3 @@ export function useGraphEditor(graph: GraphDefinition, onChange: (next: GraphDef
     [apply, graph],
   )
 }
-
-/** Ports with their wiring state, for drawing a node. */
-export const portState = (graph: GraphDefinition, node: GraphNode) => ({
-  inputs: inputsOf(node).map(port => ({ port, wired: edgesInto(graph, node.id, port.id).length > 0 })),
-  outputs: outputsOf(node).map(port => ({ port, wired: graph.edges.some(edge => edge.from === node.id && (edge.output ?? 'value') === port.id) })),
-})

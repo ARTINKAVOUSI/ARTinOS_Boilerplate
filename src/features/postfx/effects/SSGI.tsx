@@ -29,14 +29,21 @@ export function SSGI({ id = 'ssgi', enabled = true, order = 30, sliceCount = 2, 
   usePostFXEffect(id, {
     enabled,
     order,
-    needs: ['normal'],
+    needs: ['normal', 'diffuse'],
     webgpuOnly: true,
-    build: ({ input, depth, normal, camera }) => {
-      if (!normal) return null
-      const gi = ssgi(input, depth, normal, camera as PerspectiveCamera)
-      gi.sliceCount = sliceCountU
-      gi.stepCount = stepCountU
-      return vec4(input.rgb.mul(gi.a).add(input.rgb.mul(gi.rgb).mul(intensityU)), input.a)
+    build: ({ input, depth, normal, diffuse, camera }) => {
+      if (!normal || !diffuse) return null
+      const node = ssgi(input, depth, normal, camera as PerspectiveCamera)
+      node.sliceCount = sliceCountU
+      node.stepCount = stepCountU
+      // Since r185 the node renders two textures: AO (one channel, in .r) and
+      // GI (rgb). The node itself stands for the AO texture, so reading its
+      // .rgb / .a gives (ao, 0, 0) and 1 — a red wash and no occlusion.
+      const ao = node.getAONode().r
+      const gi = node.getGINode().rgb
+      // As three.js composites it: occlusion darkens the lit image, and bounce
+      // light lands on the surface's albedo, not on the already-lit colour.
+      return vec4(input.rgb.mul(ao).add(diffuse.rgb.mul(gi).mul(intensityU)), input.a)
     },
   })
   return null
@@ -51,8 +58,10 @@ export const feature: Feature = {
   category: 'screen-space',
   cost: 'very-high',
   order: 30,
-  enabled: false,
+  // On by default: the default stage is lit to be seen through it.
+  enabled: true,
   webgpuOnly: true,
+  description: 'Screen-space bounce light and ambient occlusion',
   component: SSGI,
   controls: {
     sliceCount: { type: 'number', value: 2, min: 1, max: 4, step: 1 },

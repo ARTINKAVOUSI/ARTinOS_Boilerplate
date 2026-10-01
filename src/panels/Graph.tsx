@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { PanelManifest } from '../app/panel'
-import { GRAPH_TEMPLATES, effectOptions, graphs, objectOptions, parameterOptions, useGraphs } from '../app/graphs'
+import { GRAPH_TEMPLATES, effectOptions, graphs, objectOptions, parameterOptions, useGraphs, type GraphDocument, type GraphsState } from '../app/graphs'
 import { applyLiveControl, buildLiveGraph, liveNodeForStage, liveTarget } from '../app/live-graph'
 import { nodePreviews } from '../app/node-preview'
 import { pipelineStages } from '../app/pipeline-stages'
 import { LiveInspector } from '../app/studio/LiveInspector'
+import { downloadText } from '../app/studio/files'
 import { NodeGraph } from '../ui/NodeGraph/NodeGraph'
 import { LiveGraphView, type LiveNode } from '../ui/NodeGraph/LiveGraphView'
+import type { PreviewFrame } from '../ui/NodeGraph/NodePreview'
 import { GRAPH_DOMAINS, type GraphDiagnostic, type GraphDomain } from '../ui/NodeGraph/graph'
 import { useSignalSnapshot } from '../app/signals'
 import { Select } from '../ui/Select/Select'
@@ -21,6 +23,15 @@ import { useToast } from '../ui/Toast/Toast'
 
 type Mode = 'live' | 'edit'
 
+/** How often the live view is rebuilt from the runtime. */
+const LIVE_REBUILD_MS = 250
+/** How long a one-line notice ("Created …") stays up. */
+const NOTICE_MS = 2600
+/** The editor's signal pickers only need to notice new signals, not follow values. */
+const PICKER_SIGNAL_HZ = 4
+/** Room the overlay takes on the right of the live canvas (matches its CSS width). */
+const OVERLAY_INSET = 280
+
 const LIVE_HINT = 'Generated from the running runtime: live signals, the logic consuming them, the parameters they drive, the objects in the viewport and the render pipeline.'
 const DOMAIN_HELP: Record<GraphDomain, string> = {
   signal: 'Shapes live signals and writes them back as signals or controls.',
@@ -30,10 +41,19 @@ const DOMAIN_HELP: Record<GraphDomain, string> = {
   gpu: 'Compiles to TSL. The Graph effect renders what the TSL Output publishes.',
 }
 
-function download(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
-  Object.assign(document.createElement('a'), { href: url, download: name }).click()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+/**
+ * The editor canvas with its pickers' sources. Mounted only in edit mode, so the
+ * live view never polls the signal bus or walks the scene for object names.
+ */
+function GraphEditor({ document, readouts, frames, notes, onDiagnostics }: { document: GraphDocument; readouts: ReadonlyMap<string, unknown> | undefined; frames: ReadonlyMap<string, PreviewFrame>; notes: GraphDiagnostic[]; onDiagnostics: (items: GraphDiagnostic[]) => void }) {
+  // Joined so the list compares by content: it changes when a signal appears, not on every poll.
+  const signalKey = useSignalSnapshot(PICKER_SIGNAL_HZ)
+    .map(([name]) => name)
+    .join('\n')
+  const parameters = useMemo(parameterOptions, [])
+  const effects = useMemo(effectOptions, [])
+  const sources = useMemo(() => ({ signals: signalKey ? signalKey.split('\n') : [], parameters, effects, objects: objectOptions() }), [signalKey, parameters, effects])
+  return <NodeGraph value={document.graph} onChange={graph => graphs.setGraph(document.id, graph)} readouts={readouts} frames={frames} sources={sources} runtimeDiagnostics={notes} onDiagnostics={onDiagnostics} />
 }
 
 function Graph() {
@@ -67,7 +87,7 @@ function Graph() {
   // The live view is rebuilt from the runtime a few times a second.
   useEffect(() => {
     if (mode !== 'live') return
-    const timer = setInterval(() => setTick(value => value + 1), 250)
+    const timer = setInterval(() => setTick(value => value + 1), LIVE_REBUILD_MS)
     return () => clearInterval(timer)
   }, [mode])
   const liveGraph = useMemo(() => (mode === 'live' ? buildLiveGraph() : null), [mode, tick])
@@ -88,17 +108,14 @@ function Graph() {
     for (const [nodeId, node] of build.values) nodePreviews.request(nodeId, node)
     nodePreviews.keepOnly([...build.values.keys()])
   }, [mode, stages, build])
+  // A closed panel stops the captures (each one a GPU readback) and frees their target.
+  useEffect(() => () => nodePreviews.keepOnly([]), [])
 
   useEffect(() => {
     if (!notice) return
-    const timer = setTimeout(() => setNotice(null), 2600)
+    const timer = setTimeout(() => setNotice(null), NOTICE_MS)
     return () => clearTimeout(timer)
   }, [notice])
-
-  const signals = useSignalSnapshot(4).map(([name]) => name)
-  const parameters = useMemo(parameterOptions, [])
-  const effects = useMemo(effectOptions, [])
-  const sources = useMemo(() => ({ signals, parameters, effects, objects: objectOptions() }), [signals, parameters, effects])
 
   const notes = useMemo(
     () => (active ? [...(runtimeNotes[active.id] ?? []), ...(active.domain === 'gpu' ? (compiled[active.id]?.diagnostics ?? []) : [])] : []),
@@ -161,7 +178,7 @@ function Graph() {
           <LiveGraphView
             graph={liveGraph}
             previews={previews}
-            insetRight={overlay ? 280 : 0}
+            insetRight={overlay ? OVERLAY_INSET : 0}
             onInspect={node => {
               setLiveSelected(node)
               setOverlay('inspector')
@@ -172,18 +189,9 @@ function Graph() {
 
         {mode === 'edit' &&
           (active ? (
-            <NodeGraph
-              key={active.id}
-              value={active.graph}
-              onChange={graph => graphs.setGraph(active.id, graph)}
-              readouts={readouts[active.id]}
-              frames={previews}
-              sources={sources}
-              runtimeDiagnostics={notes}
-              onDiagnostics={setDiagnostics}
-            />
+            <GraphEditor key={active.id} document={active} readouts={readouts[active.id]} frames={previews} notes={notes} onDiagnostics={setDiagnostics} />
           ) : (
-            <p className="artinos-gempty">No graphs yet. Open the ⚙ panel to create one from a template.</p>
+            <p className="artinos-gempty">No graphs yet. Open the graphs overlay (the bookmark in the bar) to create one from a template.</p>
           ))}
 
         {overlay && (
@@ -204,7 +212,7 @@ function Graph() {
                     setMode('edit')
                   }}
                   onCreate={create}
-                  onExport={() => download('artinos-graphs.json', graphs.exportJSON())}
+                  onExport={() => downloadText('artinos-graphs.json', graphs.exportJSON())}
                   onImport={() => file.current?.click()}
                   onDelete={() => {
                     if (!active) return
@@ -269,7 +277,7 @@ function Graph() {
   )
 }
 
-/** The ⚙ overlay: the graphs that exist, the templates, and portability. */
+/** The graphs overlay: the graphs that exist, the templates, and portability. */
 function GraphLibrary({
   documents,
   activeId,
@@ -320,14 +328,11 @@ function GraphLibrary({
   )
 }
 
+/** A string, so the footer re-renders when the counts change, not on every readout. */
+const selectCounts = ({ documents }: GraphsState) => `${documents.length} GRAPHS · ${documents.filter(document => document.running).length} RUNNING`
+
 function GraphFooter() {
-  const { documents } = useGraphs()
-  const running = documents.filter(document => document.running).length
-  return (
-    <>
-      PIPELINE · {documents.length} GRAPHS · {running} RUNNING
-    </>
-  )
+  return <>PIPELINE · {useGraphs(selectCounts)}</>
 }
 
 export default Graph

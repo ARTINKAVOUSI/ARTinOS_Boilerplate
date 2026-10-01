@@ -65,6 +65,7 @@ export const feature: Feature = {
   group: 'Diagnostics',
   order: 981,
   enabled: false,
+  description: 'A live list of every signal on the bus, with level meters',
   component: SignalMonitor,
   controls: {
     filter: { type: 'text', value: '', placeholder: 'e.g. audio' },

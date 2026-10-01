@@ -286,7 +286,7 @@ export function RangeSlider(props: RangeSliderProps) {
       const b = parts[1] !== undefined ? parseTyped(parts[1], format) : null;
       if (a !== null && b !== null) emit([Math.min(lim(a), lim(b)), Math.max(lim(a), lim(b))]);
       else if (a !== null) setEnd(active, lim(a));
-      onCommit?.(live.current);
+      if (a !== null) onCommit?.(live.current); // text that did not parse changes nothing, so commits nothing
     }
     thumbs[active].current?.focus({ preventScroll: true });
   };
@@ -312,8 +312,10 @@ export function RangeSlider(props: RangeSliderProps) {
     pulse(next ? 'on' : 'off', 320);
   };
 
-  const wheelRef = useRef({ nudge, enabled });
-  wheelRef.current = { nudge, enabled };
+  // onCommit is "once, on release": a run of wheel steps commits once, 250 ms after the last.
+  const commitWheel = () => onCommit?.(live.current);
+  const wheelRef = useRef({ nudge, enabled, commitWheel });
+  wheelRef.current = { nudge, enabled, commitWheel };
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -324,6 +326,8 @@ export function RangeSlider(props: RangeSliderProps) {
       if (!dv) return;
       e.preventDefault();
       wheelRef.current.nudge(which, dv > 0 ? 1 : -1, e);
+      clearTimeout(timers.current.w);
+      timers.current.w = setTimeout(() => wheelRef.current.commitWheel(), 250);
     };
     el.addEventListener('wheel', h, { passive: false });
     return () => el.removeEventListener('wheel', h);

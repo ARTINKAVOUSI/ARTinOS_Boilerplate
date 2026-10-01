@@ -43,6 +43,7 @@ export const feature: Feature = {
   order: 20,
   enabled: false,
   webgpuOnly: true,
+  description: 'Reflects what is already on screen onto glossy surfaces',
   component: SSR,
   controls: {
     stochastic: { type: 'boolean', value: false },

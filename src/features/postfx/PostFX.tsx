@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useSyncExternalStore, type DependencyList, type ReactNode } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { RenderPipeline, type Camera, type Object3D, type Scene, type WebGPURenderer } from 'three/webgpu'
-import { packNormalToRGB, metalness, mrt, normalView, output, pass, roughness, uniform, vec2, vec4, velocity } from 'three/tsl'
+import { RenderPipeline, UnsignedByteType, type Camera, type Object3D, type Scene, type WebGPURenderer } from 'three/webgpu'
+import { diffuseColor, packNormalToRGB, metalness, mrt, normalView, output, pass, roughness, uniform, vec2, vec4, velocity } from 'three/tsl'
 import type { Feature } from '../../app/feature'
 
 /**
@@ -31,7 +31,7 @@ import type { Feature } from '../../app/feature'
 export type TSLNode = any
 
 /** Extra scene-pass attachments an effect reads. Requested only while such an effect is active. */
-export type PassAttachment = 'normal' | 'velocity' | 'packedNormal' | 'metalRoughness'
+export type PassAttachment = 'normal' | 'velocity' | 'packedNormal' | 'metalRoughness' | 'diffuse'
 
 export interface PostFXBuildContext {
   /** The image so far — the scene pass, or the previous effect's output. */
@@ -44,6 +44,8 @@ export interface PostFXBuildContext {
   packedNormal: TSLNode | null
   /** r = metalness, g = roughness. */
   metalRoughness: TSLNode | null
+  /** Surface albedo (the material's diffuse colour, unlit): what bounce light is multiplied by. */
+  diffuse: TSLNode | null
   scene: Scene
   camera: Camera
   renderer: WebGPURenderer
@@ -89,7 +91,14 @@ export interface PostFXStage {
   id: string
   label: string
   node: TSLNode
+  /** Scene-pass attachments an effect's build read: depth, normal, velocity, packedNormal, metalRoughness, diffuse. */
+  reads?: readonly string[]
 }
+
+/** Context keys that are scene-pass attachments, and the attachment each one is. */
+const ATTACHMENT_OF: Record<string, string> = { depth: 'depth', viewZ: 'depth', normal: 'normal', velocity: 'velocity', packedNormal: 'packedNormal', metalRoughness: 'metalRoughness', diffuse: 'diffuse' }
+/** Effects already reported as skipped on WebGL2, so a rebuild does not repeat it. */
+const reportedSkips = new Set<string>()
 
 class EffectRegistry {
   private entries = new Map<string, Entry>()
@@ -201,13 +210,27 @@ export function findLight(scene: Scene, test: (object: Object3D) => boolean): Ob
   return found
 }
 
+/**
+ * Release every node a chain build created, each once. `keep` (the scene pass
+ * and its attachments) belongs to the next build and is neither disposed nor
+ * walked into.
+ */
 function disposeChain(root: TSLNode, keep: Set<unknown>) {
-  const seen = new Set<unknown>()
-  root?.traverse?.((node: TSLNode) => {
-    if (keep.has(node) || seen.has(node)) return
+  const seen = new Set<unknown>(keep)
+  const pending: TSLNode[] = root ? [root] : []
+  while (pending.length) {
+    const node = pending.pop()
+    if (!node || seen.has(node)) continue
     seen.add(node)
+    // An RTT node (convertToTexture) owns a full-size render target and its quad's
+    // material, which dispose() leaves allocated. (The quad's geometry is shared.)
+    if (node.isRTTNode) {
+      node.renderTarget?.dispose?.()
+      node._quadMesh?.material?.dispose?.()
+    }
     node.dispose?.()
-  })
+    if (typeof node.getChildren === 'function') for (const child of node.getChildren()) pending.push(child)
+  }
 }
 
 export interface PostFXProps {
@@ -231,18 +254,21 @@ export function PostFX({ children, enabled = true, attachments = [], onStages }:
   const entries = useMemo(() => registry.list(), [registry, revision])
   const passes = useMemo(() => registry.passList(), [registry, revision])
   const passKey = passes.map(entry => entry.id).join()
-  const needs = new Set(enabled ? [...entries.flatMap(entry => entry.needs), ...attachments] : [])
+  const webgpu = !(renderer as unknown as { backend?: { isWebGLBackend?: boolean } }).backend?.isWebGLBackend
+  // An effect skipped on WebGL2 does not get its attachments rendered either.
+  const needs = new Set(enabled ? [...entries.flatMap(entry => (entry.webgpuOnly && !webgpu ? [] : entry.needs)), ...attachments] : [])
   const needNormal = needs.has('normal') || needs.has('packedNormal')
   const needVelocity = needs.has('velocity')
   const needPacked = needs.has('packedNormal')
   const needMR = needs.has('metalRoughness')
+  const needDiffuse = needs.has('diffuse')
 
   // The attachment layout is fixed for a pass's lifetime, so a change of layout
   // makes a new pass rather than mutating the old one.
   const base = useMemo(() => {
     const pipeline = new RenderPipeline(renderer)
     const scenePass = pass(scene, camera)
-    if (needNormal || needVelocity || needMR) {
+    if (needNormal || needVelocity || needMR || needDiffuse) {
       scenePass.setMRT(
         mrt({
           output,
@@ -250,8 +276,11 @@ export function PostFX({ children, enabled = true, attachments = [], onStages }:
           ...(needPacked ? { packedNormal: packNormalToRGB(normalView) } : null),
           ...(needVelocity ? { velocity } : null),
           ...(needMR ? { metalRoughness: vec2(metalness, roughness) } : null),
+          ...(needDiffuse ? { diffuse: diffuseColor } : null),
         }),
       )
+      // Albedo lives in 0–1, so eight bits carry it at a quarter of the bandwidth.
+      if (needDiffuse) scenePass.getTexture('diffuse').type = UnsignedByteType
     }
     scenePass.name = 'Scene / Beauty'
     // Registered pass providers may wrap the scene pass as it is built.
@@ -259,7 +288,7 @@ export function PostFX({ children, enabled = true, attachments = [], onStages }:
     const values = new Map<string, unknown>(instances.map(instance => [instance.id, instance.value]))
     return { pipeline, scenePass, instances, values }
     // passKey stands in for `passes`: the same ids mean the same providers.
-  }, [renderer, scene, camera, needNormal, needVelocity, needPacked, needMR, passKey])
+  }, [renderer, scene, camera, needNormal, needVelocity, needPacked, needMR, needDiffuse, passKey])
 
   useEffect(() => () => {
     for (const instance of base.instances) instance.dispose?.()
@@ -276,11 +305,13 @@ export function PostFX({ children, enabled = true, attachments = [], onStages }:
 
   useEffect(() => {
     const { pipeline, scenePass } = base
-    const backend = (renderer as unknown as { backend?: { isWebGLBackend?: boolean } }).backend?.isWebGLBackend ? 'webgl2' : 'webgpu'
+    const backend = webgpu ? 'webgpu' : 'webgl2'
     const beauty = scenePass.getTextureNode('output')
     let current: TSLNode = beauty
     // Every stage is reported, e.g. for live thumbnails of each pass.
     const stages: PostFXStage[] = [{ id: 'pass:scene', label: 'Scene Pass', node: beauty }]
+    // The scene pass and its attachments outlive this chain; everything else the effects built goes with it.
+    const keep = new Set<unknown>([scenePass, beauty])
 
     if (enabled) {
       const context: Omit<PostFXBuildContext, 'input'> = {
@@ -291,25 +322,38 @@ export function PostFX({ children, enabled = true, attachments = [], onStages }:
         velocity: needVelocity ? scenePass.getTextureNode('velocity') : null,
         packedNormal: needPacked ? scenePass.getTextureNode('packedNormal') : null,
         metalRoughness: needMR ? scenePass.getTextureNode('metalRoughness') : null,
+        diffuse: needDiffuse ? scenePass.getTextureNode('diffuse') : null,
         scene,
         camera,
         renderer,
         backend,
       }
+      for (const node of [context.depth, context.viewZ, context.normal, context.velocity, context.packedNormal, context.metalRoughness, context.diffuse]) if (node) keep.add(node)
       for (const entry of entries) {
         if (entry.webgpuOnly && backend !== 'webgpu') {
-          console.info(`[postfx] ${entry.id} needs WebGPU and is skipped on WebGL2.`)
+          if (!reportedSkips.has(entry.id)) console.info(`[postfx] ${entry.id} needs WebGPU and is skipped on WebGL2.`)
+          reportedSkips.add(entry.id)
           continue
         }
         try {
-          current = entry.build({ ...context, input: current }) ?? current
-          stages.push({ id: entry.id, label: entry.id, node: current })
+          // Note which attachments the build reads, so a pipeline view can wire them.
+          const read = new Set<string>()
+          const watched = new Proxy({ ...context, input: current } as PostFXBuildContext, {
+            get(target, key) {
+              if (typeof key === 'string' && key in ATTACHMENT_OF) read.add(ATTACHMENT_OF[key])
+              return target[key as keyof PostFXBuildContext]
+            },
+          })
+          const built = entry.build(watched)
+          if (!built) continue
+          current = built
+          stages.push({ id: entry.id, label: entry.id, node: current, reads: [...read] })
         } catch (error) {
           // One broken effect never takes the frame down with it.
           console.error(`[postfx] ${entry.id} failed to build and was skipped.`, error)
         }
       }
-      for (const attachment of ['depth', 'normal', 'velocity', 'metalRoughness'] as const) {
+      for (const attachment of ['depth', 'normal', 'velocity', 'metalRoughness', 'diffuse'] as const) {
         const node = context[attachment]
         if (node) stages.push({ id: `pass:${attachment}`, label: attachment, node })
       }
@@ -326,9 +370,9 @@ export function PostFX({ children, enabled = true, attachments = [], onStages }:
       set(state => (state.postProcessing === pipeline ? { postProcessing: null } : {}))
       // The published nodes are about to be disposed, so retract them first.
       onStagesRef.current?.([])
-      disposeChain(outputNode, new Set([scenePass, beauty]))
+      disposeChain(outputNode, keep)
     }
-  }, [base, entries, enabled, renderer, scene, camera, set, needNormal, needVelocity, needPacked, needMR])
+  }, [base, entries, enabled, webgpu, scene, camera, set, needNormal, needVelocity, needPacked, needMR, needDiffuse])
 
   return (
     <RegistryContext.Provider value={registry}>

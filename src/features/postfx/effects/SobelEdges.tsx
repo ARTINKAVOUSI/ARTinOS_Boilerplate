@@ -29,5 +29,6 @@ export const feature: Feature = {
   cost: 'low',
   order: 640,
   enabled: false,
+  description: 'Replaces the image with its Sobel edge outline',
   component: SobelEdges,
 }

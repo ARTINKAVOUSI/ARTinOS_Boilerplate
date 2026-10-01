@@ -20,7 +20,8 @@ export interface ScreenSpaceShadowsProps {
 /**
  * Screen-Space Shadows — fine contact shadows from the main directional light.
  *
- * Pass `light`, or the first shadow-casting directional light is used.
+ * Pass `light`, or the first directional light in the scene is used, whether or
+ * not it casts shadows.
  *
  * Mount inside <PostFX>.
  */
@@ -54,6 +55,7 @@ export const feature: Feature = {
   order: 45,
   enabled: false,
   webgpuOnly: true,
+  description: 'Fine contact shadows traced in screen space from a directional light',
   component: ScreenSpaceShadows,
   controls: {
     intensity: { type: 'number', value: 1, min: 0, max: 1, step: 0.01 },

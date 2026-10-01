@@ -14,7 +14,7 @@ import {
   type GraphDiagnostic,
   type GraphNode,
 } from './graph'
-import { useGraphEditor, snap } from './editor'
+import { useGraphEditor } from './editor'
 import { NodeField, type GraphSources } from './NodeFields'
 import { PREVIEW_H, RenderPreview, ValuePreview, type PreviewFrame } from './NodePreview'
 import { usePanZoom, wirePath, type Point } from './view'
@@ -28,6 +28,8 @@ const FIELD_H = 24
 const BODY_PAD = 8
 const GROUP_PAD = 16
 const GROUP_HEAD = 18
+/** The default for `runtimeDiagnostics`: one shared array, so the diagnostics memo holds. */
+const NO_DIAGNOSTICS: readonly GraphDiagnostic[] = Object.freeze([])
 
 type Side = 'in' | 'out'
 
@@ -94,9 +96,9 @@ interface Drag {
  * The component owns its view and selection; the graph is the caller's state
  * and every edit arrives through `onChange` as a new definition.
  */
-export function NodeGraph({ value, onChange, readouts, frames, sources = {}, runtimeDiagnostics = [], onDiagnostics, className }: NodeGraphProps) {
+export function NodeGraph({ value, onChange, readouts, frames, sources = {}, runtimeDiagnostics = NO_DIAGNOSTICS, onDiagnostics, className }: NodeGraphProps) {
   const editor = useGraphEditor(value, onChange)
-  const { surface, view, setView, toGraph, onWheel, transform } = usePanZoom({ x: 30, y: 20, scale: 1 })
+  const { surface, view, setView, toGraph, transform } = usePanZoom({ x: 30, y: 20, scale: 1 })
   const [selected, setSelected] = useState<string[]>([])
   const [collapsedNodes, setCollapsedNodes] = useState<string[]>([])
   const [drag, setDrag] = useState<Drag | null>(null)
@@ -172,12 +174,17 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
   }
 
   const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.nativeEvent.isComposing) return
     const modifier = event.metaKey || event.ctrlKey
     if (event.key === 'Escape') {
       setPalette(null)
       setSelected([])
       return
     }
+    // Keys typed into a field (a node name, a value, the palette search) belong to
+    // that field: Backspace there must not delete the selected node.
+    const target = event.target as HTMLElement
+    if (target.closest('input, textarea, select') || target.isContentEditable) return
     if ((event.key === 'Delete' || event.key === 'Backspace') && selected.length) {
       editor.removeNodes(selected)
       setSelected([])
@@ -359,7 +366,6 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
           onPointerMove={onPointerMove}
           onPointerUp={finishDrag}
           onPointerCancel={finishDrag}
-          onWheel={onWheel}
           onDoubleClick={openPalette}
           onContextMenu={event => {
             event.preventDefault()
@@ -371,7 +377,13 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
               box ? (
                 <div key={box.group.id} className="ngraph-group" style={{ left: box.left, top: box.top, width: box.width, height: box.height }}>
                   <header onPointerDown={event => event.stopPropagation()}>
-                    <button type="button" onClick={() => editor.toggleGroup(box.group.id)} title={box.group.collapsed ? 'Expand group' : 'Collapse group'}>
+                    <button
+                      type="button"
+                      onClick={() => editor.toggleGroup(box.group.id)}
+                      title={box.group.collapsed ? 'Expand group' : 'Collapse group'}
+                      aria-label={`${box.group.collapsed ? 'Expand' : 'Collapse'} ${box.group.label}`}
+                      aria-expanded={!box.group.collapsed}
+                    >
                       {box.group.collapsed ? '▸' : '▾'}
                     </button>
                     <input
@@ -381,7 +393,7 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
                       aria-label={`Rename ${box.group.label}`}
                     />
                     <span>{box.members.length}</span>
-                    <button type="button" onClick={() => editor.ungroup(box.group.id)} title="Ungroup">
+                    <button type="button" onClick={() => editor.ungroup(box.group.id)} title="Ungroup" aria-label={`Ungroup ${box.group.label}`}>
                       ✕
                     </button>
                   </header>
@@ -446,6 +458,8 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
                       onPointerDown={event => event.stopPropagation()}
                       onClick={() => setCollapsedNodes(current => (current.includes(node.id) ? current.filter(id => id !== node.id) : [...current, node.id]))}
                       title={collapsed ? 'Expand node' : 'Collapse node'}
+                      aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${labelOf(node)}`}
+                      aria-expanded={!collapsed}
                     >
                       {collapsed ? '▸' : '▾'}
                     </button>
@@ -494,7 +508,7 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
 
                       {preview !== 'none' && (
                         <div className="ngraph-preview" onPointerDown={event => event.stopPropagation()}>
-                          {preview === 'render' ? <RenderPreview frame={frames?.get(node.id)} /> : <ValuePreview nodeKey={node.id} value={typeof readout === 'number' ? readout : 0} />}
+                          {preview === 'render' ? <RenderPreview frame={frames?.get(node.id)} /> : <ValuePreview value={typeof readout === 'number' ? readout : 0} />}
                         </div>
                       )}
                     </>
@@ -512,7 +526,7 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
               <>
                 <header>
                   <input value={labelOf(inspected)} onChange={event => editor.rename(inspected.id, event.target.value)} aria-label="Node name" />
-                  <button type="button" onClick={() => editor.removeNodes([inspected.id])} title="Delete node">
+                  <button type="button" onClick={() => editor.removeNodes([inspected.id])} title="Delete node" aria-label={`Delete ${labelOf(inspected)}`}>
                     ✕
                   </button>
                 </header>
@@ -595,4 +609,3 @@ export function NodeGraph({ value, onChange, readouts, frames, sources = {}, run
 }
 
 export default NodeGraph
-export { snap }

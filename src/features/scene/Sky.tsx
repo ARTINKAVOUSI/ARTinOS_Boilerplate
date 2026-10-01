@@ -50,6 +50,7 @@ export const feature: Feature = {
   group: 'Atmosphere',
   order: 17,
   enabled: false,
+  description: 'Physically based atmospheric sky; elevation and azimuth place the sun',
   component: Sky,
   controls: {
     elevation: { type: 'number', value: 20, min: -10, max: 90, step: 0.1, unit: '°' },

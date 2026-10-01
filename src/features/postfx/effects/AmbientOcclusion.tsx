@@ -42,6 +42,7 @@ export const feature: Feature = {
   cost: 'high',
   order: 40,
   enabled: false,
+  description: 'Darkens creases and contact areas with ground-truth ambient occlusion',
   component: AmbientOcclusion,
   controls: {
     intensity: { type: 'number', value: 1, min: 0, max: 1, step: 0.01 },

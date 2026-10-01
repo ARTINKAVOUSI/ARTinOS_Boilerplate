@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Feature } from '../../app/feature'
 import { useSignalCleanup, useSignals } from '../../app/signals'
 import { webcam } from '../../app/webcam'
@@ -11,6 +11,9 @@ export interface CameraInputProps {
   /** How fast the values ease towards the reading, per second. */
   smoothing?: number
 }
+
+const CHANNELS = ['luma', 'motion', 'r', 'g', 'b'] as const
+const CHANNEL_KEYS = ['camera.luma', 'camera.motion', 'camera.r', 'camera.g', 'camera.b'] as const
 
 /**
  * CameraInput — opens the webcam once and publishes what it sees:
@@ -28,14 +31,21 @@ export function CameraInput({ resolution = 64, rate = 20, smoothing = 8 }: Camer
   const bus = useSignals()
   const [error, setError] = useState<string | null>(null)
   useSignalCleanup('camera')
+  // Read by the loop, so tuning the rate or smoothing never reopens the camera.
+  const tuning = useRef({ rate, smoothing })
+  tuning.current.rate = rate
+  tuning.current.smoothing = smoothing
 
   useEffect(() => {
     let stream: MediaStream | null = null
     let stopped = false
     let frame = 0
     let lastAt = 0
-    let previousPixels: Uint8ClampedArray | null = null
+    // The last frame's pixels, kept in one buffer instead of a copy per sample.
+    const previousPixels = new Uint8ClampedArray(resolution * resolution * 4)
+    let hasPrevious = false
     const smoothed = { luma: 0, motion: 0, r: 0, g: 0, b: 0 }
+    const target = { luma: 0, motion: 0, r: 0, g: 0, b: 0 }
     const video = document.createElement('video')
     video.muted = true
     video.playsInline = true
@@ -46,7 +56,7 @@ export function CameraInput({ resolution = 64, rate = 20, smoothing = 8 }: Camer
 
     const tick = (now: number) => {
       frame = requestAnimationFrame(tick)
-      if (!context || video.readyState < 2 || now - lastAt < 1000 / rate) return
+      if (!context || video.readyState < 2 || now - lastAt < 1000 / tuning.current.rate) return
       const dt = Math.min(0.5, (now - lastAt) / 1000)
       lastAt = now
       context.drawImage(video, 0, 0, resolution, resolution)
@@ -64,15 +74,21 @@ export function CameraInput({ resolution = 64, rate = 20, smoothing = 8 }: Camer
         green += g
         blue += b
         luma += 0.2126 * r + 0.7152 * g + 0.0722 * b
-        if (previousPixels) motion += Math.abs(r - previousPixels[index]) + Math.abs(g - previousPixels[index + 1]) + Math.abs(b - previousPixels[index + 2])
+        if (hasPrevious) motion += Math.abs(r - previousPixels[index]) + Math.abs(g - previousPixels[index + 1]) + Math.abs(b - previousPixels[index + 2])
       }
       const pixels = data.length / 4
-      previousPixels = data.slice()
-      const k = 1 - Math.exp(-smoothing * dt)
-      const target = { luma: luma / pixels / 255, motion: Math.min(1, motion / pixels / 255 / 3 * 8), r: red / pixels / 255, g: green / pixels / 255, b: blue / pixels / 255 }
-      for (const key of ['luma', 'motion', 'r', 'g', 'b'] as const) {
+      previousPixels.set(data)
+      hasPrevious = true
+      const k = 1 - Math.exp(-tuning.current.smoothing * dt)
+      target.luma = luma / pixels / 255
+      target.motion = Math.min(1, motion / pixels / 255 / 3 * 8)
+      target.r = red / pixels / 255
+      target.g = green / pixels / 255
+      target.b = blue / pixels / 255
+      for (let i = 0; i < CHANNELS.length; i++) {
+        const key = CHANNELS[i]
         smoothed[key] += (target[key] - smoothed[key]) * k
-        bus.set(`camera.${key}`, smoothed[key])
+        bus.set(CHANNEL_KEYS[i], smoothed[key])
       }
       bus.set('camera.active', 1)
     }
@@ -99,7 +115,7 @@ export function CameraInput({ resolution = 64, rate = 20, smoothing = 8 }: Camer
       video.srcObject = null
       stream?.getTracks().forEach(track => track.stop())
     }
-  }, [bus, resolution, rate, smoothing])
+  }, [bus, resolution])
 
   useEffect(() => {
     if (error) console.warn(`[input.camera] ${error}`)

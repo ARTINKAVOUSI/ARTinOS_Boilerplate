@@ -38,6 +38,7 @@ export const feature: Feature = {
   cost: 'medium',
   order: 100,
   enabled: true,
+  description: 'Bright areas above a threshold glow into their surroundings',
   component: Bloom,
   controls: {
     strength: { type: 'number', value: 0.6, min: 0, max: 5, step: 0.01 },

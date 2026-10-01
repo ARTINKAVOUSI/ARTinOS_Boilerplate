@@ -1,29 +1,38 @@
 import { useEffect, useRef, useState } from 'react'
 import { useConsoleEntries } from '../console'
+import './ConsoleToast.css'
 
-const LINGER_MS = 5000
+const LINGER_MS = { warn: 6000, error: 10000 } as const
 
 /**
- * The latest warning or error, briefly, over the canvas. Errors stay until
- * hovered away; the count opens the Console panel.
+ * The latest warning or error, top-right, opposite the brand chip. It speaks
+ * once per new message: the same message repeating only raises its ×count, so
+ * a renderer error firing every frame does not pin it to the screen. Hover
+ * holds it, the message opens the Console panel, × dismisses it.
  */
 export function ConsoleToast({ onOpen }: { onOpen?: () => void }) {
   const entries = useConsoleEntries()
   const notable = entries.filter(entry => entry.level === 'warn' || entry.level === 'error')
   const latest = notable.at(-1)
+  const level = latest?.level === 'error' ? 'error' : 'warn'
+  const key = latest ? `${latest.level}:${latest.message}` : null
+  const repeats = latest ? notable.filter(entry => entry.level === latest.level && entry.message === latest.message).length : 0
   const [visible, setVisible] = useState(false)
-  const timer = useRef<number | null>(null)
-  const level = latest?.level ?? 'info'
+  const hovered = useRef(false)
+  const timer = useRef<number | undefined>(undefined)
+
+  const hideLater = () => {
+    window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => !hovered.current && setVisible(false), LINGER_MS[level])
+  }
 
   useEffect(() => {
-    if (!latest) return
+    if (!key) return
     setVisible(true)
-    if (timer.current) window.clearTimeout(timer.current)
-    if (level !== 'error') timer.current = window.setTimeout(() => setVisible(false), LINGER_MS)
-    return () => {
-      if (timer.current) window.clearTimeout(timer.current)
-    }
-  }, [latest?.id, level])
+    hideLater()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
+  useEffect(() => () => window.clearTimeout(timer.current), [])
 
   if (!latest) return null
   return (
@@ -33,17 +42,31 @@ export function ConsoleToast({ onOpen }: { onOpen?: () => void }) {
       data-visible={visible || undefined}
       aria-live={level === 'error' ? 'assertive' : 'polite'}
       onPointerEnter={() => {
-        if (timer.current) window.clearTimeout(timer.current)
-        setVisible(true)
+        hovered.current = true
+        window.clearTimeout(timer.current)
       }}
       onPointerLeave={() => {
-        timer.current = window.setTimeout(() => setVisible(false), level === 'error' ? LINGER_MS * 2 : LINGER_MS)
+        hovered.current = false
+        hideLater()
       }}
     >
-      <i aria-hidden />
-      <span className="plate-console-toast-message">{latest.message}</span>
-      <button type="button" className="plate-console-toast-open" onClick={onOpen} aria-label="Open console" title="Open console">
-        {notable.length}
+      <button
+        type="button"
+        className="plate-console-toast-open"
+        title={`${latest.message}\n\nOpen the Console`}
+        onClick={() => {
+          setVisible(false)
+          onOpen?.()
+        }}
+      >
+        <i aria-hidden />
+        <span className="plate-console-toast-message">{latest.message}</span>
+        {repeats > 1 && <small aria-label={`${repeats} times`}>×{repeats >= 500 ? '500+' : repeats}</small>}
+      </button>
+      <button type="button" className="plate-console-toast-close" aria-label="Dismiss" onClick={() => setVisible(false)}>
+        <svg viewBox="0 0 10 10" aria-hidden>
+          <path d="M2 2l6 6M8 2l-6 6" />
+        </svg>
       </button>
     </output>
   )

@@ -44,11 +44,14 @@ function score(query: string, text: string): number {
   return total
 }
 
+/** One object for every render: an inline default would rebind the hotkey listener each time. */
+const DEFAULT_HOTKEY: NonNullable<CommandPaletteProps['hotkey']> = { key: 'k', mod: true }
+
 /**
  * CommandPalette — a searchable list of every action, opened with Ctrl/⌘+K.
  * Arrow keys move, Enter runs, Escape closes.
  */
-export function CommandPalette({ commands, open, onOpenChange, hotkey = { key: 'k', mod: true }, placeholder = 'Type a command…' }: CommandPaletteProps) {
+export function CommandPalette({ commands, open, onOpenChange, hotkey = DEFAULT_HOTKEY, placeholder = 'Type a command…' }: CommandPaletteProps) {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const input = useRef<HTMLInputElement>(null)

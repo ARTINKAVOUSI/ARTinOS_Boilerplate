@@ -61,6 +61,7 @@ export const feature: Feature = {
   group: 'Objects',
   order: 103,
   enabled: false,
+  description: 'Loads any glTF file into the scene, with scale, spin and centring',
   component: Model,
   controls: {
     url: { type: 'text', value: '/models/glass-rings.glb', label: 'URL' },

@@ -5,7 +5,8 @@ import type { WebGPURenderer } from 'three/webgpu'
 /**
  * Live runtime facts the studio chrome reads: the renderer, the backend in use,
  * and a rolling frame-time history. One rAF sampler feeds every reader (the
- * dock HUD and its telemetry bar), so opening more of them costs nothing extra.
+ * dock HUD and its telemetry bar), so opening more of them costs nothing extra;
+ * it runs only while something is subscribed.
  */
 
 export interface RendererStats {
@@ -67,6 +68,10 @@ function start() {
   let windowStart = last
   let frames = 0
   const tick = (now: number) => {
+    if (!listeners.size) {
+      running = false
+      return
+    }
     frameTimes.push(now - last)
     if (frameTimes.length > HISTORY) frameTimes.shift()
     last = now
@@ -128,8 +133,15 @@ export const runtime = {
   },
 }
 
-export function useRuntime(): RuntimeSnapshot {
-  return useSyncExternalStore(runtime.subscribe, runtime.getSnapshot, runtime.getSnapshot)
+/**
+ * The runtime snapshot, which changes 4×/s. Pass a selector that returns a
+ * primitive (`s => s.backend`) to re-render only when that value changes.
+ */
+export function useRuntime(): RuntimeSnapshot
+export function useRuntime<T>(select: (snapshot: RuntimeSnapshot) => T): T
+export function useRuntime<T>(select?: (snapshot: RuntimeSnapshot) => T): RuntimeSnapshot | T {
+  const read = (): RuntimeSnapshot | T => (select ? select(snapshot) : snapshot)
+  return useSyncExternalStore(runtime.subscribe, read, read)
 }
 
 export const compactNumber = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n)))

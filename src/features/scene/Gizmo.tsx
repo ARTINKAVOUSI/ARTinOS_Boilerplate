@@ -24,7 +24,11 @@ export interface GizmoProps {
  * Mount inside a <Canvas>.
  */
 export function Gizmo({ target = '', mode = 'translate', space = 'world', size = 0.8, snap = 0 }: GizmoProps) {
-  const { scene, camera, gl, controls } = useThree()
+  // One selector per value: a bare useThree() re-renders on every change to the R3F store.
+  const scene = useThree(state => state.scene)
+  const camera = useThree(state => state.camera)
+  const gl = useThree(state => state.gl)
+  const controls = useThree(state => state.controls)
   const [object, setObject] = useState<Object3D | null>(null)
 
   // The object may mount after this feature, or be replaced when its own

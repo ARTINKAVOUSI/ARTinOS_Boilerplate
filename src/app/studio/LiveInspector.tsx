@@ -9,7 +9,7 @@ import { Slider } from '../../ui/Slider/Slider'
 import { Switch } from '../../ui/Switch/Switch'
 import { Sparkline } from '../../ui/Sparkline/Sparkline'
 import { Button } from '../../ui/Button/Button'
-import { ControlInput, labelOf } from './ControlField'
+import { ControlInput, labelOf, namesItself } from './ControlField'
 
 /**
  * Edits the thing a live node stands for. Everything here writes through the
@@ -20,7 +20,7 @@ export function LiveInspector({ node, target, onOpenGraph }: { node: LiveNode | 
     return (
       <>
         <p className="artinos-graph-hint">Select a node to inspect and tweak what it stands for.</p>
-        <PropertyRow label="Selection">
+        <PropertyRow label="Selection" density="compact">
           <span className="artinos-effect-status">Nothing selected</span>
         </PropertyRow>
       </>
@@ -34,7 +34,7 @@ export function LiveInspector({ node, target, onOpenGraph }: { node: LiveNode | 
     return (
       <>
         <p className="artinos-graph-hint">Authored graph feeding this system.</p>
-        <PropertyRow label="Nodes">
+        <PropertyRow label="Nodes" density="compact">
           <span className="artinos-effect-status">{node.detail ?? '—'}</span>
         </PropertyRow>
         <Button size="sm" onClick={() => onOpenGraph(target.id)}>
@@ -45,10 +45,10 @@ export function LiveInspector({ node, target, onOpenGraph }: { node: LiveNode | 
   return (
     <>
       <p className="artinos-graph-hint">Render target sampled from the live pipeline.</p>
-      <PropertyRow label="Target">
+      <PropertyRow label="Target" density="compact">
         <span className="artinos-effect-status">{target.id}</span>
       </PropertyRow>
-      <PropertyRow label="Detail">
+      <PropertyRow label="Detail" density="compact">
         <span className="artinos-effect-status">{node.detail ?? '—'}</span>
       </PropertyRow>
     </>
@@ -63,10 +63,10 @@ function SignalInspector({ id }: { id: string }) {
   return (
     <>
       <p className="artinos-graph-hint">Live signal. The device owns this value; it is read-only here.</p>
-      <PropertyRow label="Value">
+      <PropertyRow label="Value" density="compact">
         <span className="artinos-effect-status">{value.toFixed(4)}</span>
       </PropertyRow>
-      <PropertyRow label="Updated">
+      <PropertyRow label="Updated" density="compact">
         <span className="artinos-effect-status">{Number.isFinite(age) ? `${age.toFixed(0)}ms ago` : '—'}</span>
       </PropertyRow>
       <Sparkline label={id} values={history(id, value)} />
@@ -91,7 +91,7 @@ function ParameterInspector({ id }: { id: string }) {
   const control = feature?.controls?.[name]
   if (!feature || !control || !state) {
     return (
-      <PropertyRow label="Status">
+      <PropertyRow label="Status" density="compact">
         <span className="artinos-effect-status">Not registered</span>
       </PropertyRow>
     )
@@ -101,7 +101,7 @@ function ParameterInspector({ id }: { id: string }) {
       <p className="artinos-graph-hint">
         {feature.label} · {labelOf(name, control)}
       </p>
-      <PropertyRow label={labelOf(name, control)} onReset={() => studio.setValue(featureId, name, control.value)}>
+      <PropertyRow label={labelOf(name, control)} density={namesItself(control) ? 'default' : 'compact'} onReset={() => studio.setValue(featureId, name, control.value)}>
         <ControlInput name={name} control={control} value={state.values[name]} onChange={value => studio.setValue(featureId, name, value)} />
       </PropertyRow>
       <p className="artinos-graph-hint">A running graph is writing this control; editing it here is overwritten on the next frame it evaluates.</p>
@@ -115,7 +115,7 @@ function FeatureInspector({ id }: { id: string }) {
   const state = useFeatureState(id)
   if (!feature || !state) {
     return (
-      <PropertyRow label="Status">
+      <PropertyRow label="Status" density="compact">
         <span className="artinos-effect-status">Not in the registry</span>
       </PropertyRow>
     )
@@ -123,11 +123,11 @@ function FeatureInspector({ id }: { id: string }) {
   return (
     <>
       <p className="artinos-graph-hint">{feature.description ?? feature.path}</p>
-      <PropertyRow label="Enabled">
+      <PropertyRow label="Enabled" density="compact">
         <Switch variant="compact" label={`${feature.label} enabled`} value={state.enabled} onChange={value => studio.setEnabled(id, value)} />
       </PropertyRow>
       {Object.entries(feature.controls ?? {}).map(([name, control]) => (
-        <PropertyRow key={name} label={labelOf(name, control)} onReset={() => studio.setValue(id, name, control.value)}>
+        <PropertyRow key={name} label={labelOf(name, control)} density={namesItself(control) ? 'default' : 'compact'} onReset={() => studio.setValue(id, name, control.value)}>
           <ControlInput name={name} control={control} value={state.values[name]} onChange={value => studio.setValue(id, name, value)} />
         </PropertyRow>
       ))}
@@ -150,7 +150,7 @@ function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
     | undefined
   if (!object) {
     return (
-      <PropertyRow label="Status">
+      <PropertyRow label="Status" density="compact">
         <span className="artinos-effect-status">No longer in the scene</span>
       </PropertyRow>
     )
@@ -160,10 +160,10 @@ function ObjectInspector({ nodeId, name }: { nodeId: string; name: string }) {
       <p className="artinos-graph-hint" data-revision={revision}>
         Live object in the rendered scene.
       </p>
-      <PropertyRow label="Type">
+      <PropertyRow label="Type" density="compact">
         <span className="artinos-effect-status">{object.type}</span>
       </PropertyRow>
-      <PropertyRow label="Visible">
+      <PropertyRow label="Visible" density="compact">
         <Switch variant="compact"
           label={`${name} visible`}
           value={object.visible !== false}

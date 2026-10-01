@@ -212,44 +212,6 @@
 }
 .plate-brand-chip .plate-brand-context::before { content: '/ '; }
 
-/* ── floating chrome — palette, workspace popup, confirm dialog, toast ── */
-
-.plate-console-toast {
-  border: 1px solid var(--ui-pane-border);
-  background: var(--ui-command-sheen), var(--ui-float);
-  -webkit-backdrop-filter: var(--ui-glass-filter-float);
-  backdrop-filter: var(--ui-glass-filter-float);
-  box-shadow: var(--ui-pane-shadow), var(--ui-float-shadow);
-  font-family: var(--ui-font);
-  line-height: normal;
-  color: var(--ui-text);
-}
-
-.plate-console-toast {
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: var(--ui-radius-control);
-  font-size: 10px;
-  color: var(--ui-text-body);
-}
-.plate-console-toast > i {
-  width: 3px;
-  height: 3px;
-  background: var(--ui-accent-dot);
-}
-.plate-console-toast[data-level='warn'] > i { background: var(--ui-warn); }
-.plate-console-toast[data-level='error'] > i { background: var(--ui-fault); }
-.plate-console-toast-open {
-  font-family: inherit;
-  font-size: 8px;
-  letter-spacing: 0.06em;
-  color: var(--ui-text-meta);
-}
-.plate-console-toast-open:hover {
-  background: transparent;
-  color: var(--ui-text-strong);
-}
-
 /* ── standalone workspace chrome and empty panels ─────────────────────── */
 
 .artinos-workbench-empty {

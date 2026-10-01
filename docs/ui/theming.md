@@ -1,32 +1,18 @@
 # ARTINOS UI — theming
 
-Contents: picking a theme · solid vs glass · density · token layers · overriding tokens · custom themes (Theme Studio) · finish overrides · key tokens
+Contents: picking a theme · solid vs glass · density · token layers · overriding tokens · adding a theme · finish overrides · key tokens
 
 ## Picking a theme
 
-A theme is the whole look: ground, ink, accent colours, panel glass and the finish of every control. There is no second setting to coordinate. Get the full current list, grouped by family, from the ARTINOS UI package folder:
+A theme is the whole look: ground, ink, accent colours, panel glass and the finish of every control. There is no second setting to coordinate. This repository ships three, listed in `THEMES` / `THEME_META` (`src/ui/system/utils.ts`):
 
-```bash
-node "D:/CODES26/ARTINOS-R3F/UI COMPONENT PACKAGE/artinos.mjs" list
-```
+| id | kind | look |
+|---|---|---|
+| `studio` | solid | the default token values in `tokens.css`: neutral dark, satin controls, teal signal |
+| `frost-deep` | glass | deep optical diffusion; the studio's default |
+| `frost-etched` | glass | fine etched glass, lighter diffusion |
 
-Inside a project that already has a kit, `THEMES` / `THEME_META` from the kit's `index.ts` (or the header of its `tokens/themes.css`) list exactly the themes that kit contains.
-
-Families (ids in brackets are examples):
-- **untinted glass / frost** — clear transmission, no colour of their own; the colour is whatever is behind (`clear-air`, `clear-polished`, `clear-lens`, `clear-layered`, `frost-etched`, `frost-silk`, `frost-mist`, `frost-deep` — the showcase default). ARTINOS accents: teal signal, azure bind, amber warn, rose fault.
-- **atelier glass / frost** — coordinated palettes (`nocturne`, `lagoon`, `argent`, `garnet`, `ivory`, `glacier`, `wisteria`, `dune`).
-- **studio / signature** — solid grounds (`studio` default + base, `studio-light`, `optical`, `reference`).
-- **glass / frost** — clean panes (`glass`, `glass-light`, `glass-dark`, `crystal`, `frost`, `frost-light`, `frost-dark`, `ice`).
-- **optical glass / frost** — neutral panes, glossy pearl or translucent fills (`pane`, `pane-light`, `lucid`, `gallery`, `satin`, `monolith`, `opal`, `graphite`).
-- **luxe glass / frost** — coloured premium panes with metallic hairlines (`onyx`, `sapphire`, `platinum`, `diamond`, `emerald`, `rose-gold`, `cognac`, `amethyst`, `champagne`, `pearl`, `alabaster`, `porcelain`, `jade`, `moonstone`, `cashmere`, `velvet`).
-
-The ids must exist in the kit's `tokens/themes.css`. A kit exported with `--themes satin` does **not** contain `onyx`. Re-export with the extra theme instead of hand-copying CSS blocks, because theme finishes live in two files and share rules:
-
-```bash
-node "D:/CODES26/ARTINOS-R3F/UI COMPONENT PACKAGE/artinos.mjs" export --project . --themes satin,onyx --components <the same list> --force
-```
-
-Match the theme to the host: dark apps → studio, untinted, atelier-glass, luxe glass; light apps → `studio-light`, `glass-light`, `frost-light`, `pane-light`, `argent`, `ivory`, `porcelain`, `pearl`; over a 3D canvas, video or photo → any glass/frost theme.
+Set one with `data-ar-theme="frost-deep"` on any element, or `<ArtinosTheme theme="frost-deep">` from `src/ui/system/Theme.tsx`. The studio puts it on `<html>` from the theme switch in the studio bar. Over a 3D canvas, video or photo use a glass theme; over a flat page, `studio`.
 
 ## Solid vs glass
 
@@ -68,19 +54,19 @@ Or in CSS, loaded after `src/ui/system/system.css`:
 
 The live seam, LEDs and focus ring derive from `--ar-signal` (the live seam is `color-mix(in srgb, var(--ar-signal) 78%, #000)`), so changing the signal recolours all of them. Some themes pin their seam or LED colours in their finish; if a signal change doesn't reach them, also set `--ar-seam-active` / `--ar-led-on`.
 
-## Custom themes (Theme Studio)
+## Adding a theme
 
-For a real custom look, use the Theme Studio in the showcase (`showcase/artinos-ui-showcase.html#studio` next to the package). It edits every token live against the full component gallery and exports a standalone CSS block with every resolved token:
+A theme is one `[data-ar-theme='…']` block of role tokens in `src/ui/system/themes.css` (copy the frost block as a start; anything you leave out keeps the `studio` value from `tokens.css`), plus, if it needs its own control finish, a block in `materials.css`:
 
 ```css
-[data-ar-theme='my-theme'] { --ar-signal: #ff4fa3; /* …every token… */ }
+[data-ar-theme='my-theme'] { --ar-bg-app: #1b1d22; --ar-signal: #ff4fa3; /* … */ }
 ```
 
-Add it to a kit by re-exporting with `--custom my-theme.css` (it lands in `src/ui/system/custom-themes.css`, imported by `system.css`), then `<ArtinosTheme theme="my-theme">`. `theme` accepts any name. A custom theme is independent: it doesn't need its base theme in the kit.
+Then `<ArtinosTheme theme="my-theme">` — `theme` accepts any name. To offer it in the studio bar and the command palette, add it to `THEMES` and `THEME_META` in `utils.ts` with `kind: 'glass'` (the studio lists the glass themes, since its panels sit over the canvas).
 
 ## Finish overrides (advanced)
 
-Each theme already has its control finish. To force another on one control or scope: `material="optical" | "reference" | "soft" | "frost" | "milk" | "clear" | "tint" | "smoked" | "metal"` (or `data-ar-material`). Kits exported with `--no-materials` don't contain these.
+Each theme already has its control finish. To force another on one control or scope: `material="optical" | "reference" | "soft" | "frost" | "milk" | "clear" | "tint" | "smoked" | "metal"` (or `data-ar-material`).
 
 ## Key tokens
 

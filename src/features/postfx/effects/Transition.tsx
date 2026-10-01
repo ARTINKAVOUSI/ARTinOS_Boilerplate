@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DataTexture, RepeatWrapping, RGBAFormat, SRGBColorSpace, TextureLoader, type Texture } from 'three/webgpu'
 import { texture } from 'three/tsl'
 import { transition } from 'three/addons/tsl/display/TransitionNode.js'
@@ -50,23 +50,35 @@ export interface TransitionProps {
  *
  * Mount inside <PostFX>.
  */
-export function Transition({ id = 'transition', enabled = true, order = 950, mix = 0, threshold = 0.1, image = '/backgrounds/persian-garden.png' }: TransitionProps) {
+export function Transition({ id = 'transition', enabled = true, order = 950, mix = 0, threshold = 0.1, image = '/backgrounds/persian-garden.webp' }: TransitionProps) {
   const mask = useMemo(() => noiseTexture(), [])
-  const target = useMemo<Texture>(() => {
-    const map = new TextureLoader().load(image)
-    map.colorSpace = SRGBColorSpace
-    return map
-  }, [image])
-  useEffect(() => () => target.dispose(), [target])
   useEffect(() => () => mask.dispose(), [mask])
+  // Loaded in an effect, not during render, so a render React throws away never
+  // starts a request or leaves a texture behind; the cleanup frees it.
+  const [target, setTarget] = useState<Texture | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    let current: Texture | null = null
+    new TextureLoader().loadAsync(image).then(map => {
+      if (cancelled) return map.dispose()
+      map.colorSpace = SRGBColorSpace
+      current = map
+      setTarget(map)
+    }, error => console.warn('[postfx] transition image failed to load', error))
+    return () => {
+      cancelled = true
+      current?.dispose()
+      setTarget(null)
+    }
+  }, [image])
   const mixU = useUniform(mix)
   const thresholdU = useUniform(threshold)
   usePostFXEffect(id, {
     enabled,
     order,
     webgpuOnly: true,
-    build: ({ input }) => transition(input, texture(target), texture(mask), mixU, thresholdU, 1),
-  }, [image, target, mask])
+    build: ({ input }) => (target ? transition(input, texture(target), texture(mask), mixU, thresholdU, 1) : null),
+  }, [target, mask])
   return null
 }
 
@@ -81,10 +93,11 @@ export const feature: Feature = {
   order: 950,
   enabled: false,
   webgpuOnly: true,
+  description: 'Wipes from the scene to an image through a noise mask; animate mix',
   component: Transition,
   controls: {
     mix: { type: 'number', value: 0, min: 0, max: 1, step: 0.001 },
     threshold: { type: 'number', value: 0.1, min: 0, max: 1, step: 0.01 },
-    image: { type: 'text', value: '/backgrounds/persian-garden.png' },
+    image: { type: 'text', value: '/backgrounds/persian-garden.webp' },
   },
 }

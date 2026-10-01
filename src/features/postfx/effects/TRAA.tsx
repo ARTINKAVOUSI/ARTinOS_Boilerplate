@@ -33,6 +33,8 @@ export const feature: Feature = {
   category: 'anti-aliasing',
   cost: 'high',
   order: 980,
-  enabled: false,
+  // On by default: it resolves the default SSGI's noise.
+  enabled: true,
+  description: 'Temporal reprojection AA; smoothest edges, resolves over a few frames',
   component: TRAA,
 }

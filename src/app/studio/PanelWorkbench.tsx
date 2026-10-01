@@ -50,4 +50,3 @@ class PanelErrorBoundary extends Component<{ title: string; children: ReactNode 
     )
   }
 }
-

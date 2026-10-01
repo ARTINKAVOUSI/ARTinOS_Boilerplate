@@ -67,6 +67,7 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Camera',
   order: 10,
+  description: 'The default camera, framed from a preset, perspective or orthographic',
   component: Camera,
   controls: {
     preset: { type: 'select', value: 'product', options: Object.keys(cameraPresets) },

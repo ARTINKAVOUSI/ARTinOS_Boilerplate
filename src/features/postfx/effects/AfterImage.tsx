@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'medium',
   order: 300,
   enabled: false,
+  description: 'Keeps a fading copy of past frames, so moving things leave trails',
   component: AfterImage,
   controls: {
     damp: { type: 'number', value: 0.9, min: 0, max: 0.995, step: 0.001 },

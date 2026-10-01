@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import './Dialog.css'
 
 export interface DialogProps {
@@ -19,6 +19,8 @@ export interface DialogProps {
  */
 export function Dialog({ open, onClose, title, description, footer, width = 380, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
+  const titleId = useId()
+  const descriptionId = useId()
 
   useEffect(() => {
     const dialog = ref.current
@@ -32,6 +34,9 @@ export function Dialog({ open, onClose, title, description, footer, width = 380,
       ref={ref}
       className="ar-dialog"
       style={{ width }}
+      // Named and described by its own title and description, while they are rendered.
+      aria-labelledby={open ? titleId : undefined}
+      aria-describedby={open && description ? descriptionId : undefined}
       onCancel={event => {
         event.preventDefault()
         onClose()
@@ -44,8 +49,8 @@ export function Dialog({ open, onClose, title, description, footer, width = 380,
       {open && (
         <div className="ar-dialog__surface">
           <header className="ar-dialog__head">
-            <h2>{title}</h2>
-            {description && <p>{description}</p>}
+            <h2 id={titleId}>{title}</h2>
+            {description && <p id={descriptionId}>{description}</p>}
           </header>
           {children && <div className="ar-dialog__body">{children}</div>}
           {footer && <footer className="ar-dialog__foot">{footer}</footer>}

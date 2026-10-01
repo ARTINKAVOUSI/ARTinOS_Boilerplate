@@ -1,7 +1,7 @@
-import { int } from 'three/tsl'
+import { convertToTexture, int } from 'three/tsl'
 import { boxBlur } from 'three/addons/tsl/display/boxBlur.js'
 import type { Feature } from '../../../app/feature'
-import { usePostFXEffect } from '../PostFX'
+import { usePostFXEffect, useUniform } from '../PostFX'
 
 export interface BoxBlurProps {
   id?: string
@@ -20,7 +20,11 @@ export interface BoxBlurProps {
  * Mount inside <PostFX>.
  */
 export function BoxBlur({ id = 'box-blur', enabled = true, order = 351, size = 1, separation = 1 }: BoxBlurProps) {
-  usePostFXEffect(id, { enabled, order, build: ({ input }) => boxBlur(input, { size: int(size), separation: int(separation) }) }, [size, separation])
+  const sizeU = useUniform(size)
+  const separationU = useUniform(separation)
+  // The input is resolved to a texture here rather than inside boxBlur, so the
+  // render target is part of the chain and is freed with it.
+  usePostFXEffect(id, { enabled, order, build: ({ input }) => boxBlur(convertToTexture(input), { size: int(sizeU), separation: separationU }) })
   return null
 }
 
@@ -34,6 +38,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 351,
   enabled: false,
+  description: 'Cheap single-pass box blur; separation widens it at no extra cost',
   component: BoxBlur,
   controls: {
     size: { type: 'number', value: 1, min: 1, max: 3, step: 1 },

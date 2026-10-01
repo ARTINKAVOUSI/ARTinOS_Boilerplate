@@ -6,15 +6,10 @@ import { Button } from '../../ui/Button/Button'
 import { Dialog } from '../../ui/Dialog/Dialog'
 import { useToast } from '../../ui/Toast/Toast'
 import { IconButton } from '../../ui/IconButton/IconButton'
+import { downloadText } from './files'
 import { Icons } from './icons'
 
 const selectPresets = (state: StudioState) => state.presets
-
-function download(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
-  Object.assign(document.createElement('a'), { href: url, download: name }).click()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
 
 /** Save, load, export and import whole-studio looks, from one bookmark button. */
 export function PresetMenu() {
@@ -27,7 +22,7 @@ export function PresetMenu() {
 
   const items: MenuEntry[] = [
     { id: 'save', label: 'Save current look…', icon: Icons.plus, onSelect: () => setSaving(true) },
-    { id: 'export', label: 'Export settings (JSON)', icon: Icons.download, onSelect: () => download('artinos-settings.json', studio.exportJSON()) },
+    { id: 'export', label: 'Export settings (JSON)', icon: Icons.download, onSelect: () => downloadText('artinos-settings.json', studio.exportJSON()) },
     { id: 'import', label: 'Import settings…', icon: Icons.upload, onSelect: () => file.current?.click() },
     ...(names.length ? ([{ type: 'separator' }, { type: 'label', label: 'Looks' }] as MenuEntry[]) : []),
     ...names.map<MenuEntry>(preset => ({ id: `load-${preset}`, label: preset, icon: Icons.bookmark, onSelect: () => studio.loadPreset(preset) })),

@@ -155,8 +155,7 @@
 
 /* hidden interface */
 .artinos-metablock-shell[data-ui-hidden] .mb-group:not([data-role='viewport']),
-.artinos-metablock-shell[data-ui-hidden] > .plate-brand-chip,
-.artinos-metablock-shell[data-ui-hidden] > .plate-console-toast {
+.artinos-metablock-shell[data-ui-hidden] > .plate-brand-chip {
   opacity: 0;
   pointer-events: none;
   transition: opacity 180ms;
@@ -591,13 +590,6 @@
 .v2-ui-hint {
   font: 300 11px var(--ui-font);
   letter-spacing: 0.02em;
-}
-.plate-console-toast {
-  font: 300 11.5px var(--ui-font);
-}
-.plate-console-toast-open {
-  font: 500 9px var(--ui-num);
-  letter-spacing: 0.12em;
 }
 .artinos-metablock-shell .mb-context-menu {
   font-family: var(--ui-font);

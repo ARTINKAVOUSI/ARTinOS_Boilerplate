@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import type { DiscoveredFeature } from '../feature'
 import { studio, useFeatureState, useStudio, type StudioState } from '../store'
 import { PropertyRow } from '../../ui/PropertyRow/PropertyRow'
@@ -26,11 +26,13 @@ const selectAdvanced = (state: StudioState) => state.ui.advanced
  * under it, and its controls folded away until asked for. The catalogue form of
  * a FeatureCard — for lists where most entries are off (effects, devices).
  */
-export function FeatureTile({ feature, caption, on, state: status, onToggle }: FeatureTileProps) {
+export const FeatureTile = memo(function FeatureTile({ feature, caption, on, state: status, onToggle }: FeatureTileProps) {
   const state = useFeatureState(feature.id)
   const reveal = useStudio(selectReveal)
   const advanced = useStudio(selectAdvanced)
   const [open, setOpen] = useState(false)
+  // A control reached from the palette stays shown while the tile is, even when it is an advanced one.
+  const [pinned, setPinned] = useState<string | null>(null)
   const tile = useRef<HTMLDivElement>(null)
   const mine = reveal?.featureId === feature.id ? reveal : null
 
@@ -38,12 +40,13 @@ export function FeatureTile({ feature, caption, on, state: status, onToggle }: F
   useEffect(() => {
     if (!mine) return
     setOpen(true)
+    if (mine.control) setPinned(mine.control)
     tile.current?.scrollIntoView({ block: 'nearest' })
   }, [mine?.at])
 
   if (!state) return null
   const enabled = on ?? state.enabled
-  const controls = Object.entries(feature.controls ?? {}).filter(([name, control]) => !control.advanced || advanced || mine?.control === name)
+  const controls = Object.entries(feature.controls ?? {}).filter(([name, control]) => !control.advanced || advanced || pinned === name)
   return (
     <div ref={tile} className="v2-tile" data-enabled={enabled || undefined}>
       <span className="v2-tile__name" title={feature.path}>
@@ -74,4 +77,4 @@ export function FeatureTile({ feature, caption, on, state: status, onToggle }: F
       )}
     </div>
   )
-}
+})

@@ -104,7 +104,8 @@ export function GlassRings({
   )
 }
 
-useGLTF.preload(MODEL_URL, DRACO_PATH)
+// No module-level useGLTF.preload: the registry imports every feature file at startup, so a
+// preload would fetch the GLB and the Draco decoder even while Glass Rings is off.
 
 export default GlassRings
 

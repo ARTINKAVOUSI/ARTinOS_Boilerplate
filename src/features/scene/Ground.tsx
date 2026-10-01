@@ -12,7 +12,7 @@ export interface GroundProps {
 }
 
 /** Ground — a floor that receives shadows. */
-export function Ground({ shape = 'disc', material = 'matte', color = '#777876', size = 8, y = -1.15, shadowOpacity = 0.35 }: GroundProps) {
+export function Ground({ shape = 'disc', material = 'matte', color = '#5d5e5c', size = 8, y = -1.15, shadowOpacity = 0.35 }: GroundProps) {
   return (
     <mesh rotation-x={-Math.PI / 2} position-y={y} receiveShadow>
       {shape === 'disc' ? <circleGeometry args={[size / 2, 96]} /> : <planeGeometry args={[size, size]} />}
@@ -34,6 +34,7 @@ export const feature: Feature = {
   group: 'Ground',
   order: 40,
   enabled: false,
+  description: 'A floor that receives shadows: matte, glossy or shadow-only',
   component: Ground,
   controls: {
     shape: { type: 'select', value: 'disc', options: ['disc', 'square'] },

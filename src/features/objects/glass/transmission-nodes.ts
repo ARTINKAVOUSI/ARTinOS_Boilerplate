@@ -180,13 +180,18 @@ export interface VolumeRefractionOptions {
    * nothing extra per sample but needs more samples to stop banding. Recompiles the graph.
    */
   spectral?: boolean
+  /**
+   * Bend 3D noise into the refraction normal, scaled by `uniforms.distortion`. Off compiles the
+   * three noise lookups out of every fragment; leave it on for any non-zero distortion.
+   */
+  distortion?: boolean
 }
 
 export function createVolumeRefraction(
   backdropTextureNode: any,
   uniforms: TransmissionUniforms,
   requestedSamples = 10,
-  { spectral = false }: VolumeRefractionOptions = {},
+  { spectral = false, distortion = true }: VolumeRefractionOptions = {},
 ) {
   // Baked into the loop bounds so unused iterations are never executed. A uniform sample count
   // would always run MAX_TRANSMISSION_SAMPLES and mask the surplus with a multiply.
@@ -225,20 +230,25 @@ export function createVolumeRefraction(
     const edgeFactor = pow(float(1).sub(n.dot(v).clamp()), float(2.0))
     const edgeThicknessBoost = thicknessVal.mul(edgeFactor.mul(0.55))
 
-    const distortionAmt = uniforms.distortion
-    const temporalOffset = vec3(uniforms.time, uniforms.time.negate(), uniforms.time.negate()).mul(
-      uniforms.temporalDistortion,
-    )
-    const noisePos = position.mul(uniforms.distortionScale).add(temporalOffset)
-    const distortionNormal = distortionAmt
-      .mul(float(0.15).add(edgeFactor.mul(0.85)))
-      .mul(
-        vec3(
-          triNoise3D(noisePos, float(0.2), uniforms.time),
-          triNoise3D(noisePos.zxy, float(0.2), uniforms.time),
-          triNoise3D(noisePos.yxz, float(0.2), uniforms.time),
-        ),
+    // Built only when distortion is on: at 0 the noise would cost three triNoise3D per fragment
+    // to add nothing.
+    let distortionNormal: any = null
+    if (distortion) {
+      const distortionAmt = uniforms.distortion
+      const temporalOffset = vec3(uniforms.time, uniforms.time.negate(), uniforms.time.negate()).mul(
+        uniforms.temporalDistortion,
       )
+      const noisePos = position.mul(uniforms.distortionScale).add(temporalOffset)
+      distortionNormal = distortionAmt
+        .mul(float(0.15).add(edgeFactor.mul(0.85)))
+        .mul(
+          vec3(
+            triNoise3D(noisePos, float(0.2), uniforms.time),
+            triNoise3D(noisePos.zxy, float(0.2), uniforms.time),
+            triNoise3D(noisePos.yxz, float(0.2), uniforms.time),
+          ),
+        )
+    }
 
     // three.js PhysicalLightingModel dispersion — per-channel IOR spread.
     const halfSpread = iorVal.sub(1.0).mul(uniforms.dispersion.mul(0.025))
@@ -262,7 +272,8 @@ export function createVolumeRefraction(
     Loop({ start: 0, end: samples, type: 'float', condition: '<' }, ({ i }: any) => {
       const disk = vogelDiskSample(int(i), int(samples), phi)
       const jitter = tangent.mul(disk.x).add(bitangent.mul(disk.y))
-      const sampleNorm = normalize(n.add(roughnessScale.mul(jitter)).add(distortionNormal))
+      const jittered = n.add(roughnessScale.mul(jitter))
+      const sampleNorm = normalize(distortionNormal ? jittered.add(distortionNormal) : jittered)
 
       // Phase of the thickness-smear sweep. A white-noise hash here offsets each pixel's
       // backdrop tap by a couple of pixels at random, which speckles high-contrast backdrops,

@@ -1,12 +1,12 @@
 # ARTINOS v2 — Rebuild Plan
 
-The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.project.tsx`, now archived in `legacy/v1/` and at the git tag `v1.4-final`) as a set of copy-pastable React units, following `.claude/skills/copy-pastable-reusable-react/SKILL.md`. It covers the contract every unit follows, the folder layout, a v1 → v2 inventory with the status of every item, the boundary audit and its fixes, and the cut-over.
+The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.project.tsx`, preserved at the git tag `v1.4-final`) as a set of copy-pastable React units, following `.claude/skills/copy-pastable-reusable-react/SKILL.md`. It covers the contract every unit follows, the folder layout, a v1 → v2 inventory with the status of every item, the boundary audit and its fixes, and the cut-over.
 
 **Status as of 2026-09-22** (branch `v0.5-dock`): **complete.**
 
 - Phases 0–6 and **6A (boundary fixes)** are done. Every unit listed in [§6](#6-boundary-audit) can be deleted and the app still type-checks and builds.
 - Scope decision (2026-09-21): the extra features, panels, UI-kit remainder, Timeline, presets, VOLUMA and the automated-check work that the previous revision planned as phases 7–10 are **not needed** and have been dropped (listed in [§7](#7-inventory-v1--v2) as ✂).
-- **Phase 11, the cut-over, is done:** v2 is the repository root; v1 is archived in `legacy/v1/` (see [§8](#8-phases)).
+- **Phase 11, the cut-over, is done:** v2 is the repository root; v1 lives on at the tag `v1.4-final` (the `legacy/v1/` copy was dropped on 2026-10-01; see [§8](#8-phases)).
 
 ---
 
@@ -45,7 +45,7 @@ The plan for rebuilding the ARTINOS boilerplate (v1.4: `packages/*` and `src/*.p
 | Objects / materials | 8 + glass folder | ✅ |
 | Input devices | 8 | ✅ pointer, keyboard, microphone, hands, camera, MIDI, gamepad, tilt |
 | Overlays | 2 | ✅ Stats HUD, Signal Monitor |
-| Studio panels | 10 | ✅ |
+| Studio panels | 8 | ✅ |
 | UI kit | ARTINOS UI (13) + 17 + MetaBlock + NodeGraph | ✅ |
 | Boundary fixes (§6) | 8 | ✅ phase 6A |
 | Cut-over (v2 replaces the root) | — | ✅ phase 11 |
@@ -94,7 +94,7 @@ export const feature: Feature = {
 }
 ```
 
-Control types: `number` → Slider, `boolean` → Toggle, `select` → Select, `color` → ColorField, `vector3` → VectorField, `text` → TextField (applied on Enter or blur).
+Control types: `number` → Slider, `boolean` → Switch, `select` → Select, `color` → ColorField, `vector3` → three NumberFields, `text` → TextField (applied on Enter or blur).
 
 Mount rules:
 
@@ -133,7 +133,7 @@ export const panel: PanelManifest = {
 }
 ```
 
-Discovered with `import.meta.glob('../panels/*.tsx')`. Every body is wrapped in `PanelWorkbench` (portrait/landscape container, `--panel-height`, error boundary with Retry). Panels share only `src/app/studio/` building blocks (`FeatureCard`, `CardFlow`, `ControlInput`, `PanelBar`, `PresetMenu`, `icons`), never each other.
+Discovered with `import.meta.glob('../panels/*.tsx')`. Every body is wrapped in `PanelWorkbench` (portrait/landscape container, `--panel-height`, error boundary with Retry). Panels share only `src/app/studio/` building blocks (`FeatureCard`, `FeatureTile`, `CardFlow`, `ControlInput`, `PanelBar`, `LiveInspector`, `files`, `icons`), never each other. Only the active tab of each dock group is mounted, and the dock hands the workspace the same panel element on every render, so focus clicks, drags and resizes never re-render a panel body.
 
 ### 3.4 Discovery (`src/app/registry.ts`)
 
@@ -145,10 +145,10 @@ A plain external store (`useSyncExternalStore`) saved to `localStorage` (`artino
 
 - `features[id] = { enabled, values, order }`
 - `presets[name]` = snapshots of `features` (save, load, delete, export, import, reset)
-- `ui = { visible, world, favorites, pins, advanced }`
+- `ui = { visible, theme, advanced }`
 - `reconcile()` drops saved state for features or controls that no longer exist.
 
-Features never read the store; the app passes values as props.
+Features never read the store; the app passes values as props. Each feature is mounted by a `FeatureMount` (`src/app/Stage.tsx`) that subscribes to that feature's state alone, so a slider drag re-renders one feature, not the scene.
 
 ### 3.6 Render pipeline (`src/features/postfx/PostFX.tsx`)
 
@@ -183,7 +183,6 @@ Features never read the store; the app passes values as props.
 ├── public/            backgrounds/ hdr/ models/ draco/ mediapipe/{wasm,models}
 ├── docs/PLAN.md       this file
 ├── docs/reference/    PRD, visual references, design zips
-├── legacy/v1/         the archived v1 workspace (not built)
 └── src/
     ├── main.tsx
     ├── app/                         host and systems; never edited to add a feature
@@ -200,7 +199,7 @@ Features never read the store; the app passes values as props.
     └── features/
         ├── canvas/WebGPUCanvas.tsx
         ├── postfx/PostFX.tsx  effects/*.tsx (46)
-        ├── scene/*.tsx (17)
+        ├── scene/*.tsx (16)
         ├── objects/*.tsx (8) + glass/ (GlassMaterial, GlassInspector + css, glass-capture,
         │                               transmission-nodes, glass-optics, glass-parameters)
         ├── input/*.tsx (8)
@@ -230,7 +229,7 @@ Features never read the store; the app passes values as props.
 | Docking engine | `src/ui/MetaBlock/` | `react` |
 | Node graph editor | `src/ui/NodeGraph/` | `react`, `three` (GPU domain) |
 | PostFX effect | `features/postfx/PostFX.tsx` + `effects/<Effect>.tsx` | `three`, `@react-three/fiber`; mount `<PostFX>` in your canvas |
-| Scene feature | `features/scene/<Name>.tsx` | `three`, R3F; drei for Camera, Controls, Environment, BackdropImage, Gizmo |
+| Scene feature | `features/scene/<Name>.tsx` | `three`, R3F; drei for Camera, Controls, Environment, Gizmo |
 | Glass | `features/objects/glass/` minus `GlassInspector.*`, + `PostFX.tsx` | `three`, R3F |
 | Reactive object / input device | the feature file + `app/signals.tsx` | MediaPipe for HandTracking |
 | Media plane / camera input | the feature file + `app/webcam.ts` | — |
@@ -279,7 +278,7 @@ Legend: ✅ done · ✂ not ported (by design, or not needed per the 2026-09-21 
 | v1 package | v2 location | Status |
 |---|---|---|
 | `@artinos/runtime` | `features/canvas`, `features/postfx/PostFX.tsx`, `app/store.ts`, `app/runtime.ts`, `app/signals.tsx`, overlays | ✅ (bindings, automation, history, adaptive quality ✂) |
-| `@artinos/r3f` | `app/*`, `app/studio/*`, `src/panels/*` | ✅ 10 panels (the rest ✂, §7.7) |
+| `@artinos/r3f` | `app/*`, `app/studio/*`, `src/panels/*` | ✅ 5 panels + the studio bar (the rest ✂, §7.7) |
 | `@artinos/modules` | `features/scene`, `features/postfx/effects`, `features/objects` | ✅ |
 | `@artinos/inputflow` | `features/input/*` | ✅ 8 devices (the rest ✂, §7.5) |
 | `@artinos/ui` | `src/ui/*` | ✅ 29 components (the rest ✂, §7.8) |
@@ -303,15 +302,15 @@ Legend: ✅ done · ✂ not ported (by design, or not needed per the 2026-09-21 
 
 Fixed compared to v1: SSR/SSGI/GTAO composite as three.js documents; Outline builds visible and hidden edge colours; LUT and Transition need no external resource registry.
 
-### 7.3 Scene — 17 ✅
+### 7.3 Scene — 16 ✅
 
-RenderSettings · Shadows · Camera (8 framings, persp/ortho) · Controls (orbit / map / trackball / camera-controls / none) · Environment · Background · BackdropImage · Sky · Stars · Fog · Lighting (8 rigs, Kelvin) · Light (ambient, hemisphere, directional, point, spot, IES, probe) · Ground · ContactShadow · Grid · Gizmo.
+RenderSettings · Shadows · Camera (8 framings, persp/ortho) · Controls (orbit / map / trackball / camera-controls / none) · Environment · Background · Sky · Stars · Fog · Lighting (8 rigs, Kelvin) · Light (ambient, hemisphere, directional, point, spot, IES, probe) · Ground · ContactShadow · Grid · Gizmo · Adaptive Stage (room, cyclorama, apse, niche; optional pedestal).
 
 ✂ Water, Reflector, AdaptiveQuality (the HUD keeps its manual quality tiers), v1 `View` (multi-viewport). v1 `Presentation`, `Stage`, `CameraTarget` are covered by Camera framings + Controls.
 
 ### 7.4 Objects and materials — ✅
 
-Glass material folder (spectral transmission, backdrop + clean passes, dispersion, volume, diagnostics) · GlassRings · GlassMesh · Model (glTF + Draco) · MediaPlane · SceneText · Content · ReactiveOrb · SignalParticles.
+Glass material folder (spectral transmission, backdrop + clean passes, dispersion, volume, diagnostics) · GlassRings · GlassMesh · Model (glTF + Draco) · MediaPlane · Content. (ReactiveOrb, SignalParticles, SceneText and BackdropImage removed 2026-10-01.)
 
 ### 7.5 Input — 8 ✅
 
@@ -342,17 +341,14 @@ Glass material folder (spectral transmission, backdrop + clean passes, dispersio
 | History, bindings, automation, agent API | ✂ (the dock keeps its layout undo; signal → parameter routing is done with graphs in the Graph panel) |
 | Interactions / commands | ✅ the command palette; v1 action registry ✂ |
 
-### 7.7 Studio panels — 8 ✅ + the studio bar
+### 7.7 Studio panels — 5 ✅ + the studio bar
 
 | Panel | Replaces v1 |
 |---|---|
-| Inspector | InspectorPanel, ParametersPanel, PresetsPanel, GlassInspector |
-| Scene | ScenePanel, RenderPanel |
-| PostFX | PostFXPanel |
+| Inspector — the parameters of every active component, in catalogue order; feature `inspector` sections ride in their card | InspectorPanel, ParametersPanel, PresetsPanel, GlassInspector |
+| Library — every component by category (`app/studio/catalogue.tsx`), Add / Inspect / Remove, plus session assets and the source kit | ModulesPanel, ScenePanel, RenderPanel, PostFXPanel, AssetBrowserPanel, ResourcesPanel |
 | InputFlow | InputPanel, SignalsPanel, ProviderPanel |
 | Graph | GraphPanel + graph/* |
-| Assets | AssetBrowserPanel, ResourcesPanel |
-| Library | ModulesPanel |
 | Console | ConsolePanel, ThreeInspectorPanel (Performance and Memory views) |
 | *studio bar* (`app/studio/RuntimeHUD.tsx`, not a panel) | TelemetryPanel; appearance settings |
 
@@ -398,9 +394,9 @@ Done 2026-09-22:
 
 6. Deleted the leftovers: the old `v2/` and `packages/` folders (build output only by then), `.upgrade-backup/`, `vite.log` and `tsconfig.app.tsbuildinfo`.
 
-The root now holds only the project: `src/ public/ docs/ .claude/ index.html package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json vite.config.ts CLAUDE.md README.md`, plus `legacy/v1/` and the separate `artinos-ui-design-specification/` app (untracked, its own launch entry).
+The root now holds only the project: `src/ public/ docs/ .claude/ index.html package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json vite.config.ts CLAUDE.md README.md`.
 
-`legacy/v1/` is kept rather than deleted. Everything in it is also in the `v1.4-final` tag, so it can be dropped at any time with `git rm -r legacy`.
+`legacy/v1/` was kept at first and dropped on 2026-10-01, together with the untracked `UI template/` and `artinos-ui-design-specification/` folders beside the project. Everything v1 had is in the `v1.4-final` tag.
 
 Still to do when you want it: merge to `main` through a PR.
 
@@ -413,7 +409,7 @@ Still to do when you want it: merge to `main` through a PR.
 | react / react-dom | 19.2.0 | everything |
 | three | 0.185.1 | canvas, postfx, scene, objects, NodeGraph GPU domain |
 | @react-three/fiber | 10.0.0-alpha.2 | canvas and every 3D feature |
-| @react-three/drei | 11.0.0-alpha.5 | Camera, Controls, Environment, BackdropImage, GlassRings/Model, ReactiveOrb, Gizmo |
+| @react-three/drei | 11.0.0-alpha.5 | Camera, Controls, Environment, GlassRings/Model, Content, Gizmo |
 | @mediapipe/tasks-vision | 0.10.35 | HandTracking (lazy chunk) |
 | typescript ~5.8, vite ^6, @vitejs/plugin-react ^5, @types/* | dev | |
 
@@ -427,7 +423,7 @@ Removed: `three-stdlib`, `lucide-react` (inline SVG icons).
 - **Scene-replacing passes** (SSAA, Pixelation, Retro) re-render the scene and discard effects ordered before them; they default to orders 10–12.
 - **Shader compile errors** surface after `build()`, so `PostFX`'s try/catch cannot catch them; the frame goes black until the effect is switched off. Test a new effect first in the chain and behind another effect.
 - **No canvas MSAA** — temporal/supersampling passes need single-sample depth; AA comes from FXAA/SMAA/TRAA/TAAU.
-- **Studio skin weight** — the original stylesheet (~330 kB, 52 kB gzip) is carried whole.
+- **Studio skin weight** — the studio CSS is 231 kB (41 kB gzip); `skin/base.css`, `components.css`, `dock.css` and `panels.css` still hold rules that match nothing (see the 2026-10-01 entry in §12).
 - **Default pixel ratio 1** — the glass scene with post-processing runs 56–60 fps at 1×, 10–16 fps at 1.5×. HUD tiers raise the ceiling.
 - **Drei `ContactShadows`/`Grid`** are not WebGPU-safe in these alphas, so both are small canvas-texture versions.
 - **Never checked:** microphone/webcam/MIDI permission flows and the WebGL2 fallback (out of scope per the 2026-09-21 decision).
@@ -484,3 +480,17 @@ Delete the file or folder. `reconcile()` drops its saved state; the dock drops i
 **Cleanup (v0.6, 2026-09-30):** the studio skin (`app/studio/skin/`) went from 26 stylesheets to five — `skin.css` (entry), `tokens.css` (the `--ui-*` tokens, Frost, the two frost themes, state overrides), `base.css` (the earlier rule sets in the `artinos.legacy` / `artinos.instrument` layers), `components.css` (shell and panel layout) and `chrome.css` (the MetaBlock bridge). About 4,800 lines of CSS were removed: every rule whose selector named a class or a `data-*` attribute no code renders (the six material worlds and eight `data-theme` themes were never set; the old `artinos-*` component library is gone). Each step was checked with a computed-style fingerprint of every panel and the studio bar — no visible change. Also removed: `FeatureBoundary`'s unused crash listeners (the console capture already toasts), `PanelEmpty`, unused icons, `.npmrc` (pnpm reads `nodeLinker` from `pnpm-workspace.yaml`).
 
 **Profiler (v0.6, 2026-10-01):** three.js's Inspector overlay (`features/scene/ThreeInspector.tsx`) is gone; its useful half lives in the studio. `app/profiler.ts` subclasses three's headless `RendererInspector` — the renderer calls it around every frame and every render/compute pass — averages each pass's CPU and GPU time by call id, reads `renderer.info.memory`, and publishes a snapshot four times a second. It attaches only while something subscribes, and turns GPU timestamp queries off again when the last reader leaves. The Console panel shows it as two views beside the log: **Performance** (frame rate, CPU, GPU and idle with history; every pass as a tree with CPU, GPU and its share of the frame) and **Memory** (total GPU memory with history; count and size per kind). The studio bar lost its Overlays group; Stats HUD and Signal Monitor are still switched from the Inspector panel.
+
+**Boilerplate cleanup (v0.6, 2026-10-01):** an audit of every area (host, studio and panels, features, UI kit, CSS), then fixes:
+
+- *Repository:* `legacy/v1/` (77 MB), `UI template/` and `artinos-ui-design-specification/` removed (v1 is at `v1.4-final`); `.gitattributes` (LF), `.editorconfig`; `PanelWorkbench.tsx` no longer reads as binary to git (a stray CR); stricter `tsconfig` flags (`noFallthroughCasesInSwitch`, `noUncheckedSideEffectImports`, `erasableSyntaxOnly`); Vite honours `PORT`.
+- *Rendering cost:* each feature mounts through `FeatureMount` with its own state, so a slider re-renders one feature (no `JSON.stringify` per tick); the viewport no longer re-renders 4×/s; the dock hands the workspace a cached element per panel; the PostFX, Inspector, InputFlow and Library panels subscribe to primitives; `MetaBlock.focusGroup` is a no-op on an already-focused group and the dock saves its layout once a change settles; console notifications are batched to 10/s; the runtime sampler stops with no readers.
+- *GPU:* `disposeChain` walks each node once and frees RTT targets and their quad materials; Graph-panel previews are released (and their target disposed) when the panel closes; GPU graphs recompile only when their shader changes (not on node drags); Lighting, Light (probe), Fog and Environment no longer recreate their light/fog/env map per slider step; MotionBlur, BoxBlur, SSAA, LensFlare, God Rays and Outline update uniforms instead of rebuilding the chain.
+- *Correctness:* the `sss` id collision (Subsurface Scattering now `subsurface`); mic/camera/landmarker leaks on fast toggles; IES light props; studio state saved even while a graph drives a control (debounce max-wait, `pagehide` flush); `reveal` clears itself; tab error state no longer leaks between tabs; H no longer fires from a focused Select; a saved dock layout survives a new or closed panel; node-graph shortcuts no longer delete nodes from text fields; the live graph keys objects by uuid and draws attachment wires from what each effect actually read (`PostFXStage.reads`, replacing a hard-coded table with three wrong ids); SSAA no longer crashes the canvas when Recurrent Denoise reads it.
+- *Startup:* the two startup images are WebP (5.2 MB → 0.84 MB); Glass Rings no longer preloads its model and Draco at import; drei's WebGL-only legacy entry is a lazy, tree-shaken chunk. Production build: engine 3,118 → 2,985 kB (918 → 870 kB gzip), CSS 241 → 231 kB.
+- *CSS:* 220 lines of certain-dead rules removed from `skin/tokens.css`, `skin/chrome.css`, `MetaBlock.css` and `Slider.css` (base/components/dock/panels left for a later pass).
+- *Docs:* every feature manifest has a `description`; `docs/ui/theming.md` describes this repository's three themes; README has a start-a-new-project checklist and an asset table.
+
+Checked in Chrome (WebGPU): every effect switched on alone, and every scene/object/overlay feature toggled, with no console or WebGPU validation errors; all eight panels open; viewport and panel clicks write no layout, a tab switch writes it once.
+
+**Library and Inspector (v0.6, 2026-10-01):** the Scene, PostFX and Assets panels merged into the Library, which now browses every component by category — a rail of sections (Objects, Scene, Effects, Input, Overlays) and their shelves (scene groups, effect categories), derived from the manifests in `app/studio/catalogue.tsx` — with a filter, an All / Added / Available switch, Add, Inspect and Remove per tile, and a fold for details and settings before a component is added; Assets and the source kit are two more places on the rail. The Inspector lists only what is active, as one packed card flow in catalogue order with each card captioned by its section; the effect stack keeps its ordinals and reordering, and the pipeline switch sits in the bar. A feature folder's `inspector` section (glass diagnostics, the adaptive room) renders inside its feature's card, so it folds and leaves with the component. `owns` routes palette hits by state: the Inspector claims what is on, the Library the rest; any `studio.reveal` now brings forward the owning panel (`DockShell`), which is how a tile's Inspect works.

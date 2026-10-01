@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 400,
   enabled: false,
+  description: 'Warm antique toning, blended with the original',
   component: Sepia,
   controls: {
     amount: { type: 'number', value: 1, min: 0, max: 1, step: 0.01 },

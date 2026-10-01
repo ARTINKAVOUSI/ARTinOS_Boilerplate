@@ -1,7 +1,7 @@
 import { Environment as DreiEnvironment, Lightformer } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
-import { useEffect } from 'react'
-import { EquirectangularReflectionMapping, Euler, SRGBColorSpace, TextureLoader } from 'three'
+import { useEffect, useState } from 'react'
+import { EquirectangularReflectionMapping, SRGBColorSpace, TextureLoader, type Texture } from 'three'
 import type { Feature } from '../../app/feature'
 
 export type EnvironmentPreset = 'studio' | 'softbox' | 'warehouse' | 'gallery' | 'image'
@@ -35,32 +35,84 @@ function Lightformers({ preset, rotation }: { preset: EnvironmentPreset; rotatio
 }
 
 /** Loads an equirect photo straight onto the scene, avoiding any loader guesswork by file type. */
-function ImageEnvironment({ image, intensity, rotation, background, blur }: Required<Omit<EnvironmentProps, 'preset'>>) {
+function ImageEnvironment({ image, intensity, rotation, background, blur, onError }: Required<Omit<EnvironmentProps, 'preset'>> & { onError: () => void }) {
   const scene = useThree(state => state.scene)
+  const [texture, setTexture] = useState<Texture | null>(null)
+
+  // Loaded once per image: toggling the background must not reload the photo or regenerate the PMREM.
   useEffect(() => {
     let disposed = false
-    const previous = { environment: scene.environment, background: scene.background }
-    const texture = new TextureLoader().load(image, () => {
-      if (disposed) return
-      scene.environment = texture
-      if (background) scene.background = texture
-    })
-    texture.mapping = EquirectangularReflectionMapping
-    texture.colorSpace = SRGBColorSpace
+    let handedOver = false
+    const loaded = new TextureLoader().load(
+      image,
+      () => {
+        if (disposed) return
+        handedOver = true
+        setTexture(loaded)
+      },
+      undefined,
+      () => {
+        if (disposed) return
+        console.warn(`[environment] Could not load ${image}; using the studio preset instead.`)
+        onError()
+      },
+    )
+    loaded.mapping = EquirectangularReflectionMapping
+    loaded.colorSpace = SRGBColorSpace
     return () => {
       disposed = true
-      if (scene.environment === texture) scene.environment = previous.environment
-      if (scene.background === texture) scene.background = previous.background
-      texture.dispose()
+      // Once handed over, the effects below unassign it before it is disposed.
+      if (handedOver) setTexture(current => (current === loaded ? null : current))
+      else loaded.dispose()
     }
-  }, [scene, image, background])
+  }, [image])
+
+  useEffect(() => {
+    if (!texture) return
+    const previous = scene.environment
+    scene.environment = texture
+    return () => {
+      if (scene.environment === texture) scene.environment = previous
+    }
+  }, [scene, texture])
+
+  useEffect(() => {
+    if (!background || !texture) return
+    const previous = scene.background
+    scene.background = texture
+    return () => {
+      if (scene.background === texture) scene.background = previous
+    }
+  }, [scene, texture, background])
+
+  // Cleanups run in declaration order, so this frees the photo after both slots let go of it.
+  useEffect(() => () => texture?.dispose(), [texture])
+
+  // Declared before the sync below, so it records what the scene had before this mounted.
+  useEffect(() => {
+    const previous = {
+      environmentIntensity: scene.environmentIntensity,
+      backgroundIntensity: scene.backgroundIntensity,
+      backgroundBlurriness: scene.backgroundBlurriness,
+      environmentRotation: scene.environmentRotation.clone(),
+      backgroundRotation: scene.backgroundRotation.clone(),
+    }
+    return () => {
+      scene.environmentIntensity = previous.environmentIntensity
+      scene.backgroundIntensity = previous.backgroundIntensity
+      scene.backgroundBlurriness = previous.backgroundBlurriness
+      scene.environmentRotation.copy(previous.environmentRotation)
+      scene.backgroundRotation.copy(previous.backgroundRotation)
+    }
+  }, [scene])
 
   useEffect(() => {
     scene.environmentIntensity = intensity
     scene.backgroundIntensity = intensity
     scene.backgroundBlurriness = blur
-    scene.environmentRotation = new Euler(0, rotation, 0)
-    scene.backgroundRotation = new Euler(0, rotation, 0)
+    // The renderer reads these Eulers every frame, so set them in place.
+    scene.environmentRotation.set(0, rotation, 0)
+    scene.backgroundRotation.set(0, rotation, 0)
   }, [scene, intensity, blur, rotation])
 
   return null
@@ -68,16 +120,19 @@ function ImageEnvironment({ image, intensity, rotation, background, blur }: Requ
 
 /**
  * Environment — image-based lighting and reflections. The procedural presets
- * need no files; `image` uses any equirectangular photo.
+ * need no files; `image` uses an equirectangular photo you supply (the
+ * Library's Assets can hand it one). Without a photo, or when it fails to
+ * load, the studio preset lights the scene instead.
  */
-export function Environment({ preset = 'studio', image = '/hdr/persianbeauty.png', intensity = 1, rotation = 0, background = false, blur = 0.1 }: EnvironmentProps) {
+export function Environment({ preset = 'studio', image = '', intensity = 1, rotation = 0, background = false, blur = 0.1 }: EnvironmentProps) {
   const radians = (rotation * Math.PI) / 180
-  if (preset === 'image') {
-    return <ImageEnvironment image={image} intensity={intensity} rotation={radians} background={background} blur={blur} />
+  const [failed, setFailed] = useState<string | null>(null)
+  if (preset === 'image' && image && failed !== image) {
+    return <ImageEnvironment image={image} intensity={intensity} rotation={radians} background={background} blur={blur} onError={() => setFailed(image)} />
   }
   return (
     <DreiEnvironment background={background} backgroundBlurriness={blur} resolution={256} environmentIntensity={intensity}>
-      <Lightformers preset={preset} rotation={radians} />
+      <Lightformers preset={preset === 'image' ? 'studio' : preset} rotation={radians} />
     </DreiEnvironment>
   )
 }
@@ -90,10 +145,11 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Atmosphere',
   order: 20,
+  description: 'Image-based lighting and reflections from a preset or equirect photo',
   component: Environment,
   controls: {
-    preset: { type: 'select', value: 'image', options: ['studio', 'softbox', 'warehouse', 'gallery', 'image'] },
-    image: { type: 'text', value: '/hdr/persianbeauty.png' },
+    preset: { type: 'select', value: 'studio', options: ['studio', 'softbox', 'warehouse', 'gallery', 'image'] },
+    image: { type: 'text', value: '', placeholder: 'Equirect photo URL, for the image preset' },
     intensity: { type: 'number', value: 1, min: 0, max: 4, step: 0.01 },
     rotation: { type: 'number', value: 0, min: -180, max: 180, step: 1, unit: '°' },
     background: { type: 'boolean', value: false, label: 'Show' },

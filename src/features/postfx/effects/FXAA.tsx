@@ -29,5 +29,6 @@ export const feature: Feature = {
   cost: 'low',
   order: 990,
   enabled: true,
+  description: 'Fast approximate anti-aliasing; keep it last in the chain',
   component: FXAA,
 }

@@ -12,7 +12,13 @@ export interface FogProps {
 
 /** Fog — distance haze. Match `color` to the background for a seamless horizon. */
 export function Fog({ mode = 'linear', color = '#1a1c1f', near = 8, far = 30, density = 0.04 }: FogProps) {
-  return mode === 'exponential' ? <fogExp2 attach="fog" args={[color, density]} /> : <fog attach="fog" args={[color, near, far]} />
+  // Values are props, not `args`: the renderer caches its fog node per Fog object, so a new
+  // object on every slider step would rebuild every material. Only a mode switch swaps it.
+  return mode === 'exponential' ? (
+    <fogExp2 key="exponential" attach="fog" color={color} density={density} />
+  ) : (
+    <fog key="linear" attach="fog" color={color} near={near} far={far} />
+  )
 }
 
 export default Fog
@@ -24,6 +30,7 @@ export const feature: Feature = {
   group: 'Atmosphere',
   order: 25,
   enabled: false,
+  description: 'Distance haze, linear or exponential; match its colour to the background',
   component: Fog,
   controls: {
     mode: { type: 'select', value: 'linear', options: ['linear', 'exponential'] },

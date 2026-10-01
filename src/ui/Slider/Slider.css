@@ -6,7 +6,6 @@
 @property --ar-lo { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --ar-hi { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --ar-p { syntax: '<number>'; inherits: true; initial-value: 0; }
-@property --ar-p2 { syntax: '<number>'; inherits: true; initial-value: 0; }
 
 .ar-slider {
   position: relative;
@@ -31,15 +30,14 @@
     box-shadow var(--ar-dur-state) var(--ar-ease),
     --ar-lo var(--ar-dur-state) var(--ar-ease),
     --ar-hi var(--ar-dur-state) var(--ar-ease),
-    --ar-p var(--ar-dur-state) var(--ar-ease),
-    --ar-p2 var(--ar-dur-state) var(--ar-ease);
+    --ar-p var(--ar-dur-state) var(--ar-ease);
 }
 /* the semantic value is immediate under the hand */
 .ar-slider[data-mode] .ar-slider__track {
-  transition-duration: var(--ar-dur-state), 0s, 0s, 0s, 0s;
+  transition-duration: var(--ar-dur-state), 0s, 0s, 0s;
 }
 .ar-slider[data-mode][data-quant] .ar-slider__track {
-  transition-duration: var(--ar-dur-state), var(--ar-dur-value), var(--ar-dur-value), var(--ar-dur-value), var(--ar-dur-value);
+  transition-duration: var(--ar-dur-state), var(--ar-dur-value), var(--ar-dur-value), var(--ar-dur-value);
 }
 .ar-slider[data-mode] .ar-slider__track:not(.ar-slider__track--gradient) {
   box-shadow: var(--ar-well), inset 0 1px 3px rgba(0, 0, 0, 0.28);

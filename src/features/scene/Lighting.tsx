@@ -16,7 +16,7 @@ export interface LightingProps {
   temperature?: number
   /** The key light casts shadows. */
   shadows?: boolean
-  /** Shadow map resolution; a change rebuilds the key light. */
+  /** Shadow map resolution; the renderer resizes the map in place. */
   shadowMapSize?: number | string
 }
 
@@ -60,13 +60,16 @@ export function Lighting({ preset = 'studio', intensity = 1, keyLight = 1, fill 
   const f = intensity * fill
   const r = intensity * rim
   const size = Number(shadowMapSize) || 2048
-  const key = (position: [number, number, number], value: number) => <KeyLight key={size} position={position} intensity={value} color={white} shadows={shadows} size={size} />
+  // No remount on a size change: WebGPU's ShadowNode resizes its map from shadow.mapSize every shadow pass.
+  const key = (position: [number, number, number], value: number) => <KeyLight position={position} intensity={value} color={white} shadows={shadows} size={size} />
 
+  // Lights take their values as props, never `args`: new args rebuild the light, and a new light
+  // rebuilds the node graph of every material in the scene.
   switch (preset) {
     case 'sun':
       return (
         <>
-          <hemisphereLight args={['#cfe4ff', '#5a4a3a', 0.45 * intensity]} />
+          <hemisphereLight color="#cfe4ff" groundColor="#5a4a3a" intensity={0.45 * intensity} />
           {key([6, 8, 3], 3 * k)}
         </>
       )
@@ -109,7 +112,7 @@ export function Lighting({ preset = 'studio', intensity = 1, keyLight = 1, fill 
       return (
         <>
           <ambientLight intensity={0.24 * intensity} />
-          <hemisphereLight args={['#ffffff', '#444444', 0.2 * intensity]} />
+          <hemisphereLight color="#ffffff" groundColor="#444444" intensity={0.2 * intensity} />
           {key([4, 6, 4], (soft ? 2.2 : 2) * k)}
           <spotLight position={[-4, 2, 2]} angle={0.9} penumbra={0.95} intensity={3 * f} />
           <directionalLight position={[2, 6, -4]} intensity={1.2 * r} />
@@ -127,6 +130,9 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Lighting',
   order: 30,
+  // Off by default: the Adaptive Room, on by default, brings its own rig.
+  enabled: false,
+  description: 'Key, fill and rim light rig from a preset, with a shadow-casting key',
   component: Lighting,
   controls: {
     preset: { type: 'select', value: 'studio', options: ['studio', 'softbox', 'product', 'neutral', 'portrait', 'dramatic', 'sun', 'night'] },

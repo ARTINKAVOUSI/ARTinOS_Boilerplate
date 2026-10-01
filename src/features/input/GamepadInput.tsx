@@ -9,6 +9,12 @@ export interface GamepadInputProps {
   deadzone?: number
 }
 
+// Signal names are built once per index, not every frame.
+const axisKeys: string[] = []
+const buttonKeys: string[] = []
+const axisKey = (i: number) => (axisKeys[i] ??= `pad.axis.${i}`)
+const buttonKey = (i: number) => (buttonKeys[i] ??= `pad.button.${i}`)
+
 /**
  * GamepadInput — publishes the Gamepad API as signals:
  *
@@ -32,12 +38,13 @@ export function GamepadInput({ index = 0, deadzone = 0.08 }: GamepadInputProps) 
       const pad = navigator.getGamepads?.()[index]
       bus.set('pad.connected', pad ? 1 : 0)
       if (!pad) return
-      pad.axes.forEach((axis, axisIndex) => bus.set(`pad.axis.${axisIndex}`, curve(axis)))
-      bus.set('pad.leftX', curve(pad.axes[0] ?? 0))
-      bus.set('pad.leftY', curve(pad.axes[1] ?? 0))
-      bus.set('pad.rightX', curve(pad.axes[2] ?? 0))
-      bus.set('pad.rightY', curve(pad.axes[3] ?? 0))
-      pad.buttons.forEach((button, buttonIndex) => bus.set(`pad.button.${buttonIndex}`, button.value || (button.pressed ? 1 : 0)))
+      const { axes, buttons } = pad
+      for (let i = 0; i < axes.length; i++) bus.set(axisKey(i), curve(axes[i]))
+      bus.set('pad.leftX', curve(axes[0] ?? 0))
+      bus.set('pad.leftY', curve(axes[1] ?? 0))
+      bus.set('pad.rightX', curve(axes[2] ?? 0))
+      bus.set('pad.rightY', curve(axes[3] ?? 0))
+      for (let i = 0; i < buttons.length; i++) bus.set(buttonKey(i), buttons[i].value || (buttons[i].pressed ? 1 : 0))
     }
 
     frame = requestAnimationFrame(tick)

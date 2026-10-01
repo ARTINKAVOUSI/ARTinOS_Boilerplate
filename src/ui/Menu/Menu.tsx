@@ -45,22 +45,33 @@ function MenuList({ items, anchor, onClose, owner }: { items: readonly MenuEntry
     list.current.focus()
   }, [anchor])
 
+  // Callers pass a new onClose every render; the listeners below read the latest
+  // one, so they bind once per open instead of on every render.
+  const closeRef = useRef(onClose)
+  useLayoutEffect(() => {
+    closeRef.current = onClose
+  })
+
   useEffect(() => {
+    const close = () => closeRef.current(false)
     const onPointer = (event: PointerEvent) => {
       const target = event.target as Node
       // A press on the trigger itself is its own click: it toggles the menu.
-      if (!list.current?.contains(target) && !owner?.contains(target)) onClose(false)
+      if (!list.current?.contains(target) && !owner?.contains(target)) close()
     }
-    const onScroll = () => onClose(false)
+    // The list scrolls itself when it is long: only a wheel elsewhere closes it.
+    const onWheel = (event: WheelEvent) => {
+      if (!list.current?.contains(event.target as Node)) close()
+    }
     window.addEventListener('pointerdown', onPointer, true)
-    window.addEventListener('blur', onScroll)
-    window.addEventListener('wheel', onScroll, { passive: true })
+    window.addEventListener('blur', close)
+    window.addEventListener('wheel', onWheel, { passive: true })
     return () => {
       window.removeEventListener('pointerdown', onPointer, true)
-      window.removeEventListener('blur', onScroll)
-      window.removeEventListener('wheel', onScroll)
+      window.removeEventListener('blur', close)
+      window.removeEventListener('wheel', onWheel)
     }
-  }, [onClose, owner])
+  }, [owner])
 
   const select = (index: number) => {
     const entry = items[index]
@@ -93,7 +104,7 @@ function MenuList({ items, anchor, onClose, owner }: { items: readonly MenuEntry
         event.stopPropagation()
         const at = enabled.indexOf(active)
         if (event.key === 'ArrowDown') setActive(enabled[(at + 1) % enabled.length] ?? -1)
-        else if (event.key === 'ArrowUp') setActive(enabled[(at - 1 + enabled.length) % enabled.length] ?? -1)
+        else if (event.key === 'ArrowUp') setActive(enabled[(Math.max(at, 0) - 1 + enabled.length) % enabled.length] ?? -1) // nothing highlighted → the last item
         else if (event.key === 'Home') setActive(enabled[0] ?? -1)
         else if (event.key === 'End') setActive(enabled[enabled.length - 1] ?? -1)
         else if (event.key === 'Enter' || event.key === ' ') select(active)

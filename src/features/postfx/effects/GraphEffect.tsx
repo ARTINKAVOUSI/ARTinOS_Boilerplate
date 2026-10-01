@@ -43,8 +43,8 @@ export function GraphEffect({ id = 'graph-effect', enabled = true, order = 460, 
     {
       enabled: enabled && !!node,
       order,
+      webgpuOnly: true,
       build: ({ input }) => {
-        if (!node) return input
         const source = float(node as never)
         const tint = vec3(source)
         const rgb =

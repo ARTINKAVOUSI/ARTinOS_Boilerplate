@@ -36,6 +36,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 700,
   enabled: true,
+  description: 'Darkens the frame towards its corners',
   component: Vignette,
   controls: {
     intensity: { type: 'number', value: 0.35, min: 0, max: 1, step: 0.01 },

@@ -36,5 +36,6 @@ export const feature: Feature = {
   order: 12,
   enabled: false,
   webgpuOnly: true,
+  description: 'PS1-style re-render: vertex snapping, affine textures, low resolution',
   component: RetroPS1,
 }

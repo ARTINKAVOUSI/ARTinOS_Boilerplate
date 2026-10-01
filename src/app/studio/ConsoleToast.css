@@ -1,0 +1,120 @@
+/* Console toast — top-right, the brand chip's counterpart: the same glass pill,
+   the same height and inset from the edge. It slides in for a new warning or
+   error and leaves on its own. */
+.plate-workspace .plate-console-toast {
+  position: absolute;
+  top: 22px;
+  right: 32px;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  max-width: min(440px, calc(100% - 260px));
+  height: 30px;
+  padding: 0 4px 0 2px;
+  border: 1px solid var(--ui-pane-border);
+  border-radius: 12px;
+  background: var(--ui-pane-sheen), var(--ui-pane-tint);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-pane-shadow);
+  font: 300 11.5px/1 var(--ui-font);
+  color: var(--ui-text);
+  opacity: 0;
+  translate: 0 -6px;
+  pointer-events: none;
+  transition: opacity 160ms var(--ui-ease-exit, ease-in), translate 160ms var(--ui-ease-exit, ease-in);
+}
+.plate-workspace .plate-console-toast[data-visible] {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+  transition-duration: 240ms;
+  transition-timing-function: var(--ui-ease, cubic-bezier(0.2, 0.7, 0.2, 1));
+}
+
+/* the message is the way into the Console */
+.plate-workspace .plate-console-toast-open {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.plate-workspace .plate-console-toast-open:hover {
+  background: var(--ui-hover-wash);
+}
+.plate-workspace .plate-console-toast-open > i {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ui-warn);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--ui-warn) 60%, transparent);
+}
+.plate-workspace .plate-console-toast[data-level='error'] .plate-console-toast-open > i {
+  background: var(--ui-fault);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--ui-fault) 60%, transparent);
+}
+.plate-workspace .plate-console-toast-message {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.plate-workspace .plate-console-toast-open > small {
+  flex: none;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font: 400 10px/1.2 var(--ui-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-meta);
+}
+
+.plate-workspace .plate-console-toast-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--ui-text-meta);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.plate-workspace .plate-console-toast-close:hover {
+  background: var(--ui-hover-wash);
+  color: var(--ui-text-strong);
+}
+.plate-workspace .plate-console-toast-close svg {
+  width: 9px;
+  height: 9px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+.plate-workspace .plate-console-toast :is(.plate-console-toast-open, .plate-console-toast-close):focus-visible {
+  outline: none;
+  box-shadow: var(--ui-focus-ring, 0 0 0 1px var(--ui-accent));
+}
+
+/* out of the way when the interface is hidden or the dock fills the window */
+.artinos-metablock-shell[data-ui-hidden] > .plate-console-toast,
+.artinos-metablock-shell:has(.mb-group[data-posture='maximized'][data-role='dock']) > .plate-console-toast {
+  opacity: 0;
+  pointer-events: none;
+}

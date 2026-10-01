@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three/webgpu'
 import { texture as textureNode, uniform, viewportSharedTexture } from 'three/tsl'
@@ -22,7 +22,7 @@ export interface GlassMaterialProps {
   spectralDispersion?: boolean
   /** Extra thickness smear / frost, independent of roughness. */
   anisotropicBlur?: number
-  /** 3D noise bent into the refraction normal. */
+  /** 3D noise bent into the refraction normal. Compiled out at 0; moving to or from 0 recompiles the node graph. */
   distortion?: number
   distortionScale?: number
   temporalDistortion?: number
@@ -135,8 +135,6 @@ function applyProps(material: any, uniforms: any, props: Required<GlassMaterialP
   }
   material.transmissionBackdropConfig = {
     backside: props.backside,
-    backsideThickness: props.backsideThickness,
-    thickness: props.thickness,
     backdropResolutionScale: props.backdropResolutionScale,
     backsideResolutionScale: props.backsideResolutionScale,
     background: resolveColor(props.background),
@@ -153,7 +151,7 @@ function applyProps(material: any, uniforms: any, props: Required<GlassMaterialP
  * </mesh>
  * ```
  *
- * Sample count and spectral mode rebuild the refraction graph. Live optical values update
+ * Sample count, spectral mode and distortion on/off rebuild the refraction graph. Live optical values update
  * uniforms; enabling physical lobes recompiles the material variant when needed.
  */
 export const GlassMaterial = forwardRef<any, GlassMaterialProps>(function GlassMaterial(incoming, fref) {
@@ -164,8 +162,11 @@ export const GlassMaterial = forwardRef<any, GlassMaterialProps>(function GlassM
   const latest = useRef(props)
   latest.current = props
 
-  const [compiledSamples, setCompiledSamples] = useState(props.samples)
-  const [compiledSpectral, setCompiledSpectral] = useState(props.spectralDispersion)
+  // The only values baked into the node graph; each change rebuilds the material.
+  const compiledSamples = props.samples
+  const compiledSpectral = props.spectralDispersion
+  // Distortion noise is compiled out entirely at 0, its default; any other value is a live uniform.
+  const compiledDistortion = props.distortion !== 0
 
   // v1 read these from its runtime resource registry; here the material asks the
   // PostFX host for the glass passes. Outside a host it samples the viewport instead.
@@ -226,7 +227,7 @@ export const GlassMaterial = forwardRef<any, GlassMaterialProps>(function GlassM
         ? (backdropTex.isNode ? backdropTex : (textureNode(backdropTex) as any).setUpdateMatrix(false))
         : viewportSharedTexture()
       const refraction: any = buildTransmissionBackdropNode(
-        backdropNode, transmissionUniforms, compiledSamples, { spectral: compiledSpectral },
+        backdropNode, transmissionUniforms, compiledSamples, { spectral: compiledSpectral, distortion: compiledDistortion },
       )
       // Evaluate after setupDiffuseColor/setupVariants: normalWorld, roughness and
       // dispersion are not initialized when colorNode is evaluated.
@@ -240,7 +241,7 @@ export const GlassMaterial = forwardRef<any, GlassMaterialProps>(function GlassM
         back.thicknessNode = transmissionUniforms.backsideThickness
         back.backdropNode = buildTransmissionBackdropNode(
           cleanBackdrop, { ...transmissionUniforms, thickness: transmissionUniforms.backsideThickness },
-          compiledSamples, { spectral: compiledSpectral },
+          compiledSamples, { spectral: compiledSpectral, distortion: compiledDistortion },
         ).rgb
         next.transmissionBacksideMaterial = back
       }
@@ -249,7 +250,7 @@ export const GlassMaterial = forwardRef<any, GlassMaterialProps>(function GlassM
     const bundle = { uTime, transmission: uTransmission, transmissionParams: transmissionUniforms }
     applyProps(next, bundle, initial)
     return { material: next, uniforms: bundle }
-  }, [renderer, backdropTex, cleanBackdrop, props.screenSpaceBackdrop, compiledSamples, compiledSpectral])
+  }, [renderer, backdropTex, cleanBackdrop, props.screenSpaceBackdrop, compiledSamples, compiledSpectral, compiledDistortion])
 
   useImperativeHandle(fref, () => material, [material])
 
@@ -268,9 +269,6 @@ export const GlassMaterial = forwardRef<any, GlassMaterialProps>(function GlassM
 
   useFrame((_state: any, delta: number) => {
     uniforms.uTime.value += delta
-    const live = latest.current
-    if (live.samples !== compiledSamples) setCompiledSamples(live.samples)
-    if (live.spectralDispersion !== compiledSpectral) setCompiledSpectral(live.spectralDispersion)
   })
 
   return <primitive object={material} attach="material" />

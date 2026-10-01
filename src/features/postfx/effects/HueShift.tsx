@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 402,
   enabled: false,
+  description: 'Rotates every colour around the hue wheel',
   component: HueShift,
   controls: {
     adjustment: { type: 'number', value: 0, min: -3.1416, max: 3.1416, step: 0.01 },

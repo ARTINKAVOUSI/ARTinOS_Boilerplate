@@ -75,6 +75,7 @@ export const feature: Feature = {
   group: 'Ground',
   order: 42,
   enabled: false,
+  description: 'A fading reference grid on the floor',
   component: Grid,
   controls: {
     size: { type: 'number', value: 20, min: 2, max: 200, step: 1 },

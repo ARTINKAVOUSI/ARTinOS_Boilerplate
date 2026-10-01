@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Color, type Object3D } from 'three/webgpu'
 import { uniform } from 'three/tsl'
 import { outline } from 'three/addons/tsl/display/OutlineNode.js'
@@ -34,6 +35,11 @@ export function Outline({ id = 'outline', enabled = true, order = 500, strength 
   const strengthU = useUniform(strength)
   const thicknessU = useUniform(thickness)
   const glowU = useUniform(glow)
+  // One uniform each for the component's life, so a colour edit needs no rebuild.
+  const visibleColorU = useMemo(() => uniform(new Color()), [])
+  const hiddenColorU = useMemo(() => uniform(new Color()), [])
+  visibleColorU.value.set(visibleColor)
+  hiddenColorU.value.set(hiddenColor)
   usePostFXEffect(id, {
     enabled,
     order,
@@ -42,10 +48,10 @@ export function Outline({ id = 'outline', enabled = true, order = 500, strength 
       if (!selection) scene.traverse(object => { if (object.userData.outline) selectedObjects.push(object) })
       if (!selectedObjects.length) return null
       const node = outline(scene, camera, { selectedObjects, edgeThickness: thicknessU, edgeGlow: glowU })
-      const edges = node.visibleEdge.mul(uniform(new Color(visibleColor))).add(node.hiddenEdge.mul(uniform(new Color(hiddenColor)))).mul(strengthU)
+      const edges = node.visibleEdge.mul(visibleColorU).add(node.hiddenEdge.mul(hiddenColorU)).mul(strengthU)
       return input.add(edges)
     },
-  }, [visibleColor, hiddenColor, selection])
+  }, [selection])
   return null
 }
 
@@ -59,6 +65,7 @@ export const feature: Feature = {
   cost: 'medium',
   order: 500,
   enabled: false,
+  description: 'Glowing edges around selected objects or ones tagged userData.outline',
   component: Outline,
   controls: {
     strength: { type: 'number', value: 3, min: 0, max: 10, step: 0.01 },

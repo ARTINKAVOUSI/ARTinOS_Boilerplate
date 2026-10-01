@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Billboard } from '@react-three/drei'
 import { DoubleSide, LinearFilter, SRGBColorSpace, VideoTexture, type Texture } from 'three'
 import type { Feature } from '../../app/feature'
 import { useWebcamVideo } from '../../app/webcam'
@@ -47,25 +48,46 @@ export function MediaPlane({ src = '', position = [0, 1.2, -2], rotation = [0, 0
     }
   }, [src, shared])
 
-  const texture = useMemo<Texture | null>(() => {
-    if (!element) return null
+  // Created in the effect that disposes it: VideoTexture's constructor starts a
+  // requestVideoFrameCallback loop, so a copy made during render and discarded (StrictMode
+  // does that) would loop forever, and disposing a memoised one would freeze the live copy.
+  const [texture, setTexture] = useState<Texture | null>(null)
+  useEffect(() => {
+    if (!element) {
+      setTexture(null)
+      return
+    }
     const created = new VideoTexture(element)
     created.colorSpace = SRGBColorSpace
     created.minFilter = LinearFilter
     created.magFilter = LinearFilter
-    return created
+    setTexture(created)
+    return () => created.dispose()
   }, [element])
 
-  useEffect(() => () => texture?.dispose(), [texture])
+  // Height over width. A video's size arrives with its metadata, which can be after mount.
+  const [ratio, setRatio] = useState(9 / 16)
+  useEffect(() => {
+    if (!element) return
+    const measure = () => setRatio(element.videoWidth && element.videoHeight ? element.videoHeight / element.videoWidth : 9 / 16)
+    measure()
+    element.addEventListener('loadedmetadata', measure)
+    // A camera can change resolution mid-stream.
+    element.addEventListener('resize', measure)
+    return () => {
+      element.removeEventListener('loadedmetadata', measure)
+      element.removeEventListener('resize', measure)
+    }
+  }, [element])
 
   if (!texture || !element) return null
-  const ratio = element.videoHeight && element.videoWidth ? element.videoHeight / element.videoWidth : 9 / 16
-  return (
-    <mesh name="MediaPlane" position={position} rotation={billboard ? [0, 0, 0] : rotation}>
+  const plane = (
+    <mesh name="MediaPlane" position={billboard ? [0, 0, 0] : position} rotation={billboard ? [0, 0, 0] : rotation}>
       <planeGeometry args={[width, width * ratio]} />
       <meshBasicMaterial map={texture} side={DoubleSide} transparent={opacity < 1} opacity={opacity} toneMapped={false} />
     </mesh>
   )
+  return billboard ? <Billboard position={position}>{plane}</Billboard> : plane
 }
 
 export default MediaPlane

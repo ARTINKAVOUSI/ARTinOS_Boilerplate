@@ -32,9 +32,9 @@ export function Controls({
   autoRotateSpeed = 1,
   enablePan = true,
   enableZoom = true,
-  minDistance = 0.5,
-  maxDistance = 60,
-  maxPolarAngle = 180,
+  minDistance = 1.5,
+  maxDistance = 25,
+  maxPolarAngle = 88,
 }: ControlsProps) {
   const domElement = useThree(state => state.gl?.domElement) as HTMLElement | undefined
   if (mode === 'none' || !domElement) return null
@@ -69,6 +69,7 @@ export const feature: Feature = {
   kind: 'scene',
   group: 'Camera',
   order: 11,
+  description: 'Mouse and touch camera navigation: orbit, map, trackball or camera',
   component: Controls,
   controls: {
     mode: { type: 'select', value: 'orbit', options: ['orbit', 'map', 'trackball', 'camera', 'none'] },

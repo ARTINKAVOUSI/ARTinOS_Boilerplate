@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 404,
   enabled: false,
+  description: 'High-contrast, desaturated film look',
   component: BleachBypass,
   controls: {
     opacity: { type: 'number', value: 0.5, min: 0, max: 1, step: 0.01 },

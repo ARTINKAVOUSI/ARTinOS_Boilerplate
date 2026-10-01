@@ -12,6 +12,8 @@ export interface PipelineStage {
   label: string
   /** The TSL node this stage outputs, renderable to a thumbnail. */
   node: unknown
+  /** For an effect: the scene-pass attachments its build read (depth, normal, velocity, …). */
+  reads?: readonly string[]
 }
 
 let stages: readonly PipelineStage[] = []

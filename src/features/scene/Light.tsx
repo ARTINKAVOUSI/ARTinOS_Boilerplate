@@ -74,32 +74,57 @@ export function Light({
 }
 
 /** A spot light shaped by an IES photometric profile. */
-export function IESLight({ url, ...props }: { url: string } & Omit<LightProps, 'type' | 'iesUrl'>) {
+export function IESLight({
+  url,
+  color = '#ffffff',
+  intensity = 1,
+  position = [3, 5, 4],
+  castShadow = false,
+  distance = 0,
+  decay = 2,
+  angle = Math.PI / 3,
+  penumbra = 0.25,
+  visible = true,
+  layers = 0,
+}: { url: string } & Omit<LightProps, 'type' | 'iesUrl'>) {
+  // useLoader caches the profile and owns it, so it is never disposed here.
   const map = useLoader(IESLoader, url)
-  const light = useMemo(() => new IESSpotLight(props.color, props.intensity, props.distance, props.angle, props.penumbra, props.decay), [])
+  // Built once, with the profile already on it, so its first light node samples the map.
+  const light = useMemo(() => {
+    const created = new IESSpotLight(color, intensity, distance, angle, penumbra, decay)
+    created.iesMap = map
+    return created
+  }, [])
+  const [x, y, z] = position
+  // Sync only: disposing here would tear the light down on every prop change.
   useEffect(() => {
     light.name = 'Light'
-    ;(light as unknown as { iesMap: unknown }).iesMap = map
-    light.position.fromArray(props.position ?? [3, 5, 4])
-    light.castShadow = props.castShadow ?? false
-    light.visible = props.visible ?? true
-    light.layers.set(props.layers ?? 0)
-    return () => {
-      map.dispose()
-      light.dispose()
-    }
-  }, [light, map, props.position, props.castShadow, props.layers, props.visible])
+    light.iesMap = map
+    light.color.set(color)
+    light.intensity = intensity
+    light.distance = distance
+    light.decay = decay
+    light.angle = angle
+    light.penumbra = penumbra
+    light.position.set(x, y, z)
+    light.castShadow = castShadow
+    light.visible = visible
+    light.layers.set(layers)
+  }, [light, map, color, intensity, distance, decay, angle, penumbra, x, y, z, castShadow, visible, layers])
+  useEffect(() => () => light.dispose(), [light])
   return <primitive object={light} />
 }
 
 /** An empty light probe; fill its coefficients to light from an environment. */
 export function ProbeLight({ intensity = 1, layers = 0 }: { intensity?: number; layers?: number }) {
-  const probe = useMemo(() => new LightProbe(new SphericalHarmonics3(), intensity), [intensity])
+  // Created once: a new probe on every intensity step would rebuild every material's lighting.
+  const probe = useMemo(() => new LightProbe(new SphericalHarmonics3(), intensity), [])
   useEffect(() => {
     probe.name = 'Light'
+    probe.intensity = intensity
     probe.layers.set(layers)
-    return () => probe.dispose()
-  }, [probe, layers])
+  }, [probe, intensity, layers])
+  useEffect(() => () => probe.dispose(), [probe])
   return <primitive object={probe} />
 }
 

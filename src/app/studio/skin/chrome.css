@@ -1,16 +1,16 @@
-/* Studio chrome — ties the MetaBlock engine and the runtime HUD to the
-   @artinos/ui workbench tokens.
+/* Studio chrome — ties the MetaBlock engine (src/ui/MetaBlock) and the runtime
+   HUD to the studio's --ui-* tokens.
 
    MetaBlock ships its own visual variables (--mb-*, --au-*) with a teal
-   default; @artinos/ui must not know about them. This file is the bridge. It is
-   unlayered and loaded after @artinos/metablock/styles.css, so it overrides the
-   engine's defaults without editing the engine. */
+   default; the UI kit (src/ui) must not know about the studio. This file is the
+   bridge. It is unlayered and DockShell imports it after the engine's
+   MetaBlock.css, so it overrides the engine's defaults without editing the
+   engine. */
 
 .artinos-metablock-shell {
   --mb-radius: var(--ui-radius);
   --mb-signal: var(--ui-accent);
   --mb-frost: blur(var(--ui-blur));
-  --mb-shadow: #00000059;
   --au-surface: #1b2423;
   --au-surface-2: var(--ui-float);
   --au-line: var(--ui-line);
@@ -68,13 +68,6 @@
   min-width: 0;
 }
 
-/* Floating group head: the pane head with a tab strip. */
-.artinos-metablock-shell .artinos-metablock-panel-header {
-  gap: 10px;
-  min-height: var(--ui-pane-head-h);
-  padding: 0 6px 0 10px;
-}
-
 .artinos-workspace-expand {
   display: inline-grid;
   place-items: center;
@@ -109,57 +102,23 @@
 .plate-toolbar-status .artinos-hud-summary {
   display: flex;
   align-items: center;
-  gap: 10px;
   height: auto;
-  color: var(--ui-text);
 }
 .plate-toolbar-status .artinos-hud-backend {
   display: flex;
   align-items: center;
-  gap: 5px;
   padding: 0;
   background: none;
 }
 .plate-toolbar-status .artinos-hud-backend i {
-  width: 3px;
-  height: 3px;
   border-radius: 50%;
   background: var(--ui-accent-dot);
   box-shadow: none;
 }
-.plate-toolbar-status .artinos-hud-backend b,
-.plate-toolbar-status .artinos-hud-quality {
-  font-family: inherit;
-  font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ui-text-meta);
-}
 .plate-toolbar-status .artinos-hud-readout {
   display: flex;
   align-items: baseline;
-  gap: 3px;
   padding: 0;
-}
-.plate-toolbar-status .artinos-hud-readout strong {
-  font-family: inherit;
-  font-size: 10px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--ui-text);
-}
-.plate-toolbar-status .artinos-hud-readout small {
-  font-family: inherit;
-  font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ui-text-meta);
-}
-.plate-toolbar-status .artinos-hud-quality b {
-  font-weight: 500;
-  color: var(--ui-text-body);
 }
 .plate-toolbar-status .artinos-hud-micrograph .is-cpu { stroke: var(--ui-range-seam); }
 .plate-toolbar-status .artinos-hud-chevron { color: var(--ui-icon); }

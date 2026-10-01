@@ -38,6 +38,7 @@ export const feature: Feature = {
   cost: 'high',
   order: 200,
   enabled: false,
+  description: 'Blurs what lies outside the focus band, by scene depth',
   component: DepthOfField,
   controls: {
     focusDistance: { type: 'number', value: 5, min: 0.1, max: 50, step: 0.05 },

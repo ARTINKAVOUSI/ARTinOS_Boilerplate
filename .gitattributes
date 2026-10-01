@@ -1,0 +1,2 @@
+# LF in the repository and in every checkout, whatever the platform's autocrlf.
+* text=auto eol=lf

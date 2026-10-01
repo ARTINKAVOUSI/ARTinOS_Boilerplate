@@ -44,10 +44,13 @@ export function Tabs<V extends string = string>({ items, value, defaultValue, on
 
   const onKeyDown = (e: ReactKeyboardEvent) => {
     const n = opts.length;
-    let j = e.key === 'ArrowRight' ? idx + 1 : e.key === 'ArrowLeft' ? idx - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1;
-    if (j === -1 && e.key !== 'ArrowLeft') return;
+    const dir = e.key === 'ArrowRight' || e.key === 'Home' ? 1 : e.key === 'ArrowLeft' || e.key === 'End' ? -1 : 0;
+    if (!dir || !n) return;
     e.preventDefault();
-    j = (j + n) % n;
+    // Disabled tabs are skipped, wrapping round: Home lands on the first enabled tab, End on the last.
+    const wrap = (i: number) => ((i % n) + n) % n;
+    let j = wrap(e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : idx + dir);
+    for (let k = 1; k < n && opts[j].disabled; k++) j = wrap(j + dir);
     if (opts[j].disabled) return;
     pick(opts[j].value);
     refs.current[j]?.focus();

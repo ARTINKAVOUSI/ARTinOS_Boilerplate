@@ -24,19 +24,14 @@
       "port": 5191
     },
     {
-      "name": "artinos-ui-spec",
+      "name": "artinos-auto",
       "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
       "runtimeArgs": [
-        "--prefix",
-        "artinos-ui-design-specification",
         "run",
-        "dev",
-        "--",
-        "--port",
-        "5200",
-        "--strictPort"
+        "dev"
       ],
-      "port": 5200
+      "port": 5192,
+      "autoPort": true
     }
   ]
 }

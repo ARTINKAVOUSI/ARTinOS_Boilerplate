@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 403,
   enabled: false,
+  description: 'Scales colour intensity: 0 is grey, above 1 is vivid',
   component: Saturation,
   controls: {
     adjustment: { type: 'number', value: 1.1, min: 0, max: 3, step: 0.01 },

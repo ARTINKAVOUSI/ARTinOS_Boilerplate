@@ -2,21 +2,28 @@ import { Component, Suspense, type ReactNode } from 'react'
 
 interface Props {
   id: string
+  /** A new value clears a caught error, so the feature gets another attempt. */
+  resetKey?: unknown
   children: ReactNode
+}
+
+interface State {
+  error: Error | null
+  key?: unknown
 }
 
 /**
  * Isolates one feature: a crash or a pending load in it never takes the rest
  * of the scene down. The feature renders nothing until its props change.
  */
-export class FeatureBoundary extends Component<Props & { resetKey?: string }, { error: Error | null; key?: string }> {
-  state: { error: Error | null; key?: string } = { error: null }
+export class FeatureBoundary extends Component<Props, State> {
+  state: State = { error: null }
 
   static getDerivedStateFromError(error: Error) {
     return { error }
   }
 
-  static getDerivedStateFromProps(props: Props & { resetKey?: string }, state: { error: Error | null; key?: string }) {
+  static getDerivedStateFromProps(props: Props, state: State) {
     // New props are a new attempt.
     if (props.resetKey !== state.key) return { error: null, key: props.resetKey }
     return null

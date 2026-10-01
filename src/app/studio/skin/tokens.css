@@ -18,26 +18,20 @@
   /* geometry — radius is adaptive, never universal */
   --ui-r-panel: 12px;
   --ui-r-comp: 7px;
-  --ui-r-active: 5px;
   --ui-r-micro: 4px;
 
   /* density */
   --ui-h-comp: 26px;
   --ui-h-comp-sm: 22px;
-  --ui-gap-row: 4px;
-  --ui-pad-panel: 14px;
-  --ui-label-w: 96px;
-  --ui-label-w-wide: 112px;
 
   /* type — the ARTINOS UI kit's faces, so the studio and its controls read as one */
   --ui-face: var(--ar-font-ui, 'Chivo', system-ui, -apple-system, 'Segoe UI', sans-serif);
   --ui-num: var(--ar-font-num, 'Chivo Mono', ui-monospace, SFMono-Regular, Consolas, monospace);
 
-  /* motion — mass, spring and damping are overridden per material world */
+  /* motion */
   --ui-ease: cubic-bezier(0.2, 0.7, 0.25, 1);
   --ui-t-fast: 110ms;
   --ui-t-mid: 190ms;
-  --ui-t-slow: 420ms;
 
   /* scene — what shows before a backdrop paints */
   --ui-scene: #14110d;
@@ -50,7 +44,6 @@
   :root {
     --ui-t-fast: 1ms;
     --ui-t-mid: 1ms;
-    --ui-t-slow: 1ms;
   }
 }
 
@@ -69,20 +62,15 @@
   --ui-text-muted: var(--ui-ink-2);
   --ui-text-soft: var(--ui-ink-3);
   --ui-text-meta: var(--ui-ink-3);
-  --ui-text-serial: var(--ui-ink-4);
   --ui-text-ghost: var(--ui-ink-4);
 
   /* signal */
   --ui-accent: var(--ui-sig);
-  --ui-accent-strong: var(--ui-sig);
-  --ui-accent-pin: var(--ui-sig);
   --ui-accent-dot: var(--ui-sig);
   --ui-accent-wash: var(--ui-sig-soft);
   --ui-accent-line: var(--ui-sig-line);
-  --ui-accent-glow: var(--ui-sig-soft);
   --ui-warn: var(--ui-sig-warm);
   --ui-fault: var(--ui-sig-rose);
-  --ui-bind: var(--ui-sig);
 
   /* lines — every rule on a surface is the world's edge */
   --ui-line: var(--ui-edge);
@@ -90,108 +78,50 @@
   --ui-line-foot: var(--ui-edge);
   --ui-line-soft: var(--ui-edge);
   --ui-line-faint: var(--ui-edge);
-  --ui-line-nest: var(--ui-edge);
-  --ui-hairline: var(--ui-edge);
 
   /* geometry */
-  --ui-row: var(--ui-h-comp);
-  --ui-control-h: var(--ui-h-comp);
   --ui-control-height: var(--ui-h-comp);
-  --ui-range-h: var(--ui-h-comp);
-  --ui-trailing-w: 7px;
   --ui-label-spacing: 0px;
   --ui-radius: var(--ui-r-panel);
   --ui-radius-card: var(--ui-r-panel);
   --ui-radius-panel: var(--ui-r-panel);
   --ui-radius-shell: var(--ui-r-panel);
   --ui-radius-control: var(--ui-r-comp);
-  --ui-radius-small: var(--ui-r-active);
   --ui-radius-tiny: var(--ui-r-micro);
 
   /* motion */
-  --ui-ease-out: var(--ui-ease);
-  --ui-ease-spring: var(--ui-ease);
-  --ui-dur-press: var(--ui-t-fast);
   --ui-dur-fast: var(--ui-t-fast);
-  --ui-dur: var(--ui-t-mid);
-  --ui-dur-slow: var(--ui-t-mid);
-  --ui-dur-shadow: var(--ui-t-slow);
 
   /* interaction */
   --ui-hover-wash: rgba(255, 255, 255, 0.08);
-  --ui-row-hover: transparent;
-  --ui-press-wash: rgba(0, 0, 0, 0.2);
   --ui-focus: var(--ui-sig-line);
 
-  /* the active optical material — a denser insert moving inside a softer body */
-  --ui-cap: linear-gradient(180deg, var(--ui-active-lit) 0%, var(--ui-active-a) 42%, var(--ui-active-b) 100%);
-  --ui-cap-raised: linear-gradient(180deg, var(--ui-active-lit), var(--ui-active-a) 55%, var(--ui-active-b));
-  --ui-cap-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  /* surfaces */
   --ui-well-in: inset 0 1px 3px rgba(0, 0, 0, 0.22);
   --ui-card: var(--ui-body);
   --ui-chrome: var(--ui-glass);
 
   /* panel */
   --ui-glass-filter: blur(var(--ui-blur)) saturate(var(--ui-sat));
-  --ui-glass-filter-float: blur(var(--ui-blur)) saturate(var(--ui-sat));
-  --ui-grain-opacity: var(--ui-grain);
   --ui-pane-tint: var(--ui-glass);
   --ui-pane-sheen: linear-gradient(180deg, var(--ui-glass-top) 0%, transparent 34%);
   --ui-pane-border: var(--ui-edge);
   --ui-pane-shadow: var(--ui-depth), inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
-  --ui-pane-shadow-raised: var(--ui-pane-shadow);
   --ui-pane-head-h: 36px;
 
   /* capsule */
-  --ui-range-border: var(--ui-edge);
   --ui-range-border-hover: var(--ui-edge-lit);
-  --ui-range-well: var(--ui-well);
-  --ui-range-inset: var(--ui-well-in);
-  --ui-range-inset-hover: var(--ui-well-in);
-  --ui-range-fill: var(--ui-cap);
-  --ui-range-fill-hover: var(--ui-cap);
-  --ui-range-fill-active: var(--ui-cap);
-  --ui-range-edge: var(--ui-edge-lit);
-  --ui-range-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   --ui-range-seam: var(--ui-seam);
-  --ui-range-seam-top: 5px;
-  --ui-range-value-shadow: none;
-  --ui-range-ticks: var(--ui-ink-4);
 
-  /* segmented · select · number · switch */
-  --ui-seg-border: var(--ui-edge);
-  --ui-seg-well: var(--ui-well);
-  --ui-seg-inset: inset 0 1px 3px rgba(0, 0, 0, 0.18);
-  --ui-seg-text: var(--ui-ink-2);
-  --ui-seg-on: var(--ui-cap-raised);
-  --ui-seg-on-shadow: var(--ui-cap-shadow);
-  --ui-select-border: var(--ui-edge);
-  --ui-select-fill: var(--ui-body);
-  --ui-option-fill: #1c1e21;
+  /* number */
   --ui-number-border: var(--ui-edge);
   --ui-number-well: var(--ui-well);
-  --ui-switch-border: var(--ui-edge);
-  --ui-switch-well: var(--ui-well);
-  --ui-knob-border: transparent;
-  --ui-knob-fill: var(--ui-cap-raised);
-  --ui-knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  --ui-knob-tick: var(--ui-seam);
 
-  /* tabs · search · pins */
+  /* tabs · search */
   --ui-tab-text: var(--ui-ink-3);
   --ui-search-border: var(--ui-edge);
   --ui-search-well: var(--ui-well);
   --ui-search-placeholder: var(--ui-ink-3);
-  --ui-pins-text: var(--ui-ink-3);
-  --ui-pins-link: var(--ui-ink-2);
-  --ui-pins-rule: var(--ui-edge);
-  --ui-pins-empty: var(--ui-ink-4);
-
-  /* vector */
-  --ui-vector-well: var(--ui-well);
-  --ui-vector-border: var(--ui-edge);
-  --ui-vector-axis: var(--ui-ink-3);
-  --ui-vector-title: var(--ui-ink-2);
 
   /* buttons */
   --ui-button-border: var(--ui-edge);
@@ -201,48 +131,15 @@
   --ui-icon: var(--ui-ink-3);
 
   /* selection list · notes */
-  --ui-object-text: var(--ui-ink-2);
-  --ui-object-meta: var(--ui-ink-3);
   --ui-object-on: var(--ui-body);
-  --ui-object-on-shadow: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge-lit);
   --ui-note: var(--ui-ink-3);
-  --ui-log: var(--ui-ink-2);
   --ui-empty: var(--ui-ink-3);
-
-  /* colour */
-  --ui-swatch-border: rgba(255, 255, 255, 0.22);
-  --ui-ramp-border: rgba(255, 255, 255, 0.22);
-  --ui-ramp-label: var(--ui-ink-3);
-
-  /* instruments */
-  --ui-handle-edge: rgba(0, 0, 0, 0.4);
-  --ui-checker: #8888884d;
-  --ui-mark: var(--ui-sig-soft);
 
   /* legacy pane presets — every one is now the world's own material */
   --ui-command-blur: var(--ui-blur);
   --ui-command-sheen: var(--ui-pane-sheen);
-  --ui-command-tint: var(--ui-glass);
-  --ui-material-sheen: var(--ui-pane-sheen);
-  --ui-material-fill: var(--ui-cap);
-  --ui-light-tint: var(--ui-glass);
-  --ui-light-fill: var(--ui-cap);
-  --ui-camera-well: var(--ui-well);
-  --ui-type-fill: var(--ui-cap);
-  --ui-type-seam: var(--ui-seam);
-  --ui-type-select: var(--ui-body);
 
-  /* ground — the backdrop component paints the scene; this is its fallback */
-  --ui-ground: var(--ui-scene);
-  --ui-ground-env: none;
-  --ui-ground-image: none;
-  --ui-ground-scrim: none;
-  --ui-scrim: rgba(0, 0, 0, 0.35);
-
-  /* app bar · floating layers */
-  --ui-appbar-h: 42px;
-  --ui-appbar-fill: var(--ui-glass);
-  --ui-session: var(--ui-ink-3);
+  /* floating layers */
   --ui-float: var(--ui-glass);
   --ui-float-shadow: var(--ui-depth), inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
 }
@@ -252,15 +149,8 @@
   --font-ui: var(--ui-face);
   --font-num: var(--ui-num);
 
-  --type-display: 200 28px/1.1 var(--ui-face);
-  --type-title: 300 14px/1.3 var(--ui-face);
-  --type-hero: 300 22px/1.1 var(--ui-num);
   --type-panel: 300 13.5px/1.3 var(--ui-face);
-  --type-section: 500 9px/1.3 var(--ui-num);
-  --type-body: 300 12px/1.5 var(--ui-face);
   --type-label: 300 12px/1.35 var(--ui-face);
-  --type-value: 300 11.5px/1.3 var(--ui-num);
-  --type-readout: 300 11.5px/1.3 var(--ui-num);
 
   --bg-app: var(--ui-scene);
   --bg-stage: var(--ui-scene);
@@ -270,14 +160,12 @@
   --bg-active: var(--ui-body);
   --bg-well: var(--ui-well);
   --bg-float: var(--ui-glass);
-  --bg-scrim: var(--ui-scrim);
   --bg-row: transparent;
 
   --text-hi: var(--ui-ink);
   --text-mid: var(--ui-ink-2);
   --text-low: var(--ui-ink-3);
   --text-faint: var(--ui-ink-3);
-  --text-ghost: var(--ui-ink-4);
 
   --line-subtle: var(--ui-edge);
   --line: var(--ui-edge);
@@ -292,25 +180,15 @@
   --sig-fault: var(--ui-sig-rose);
   --sig-fault-wash: color-mix(in srgb, var(--ui-sig-rose) 14%, transparent);
   --sig-bind: var(--ui-sig);
-  --sig-bind-wash: var(--ui-sig-soft);
-  --sig-neutral: var(--ui-ink-4);
-
-  --fill-track: var(--ui-body);
-  --fill-track-hover: var(--ui-edge);
-  --tick: var(--ui-seam);
 
   --e0-well: var(--ui-well-in), inset 0 0 0 1px var(--ui-edge);
   --e1-surface: var(--ui-body-in), inset 0 0 0 1px var(--ui-edge);
-  --e2-dock: var(--ui-pane-shadow);
   --e3-float: var(--ui-float-shadow);
 
   --frost-tint: var(--ui-glass);
   --frost-sheen: var(--ui-pane-sheen);
-  --frost-edge: inset 0 1px 0 var(--ui-edge-lit), inset 0 0 0 1px var(--ui-edge);
-  --blur-frost: blur(var(--ui-blur));
   --blur-float: blur(var(--ui-blur));
   --focus-ring: inset 0 0 0 1px var(--ui-sig-line), 0 0 0 3px var(--ui-sig-soft);
-  --shadow-deep: rgba(0, 0, 0, 0.45);
   --shadow-well: rgba(0, 0, 0, 0.22);
 
   --radius-control: var(--ui-r-comp);
@@ -322,16 +200,11 @@
   --control-h: var(--ui-h-comp);
   --control-h-lg: var(--ui-h-comp);
 
-  --dur-value: var(--ui-t-fast);
   --dur-state: var(--ui-t-mid);
-  --dur-surface: var(--ui-t-slow);
   --ease-std: var(--ui-ease);
-  --ease-enter: var(--ui-ease);
 }
 
 :root {
-  --track-display: -0.025em;
-  --track-title: -0.006em;
   --track-caps: 0.04em;
   --track-panel: 0.04em;
 
@@ -340,19 +213,10 @@
   --space-3: 6px;
   --space-4: 8px;
   --space-5: 12px;
-  --space-6: 16px;
   --space-7: 24px;
   --space-8: 32px;
 
-  --row-gap: var(--ui-gap-row);
-  --panel-header-h: var(--ui-pane-head-h);
-  --command-bar-h: var(--ui-appbar-h);
   --tab-strip-h: 36px;
-  --safe-area: 12px;
-
-  --dur-layout: var(--ui-t-slow);
-  --dur-exit: var(--ui-t-fast);
-  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* 02 · FROST GLASS — the canonical ARTINOS surface */
@@ -361,28 +225,21 @@
   --ui-glass-top: rgba(255, 255, 255, 0.19);
   --ui-blur: 26px;
   --ui-sat: 1.24;
-  --ui-grain: 0.05;
   --ui-edge: rgba(255, 255, 255, 0.17);
   --ui-edge-lit: rgba(255, 255, 255, 0.55);
   --ui-depth: 0 26px 64px rgba(0, 0, 0, 0.34), 0 3px 10px rgba(0, 0, 0, 0.18);
   --ui-body: rgba(255, 255, 255, 0.085);
   --ui-body-in: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
-  --ui-active-a: rgba(255, 255, 255, 0.74);
-  --ui-active-b: rgba(255, 255, 255, 0.5);
-  --ui-active-lit: rgba(255, 255, 255, 0.92);
-  --ui-ink-active: rgba(16, 20, 22, 0.82);
   --ui-seam: rgba(16, 20, 22, 0.6);
   --ui-well: rgba(0, 0, 0, 0.16);
-  --ui-mass: 1;
-  --ui-spring: 210;
-  --ui-damp: 22;
 }
 
 /* The dock glass for the two ARTINOS UI frost themes.
    `data-ar-theme` sits on <html> (DockShell) next to the kit's own tokens; these
    rules retune the studio's frost world to match. Both frosts are untinted: the
    glass diffuses the scene but never shifts its hue, so saturation stays at 1.
-   Imported after worlds.css — same specificity, so the later block wins. */
+   They come after the :root frost block above with the same specificity, so
+   on <html> these theme blocks win. */
 
 [data-ar-theme='frost-deep'] {
   --ui-glass: rgba(255, 255, 255, 0.06);
@@ -408,13 +265,6 @@
    loses legibility against a moving scene. useControl sets this attribute. */
 [data-interacting='true'] {
   --ui-pane-tint: #1b2423a6;
-}
-
-[data-density='compact'] {
-  --ui-row: 24px;
-  --ui-range-h: 20px;
-  --ui-control-h: 21px;
-  --ui-range-seam-top: 5px;
 }
 
 @media (forced-colors: active) {

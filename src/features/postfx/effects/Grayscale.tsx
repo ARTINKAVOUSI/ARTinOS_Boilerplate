@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 401,
   enabled: false,
+  description: 'Removes colour, with a blend back to the original',
   component: Grayscale,
   controls: {
     amount: { type: 'number', value: 1, min: 0, max: 1, step: 0.01 },

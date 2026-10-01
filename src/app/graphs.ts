@@ -11,18 +11,19 @@
  * full frame rate would cost more than the effect it animates. Signal writes,
  * scene writes and uniform pushes are free and happen every frame.
  *
- * The authored value of a driven control is remembered when a graph starts and
- * put back when it stops, so modulation never eats what you typed.
+ * The authored value of a driven control — and the switch and chain position of
+ * a driven effect — is remembered when a graph takes it over and put back when
+ * it stops, so modulation never eats what you typed.
  */
 import { useSyncExternalStore } from 'react'
-import type { Material, Mesh } from 'three'
+import type { Material, Mesh, Object3D } from 'three'
 import { createNode, drivenParameters, evaluate, validateGraph, type GraphDefinition, type GraphDiagnostic, type GraphDomain, type GraphHost, type GraphObject } from '../ui/NodeGraph/graph'
 import { compileGPU, refreshUniforms, type CompiledGraph } from '../ui/NodeGraph/gpu'
 import { compiledGraphs } from './compiled-graphs'
 import { signalBus } from './signals'
 import { features, findFeature } from './registry'
 import { runtime } from './runtime'
-import { studio } from './store'
+import { effectOrder, studio } from './store'
 
 export interface GraphDocument {
   id: string
@@ -41,7 +42,6 @@ export interface GraphsState {
   diagnostics: Record<string, GraphDiagnostic[]>
   /** Compiled GPU graphs, by document id. */
   compiled: Record<string, CompiledGraph>
-  revision: number
 }
 
 const STORAGE_KEY = 'artinos.v2.graphs'
@@ -72,14 +72,12 @@ let documents = load()
 let readouts: GraphsState['readouts'] = {}
 let diagnostics: GraphsState['diagnostics'] = {}
 let compiled: GraphsState['compiled'] = {}
-let revision = 0
 const listeners = new Set<() => void>()
 let saveTimer: ReturnType<typeof setTimeout> | undefined
-let snapshot: GraphsState = { documents, readouts, diagnostics, compiled, revision }
+let snapshot: GraphsState = { documents, readouts, diagnostics, compiled }
 
 function publish(persist: boolean) {
-  revision++
-  snapshot = { documents, readouts, diagnostics, compiled, revision }
+  snapshot = { documents, readouts, diagnostics, compiled }
   listeners.forEach(listener => listener())
   if (!persist) return
   clearTimeout(saveTimer)
@@ -135,8 +133,23 @@ const restore = (id: string) => {
   const [featureId, control] = id.split(':')
   studio.setValue(featureId, control, base)
 }
+// The authored switch and chain position of every effect a render graph has taken over.
+const authoredEnabled = new Map<string, boolean>()
+const authoredOrder = new Map<string, number>()
 
-const memory = new Map<string, number>()
+/** Effect ids the running graphs drive with nodes of this type. */
+const drivenEffects = (type: 'effect-enabled' | 'effect-order') =>
+  new Set(documents.filter(document => document.running).flatMap(document => document.graph.nodes.filter(node => node.type === type).map(node => String(node.data?.id ?? ''))))
+
+// Smoothing and other per-node state, kept apart per document: two imported
+// copies of one graph share node ids but must not share memory.
+const memories = new Map<string, Map<string, number>>()
+const memoryOf = (documentId: string) => {
+  let memory = memories.get(documentId)
+  if (!memory) memories.set(documentId, (memory = new Map()))
+  return memory
+}
+
 let frame = 0
 let startedAt = 0
 let last = 0
@@ -146,14 +159,19 @@ let pendingWrites = new Map<string, number | boolean>()
 const pendingEnable = new Map<string, boolean>()
 const pendingOrder = new Map<string, number>()
 
-/** What a graph can reach: signals, controls, the live scene, the effect chain. */
+/** What a graph can reach: signals, controls, the live scene, the effect chain. Made once per tick. */
 function host(): GraphHost {
+  // Every scene-object node looks up by name; walk the scene once per tick, not once per node.
+  let objects: Map<string, Object3D> | undefined
   return {
     readSignal: id => signalBus.get(id),
     writeSignal: (id, value) => signalBus.set(id, value),
     readParameter,
     writeParameter: (id, value) => pendingWrites.set(id, value),
-    findObject: name => runtime.sceneObjects().find(object => object.name === name) as unknown as GraphObject | undefined,
+    findObject: name => {
+      objects ??= new Map(runtime.sceneObjects().map(object => [object.name, object]))
+      return objects.get(name) as unknown as GraphObject | undefined
+    },
     writeMaterial: (object, property, value) => {
       const material = (object as unknown as Mesh).material as (Material & Record<string, unknown>) | undefined
       if (!material || Array.isArray(material)) return 'This object has no single material'
@@ -190,7 +208,7 @@ function tick(now: number) {
     }
     const notes: GraphDiagnostic[] = []
     try {
-      nextReadouts[document.id] = evaluate(document.graph, { ...io, time, delta, memory, diagnostics: notes })
+      nextReadouts[document.id] = evaluate(document.graph, { ...io, time, delta, memory: memoryOf(document.id), diagnostics: notes })
     } catch (error) {
       console.error(`[graphs] ${document.name} failed and was stopped`, error)
       graphs.setRunning(document.id, false)
@@ -202,8 +220,15 @@ function tick(now: number) {
   // ride the same throttle as control writes.
   if (now - lastWrite >= 1000 / WRITE_HZ && (pendingWrites.size || pendingEnable.size || pendingOrder.size)) {
     lastWrite = now
-    for (const [id, enabled] of pendingEnable) studio.setEnabled(id, enabled)
-    for (const [id, order] of pendingOrder) studio.setOrder(id, order)
+    const states = studio.getState().features
+    for (const [id, enabled] of pendingEnable) {
+      if (!authoredEnabled.has(id) && states[id]) authoredEnabled.set(id, states[id].enabled)
+      studio.setEnabled(id, enabled)
+    }
+    for (const [id, order] of pendingOrder) {
+      if (!authoredOrder.has(id) && states[id]) authoredOrder.set(id, effectOrder(id))
+      studio.setOrder(id, order)
+    }
     for (const [id, value] of pendingWrites) {
       const [featureId, control] = id.split(':')
       if (!featureId || !control) continue
@@ -226,18 +251,33 @@ function tick(now: number) {
   }
 }
 
-/** Compile every running GPU graph; the Graph effect renders what they publish. */
+/** What a GPU graph compiles from: nodes and wires, without positions, labels or groups. */
+const shaderKey = (graph: GraphDefinition) => JSON.stringify([graph.nodes.map(node => [node.id, node.type, node.data]), graph.edges])
+const compiledKeys = new Map<string, string>()
+
+/**
+ * Compile the running GPU graphs; the Graph effect renders what they publish.
+ * A graph recompiles only when its shader would change — dragging a node or
+ * renaming another graph keeps the compiled node, so the pipeline is not rebuilt.
+ */
 function compileAll() {
   const next: GraphsState['compiled'] = {}
   const io = host()
   for (const document of documents) {
     if (document.domain !== 'gpu' || !document.running) continue
+    const key = shaderKey(document.graph)
+    if (compiled[document.id] && compiledKeys.get(document.id) === key) {
+      next[document.id] = compiled[document.id]
+      continue
+    }
+    compiledKeys.set(document.id, key)
     try {
       next[document.id] = compileGPU(document.graph, io)
     } catch (error) {
       next[document.id] = { node: null, uniforms: [], values: new Map(), diagnostics: [{ severity: 'error', message: error instanceof Error ? error.message : String(error) }] }
     }
   }
+  for (const id of [...compiledKeys.keys()]) if (!next[id]) compiledKeys.delete(id)
   compiled = next
   // The Graph effect reads the published nodes; it cannot import this module.
   compiledGraphs.publish(documents.filter(document => next[document.id]?.node).map(document => ({ id: document.id, name: document.name, node: next[document.id].node })))
@@ -257,10 +297,30 @@ function sync() {
     diagnostics = {}
   }
   compileAll()
-  // Controls no graph drives any more go back to the value that was typed.
+  // Writes still queued from a graph that just stopped must not land after the
+  // restore below; the graphs still running queue theirs again on the next frame.
+  pendingWrites = new Map()
+  pendingEnable.clear()
+  pendingOrder.clear()
+  // Controls and effects no graph drives any more go back to what was set by hand.
   const driven = new Set(documents.filter(document => document.running).flatMap(document => drivenParameters(document.graph)))
   for (const id of [...authored.keys()]) if (!driven.has(id)) restore(id)
+  const switched = drivenEffects('effect-enabled')
+  for (const [id, enabled] of authoredEnabled)
+    if (!switched.has(id)) {
+      authoredEnabled.delete(id)
+      studio.setEnabled(id, enabled)
+    }
+  const ordered = drivenEffects('effect-order')
+  for (const [id, order] of authoredOrder)
+    if (!ordered.has(id)) {
+      authoredOrder.delete(id)
+      studio.setOrder(id, order)
+    }
+  for (const id of [...memories.keys()]) if (!documents.some(document => document.id === id && document.running)) memories.delete(id)
 }
+
+const newId = () => `graph-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
 
 const update = (next: GraphDocument[]) => {
   documents = next
@@ -276,7 +336,7 @@ export const graphs = {
   },
 
   create(name = `Graph ${documents.length + 1}`, domain: GraphDomain = 'signal', graph?: GraphDefinition) {
-    const document: GraphDocument = { id: `graph-${Date.now().toString(36)}`, name, domain, running: false, graph: graph ?? emptyGraph(domain) }
+    const document: GraphDocument = { id: newId(), name, domain, running: false, graph: graph ?? emptyGraph(domain) }
     update([...documents, document])
     return document.id
   },
@@ -306,17 +366,41 @@ export const graphs = {
     update(documents.map(document => (document.id === id ? { ...document, graph } : document)))
   },
 
+  /** The value a control goes back to when its graph stops, or undefined while no graph drives it. */
+  getAuthored: (id: string) => authored.get(id),
+
+  /**
+   * Change the value a control should have. While a graph drives it, that is the
+   * value it returns to when the graph stops (the live value is the graph's);
+   * otherwise the control is simply set.
+   */
+  setAuthored(id: string, value: number | boolean) {
+    if (authored.has(id)) {
+      authored.set(id, value)
+      return
+    }
+    const [featureId, control] = id.split(':')
+    if (featureId && control) studio.setValue(featureId, control, value)
+  },
+
   exportJSON: () => JSON.stringify({ documents }, null, 2),
 
   importJSON(text: string) {
     const parsed = JSON.parse(text) as { documents?: GraphDocument[] }
     if (!Array.isArray(parsed.documents)) throw new Error('No graphs in that file')
-    update([...documents, ...parsed.documents.map(document => ({ ...document, id: `graph-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, running: false }))])
+    update([...documents, ...parsed.documents.map(document => ({ ...document, id: newId(), running: false }))])
   },
 }
 
-export function useGraphs(): GraphsState {
-  return useSyncExternalStore(graphs.subscribe, graphs.getState, graphs.getState)
+/**
+ * The graph documents, readouts and diagnostics. Readouts refresh 10×/s while
+ * a graph runs; pass a selector that returns a primitive to re-render less.
+ */
+export function useGraphs(): GraphsState
+export function useGraphs<T>(select: (state: GraphsState) => T): T
+export function useGraphs<T>(select?: (state: GraphsState) => T): GraphsState | T {
+  const read = (): GraphsState | T => (select ? select(snapshot) : snapshot)
+  return useSyncExternalStore(graphs.subscribe, read, read)
 }
 
 // ── Templates ──────────────────────────────────────────────────────────────

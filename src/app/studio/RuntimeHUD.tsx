@@ -105,7 +105,7 @@ export function RuntimeHUD() {
 
   const fps = Math.round(stats.fps)
   const health = healthOf(fps)
-  const ratio = Number(render?.values.maxPixelRatio ?? 2)
+  const ratio = Number(render?.values.maxPixelRatio ?? 1)
   const tier: Tier = [...TIERS].reverse().find(entry => ratio >= entry.ratio)?.value ?? 'low'
   const budget = stats.frameMs / BUDGET_MS
   const backend = stats.backend === 'webgpu' ? 'WebGPU' : stats.backend === 'webgl2' ? 'WebGL2' : 'GPU'
@@ -117,7 +117,8 @@ export function RuntimeHUD() {
       const target = event.target as Node
       if (!hud.current?.contains(target) && !bar.current?.contains(target) && !(target as Element).closest?.('.ar-list, .ar-menu, .ar-dialog')) setOpen(false)
     }
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false)
+    // Escape inside a dialog or list opened from the bar closes that, not the bar.
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && !event.defaultPrevented && !(event.target as Element | null)?.closest?.('.ar-list, .ar-menu, .ar-dialog') && setOpen(false)
     window.addEventListener('pointerdown', onPointer, true)
     window.addEventListener('keydown', onKey)
     return () => {
@@ -133,7 +134,10 @@ export function RuntimeHUD() {
     if (!el) return
     el.dataset.more = [el.scrollLeft > 2 && 'start', el.scrollLeft + el.clientWidth < el.scrollWidth - 2 && 'end'].filter(Boolean).join(' ')
   }
-  useLayoutEffect(edges)
+  // Only while open: it reads layout, and the readout re-renders 4×/s.
+  useLayoutEffect(() => {
+    if (open) edges()
+  })
 
   const sheet = (
     <div

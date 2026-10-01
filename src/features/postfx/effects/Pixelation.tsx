@@ -45,6 +45,7 @@ export const feature: Feature = {
   order: 11,
   enabled: false,
   webgpuOnly: true,
+  description: 'Low-res pixel-art re-render with normal and depth edge lines',
   component: Pixelation,
   controls: {
     pixelSize: { type: 'number', value: 6, min: 1, max: 32, step: 1 },

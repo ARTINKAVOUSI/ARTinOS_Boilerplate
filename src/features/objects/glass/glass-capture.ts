@@ -8,8 +8,7 @@
  *   2. Glass / Backdrop draws the glass back faces (their backside materials,
  *                       sampling Clean) or, with no backside, the scene without
  *                       glass.
- *   3. Scene / Beauty   renders front faces sampling Backdrop; objects tagged
- *                       `transmissionBackdropOnly` are left out.
+ *   3. Scene / Beauty   renders front faces sampling Backdrop.
  *
  * Every visibility, material, layer and background change is restored even if
  * a capture throws. With no glass in view the backdrop pass returns after one
@@ -81,10 +80,12 @@ export function withScenePassFilter<T>(scene: AnyNode, exclude: (object: AnyNode
   }
 }
 
+const isGlassMaterial = (material: AnyNode) => material?.isTransmissionGlassMaterial === true
+
+// Runs on every object in several traversals a frame, so it allocates nothing.
 export const isTransmissionGlass = (object: AnyNode) =>
-  object.isMesh &&
-  (object.userData?.transmissionGlass === true ||
-    (Array.isArray(object.material) ? object.material : [object.material]).some((material: AnyNode) => material?.isTransmissionGlassMaterial))
+  object.isMesh === true &&
+  (Array.isArray(object.material) ? object.material.some(isGlassMaterial) : isGlassMaterial(object.material))
 
 export function configureScenePasses(scenePass: AnyNode, backdropPass: AnyNode, scene: AnyNode, cleanPass?: AnyNode, clean = false) {
   if (cleanPass) configureScenePasses({ updateBefore() {} }, cleanPass, scene, undefined, true)
@@ -106,7 +107,6 @@ export function configureScenePasses(scenePass: AnyNode, backdropPass: AnyNode, 
         fill ??= config.background
       }
     })
-    backdropPass.captureActive = meshCount > 0
     if (!meshCount) return
     backdropPass.setResolutionScale(Math.min(1, Math.max(0.1, scale)))
     const background = scene.background
@@ -147,7 +147,7 @@ export function configureScenePasses(scenePass: AnyNode, backdropPass: AnyNode, 
   scenePass.updateBefore = (frame: AnyNode) => {
     // Same-frame capture must finish before any beauty material samples its texture.
     frame.updateBeforeNode(backdropPass)
-    return withScenePassFilter(scene, object => object.userData?.transmissionBackdropOnly === true, () => beauty(frame))
+    return beauty(frame)
   }
 }
 

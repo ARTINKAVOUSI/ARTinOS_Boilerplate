@@ -21,10 +21,21 @@ export interface LogEntry {
 }
 
 const LIMIT = 500
+/** Readers are told about new entries at most this often, however fast something logs. */
+const NOTIFY_MS = 100
 let entries: LogEntry[] = []
+let pending: LogEntry[] = []
+let flushTimer: ReturnType<typeof setTimeout> | undefined
 let serial = 0
 let paused = false
 const listeners = new Set<() => void>()
+
+function flush() {
+  flushTimer = undefined
+  entries = [...entries, ...pending].slice(-LIMIT)
+  pending = []
+  listeners.forEach(listener => listener())
+}
 
 const format = (value: unknown): string => {
   if (value instanceof Error) return value.stack ?? `${value.name}: ${value.message}`
@@ -43,8 +54,9 @@ function push(level: LogLevel, args: unknown[]) {
   const parts = styles ? [String(args[0]).replace(/%c/g, ''), ...args.slice(1 + styles)] : args
   const text = parts.map(format).join(' ')
   const source = /^\[([\w.-]+)\]/.exec(text)?.[1] ?? 'app'
-  entries = [...entries, { id: ++serial, level, time: Date.now(), message: text.split('\n')[0].slice(0, 400), detail: text, source }].slice(-LIMIT)
-  listeners.forEach(listener => listener())
+  pending.push({ id: ++serial, level, time: Date.now(), message: text.split('\n')[0].slice(0, 400), detail: text, source })
+  // Readers render React: a warning logged every frame must not re-render the Console 60×/s.
+  flushTimer ??= setTimeout(flush, NOTIFY_MS)
 }
 
 let installed = false
@@ -70,7 +82,10 @@ export const consoleStore = {
     return () => listeners.delete(listener)
   },
   clear() {
+    clearTimeout(flushTimer)
+    flushTimer = undefined
     entries = []
+    pending = []
     listeners.forEach(listener => listener())
   },
   setPaused(value: boolean) {

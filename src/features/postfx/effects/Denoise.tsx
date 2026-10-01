@@ -34,5 +34,6 @@ export const feature: Feature = {
   cost: 'medium',
   order: 50,
   enabled: false,
+  description: 'Depth- and normal-aware denoiser for noisy screen-space effects',
   component: Denoise,
 }

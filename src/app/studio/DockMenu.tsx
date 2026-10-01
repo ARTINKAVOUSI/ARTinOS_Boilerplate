@@ -44,7 +44,6 @@ function iconOf(item: MetaBlockContextMenuItem) {
   if (/return-home|group-home/.test(id)) return Icons.returnHome
   if (/float/.test(id)) return Icons.float
   if (/maximize/.test(id)) return item.label.startsWith('Restore') ? Icons.minimize : Icons.maximize
-  if (/popout/.test(id)) return Icons.popout
   if (/close/.test(id)) return Icons.close
   return Icons.sliders
 }

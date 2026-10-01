@@ -57,7 +57,7 @@ export function MidiInput({ channel = 0, release = 0.25 }: MidiInputProps) {
       } else if (command === 0xb0) {
         bus.set(`midi.cc.${first}`, second / 127)
       } else if (command === 0xe0) {
-        bus.set('midi.bend', ((second * 128 + first) / 8192 - 1) * 1)
+        bus.set('midi.bend', (second * 128 + first) / 8192 - 1)
       }
     }
 

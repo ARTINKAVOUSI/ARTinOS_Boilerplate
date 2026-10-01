@@ -57,6 +57,7 @@ export const feature: Feature = {
   group: 'Ground',
   order: 41,
   enabled: false,
+  description: 'A soft gradient shadow decal under the subject, no per-frame cost',
   component: ContactShadow,
   controls: {
     opacity: { type: 'number', value: 0.5, min: 0, max: 1, step: 0.01 },

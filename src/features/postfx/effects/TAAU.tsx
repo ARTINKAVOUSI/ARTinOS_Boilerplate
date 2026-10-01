@@ -34,5 +34,6 @@ export const feature: Feature = {
   cost: 'high',
   order: 981,
   enabled: false,
+  description: 'Temporal anti-aliasing with upscaling; resolves over a few frames',
   component: TAAU,
 }

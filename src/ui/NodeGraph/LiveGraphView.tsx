@@ -129,9 +129,14 @@ export function LiveGraphView({ graph, previews, onInspect, onControl, insetRigh
     return () => surface.removeEventListener('wheel', onWheel)
   }, [])
 
+  // The running pan's window listeners, so a cancelled gesture or an unmount mid-pan removes them too.
+  const stopPan = useRef<(() => void) | null>(null)
+  useEffect(() => () => stopPan.current?.(), [])
+
   const pan = (event: ReactPointerEvent) => {
     const target = event.target as HTMLElement
     if (target.closest('.artinos-lnode') || target.closest('input,select,button')) return
+    stopPan.current?.()
     const startX = event.clientX
     const startY = event.clientY
     const origin = { ...viewport }
@@ -139,9 +144,13 @@ export function LiveGraphView({ graph, previews, onInspect, onControl, insetRigh
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      if (stopPan.current === up) stopPan.current = null
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+    stopPan.current = up
   }
 
   const anchor = (node: LiveNode, side: 'in' | 'out') => ({ x: node.x + (side === 'out' ? LIVE_NODE_WIDTH : 0), y: node.y + node.height / 2 })
@@ -249,7 +258,7 @@ export function LiveGraphView({ graph, previews, onInspect, onControl, insetRigh
                 {node.preview === 'render' ? (
                   <RenderPreview frame={previews?.get(node.id)} />
                 ) : (
-                  <ValuePreview nodeKey={`live:${node.id}`} value={typeof node.value === 'string' ? Number(node.value) || 0 : Number(node.value ?? 0)} />
+                  <ValuePreview value={typeof node.value === 'string' ? Number(node.value) || 0 : Number(node.value ?? 0)} />
                 )}
               </div>
             )}
@@ -258,11 +267,11 @@ export function LiveGraphView({ graph, previews, onInspect, onControl, insetRigh
       </div>
 
       <div className="artinos-gzoom">
-        <button type="button" title="Zoom out" onClick={() => setViewport(v => ({ ...v, zoom: Math.max(MIN_ZOOM, v.zoom / 1.2) }))}>
+        <button type="button" title="Zoom out" aria-label="Zoom out" onClick={() => setViewport(v => ({ ...v, zoom: Math.max(MIN_ZOOM, v.zoom / 1.2) }))}>
           −
         </button>
         <output>{Math.round(viewport.zoom * 100)}%</output>
-        <button type="button" title="Zoom in" onClick={() => setViewport(v => ({ ...v, zoom: Math.min(MAX_ZOOM, v.zoom * 1.2) }))}>
+        <button type="button" title="Zoom in" aria-label="Zoom in" onClick={() => setViewport(v => ({ ...v, zoom: Math.min(MAX_ZOOM, v.zoom * 1.2) }))}>
           +
         </button>
         <button type="button" title="Fit to view" onClick={fit}>

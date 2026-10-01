@@ -43,6 +43,17 @@ const bump = () => {
   listeners.forEach(listener => listener())
 }
 
+/** With nothing left to preview, give the GPU back its target, material and quad. */
+function release() {
+  if (inFlight || requests.size) return
+  // The quad's geometry is three's shared full-screen triangle, so only the quad reference goes.
+  target?.dispose()
+  material?.dispose()
+  target = null
+  material = null
+  quad = null
+}
+
 async function capture(key: string, node: unknown) {
   const renderer = runtime.getRenderer() as unknown as Renderer | null
   if (!renderer) return
@@ -94,6 +105,8 @@ function tick() {
     .catch(() => failed.add(key))
     .finally(() => {
       inFlight = false
+      // A panel that closed mid-capture left the release to us.
+      release()
     })
 }
 
@@ -106,7 +119,7 @@ export const nodePreviews = {
     requests.set(key, node)
     failed.delete(key)
   },
-  /** Drop everything not in `keys` — nodes that are gone, or a closed panel. */
+  /** Drop everything not in `keys` — nodes that are gone, or a closed panel (`keepOnly([])`). */
   keepOnly(keys: readonly string[]) {
     const wanted = new Set(keys)
     let changed = false
@@ -118,6 +131,7 @@ export const nodePreviews = {
         changed = true
       }
     if (changed) bump()
+    release()
   },
   getFrames: () => snapshot,
   subscribe(listener: () => void) {

@@ -1,5 +1,6 @@
 {
-  "name": "artinos-boilerplate-v2",
+  "name": "artinos-boilerplate",
+  "description": "React 19 + React Three Fiber 10 + three.js WebGPU boilerplate where every capability is a copy-pastable file",
   "private": true,
   "version": "2.0.0",
   "type": "module",

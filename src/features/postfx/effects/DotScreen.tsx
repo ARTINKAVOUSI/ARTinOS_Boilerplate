@@ -45,6 +45,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 650,
   enabled: false,
+  description: 'Greyscale halftone dot pattern, like newsprint',
   component: DotScreen,
   controls: {
     angle: { type: 'number', value: 1.57, min: 0, max: 6.283, step: 0.01 },

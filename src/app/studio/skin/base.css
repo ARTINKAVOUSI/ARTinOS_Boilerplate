@@ -380,13 +380,13 @@
   /* Same framing as the crisp layer, just blown up and blurred: the pixels either side of the
      letterbox edge come from the same place in the picture, so the seam reads as depth of field
      rather than as a cut. */
-  background:url('/backgrounds/persian-garden.png') center/contain no-repeat;
+  background:url('/backgrounds/persian-garden.webp') center/contain no-repeat;
   filter:blur(60px) saturate(112%);
   transform:scale(1.75);
 }
 .artinos-metablock-shell::after{
   z-index:-1;
-  background:url('/backgrounds/persian-garden.png') center/contain no-repeat;
+  background:url('/backgrounds/persian-garden.webp') center/contain no-repeat;
 }
 
 
@@ -564,67 +564,6 @@
   letter-spacing: 0.18em;
   color: var(--sig-live-hi);
 }
-
-/* ── CONSOLE TOAST ────────────────────────────────────────────────────────
-   The console has something to say only when something happens, so it floats
-   bottom-right beneath the dock and fades out when activity stops. */
-
-.plate-workspace .plate-console-toast {
-  position: absolute;
-  right: var(--space-8);
-  bottom: calc(var(--bottom-height, 276px) + var(--space-7));
-  z-index: 25;
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  max-width: 420px;
-  padding: 9px 11px;
-  border-radius: 3px;
-  background: var(--bg-float);
-  box-shadow: var(--e3-float);
-  backdrop-filter: var(--blur-float);
-  -webkit-backdrop-filter: var(--blur-float);
-  font: var(--type-label);
-  color: var(--text-mid);
-  opacity: 0;
-  transform: translateY(4px);
-  pointer-events: none;
-  transition: opacity var(--dur-surface) var(--ease-enter), transform var(--dur-surface) var(--ease-enter);
-}
-.plate-workspace .plate-console-toast[data-visible] {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-.plate-workspace .plate-console-toast > i {
-  width: 5px;
-  height: 5px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--sig-live);
-}
-.plate-workspace .plate-console-toast[data-level='warn'] > i { background: var(--sig-warn); }
-.plate-workspace .plate-console-toast[data-level='error'] > i { background: var(--sig-fault); }
-.plate-workspace .plate-console-toast-message {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.plate-workspace .plate-console-toast-open {
-  flex: 0 0 auto;
-  border: 0;
-  border-radius: 3px;
-  padding: 2px 6px;
-  background: transparent;
-  font-family: var(--font-num);
-  font-size: 8.5px;
-  letter-spacing: 0.18em;
-  color: var(--text-faint);
-}
-.plate-workspace .plate-console-toast-open:hover { background: var(--bg-hover); color: var(--text-hi); }
-.plate-workspace .plate-console-toast-open:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-
 /* ── SH.01  TAB STRIP ─────────────────────────────────────────────────────
    Flush text on a shared hairline (reference PL.02 `tabsA`), not pills. Every
    open panel is bright with an underline; the rest sit dim on the same line.
@@ -826,16 +765,6 @@
 .plate-workspace .log-message.info { color: var(--text-mid); }
 .plate-workspace .log-message.warn { color: var(--sig-warn); }
 .plate-workspace .log-message.error { color: var(--sig-fault); }
-
-/* ── EXIT MOTION ──────────────────────────────────────────────────────────
-   Arriving decelerates; leaving accelerates away in less time. Applied to the
-   layers that come and go. */
-.plate-workspace .plate-console-toast {
-  transition: opacity var(--dur-exit) var(--ease-exit), transform var(--dur-exit) var(--ease-exit);
-}
-.plate-workspace .plate-console-toast[data-visible] {
-  transition: opacity var(--dur-surface) var(--ease-enter), transform var(--dur-surface) var(--ease-enter);
-}
 
 /* ── SH.01  STATUS CLUSTER ────────────────────────────────────────────────
    Transcribed from the reference's command bar: one quiet pill holding

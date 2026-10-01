@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { MetaBlockWorkspace, MetaBlockWorkspaceView, useWorkspaceRevision, type GroupChromeContext, type MetaBlockGroup, type MetaBlockInstance } from '../../ui/MetaBlock'
 import { CommandPalette, type Command } from '../../ui/CommandPalette/CommandPalette'
 import { GLASS_THEMES, THEME_META } from '../../ui/system/utils'
@@ -11,7 +11,7 @@ import { PanelWorkbench } from './PanelWorkbench'
 import { PanelBarSlot, PanelIdContext } from './PanelBar'
 import { RuntimeHUD } from './RuntimeHUD'
 import { ConsoleToast } from './ConsoleToast'
-import { DOCK_LAYOUT_KEY as PERSIST_KEY, resetDockLayout } from './layout'
+import { DOCK_LAYOUT_KEY as PERSIST_KEY, isResettingLayout, resetDockLayout } from './layout'
 import { Icons } from './icons'
 import { DockMenu } from './DockMenu'
 // After the engine's own stylesheet: binds its variables to the studio tokens.
@@ -25,7 +25,17 @@ function panelFor(feature: DiscoveredFeature) {
 }
 
 const DOCK_SIZE = { left: 0.22, right: 0.24, bottom: 0.36 } as const
+const FLOAT_BOUNDS = { x: 120, y: 120, width: 420, height: 340 }
+/** Layout changes are written out once they settle, never per drag or resize frame. */
+const PERSIST_DELAY_MS = 300
+/** Workspace events that do not change the saved arrangement. */
+const TRANSIENT_EVENTS = new Set(['focus', 'selection'])
 const selectUI = (state: StudioState) => state.ui
+const selectReveal = (state: StudioState) => state.reveal
+
+/** Keys typed into a field, a list or a slider are for that control, not the studio. */
+const typingTarget = (target: EventTarget | null) =>
+  target instanceof Element && !!target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="combobox"], [role="listbox"], [role="menu"], [role="slider"], [role="spinbutton"], [role="textbox"]')
 
 /**
  * Build the MetaBlock workspace from the discovered panels.
@@ -61,19 +71,30 @@ function buildWorkspace(list: DiscoveredPanel[]) {
   }
   for (const panel of floating) {
     workspace.createMetaBlock({ id: panel.id, title: panel.title, role: 'panel' })
-    workspace.floatBlock(panel.id, { x: 120, y: 120, width: 420, height: 340 })
+    workspace.floatBlock(panel.id, FLOAT_BOUNDS)
   }
 
-  // A saved layout wins, but only while it still matches the panels on disk —
-  // a deleted panel file must not come back as an empty tab.
+  // A saved layout wins while every tab in it is still a panel on disk — a
+  // deleted panel file must not come back as an empty tab. Panels added since
+  // (or closed then) join their dock; everything else keeps its place.
   try {
     const raw = localStorage.getItem(PERSIST_KEY)
     if (raw) {
       const snapshot = JSON.parse(raw)
       const known = new Set(list.map(panel => panel.id).concat('viewport.canvas'))
       const saved: string[] = (snapshot?.blocks ?? []).map((block: MetaBlockInstance) => block.id)
-      const complete = list.every(panel => saved.includes(panel.id))
-      if (saved.length && complete && saved.every(id => known.has(id))) workspace.restore(snapshot)
+      if (saved.length && saved.every(id => known.has(id))) {
+        workspace.restore(snapshot)
+        // The studio has no pop-out windows; a group saved popped out would stay invisible.
+        for (const groupId of [...workspace.popouts.keys()]) workspace.reattachPopout(groupId, { area: 'bottom', targetGroupId: workspace.groups.has('dock.bottom') ? 'dock.bottom' : null })
+        for (const panel of list) {
+          if (workspace.blocks.has(panel.id)) continue
+          const groupId = `dock.${panel.dock ?? 'bottom'}`
+          const docked = workspace.groups.get(groupId)?.role === 'dock'
+          workspace.createMetaBlock({ id: panel.id, title: panel.title, role: 'panel', meta: { description: panel.description ?? null } }, { groupId: docked ? groupId : undefined })
+          if (!docked) workspace.floatBlock(panel.id, FLOAT_BOUNDS)
+        }
+      }
     }
   } catch {
     /* a corrupt or foreign layout falls back to the defaults */
@@ -103,21 +124,29 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
     document.documentElement.dataset.arTheme = ui.theme
   }, [ui.theme])
 
-  // Persist on every change, coalesced to a frame so drags stay off localStorage.
+  // Persist the arrangement once a change settles: drags, resizes and focus clicks stay off localStorage.
   useEffect(() => {
-    let frame = 0
-    const off = workspace.on('*', () => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        try {
-          localStorage.setItem(PERSIST_KEY, JSON.stringify(workspace.serialize()))
-        } catch {
-          /* quota or private mode */
-        }
-      })
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const save = () => {
+      timer = undefined
+      if (isResettingLayout()) return
+      try {
+        localStorage.setItem(PERSIST_KEY, JSON.stringify(workspace.serialize()))
+      } catch {
+        /* quota or private mode */
+      }
+    }
+    const off = workspace.on('*', (event: { type?: string }) => {
+      if (TRANSIENT_EVENTS.has(event?.type ?? '')) return
+      clearTimeout(timer)
+      timer = setTimeout(save, PERSIST_DELAY_MS)
     })
+    // Leaving with a change still pending writes it out.
+    const flush = () => timer !== undefined && save()
+    window.addEventListener('pagehide', flush)
     return () => {
-      cancelAnimationFrame(frame)
+      flush()
+      window.removeEventListener('pagehide', flush)
       off()
     }
   }, [workspace])
@@ -126,17 +155,29 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
     (id: string) => {
       const panel = byId.get(id)
       if (!panel) return
-      if (!workspace.blocks.has(id)) workspace.createMetaBlock({ id, title: panel.title, role: 'panel' }, { groupId: workspace.groups.has('dock.bottom') ? 'dock.bottom' : undefined })
+      if (!workspace.blocks.has(id)) {
+        // Back into its dock if there is one, else the first dock, else a floating window.
+        const home = [`dock.${panel.dock ?? 'bottom'}`, 'dock.bottom', ...workspace.groups.keys()].find(groupId => workspace.groups.get(groupId)?.role === 'dock')
+        workspace.createMetaBlock({ id, title: panel.title, role: 'panel' }, { groupId: home })
+        if (!home) workspace.floatBlock(id, FLOAT_BOUNDS)
+      }
       workspace.activateBlock(id)
     },
     [byId, workspace],
   )
 
+  // Any reveal — a palette hit, or a panel's own "show in the Inspector" —
+  // brings forward the panel that owns the feature at that moment.
+  const reveal = useStudio(selectReveal)
+  useEffect(() => {
+    const feature = reveal && features.find(entry => entry.id === reveal.featureId)
+    if (feature) openPanel(panelFor(feature))
+  }, [reveal?.at, openPanel])
+
   // H hides the studio chrome; the scene stays.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null
-      if ((target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]')) || event.metaKey || event.ctrlKey || event.altKey) return
+      if (event.repeat || event.isComposing || event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || typingTarget(event.target)) return
       if (event.key === 'h' || event.key === 'H') studio.setUI({ visible: !studio.getState().ui.visible })
     }
     window.addEventListener('keydown', onKey)
@@ -174,7 +215,7 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
             keywords,
             run: () => studio.setEnabled(feature.id, !studio.getState().features[feature.id]?.enabled),
           },
-          { id: `path.${feature.id}`, label: `Copy path · ${feature.path}`, group: 'Source', keywords, run: () => void navigator.clipboard?.writeText(feature.path) },
+          { id: `path.${feature.id}`, label: `Copy path · ${feature.path}`, group: 'Source', keywords, run: () => void navigator.clipboard?.writeText(feature.path).catch(() => console.warn(`[studio] Could not copy ${feature.path}`)) },
           // Every control is searchable by name: the hit opens its panel and
           // scrolls the row into view, which is what the per-panel search fields did.
           ...Object.entries(feature.controls ?? {}).map(([name, control]) => ({
@@ -193,14 +234,27 @@ export function DockShell({ viewport }: { viewport: ReactNode }) {
     [openPanel, workspace],
   )
 
+  // One element per block, made once. The workspace re-renders on every focus
+  // click, drag frame and resize; handing it the same element each time lets
+  // React skip the panel body entirely.
+  const bodies = useMemo(() => new Map<string, ReactElement | null>(), [])
   const renderBlock = (block: MetaBlockInstance) => {
+    let body = bodies.get(block.id)
+    if (body === undefined) {
+      body = blockBody(block.id)
+      bodies.set(block.id, body)
+    }
+    return body
+  }
+  const blockBody = (id: string): ReactElement | null => {
     // R3F sizes its canvas from its parent box; this wrapper gives it a stable full-bleed one.
-    if (block.id === 'viewport.canvas') return <main className="artinos-viewport">{viewport}</main>
-    const panel = byId.get(block.id)
+    if (id === 'viewport.canvas') return <main className="artinos-viewport">{viewport}</main>
+    const panel = byId.get(id)
     if (!panel) return null
     const Content = panel.component
+    // Keyed by panel, so a tab switch never hands one panel's error state to another.
     return (
-      <PanelIdContext value={panel.id}>
+      <PanelIdContext key={panel.id} value={panel.id}>
         <div className={`artinos-panel artinos-panel-${panel.id} is-open`}>
           <div className="artinos-panel-body">
             <PanelWorkbench title={panel.title}>

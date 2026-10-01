@@ -450,9 +450,6 @@ export const drivenParameters = (graph: GraphDefinition): string[] => [
   ),
 ]
 
-/** Signals this graph reads, so a live view can wire them up. */
-export const readSignals = (graph: GraphDefinition): string[] => [...new Set(graph.nodes.filter(node => node.type === 'signal').map(node => String(fieldValue(node, 'id') ?? '')).filter(Boolean))]
-
 const finite = (value: number) => (Number.isFinite(value) ? value : 0)
 const hashNoise = (x: number) => {
   const s = Math.sin(x * 12.9898) * 43758.5453123
@@ -460,9 +457,6 @@ const hashNoise = (x: number) => {
 }
 const vector3 = (value: unknown, fallback: [number, number, number]): [number, number, number] =>
   Array.isArray(value) && value.length >= 3 ? [Number(value[0]) || 0, Number(value[1]) || 0, Number(value[2]) || 0] : fallback
-
-const NUMERIC_TYPES = new Set(NODE_SCHEMAS.filter(schema => schema.category !== 'Scene' && schema.category !== 'Render' && schema.category !== 'GPU').map(schema => schema.type))
-export const isNumericNode = (node: GraphNode) => NUMERIC_TYPES.has(node.type)
 
 /**
  * Runs every node once in dependency order and returns each node's output.
@@ -716,11 +710,4 @@ export function evaluate(graph: GraphDefinition, context: GraphContext): Map<str
     }
   }
   return values
-}
-
-/** The numbers out of an evaluation, for readouts and previews. */
-export const numericValues = (values: Map<string, unknown>) => {
-  const numbers = new Map<string, number>()
-  for (const [id, value] of values) if (typeof value === 'number') numbers.set(id, value)
-  return numbers
 }

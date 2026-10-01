@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import type { DirectionalLight, PointLight } from 'three/webgpu'
+import type { DirectionalLight, Object3D, PointLight } from 'three/webgpu'
 import { sss } from 'three/addons/tsl/display/SSSNode.js'
 import type { Feature } from '../../../app/feature'
 import { usePostFXEffect, findLight } from '../PostFX'
@@ -14,28 +14,45 @@ export interface SubsurfaceScatteringProps {
   light?: DirectionalLight | PointLight
 }
 
+/** The default light: the first directional or point light in the scene. */
+const isMainLight = (object: Object3D) => {
+  const candidate = object as DirectionalLight & { isPointLight?: boolean }
+  return !!(candidate.isDirectionalLight || candidate.isPointLight)
+}
+
+/** Frames between scene searches while no light is held. */
+const SEARCH_INTERVAL = 30
+
 /**
- * Subsurface Scattering — screen-space light bleeding through thin geometry,
- * lit from the scene's main light.
+ * Subsurface Scattering — despite the name, not a scattering effect.
  *
- * Needs a directional or point light. Pass `light` to choose it; otherwise the
- * first one in the scene is used.
+ * What it does today: it runs three's Screen-Space Shadows node (`SSSNode`, the
+ * node ScreenSpaceShadows uses) from the main light and ADDS its output to the
+ * image. That output is a shadow factor (1 where lit, lower inside contact
+ * shadows), so every lit pixel gains about +1 per channel and the frame washes
+ * out towards white. No light travels through geometry.
+ *
+ * Lit from `light`, or else the first directional or point light in the scene.
+ * SSSNode aims along the light's `target`, which a point light does not have,
+ * so expect render errors with one.
  *
  * Mount inside <PostFX>.
  */
-export function SubsurfaceScattering({ id = 'sss', enabled = true, order = 140, light }: SubsurfaceScatteringProps) {
+export function SubsurfaceScattering({ id = 'subsurface', enabled = true, order = 140, light }: SubsurfaceScatteringProps) {
   const scene = useThree(state => state.scene)
   const [source, setSource] = useState<DirectionalLight | PointLight | null>(null)
+  const sinceSearch = useRef(SEARCH_INTERVAL)
   // The node captures the light when it is built, so wait until one exists and
-  // follow it if the scene replaces it.
+  // follow it if the scene replaces it. A light is kept while it stays in the
+  // scene; without one the scene is searched at most every SEARCH_INTERVAL frames.
   useFrame(() => {
-    const found =
-      light ??
-      (findLight(scene, object => {
-        const candidate = object as DirectionalLight & { isPointLight?: boolean }
-        return !!(candidate.isDirectionalLight || candidate.isPointLight)
-      }) as DirectionalLight | PointLight | undefined)
-    if ((found ?? null) !== source) setSource(found ?? null)
+    sinceSearch.current++
+    let next: DirectionalLight | PointLight | null = light ?? (source?.parent ? source : null)
+    if (!next && sinceSearch.current >= SEARCH_INTERVAL) {
+      sinceSearch.current = 0
+      next = (findLight(scene, isMainLight) as DirectionalLight | PointLight | undefined) ?? null
+    }
+    if (next !== source) setSource(next)
   })
 
   usePostFXEffect(
@@ -63,6 +80,6 @@ export const feature: Feature = {
   order: 140,
   enabled: false,
   webgpuOnly: true,
-  description: 'Light bleeding through thin geometry, from the scene’s main light',
+  description: 'Not real SSS: adds a screen-space shadow term, washing the image out',
   component: SubsurfaceScattering,
 }

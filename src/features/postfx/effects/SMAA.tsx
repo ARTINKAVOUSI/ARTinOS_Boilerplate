@@ -29,5 +29,6 @@ export const feature: Feature = {
   cost: 'medium',
   order: 991,
   enabled: false,
+  description: 'Subpixel morphological anti-aliasing; crisper than FXAA',
   component: SMAA,
 }

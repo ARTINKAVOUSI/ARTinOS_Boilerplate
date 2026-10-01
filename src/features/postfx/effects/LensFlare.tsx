@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { lensflare } from 'three/addons/tsl/display/LensflareNode.js'
 import type { Feature } from '../../../app/feature'
 import { usePostFXEffect, useUniform } from '../PostFX'
@@ -29,7 +30,23 @@ export function LensFlare({ id = 'lens-flare', enabled = true, order = 120, thre
   const ghostSpacingU = useUniform(ghostSpacing)
   const ghostAttenuationU = useUniform(ghostAttenuation)
   const ghostSamplesU = useUniform(ghostSamples)
-  usePostFXEffect(id, { enabled, order, build: ({ input }) => input.add(lensflare(input, { threshold: thresholdU, ghostSpacing: ghostSpacingU, ghostAttenuationFactor: ghostAttenuationU, ghostSamples: ghostSamplesU, downSampleRatio })) }, [downSampleRatio])
+  // The node reads downSampleRatio every frame when it sizes its target, so it is
+  // assigned live instead of rebuilding.
+  const ratio = useRef(downSampleRatio)
+  const flare = useRef<ReturnType<typeof lensflare> | null>(null)
+  useEffect(() => {
+    ratio.current = downSampleRatio
+    if (flare.current) flare.current.downSampleRatio = downSampleRatio
+  }, [downSampleRatio])
+  usePostFXEffect(id, {
+    enabled,
+    order,
+    build: ({ input }) => {
+      const node = lensflare(input, { threshold: thresholdU, ghostSpacing: ghostSpacingU, ghostAttenuationFactor: ghostAttenuationU, ghostSamples: ghostSamplesU, downSampleRatio: ratio.current })
+      flare.current = node
+      return input.add(node)
+    },
+  })
   return null
 }
 
@@ -43,6 +60,7 @@ export const feature: Feature = {
   cost: 'high',
   order: 120,
   enabled: false,
+  description: 'Ghosts and halos from bright sources, added over the image',
   component: LensFlare,
   controls: {
     threshold: { type: 'number', value: 0.5, min: 0, max: 1, step: 0.01 },

@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 export const PREVIEW_W = 168
 export const PREVIEW_H = 44
@@ -13,23 +13,20 @@ export interface PreviewFrame {
   updatedAt: number
 }
 
-const histories = new Map<string, number[]>()
 const HISTORY = 64
 
-export function sampleHistory(key: string, value: number) {
-  const list = histories.get(key) ?? []
-  if (list.length && list.at(-1) === value && list.length > 2) return list
-  list.push(value)
-  if (list.length > HISTORY) list.splice(0, list.length - HISTORY)
-  histories.set(key, list)
-  return list
-}
-export const clearHistory = (key: string) => histories.delete(key)
-
 /** SVG keeps previews renderer-neutral: no second canvas is ever created. */
-export const ValuePreview = memo(function ValuePreview({ nodeKey, value }: { nodeKey: string; value: number }) {
-  const history = sampleHistory(nodeKey, value)
-  if (history.length < 2) return <svg className="ngraph-preview-canvas" viewBox={`0 0 ${PREVIEW_W} ${PREVIEW_H}`} />
+export const ValuePreview = memo(function ValuePreview({ value }: { value: number }) {
+  // Each preview owns its recent samples, so they go when it unmounts. A sample
+  // is taken in an effect and only when the value changed — a re-render (or
+  // StrictMode's double render) never records twice — and a new array means a
+  // redraw.
+  const [samples, setSamples] = useState<readonly number[]>(() => [value])
+  useEffect(() => {
+    setSamples(list => (list[list.length - 1] === value ? list : [...list, value].slice(-HISTORY)))
+  }, [value])
+  // A value that has not changed yet still draws, as a flat line.
+  const history = samples.length > 1 ? samples : [samples[0], samples[0]]
   let min = Math.min(...history)
   let max = Math.max(...history)
   if (max - min < 1e-6) {

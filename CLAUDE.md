@@ -31,8 +31,9 @@ if you find yourself editing a list to register something, the design is wrong.
    `src/ui` component never imports anything outside its own folder and
    `src/ui/system/` (the design system's foundation); and
    `src/app` never imports a feature, so deleting any feature can't break the
-   host. Shared live state (the signal bus, the shared webcam) is a system in
-   `src/app/`.
+   host — the one exception is the canvas host the Stage renders into,
+   `features/canvas/WebGPUCanvas.tsx`, which exports no manifest. Shared live
+   state (the signal bus, the shared webcam) is a system in `src/app/`.
 3. **Files under `src/features/` never import `app/store` or `app/registry`.**
    The registry loads every feature file, so that import is circular (it
    crashes at startup). Values come in as props; a studio section a feature
@@ -50,13 +51,20 @@ if you find yourself editing a list to register something, the design is wrong.
    resources. Deleting a feature file must leave no trace behind.
 8. **Every control is declared in the manifest**, so it appears in the panel,
    the palette search, presets and the saved state with no extra wiring.
+9. **A slider drag reaches the GPU, not a rebuild.** A value that changes often
+   goes into a uniform (`useUniform` from `features/postfx/PostFX.tsx`) or a
+   live property — never into `args`, a `useMemo` that recreates a light, fog,
+   texture or material, or a `usePostFXEffect` dep (each of those recompiles
+   shaders). Studio code subscribes narrowly: `useFeatureState(id)` or a
+   selector that returns a primitive, never the whole `features` map.
 
 ## Porting work
 
-When bringing a capability over from the original v1 workspace (archived in
-`legacy/v1/`, and at the git tag `v1.4-final`), port
-the *behaviour*, not the architecture: the original's registries, providers and
-cross-package imports are exactly what this rebuild removes. The result is one
-file or one folder in the table above, self-contained and deletable.
+When bringing a capability over from the original v1 workspace (preserved at
+the git tag `v1.4-final`: `git show v1.4-final:<path>` or a worktree of it), or
+from any other project, port the *behaviour*, not the architecture: the
+original's registries, providers, barrels, own canvases and cross-package
+imports are exactly what this rebuild removes. The result is one file or one
+folder in the table above, self-contained and deletable.
 
 `docs/PLAN.md` holds the full architecture and the porting status.

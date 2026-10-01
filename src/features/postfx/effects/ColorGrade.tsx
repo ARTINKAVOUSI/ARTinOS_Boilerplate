@@ -64,6 +64,9 @@ export function ColorGrade({ id = 'lut3d', enabled = true, order = 450, intensit
     return () => {
       cancelled = true
       current?.dispose()
+      // Drop the disposed table, so the chain passes through instead of sampling
+      // it until the next one loads (or for good, if that load fails).
+      setLut(null)
     }
   }, [url])
   const intensityU = useUniform(intensity)
@@ -72,7 +75,7 @@ export function ColorGrade({ id = 'lut3d', enabled = true, order = 450, intensit
     order,
     webgpuOnly: true,
     build: ({ input }) => (lut ? lut3D(input, texture3D(lut), (lut.image as { width: number }).width, intensityU) : null),
-  }, [url, lut])
+  }, [lut])
   return null
 }
 
@@ -87,6 +90,7 @@ export const feature: Feature = {
   order: 450,
   enabled: false,
   webgpuOnly: true,
+  description: 'Applies a 3D LUT from a .cube file, or a built-in warm/teal grade',
   component: ColorGrade,
   controls: {
     intensity: { type: 'number', value: 1, min: 0, max: 1, step: 0.01 },

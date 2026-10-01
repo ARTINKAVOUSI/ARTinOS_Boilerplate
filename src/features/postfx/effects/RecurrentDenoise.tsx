@@ -42,6 +42,7 @@ export const feature: Feature = {
   order: 55,
   enabled: false,
   webgpuOnly: true,
+  description: 'Temporal and spatial denoiser for noisy SSR and SSGI output',
   component: RecurrentDenoise,
   controls: {
     accumulate: { type: 'boolean', value: true },

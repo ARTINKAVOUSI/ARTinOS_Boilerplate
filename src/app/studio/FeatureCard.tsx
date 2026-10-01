@@ -12,12 +12,12 @@ export interface FeatureCardProps {
   feature: DiscoveredFeature
   /** Extra header controls (reorder buttons for effects). */
   extra?: ReactNode
-  /** Hide the on/off switch (for always-on hosts). */
-  hideSwitch?: boolean
   /** Quiet word before the control count, e.g. the feature group. */
   caption?: string
   /** Position in an ordered list (the effect stack), shown as 01, 02 … before the name. */
   ordinal?: number
+  /** The feature's own studio section (its `inspector` export), shown under its rows and folded with them. */
+  children?: ReactNode
 }
 
 const selectAdvanced = (state: StudioState) => state.ui.advanced
@@ -28,18 +28,32 @@ const same = (a: unknown, b: unknown) => Object.is(a, b) || JSON.stringify(a) ==
 let clipboard: string | null = null
 const SCHEMA = 'artinos.control-value.v1'
 
+/** A pasted value as this control can take it, or undefined when it cannot. */
+function accept(control: Control, value: unknown): ControlValue | undefined {
+  switch (control.type) {
+    case 'number':
+      return typeof value === 'number' && Number.isFinite(value) ? Math.min(control.max ?? Infinity, Math.max(control.min ?? -Infinity, value)) : undefined
+    case 'select':
+      return typeof value === 'string' && control.options.includes(value) ? value : undefined
+    case 'vector3':
+      return Array.isArray(value) && value.length === 3 && value.every(Number.isFinite) ? (value as [number, number, number]) : undefined
+    default:
+      return typeof value === typeof control.value ? (value as ControlValue) : undefined
+  }
+}
+
 /** A row's right-click menu: reset, copy and paste the value. Nothing in the row itself. */
-function rowMenu(label: string, value: ControlValue | undefined, fallback: ControlValue, set: (next: ControlValue) => void): MenuEntry[] {
+function rowMenu(label: string, control: Control, value: ControlValue | undefined, set: (next: ControlValue) => void): MenuEntry[] {
   return [
     { type: 'label', label },
-    { id: 'reset', label: 'Reset to default', icon: Icons.reset, disabled: same(value, fallback), onSelect: () => set(fallback) },
+    { id: 'reset', label: 'Reset to default', icon: Icons.reset, disabled: same(value, control.value), onSelect: () => set(control.value) },
     { type: 'separator' },
     {
       id: 'copy',
       label: 'Copy value',
       icon: Icons.copy,
       onSelect: () => {
-        clipboard = JSON.stringify({ schema: SCHEMA, value: value ?? fallback })
+        clipboard = JSON.stringify({ schema: SCHEMA, type: control.type, value: value ?? control.value })
         void navigator.clipboard?.writeText(clipboard).catch(() => undefined)
       },
     },
@@ -51,8 +65,9 @@ function rowMenu(label: string, value: ControlValue | undefined, fallback: Contr
         const raw = (await navigator.clipboard?.readText().catch(() => '')) || clipboard
         try {
           const parsed = raw ? JSON.parse(raw) : null
-          // Only a value of the same kind: a colour never lands in a slider.
-          if (parsed?.schema === SCHEMA && typeof parsed.value === typeof fallback) set(parsed.value)
+          // Only a value of the same kind, inside this control's range: a colour never lands in a slider.
+          const next = parsed?.schema === SCHEMA && parsed.type === control.type ? accept(control, parsed.value) : undefined
+          if (next !== undefined) set(next)
         } catch {
           /* not an ARTINOS control value */
         }
@@ -68,28 +83,32 @@ function rowMenu(label: string, value: ControlValue | undefined, fallback: Contr
  * Searching happens in the dock's command palette, not here; a palette hit
  * arrives as a `reveal` target, which opens this card and highlights the row.
  */
-export const FeatureCard = memo(function FeatureCard({ feature, extra, hideSwitch = false, caption, ordinal }: FeatureCardProps) {
+export const FeatureCard = memo(function FeatureCard({ feature, extra, caption, ordinal, children }: FeatureCardProps) {
   const state = useFeatureState(feature.id)
   const advanced = useStudio(selectAdvanced)
   const reveal = useStudio(selectReveal)
   const [collapsed, setCollapsed] = useState(false)
+  // A control reached from the palette stays shown while the card is, even when it is an advanced one.
+  const [pinned, setPinned] = useState<string | null>(null)
   const card = useRef<HTMLDivElement>(null)
   const mine = reveal?.featureId === feature.id ? reveal : null
 
   useEffect(() => {
     if (!mine) return
     setCollapsed(false)
+    if (mine.control) setPinned(mine.control)
+  }, [mine?.at])
+
+  // After the unfold above has rendered the rows, so the row itself can be found.
+  useEffect(() => {
+    if (!mine || collapsed) return
     const target = mine.control ? card.current?.querySelector(`[data-control="${mine.control}"]`) : null
     ;(target ?? card.current)?.scrollIntoView({ block: 'nearest' })
-  }, [mine?.at, mine?.control])
+  }, [mine?.at, collapsed])
 
   if (!state) return null
 
-  const entries = Object.entries(feature.controls ?? {}).filter(([name, control]) => {
-    // A revealed control is shown even when it is an advanced one.
-    if (mine?.control === name) return true
-    return !control.advanced || advanced
-  })
+  const entries = Object.entries(feature.controls ?? {}).filter(([name, control]) => !control.advanced || advanced || pinned === name)
 
   const changed = entries.some(([name, control]) => !same(state.values[name], control.value))
 
@@ -107,7 +126,7 @@ export const FeatureCard = memo(function FeatureCard({ feature, extra, hideSwitc
         <span className="v2-card-actions">
           {extra}
           {changed && <IconButton size="sm" label={`Reset ${feature.label}`} icon={Icons.reset} onClick={() => studio.reset(feature.id)} />}
-          {!hideSwitch && <Switch variant="compact" label={`${feature.label} enabled`} value={state.enabled} onChange={enabled => studio.setEnabled(feature.id, enabled)} />}
+          <Switch variant="compact" label={`${feature.label} enabled`} value={state.enabled} onChange={enabled => studio.setEnabled(feature.id, enabled)} />
         </span>
       </div>
       {!collapsed && (
@@ -119,7 +138,7 @@ export const FeatureCard = memo(function FeatureCard({ feature, extra, hideSwitc
             return (
               <Fragment key={name}>
               {heading && <div className="v2-control-group">{heading}</div>}
-              <ContextMenu items={() => rowMenu(labelOf(name, control), value, control.value, set)}>
+              <ContextMenu items={() => rowMenu(labelOf(name, control), control, value, set)}>
                 <PropertyRow
                   label={labelOf(name, control)}
                   density={namesItself(control) ? 'default' : 'compact'}
@@ -133,6 +152,7 @@ export const FeatureCard = memo(function FeatureCard({ feature, extra, hideSwitc
               </Fragment>
             )
           })}
+          {children && <div className="v2-card-inspector">{children}</div>}
         </div>
       )}
     </div>

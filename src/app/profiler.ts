@@ -137,6 +137,8 @@ const MEMORY_KINDS: Array<[name: string, count: string, size: string | null]> = 
 let snapshot = EMPTY
 let inspector: StudioInspector | null = null
 let host: WebGPURenderer | null = null
+/** What the renderer had before the profiler attached, put back when it detaches. */
+let previous: { inspector: WebGPURenderer['inspector']; trackTimestamp: boolean | undefined } | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 const listeners = new Set<() => void>()
 
@@ -149,21 +151,24 @@ function attach() {
   detach()
   inspector = new StudioInspector()
   host = renderer
-  renderer.inspector = inspector
   const backend = backendOf(renderer)
+  previous = { inspector: renderer.inspector, trackTimestamp: backend?.trackTimestamp }
+  renderer.inspector = inspector
   if (backend && hasTimestamps(renderer)) backend.trackTimestamp = true
 }
 
 function detach() {
   if (!host || !inspector) return
-  if (host.inspector === inspector) host.inspector = new InspectorBase()
+  // Back to whatever the renderer had: its own inspector and timestamp setting (WebGPUCanvas's `trackTimestamp`).
+  if (host.inspector === inspector) host.inspector = previous?.inspector ?? new InspectorBase()
   // Detaching nulls its renderer, but a timestamp read it queued for the next
   // frame still runs and reads it: keep it pointed at the live renderer.
   inspector.setRenderer(host)
   const backend = backendOf(host)
-  if (backend) backend.trackTimestamp = false
+  if (backend) backend.trackTimestamp = previous?.trackTimestamp ?? false
   inspector = null
   host = null
+  previous = null
 }
 
 function publish() {

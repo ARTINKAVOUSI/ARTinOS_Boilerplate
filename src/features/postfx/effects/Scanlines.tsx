@@ -39,6 +39,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 660,
   enabled: false,
+  description: 'CRT-style horizontal scanlines, optionally scrolling',
   component: Scanlines,
   controls: {
     intensity: { type: 'number', value: 0.3, min: 0, max: 1, step: 0.01 },

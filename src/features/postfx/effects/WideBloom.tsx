@@ -35,6 +35,7 @@ export const feature: Feature = {
   cost: 'high',
   order: 110,
   enabled: false,
+  description: 'Broad, high-threshold glow on the brightest highlights only',
   component: WideBloom,
   controls: {
     scale: { type: 'number', value: 3, min: 0.1, max: 10, step: 0.1 },

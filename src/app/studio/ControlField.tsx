@@ -61,7 +61,7 @@ export function ControlInput({ name, control, value, onChange }: { name: string;
     case 'boolean':
       return <Switch variant="compact" label={label} value={typeof value === 'boolean' ? value : control.value} onChange={onChange} />
     case 'select':
-      return <Select label={label} value={String(value ?? control.value)} options={control.options} onChange={onChange} />
+      return <Select appearance="well" label={label} value={String(value ?? control.value)} options={control.options} onChange={onChange} />
     case 'color':
       return <ColorField label={label} value={String(value ?? control.value)} onChange={onChange} />
     case 'vector3': {

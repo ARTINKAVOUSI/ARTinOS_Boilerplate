@@ -1,4 +1,4 @@
-import { vec2 } from 'three/tsl'
+import { convertToTexture, vec2 } from 'three/tsl'
 import { radialBlur } from 'three/addons/tsl/display/radialBlur.js'
 import type { Feature } from '../../../app/feature'
 import { usePostFXEffect, useUniform } from '../PostFX'
@@ -35,7 +35,9 @@ export function RadialBlur({ id = 'radial-blur', enabled = true, order = 353, ce
     enabled,
     order,
     webgpuOnly: true,
-    build: ({ input }) => radialBlur(input, { center: vec2(centerXU, centerYU), weight: weightU, decay: decayU, exposure: exposureU }),
+    // The input is resolved to a texture here rather than inside radialBlur, so the
+    // render target is part of the chain and is freed with it.
+    build: ({ input }) => radialBlur(convertToTexture(input), { center: vec2(centerXU, centerYU), weight: weightU, decay: decayU, exposure: exposureU }),
   })
   return null
 }
@@ -51,6 +53,7 @@ export const feature: Feature = {
   order: 353,
   enabled: false,
   webgpuOnly: true,
+  description: 'Streaks radiating from a screen point, for fake light shafts or speed',
   component: RadialBlur,
   controls: {
     centerX: { type: 'number', value: 0.5, min: 0, max: 1, step: 0.01 },

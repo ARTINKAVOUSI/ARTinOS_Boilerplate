@@ -32,6 +32,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 405,
   enabled: false,
+  description: 'Quantises each colour channel into a few flat levels',
   component: Posterize,
   controls: {
     steps: { type: 'number', value: 8, min: 2, max: 64, step: 1 },

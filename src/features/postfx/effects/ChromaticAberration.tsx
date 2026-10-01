@@ -36,6 +36,7 @@ export const feature: Feature = {
   cost: 'low',
   order: 600,
   enabled: false,
+  description: 'Colour fringing that grows towards the frame edge',
   component: ChromaticAberration,
   controls: {
     strength: { type: 'number', value: 1, min: 0, max: 5, step: 0.01 },

@@ -144,19 +144,27 @@ export function NumberField(props: NumberFieldProps) {
     }
   };
 
-  const wheelRef = useRef({ nudge, disabled, editing });
-  wheelRef.current = { nudge, disabled, editing };
+  // onCommit is "once, on release": a run of wheel steps commits once, 250 ms after the last.
+  const commitWheel = () => onCommit?.(live.current);
+  const wheelRef = useRef({ nudge, disabled, editing, commitWheel });
+  wheelRef.current = { nudge, disabled, editing, commitWheel };
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
+    let commit: ReturnType<typeof setTimeout> | undefined;
     const h = (e: WheelEvent) => {
       const w = wheelRef.current;
       if (document.activeElement !== el || w.disabled || w.editing !== null || !e.deltaY) return;
       e.preventDefault();
       w.nudge(e.deltaY < 0 ? 1 : -1, e);
+      clearTimeout(commit);
+      commit = setTimeout(() => wheelRef.current.commitWheel(), 250);
     };
     el.addEventListener('wheel', h, { passive: false });
-    return () => el.removeEventListener('wheel', h);
+    return () => {
+      el.removeEventListener('wheel', h);
+      clearTimeout(commit);
+    };
   }, []);
 
   const f = runFormat(v, { format, decimals, unit, formatter });

@@ -52,6 +52,7 @@ export const feature: Feature = {
   group: 'Atmosphere',
   order: 18,
   enabled: false,
+  description: 'A distant, slowly turning shell of points for night and space scenes',
   component: Stars,
   controls: {
     count: { type: 'number', value: 1500, min: 100, max: 20000, step: 100 },
