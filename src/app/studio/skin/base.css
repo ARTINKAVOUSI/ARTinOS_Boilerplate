@@ -1,0 +1,1110 @@
+/* Studio skin · base — the workbench's earlier rule sets, kept in two low cascade layers so every later rule (components, chrome, panels) wins over them without fighting specificity. */
+
+@layer artinos.legacy {
+/* Component layer. tokens.css below is the ONLY source of values: every rule in
+   this file must resolve through a role (--bg-*, --text-*, --line-*, --sig-*,
+   --e0..3-*, --space-*, --dur-*), never a primitive and never a raw colour.
+   See ../../../docs/UI-DESIGN-SYSTEM.md. */
+
+@layer legacy {
+:root{
+  font-family:var(--font-ui);
+  color:var(--text-hi);
+  background:var(--bg-app);
+}
+*{box-sizing:border-box}html,body,#root{width:100%;height:100%;margin:0;overflow:hidden}body{background:var(--bg)}button,input,select{font:inherit;color:inherit}button{cursor:pointer}button:focus{outline:none}button:focus-visible{outline:1px solid color-mix(in srgb,var(--sig-live) 48%,transparent);outline-offset:-2px}button:disabled{opacity:.45;cursor:default}code{font-family:var(--font-num)}
+.artinos-workspace{position:relative;width:100%;height:100%;background:var(--bg);overflow:hidden}.artinos-workspace{display:grid;grid-template-columns:var(--left-width,300px) minmax(0,1fr) var(--right-width,340px);grid-template-rows:minmax(0,1fr) var(--bottom-height,0px)}
+.artinos-viewport{position:relative;grid-column:2;grid-row:1;overflow:hidden;min-width:0;min-height:0;background:var(--bg-stage)}
+.artinos-panel{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel-hi),transparent 45%),var(--panel);backdrop-filter:blur(24px) saturate(125%);box-shadow:0 12px 38px rgba(0,0,0,.2);border-radius:var(--radius);overflow:hidden;flex:0 0 auto}.artinos-panel-header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);min-height:36px;border-bottom:1px solid transparent}.artinos-panel-header>button{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);flex:1;padding:10px 12px;border:0;background:transparent;font-size:10px;letter-spacing:.13em;color:var(--text-hi);text-transform:uppercase;text-align:left}.artinos-panel-toolbar{padding-right:8px;display:flex;gap:var(--space-2)}.artinos-panel.is-open>.artinos-panel-header{border-color:var(--line-subtle)}.artinos-panel-body{padding:0 11px 11px;max-height:min(62vh,760px);overflow:auto}
+.artinos-hud{position:absolute;left:14px;top:14px;z-index:20;display:flex;align-items:center;gap:var(--space-4);padding:7px 10px;border:1px solid var(--line);background:var(--frost-tint);backdrop-filter:blur(18px);border-radius:999px;font-size:9px;letter-spacing:.03em;color:var(--text-mid)}.artinos-hud b{color:var(--accent);font-weight:600}.artinos-hud.has-errors{border-color:var(--sig-fault)}.artinos-console{font-family:var(--font-num);font-size:9px;display:flex;flex-direction:column;gap:var(--space-1)}.artinos-console time{color:var(--text-low)}.artinos-console b{font-weight:500;color:var(--text-low)}.artinos-console .log-warn span{color:var(--warn)}.artinos-console .log-error span{color:var(--danger)}
+
+@media(max-width:980px){.artinos-workspace{grid-template-columns:0 minmax(0,1fr) min(330px,42vw)}.artinos-hud{top:auto;bottom:12px;max-width:calc(100vw - 24px);overflow:auto}}
+@media(max-width:680px){.artinos-workspace{display:block}.artinos-viewport{position:absolute;inset:0}.artinos-hud{left:8px;bottom:8px}}
+.artinos-panel{container-type:inline-size}.artinos-panel-header{display:flex;align-items:center;gap:var(--space-2)}.artinos-panel-drag{cursor:grab;flex:1}.artinos-panel-drag:active{cursor:grabbing}.artinos-panel-close{width:28px!important;flex:0 0 28px!important;color:var(--text-low)!important}.artinos-panel-menu{position:absolute;right:0;top:32px;width:260px;max-height:70vh;overflow:auto;padding:10px;border:1px solid var(--line);background:var(--bg-float);backdrop-filter:blur(18px);box-shadow:0 18px 50px rgba(0,0,0,.35);z-index:40;display:grid;gap:var(--space-2)}.artinos-panel-menu>b{padding:4px 6px 8px}.artinos-panel-menu label{display:grid;grid-template-columns:18px 1fr auto;align-items:center;gap:var(--space-3);padding:5px;border-radius:var(--radius-control)}.artinos-panel-menu label:hover{background:var(--bg-hover)}.artinos-panel-menu small{opacity:.5}.artinos-panel-menu button{margin-top:6px}
+.artinos-panel-float,.artinos-panel-float-move{width:28px!important;flex:0 0 28px!important;color:var(--text-low)!important;padding:7px!important}.artinos-panel-float-move{cursor:move!important}.artinos-panel-float{font-size:12px!important}.artinos-panel-float-move:hover,.artinos-panel-float:hover{color:var(--accent)!important}
+.artinos-panel-float{position:static}.artinos-panel.artinos-panel-float{position:absolute;z-index:46;display:flex;flex-direction:column;min-width:260px;min-height:180px;max-width:calc(100% - 12px);max-height:calc(100% - 12px);box-shadow:0 24px 80px rgba(0,0,0,.48)}.artinos-panel.artinos-panel-float .artinos-panel-body{max-height:none;min-height:0;flex:1}.artinos-panel-split-resizer{position:absolute;z-index:8;opacity:0;transition:opacity .12s}.artinos-panel:hover>.artinos-panel-split-resizer{opacity:.5}.artinos-panel-split-resizer.split-left,.artinos-panel-split-resizer.split-right{height:5px;left:8px;right:8px;bottom:-2px;cursor:ns-resize;background:linear-gradient(90deg,transparent,var(--line-strong),transparent)}.artinos-panel-split-resizer.split-bottom{width:5px;top:8px;bottom:8px;right:-2px;cursor:ew-resize;background:linear-gradient(transparent,var(--line-strong),transparent)}.artinos-panel-split-resizer.split-float{width:16px;height:16px;right:0;bottom:0;cursor:nwse-resize;background:linear-gradient(135deg,transparent 45%,var(--line-strong) 46%,var(--line-strong) 54%,transparent 55%)}.artinos-panel-menu label{grid-template-columns:18px 1fr 70px}.artinos-panel-menu select{font-size:9px;border:1px solid var(--line);background:var(--bg-raised);border-radius:var(--radius-control);color:var(--text-mid);padding:3px}
+/* Legacy alias layer - TEMPORARY.
+   Maps the four token vocabularies this file used to declare onto the roles in
+   tokens.css, so existing .artinos-* rules keep working while they migrate.
+   Every name here is scheduled for deletion: when the last rule referencing it
+   is migrated, delete the alias. Do not add to this block. */
+:root{
+  --bg:var(--bg-app);--panel:var(--bg-surface);--panel2:var(--bg-stage);--panel-hi:var(--bg-hover);
+  --muted:var(--text-low);--text:var(--text-hi);--accent:var(--sig-live);--accent2:var(--sig-bind);
+  --danger:var(--sig-fault);--warn:var(--sig-warn);--radius:var(--radius-panel);
+  --gray-1:var(--ink-void);--gray-2:var(--ink-surface);--gray-12:var(--chalk-hi);--teal-9:var(--teal-500);
+  --text-primary:var(--text-hi);--text-secondary:var(--text-mid);--text-muted:var(--text-low);--text-accent:var(--sig-live-hi);
+  --border-subtle:var(--line-subtle);--border-strong:var(--line-strong);--hairline-strong:var(--line-strong);
+  --accent-bg:var(--sig-live);--accent-muted:var(--sig-live-wash);--accent-glow:var(--sig-live-line);
+  --radius-field:var(--radius-control);--radius-float:var(--radius-shell);
+  --well-bg:var(--bg-well);--well-shadow:var(--e0-well);--shadow-float:var(--e3-float);
+  --glow-sm:0 0 8px var(--sig-live-line);--glow-md:0 0 14px var(--sig-live-line);
+  --frost-base:var(--frost-tint);--frost-raised:var(--bg-hover);--frost-recessed:var(--bg-well);--frost-line:var(--line-subtle);
+  --blur-glass:38px;
+}
+.plate-workspace{display:block!important;background:var(--bg-app)}
+.plate-workspace>.artinos-viewport{position:absolute;inset:0;z-index:0;overflow:hidden;background:var(--bg-app)}
+.plate-dock-toolbar{position:relative;display:flex;align-items:center;gap:var(--space-4);height:46px;min-height:46px;padding:0 10px 0 14px;border-bottom:1px solid var(--frost-line);background:var(--frost-raised);z-index:4}
+.plate-search-entry{display:flex;align-items:center;gap:var(--space-3);height:var(--control-h);padding:0 11px;border:0;border-radius:var(--radius-control);background:var(--bg-well);box-shadow:var(--e0-well);color:var(--text-low);font:var(--type-label);text-align:left;transition:background-color var(--dur-state) var(--ease-std),box-shadow var(--dur-state) var(--ease-std)}
+.plate-search-entry:hover{color:var(--text-mid)}
+.plate-search-entry:focus-visible{outline:none;box-shadow:var(--e0-well),var(--focus-ring)}
+.plate-search-entry>span{flex:1;white-space:nowrap}
+.plate-search-entry>kbd{font-family:var(--font-num);font-size:9px;letter-spacing:var(--track-caps);color:var(--text-faint)}
+.plate-brand{display:flex;align-items:center;min-width:max-content;margin-right:auto;color:var(--text-primary)}.plate-brand b{font-size:10px;font-weight:800;letter-spacing:.16em;white-space:nowrap}
+.plate-toolbar-status{display:flex;align-items:center;justify-content:center;min-width:0}.plate-toolbar-status .artinos-hud.is-embedded{position:static;inset:auto;display:flex;align-items:center;gap:var(--space-4);max-width:none;margin:0;padding:3px 5px;border:1px solid var(--line-subtle);border-radius:var(--radius-card);background:var(--bg-well);box-shadow:inset 0 1px 2px rgba(0,0,0,.5);font-family:inherit;font-size:8.5px;letter-spacing:0;white-space:nowrap}.artinos-hud-backend,.artinos-hud-quality{display:flex;align-items:center}.artinos-hud-backend{gap:var(--space-2);padding:3px 6px;border-radius:var(--radius-control);background:var(--accent-muted)}.artinos-hud-backend>i{position:relative;width:5px;height:5px;border-radius:50%;background:var(--text-muted)}.artinos-hud-backend>i.is-live{background:var(--accent-bg);box-shadow:0 0 8px color-mix(in srgb,var(--sig-live) 50%,transparent)}.artinos-hud-backend b{color:var(--text-accent);font-size:8.5px;font-weight:800;letter-spacing:.12em}.artinos-hud-quality{gap:var(--space-2);padding:3px 6px;border:1px solid var(--line-subtle);border-radius:var(--radius-control);background:var(--bg-row)}.artinos-hud-quality small{color:var(--text-low);font-size:8.5px;text-transform:uppercase}.artinos-hud-quality b{color:var(--text-secondary);font-size:8.5px;font-weight:650;letter-spacing:.02em;text-transform:capitalize}
+.plate-workspace .artinos-panel{position:relative;display:flex;flex-direction:column;min-width:280px;min-height:0;max-height:none;margin:0;border:0;border-radius:var(--radius-panel);background:var(--bg-row);box-shadow:var(--e1-surface);overflow:hidden;container-type:inline-size}
+.plate-workspace .artinos-panel-header{height:42px;min-height:42px;border-bottom:1px solid var(--frost-line);background:var(--frost-raised)}
+.plate-workspace .artinos-panel-header>button{height:100%;padding:0 12px;font-size:9px;font-weight:750;letter-spacing:.19em;color:var(--text-hi)}.plate-workspace .artinos-panel-header>button span:last-child{color:var(--text-faint);font-weight:500}
+.plate-workspace .artinos-panel-header>button:hover{background:var(--bg-row)}
+.plate-workspace .artinos-panel-body{flex:1;min-height:0;max-height:none!important;padding:10px 13px 18px;overflow:auto;background:var(--bg-well);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.08) transparent}
+.plate-workspace .artinos-panel-body::-webkit-scrollbar{width:4px;height:4px}.plate-workspace .artinos-panel-body::-webkit-scrollbar-thumb{background:var(--bg-active);border-radius:99px}
+.plate-workspace .artinos-panel-close,.plate-workspace .artinos-panel-float,.plate-workspace .artinos-panel-float-move{height:var(--control-h)!important;width:28px!important;flex:0 0 28px!important;padding:0!important;border-radius:var(--radius-control)!important;color:var(--text-low)!important}.plate-workspace .artinos-panel-close:hover,.plate-workspace .artinos-panel-float:hover,.plate-workspace .artinos-panel-float-move:hover{color:var(--text-accent)!important;background:color-mix(in srgb,var(--sig-live) 8%,transparent)!important}
+.plate-workspace .artinos-panel.artinos-panel-float{position:absolute;z-index:46;display:flex;min-width:280px;min-height:220px;border:1px solid var(--line);border-radius:var(--radius-float);background:linear-gradient(180deg,var(--bg-hover),var(--bg-row)),linear-gradient(var(--frost-base),var(--frost-base));backdrop-filter:blur(34px) saturate(82%) brightness(72%);box-shadow:0 32px 80px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.08)}
+.plate-workspace .artinos-hud{left:auto;right:48px;top:auto;bottom:calc(var(--bottom-height,360px) + 30px);z-index:24;padding:8px 12px;background:var(--frost-tint);border-color:var(--line-subtle);box-shadow:0 12px 36px rgba(0,0,0,.28);font-family:var(--font-num)}.plate-workspace .artinos-hud b{letter-spacing:.14em;text-transform:uppercase}
+.plate-workspace .artinos-panel-menu{top:42px;right:12px;width:300px;background:var(--bg-float);border:1px solid var(--line-subtle);border-radius:var(--radius-panel);backdrop-filter:blur(var(--blur-glass)) saturate(72%);box-shadow:0 28px 80px rgba(0,0,0,.55)}
+.plate-workspace .artinos-panel-menu button,.plate-workspace .artinos-panel-menu select{border:1px solid var(--line);background:var(--bg-hover);color:var(--text-mid);border-radius:var(--radius-control);padding:5px}.plate-workspace input::placeholder{color:var(--text-low)}
+.artinos-panel-suite{min-width:0}
+.artinos-panel-scene .artinos-panel-body{padding-inline:16px}
+.plate-workspace select,.plate-workspace input:not([type=range]):not([type=checkbox]):not([type=color]){height:var(--control-h);min-height:var(--control-h);border-color:var(--line-subtle);background:var(--bg-well);box-shadow:inset 0 1px 2px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.014)}.plate-workspace select,.plate-workspace input:not([type=range]):not([type=checkbox]):not([type=color]){padding-block:0}
+@media(max-width:900px){.plate-dock-toolbar{height:44px;min-height:44px;padding:0 8px;gap:var(--space-3)}.plate-workspace .artinos-hud{right:12px;bottom:calc(min(var(--bottom-height,360px),52vh) + 18px);max-width:calc(100vw - 24px);overflow:auto}}
+@media(max-width:620px){.plate-workspace .artinos-hud{bottom:calc(min(var(--bottom-height,360px),58vh) + 14px)}}
+
+/* Unified adaptive frost + compact tool chrome -------------------------------- */
+
+.plate-dock-toolbar{height:40px;min-height:40px;padding:0 8px 0 12px;gap:var(--space-3);background:color-mix(in srgb,var(--frost-raised) 82%,transparent)}
+.plate-brand{height:var(--control-h);gap:var(--space-3);margin-right:auto}.plate-brand b{font-size:9px;line-height:1;letter-spacing:.19em}.plate-brand span{padding-left:7px;border-left:1px solid var(--frost-line);color:var(--text-muted);font-size:8.5px;font-weight:650;line-height:12px;letter-spacing:.12em}
+.plate-toolbar-cluster{display:flex;align-items:center;gap:var(--space-2);height:var(--control-h);margin-left:auto;padding:1px;border:1px solid var(--frost-line);border-radius:var(--radius-card);background:var(--frost-recessed);box-shadow:inset 0 1px 2px rgba(0,0,0,.18)}
+.plate-toolbar-status{height:var(--control-h)}.plate-toolbar-status .artinos-hud.is-embedded{height:var(--control-h);gap:var(--space-1);padding:2px;border:0;border-radius:var(--radius-card);background:var(--bg-row);box-shadow:none;color:var(--text-secondary);overflow:hidden}
+.plate-toolbar-status .artinos-hud-backend,.plate-toolbar-status .artinos-hud-quality{height:var(--control-h-sm);padding:0 7px;border:0;border-radius:var(--radius-control);background:transparent}
+.plate-toolbar-status .artinos-hud-backend{gap:var(--space-2);border-left:0}.plate-toolbar-status .artinos-hud-quality{gap:var(--space-2)}.plate-toolbar-status .artinos-hud-quality small{font-size:8.5px;color:var(--text-muted)}
+
+.plate-workspace .artinos-panel-header{height:var(--control-h-lg);min-height:var(--control-h-lg);background:color-mix(in srgb,var(--frost-raised) 72%,transparent)}.plate-workspace .artinos-panel-header>button{padding:0 10px;font-size:8.5px;letter-spacing:.17em}.plate-workspace .artinos-panel-close,.plate-workspace .artinos-panel-float,.plate-workspace .artinos-panel-float-move{height:var(--control-h-sm)!important;width:24px!important;flex-basis:24px!important}.plate-workspace .artinos-panel-body{padding:7px 10px 14px;background:transparent}
+.artinos-postfx-commandbar{display:grid;grid-template-columns:auto auto minmax(140px,1fr) 100px auto auto;align-items:center;gap:var(--space-2);min-height:var(--control-h-lg)}
+.artinos-effect{min-width:0;overflow:hidden;border:1px solid var(--frost-line);border-radius:var(--radius-card);background:var(--bg-row);transition:border-color .16s,background-color .16s}.artinos-effect:hover{border-color:color-mix(in srgb,var(--frost-line) 55%,var(--accent-bg))}.artinos-effect.is-enabled{background:linear-gradient(90deg,color-mix(in srgb,var(--accent-bg) 5%,transparent),var(--bg-row))}.artinos-effect.is-expanded{border-color:color-mix(in srgb,var(--accent-bg) 23%,var(--frost-line));background:var(--bg-row)}
+.artinos-effect-status{display:block;margin:0 0 5px;color:var(--text-secondary);font-size:8.5px;line-height:1.45;text-transform:capitalize}
+@container (max-width:760px){.artinos-postfx-commandbar{grid-template-columns:auto auto minmax(120px,1fr) 90px}}
+
+/* Dense, readable PostFX command surface ------------------------------------- */
+.artinos-postfx-commandbar{display:grid;grid-template-columns:auto auto minmax(180px,1fr) minmax(110px,150px) minmax(105px,130px) auto;align-items:center;gap:var(--space-3);width:100%;min-height:var(--control-h-lg)}
+@container (max-width:760px){.artinos-postfx-commandbar{grid-template-columns:auto auto minmax(120px,1fr) minmax(90px,120px) auto}}
+
+/* Interactive performance instrument + fluid dock motion -------------------- */
+.plate-dock-toolbar{container-type:inline-size}
+.plate-toolbar-status .artinos-hud.is-embedded{position:relative;display:block;height:var(--control-h);overflow:visible}
+.artinos-hud-summary{display:flex;align-items:center;gap:var(--space-1);height:var(--control-h);padding:2px;border:0;border-radius:var(--radius-card);background:var(--bg-row);color:var(--text-secondary);overflow:hidden;white-space:nowrap;transition:background-color .2s ease,box-shadow .2s ease}
+.artinos-hud-summary:hover,.artinos-hud.is-open .artinos-hud-summary{background:var(--bg-hover);box-shadow:inset 0 0 0 1px var(--frost-line)}
+.artinos-hud-summary .artinos-hud-backend,.artinos-hud-summary .artinos-hud-quality{flex:0 0 auto}
+.artinos-hud-micrograph{width:54px;height:16px;margin:0 2px;overflow:visible}.artinos-hud-micrograph polyline{fill:none;stroke-width:1;vector-effect:non-scaling-stroke}.artinos-hud-micrograph .is-cpu{stroke:var(--text-mid);filter:drop-shadow(0 0 2px rgba(143,168,186,.32))}
+.artinos-hud-chevron{flex:0 0 auto;margin:0 3px;color:var(--text-muted);transition:transform .28s cubic-bezier(.2,.8,.2,1),color .2s}.artinos-hud.is-open .artinos-hud-chevron{transform:rotate(180deg);color:var(--text-accent)}
+.artinos-effect{transition-duration:.22s;transition-timing-function:cubic-bezier(.2,.8,.2,1)}.plate-workspace .artinos-panel-body{animation:panel-body-in .25s cubic-bezier(.2,.8,.2,1)}@keyframes panel-body-in{from{opacity:.55;transform:translateY(3px)}to{opacity:1;transform:none}}
+@container (max-width:780px){.artinos-hud-micrograph{width:44px}.plate-brand span{display:none}}
+@container (max-width:620px){.artinos-hud-micrograph,.artinos-hud-summary .artinos-hud-quality{display:none}}
+@container (max-width:460px){.artinos-hud-summary .hud-frame{display:none}.plate-toolbar-cluster{gap:var(--space-1)}.plate-toolbar-status .artinos-hud-backend{padding-inline:5px}}
+
+/* Dense runtime workspaces: one clear level of navigation, no decorative dead space. */
+.plate-workspace .artinos-panel-telemetry .artinos-panel-header{height:var(--control-h-sm);min-height:var(--control-h-sm);background:color-mix(in srgb,var(--frost-raised) 48%,transparent)}
+.plate-workspace .artinos-panel-telemetry .artinos-panel-header>button{padding-inline:9px;font-size:8.5px;letter-spacing:.2em}
+.plate-workspace .artinos-panel-telemetry .artinos-panel-header>button span:last-child{font-size:9px}
+.plate-workspace .artinos-panel-telemetry .artinos-panel-close,.plate-workspace .artinos-panel-telemetry .artinos-panel-float,.plate-workspace .artinos-panel-telemetry .artinos-panel-float-move{height:19px!important;width:19px!important;flex-basis:19px!important;font-size:9px!important}
+.plate-workspace .artinos-panel-telemetry .artinos-panel-body{display:flex;min-height:0;padding:5px 8px 8px;overflow:hidden}
+
+/* InputFlow is a first-class workspace panel; Inspector stays focused on project controls. */
+.artinos-inputflow-workspace{display:grid;gap:var(--space-3);min-width:0}
+
+/* Three's real inspector is docked inside Telemetry and inherits the ARTINOS grammar. */
+.three-inspector.artinos-three-inspector-integrated:not(.artinos-three-inspector-embedded){display:none!important}
+.three-inspector.artinos-three-inspector-integrated>.profiler-toggle,.three-inspector.artinos-three-inspector-integrated>.profiler-mini-panel{display:none!important}
+.three-inspector.artinos-three-inspector-embedded{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;--profiler-background:transparent;--profiler-header-background:transparent;--profiler-header:color-mix(in srgb,var(--frost-recessed) 56%,transparent);--profiler-border:var(--frost-line);--text-primary:var(--text-primary);--text-secondary:var(--text-muted);--color-accent:var(--text-accent);--color-green:color-mix(in srgb,var(--text-accent) 72%,var(--text-secondary));--color-yellow:color-mix(in srgb,var(--text-secondary) 84%,var(--text-accent));--color-red:#cc8985;--color-fps:var(--text-accent);--font-family:inherit;--font-mono:var(--font-num)}
+.three-inspector.artinos-three-inspector-embedded>.profiler-toggle,.three-inspector.artinos-three-inspector-embedded>.profiler-mini-panel{display:none!important}.three-inspector.artinos-three-inspector-embedded>.profiler-panel{position:absolute!important;inset:0!important;z-index:1!important;display:flex!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;overflow:hidden!important;transform:none!important;transition:none!important;border:0!important;border-radius:var(--ui-radius-card)!important;background:transparent!important;backdrop-filter:none!important;box-shadow:none!important;color:var(--text-primary)!important;font-family:inherit!important}.three-inspector.artinos-three-inspector-embedded .panel-resizer,.three-inspector.artinos-three-inspector-embedded .profiler-controls{display:none!important}
+.three-inspector.artinos-three-inspector-embedded .profiler-header{position:relative!important;width:100%!important;height:var(--control-h)!important;min-height:var(--control-h)!important;overflow-x:auto!important;margin:0 0 5px!important;border:1px solid var(--ui-hairline)!important;border-radius:var(--ui-radius-control)!important;background:var(--ui-well)!important}.three-inspector.artinos-three-inspector-embedded .profiler-tabs{align-items:center;gap:var(--space-1);width:max-content;min-width:100%;height:100%;margin:0!important;padding:2px!important;cursor:default!important}.three-inspector.artinos-three-inspector-embedded .tab-btn{height:var(--control-h-sm)!important;padding:0 9px!important;border:0!important;border-radius:var(--radius-control)!important;background:transparent!important;color:var(--text-muted)!important;font:650 8.5px/1 inherit!important;letter-spacing:.04em!important;cursor:pointer!important;transition:color .16s ease,background-color .16s ease!important}.three-inspector.artinos-three-inspector-embedded .tab-btn:hover{color:var(--text-secondary)!important;background:var(--bg-hover)!important}.three-inspector.artinos-three-inspector-embedded .tab-btn.active{color:var(--text-accent)!important;background:var(--accent-muted)!important}.three-inspector.artinos-three-inspector-embedded .tab-btn.active:before{display:none!important}
+.three-inspector.artinos-three-inspector-embedded .profiler-content-wrapper{position:relative!important;min-width:0!important;min-height:0!important;overflow:hidden!important;border:1px solid var(--frost-line)!important;border-radius:var(--ui-radius-card)!important;background:transparent!important}.three-inspector.artinos-three-inspector-embedded .profiler-content{padding:5px!important;font:8.5px/1.35 inherit!important;scrollbar-color:color-mix(in srgb,var(--text-muted) 24%,transparent) transparent!important}.three-inspector.artinos-three-inspector-embedded .list-scroll-wrapper{padding:0!important}.three-inspector.artinos-three-inspector-embedded .list-container{color:var(--text-secondary)!important}.three-inspector.artinos-three-inspector-embedded .list-item-row{min-height:var(--control-h-sm)!important;border-radius:var(--ui-radius-control)!important;background:transparent!important}.three-inspector.artinos-three-inspector-embedded .list-item-wrapper:not(.header-wrapper):nth-child(odd)>.list-item-row{background:var(--bg-row)!important}.three-inspector.artinos-three-inspector-embedded .list-item-wrapper.header-wrapper>.list-item-row,.three-inspector.artinos-three-inspector-embedded .list-item-row.collapsible{background:color-mix(in srgb,var(--frost-raised) 74%,transparent)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--frost-line) 65%,transparent)!important}.three-inspector.artinos-three-inspector-embedded .list-item-row.collapsible:hover{background:color-mix(in srgb,var(--accent-muted) 34%,var(--frost-raised))!important}.three-inspector.artinos-three-inspector-embedded .list-item-wrapper.header-wrapper>.list-item-row>.list-item-cell:first-child,.three-inspector.artinos-three-inspector-embedded .list-item-row.collapsible>.list-item-cell:first-child{color:var(--text-secondary)!important;font-weight:650!important}.three-inspector.artinos-three-inspector-embedded .list-item-cell{padding:4px 7px!important;font-size:8.5px!important}.three-inspector.artinos-three-inspector-embedded .list-item-cell .value{color:var(--text-secondary)!important}.three-inspector.artinos-three-inspector-embedded .list-item-cell .value.good{color:var(--text-accent)!important}.three-inspector.artinos-three-inspector-embedded .graph-container{border:1px solid color-mix(in srgb,var(--frost-line) 72%,transparent)!important;border-radius:var(--ui-radius-card)!important;background:color-mix(in srgb,var(--frost-recessed) 38%,transparent)!important;box-shadow:inset 0 1px rgba(255,255,255,.016)!important}.three-inspector.artinos-three-inspector-embedded input,.three-inspector.artinos-three-inspector-embedded select,.three-inspector.artinos-three-inspector-embedded button{border-radius:var(--ui-radius-control)!important}
+
+/* Restrained semantic heat: readable at a glance without traffic-light saturation. */
+.artinos-hud.heat-good{--hud-heat:var(--sig-live);--hud-heat-soft:var(--sig-live-wash)}.artinos-hud.heat-warn{--hud-heat:var(--sig-warn);--hud-heat-soft:var(--sig-warn-wash)}.artinos-hud.heat-bad{--hud-heat:var(--sig-fault);--hud-heat-soft:var(--sig-fault-wash)}
+.artinos-hud-summary{box-shadow:inset 2px 0 var(--hud-heat,transparent)}.artinos-hud-summary:hover,.artinos-hud.is-open .artinos-hud-summary{background:linear-gradient(90deg,var(--hud-heat-soft,transparent),var(--bg-hover))}.artinos-hud-quality{box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)}.artinos-hud-quality.quality-auto b{color:var(--text-mid)}.artinos-hud-quality.quality-low b{color:var(--text-mid)}.artinos-hud-quality.quality-balanced b{color:var(--text-mid)}.artinos-hud-quality.quality-high b{color:var(--text-mid)}.artinos-hud-quality.quality-ultra b{color:var(--text-mid)}
+@container (max-width:430px){.three-inspector.artinos-three-inspector-embedded .tab-btn{padding-inline:7px!important;font-size:8.5px!important}}
+@media(prefers-reduced-motion:reduce){.plate-workspace *, .plate-workspace *:before,.plate-workspace *:after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+/* Final alignment and density pass. */
+.plate-workspace .artinos-panel-inspector .artinos-panel-body{display:flex;min-height:0;overflow:hidden}
+.artinos-inspector-suite{display:flex;flex:1;min-width:0;min-height:0;flex-direction:column}
+.artinos-panel-split-resizer,.artinos-panel:hover>.artinos-panel-split-resizer{opacity:0!important;background:transparent!important}
+.plate-toolbar-status{align-self:center;height:var(--control-h)}.plate-toolbar-status .artinos-hud.is-embedded{display:flex;align-items:center;height:var(--control-h);padding:1px}.artinos-hud-summary{height:var(--control-h);padding:1px;box-shadow:none;transition:background-color .18s ease}.artinos-hud-summary:hover,.artinos-hud.is-open .artinos-hud-summary{background:var(--bg-hover);box-shadow:none}
+.artinos-hud-micrograph .is-cpu{stroke:var(--text-secondary);opacity:.58;filter:none}
+.artinos-hud.heat-good{--hud-heat:var(--sig-live)}.artinos-hud.heat-warn{--hud-heat:var(--sig-warn)}.artinos-hud.heat-bad{--hud-heat:var(--sig-fault)}.artinos-hud .hud-fps strong{color:var(--hud-heat,var(--text-primary));font-size:10px;font-weight:820;letter-spacing:-.03em}.artinos-hud .hud-fps small{color:var(--text-muted)}.artinos-hud-quality b{color:var(--text-accent)}.artinos-hud-quality.quality-low b{opacity:.64}.artinos-hud-quality.quality-balanced b{opacity:.76}.artinos-hud-quality.quality-high b{opacity:.88}.artinos-hud-quality.quality-ultra b{opacity:1}
+.plate-toolbar-status .artinos-hud.is-embedded,.plate-toolbar-status .artinos-hud.is-embedded .artinos-hud-summary,.plate-toolbar-status .artinos-hud.is-embedded .artinos-hud-summary:hover,.plate-toolbar-status .artinos-hud.is-embedded.is-open .artinos-hud-summary{border-color:transparent;background:transparent;box-shadow:none}
+.plate-toolbar-cluster{border-color:transparent;background:transparent;box-shadow:none}.plate-toolbar-status .artinos-hud-backend,.plate-toolbar-status .artinos-hud-quality{border-color:transparent;background:transparent;box-shadow:none}
+
+/* Performance expansion is a dock-width instrument bar, not a floating card. */
+.plate-toolbar-status .artinos-hud-summary,.plate-toolbar-status .artinos-hud-summary:hover,.plate-toolbar-status .artinos-hud.is-open .artinos-hud-summary,.plate-toolbar-status .artinos-hud-summary>*{border-color:transparent;background-color:transparent;background-image:none;box-shadow:none}
+.plate-toolbar-status .artinos-hud-summary,.plate-toolbar-status .artinos-hud-summary:hover,.plate-toolbar-status .artinos-hud.is-open .artinos-hud-summary{background:transparent;backdrop-filter:none;filter:none}.plate-toolbar-status .artinos-hud-summary:before,.plate-toolbar-status .artinos-hud-summary:after{display:none}
+
+/* One visual grammar for every dock surface and instrument. */
+.plate-workspace{--ui-radius-shell:var(--radius-shell);--ui-radius-panel:var(--radius-panel);--ui-radius-card:var(--radius-panel);--ui-control-height:var(--control-h);--ui-hairline:var(--line-subtle);--ui-chrome:var(--bg-hover);--ui-card:transparent;--ui-well:var(--bg-well);--ui-label-spacing:var(--track-caps)}
+.plate-dock-toolbar{border-radius:var(--ui-radius-shell) var(--ui-radius-shell) 0 0;background:var(--ui-chrome)}
+.plate-workspace .artinos-panel-header{background:var(--ui-chrome)}
+.plate-workspace .artinos-effect{border-color:var(--ui-hairline);border-radius:var(--ui-radius-card);background-color:var(--ui-card)}
+.plate-workspace button,.plate-workspace input,.plate-workspace select,.plate-workspace textarea{border-radius:var(--ui-radius-control)}
+.plate-workspace input,.plate-workspace select{min-height:var(--ui-control-height)}
+.plate-workspace .artinos-panel-header>button{letter-spacing:var(--ui-label-spacing)}
+.plate-workspace .artinos-panel-header,.plate-dock-toolbar,.plate-workspace .artinos-effect{transition:border-color .18s ease,color .18s ease,background-color .18s ease,box-shadow .22s ease,opacity .18s ease}
+/* The editor owns the whole panel body; everything else floats over the canvas. */
+.artinos-graph-studio{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;container-type:inline-size}
+.artinos-graph-studio.is-empty{padding:6px 8px;overflow:auto}
+
+.artinos-graph-stage{position:relative;flex:1;min-height:0;min-width:0;display:flex}
+.artinos-gcanvas{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;
+  background:var(--bg-stage) radial-gradient(circle at 1px 1px,var(--bg-active) 1px,transparent 1.4px);background-size:14px 14px;
+  touch-action:none;cursor:default;outline:none}
+.artinos-gcanvas:focus-visible{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sig-live) 40%,transparent)}
+.artinos-gcanvas.is-linking{cursor:crosshair}
+.artinos-gviewport{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.artinos-gempty{position:absolute;inset:0;display:grid;place-content:center;margin:0;font-size:10px;color:var(--muted);pointer-events:none}
+
+/* Floating overlays */
+.artinos-graph-overlay{position:absolute;top:8px;right:8px;bottom:8px;width:min(272px,42%);z-index:6;display:flex;flex-direction:column;
+  border:1px solid var(--line-strong);border-radius:var(--radius-panel);background:var(--bg-float);backdrop-filter:blur(18px);box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.artinos-graph-overlay>header{display:flex;align-items:center;justify-content:space-between;padding:6px 9px;border-bottom:1px solid var(--line)}
+.artinos-graph-overlay>header b{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.artinos-graph-overlay>header button{width:18px;height:18px;border:0;border-radius:var(--radius-control);background:none;color:var(--muted);font-size:12px;line-height:1}
+.artinos-graph-overlay>header button:hover{background:var(--panel-hi);color:var(--text)}
+.artinos-graph-overlay-body{flex:1;min-height:0;overflow:auto;padding:7px 9px 11px;display:flex;flex-direction:column;gap:var(--space-3);scrollbar-width:thin}
+@container (max-width:520px){.artinos-graph-overlay{width:auto;left:8px}}
+
+.artinos-graph-issues{position:absolute;left:8px;bottom:8px;z-index:5;max-width:min(330px,52%)}
+.artinos-graph-issues details{border:1px solid var(--line-strong);border-radius:var(--radius-card);background:var(--bg-float);backdrop-filter:blur(14px);overflow:hidden}
+.artinos-graph-issues summary{list-style:none;cursor:pointer;padding:5px 8px;display:flex;align-items:center;gap:var(--space-3)}
+.artinos-graph-issues summary::-webkit-details-marker{display:none}
+.artinos-graph-issues details[open]{max-height:210px;overflow:auto}
+.artinos-graph-hint{position:absolute;left:10px;top:8px;margin:0;font-size:9px;color:var(--text-low);pointer-events:none;max-width:46%}
+.artinos-gnotice{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:7;padding:5px 11px;border-radius:var(--radius-card);
+  border:1px solid color-mix(in srgb,var(--sig-live) 40%,transparent);background:var(--bg-float);color:var(--accent);font-size:10px;animation:artinos-gfade .18s ease}
+@keyframes artinos-gfade{from{opacity:0;transform:translate(-50%,4px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* Wires */
+.artinos-gwires{position:absolute;overflow:visible;pointer-events:none}
+.artinos-gwire path.line{fill:none;stroke:var(--sig-live);stroke-width:1.6;pointer-events:none}
+.artinos-gwire path.hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
+.artinos-gwire.is-active path.line{stroke:var(--accent);stroke-width:2.2}
+
+/* Inline controls on the node body */
+.artinos-gfield{padding:0 8px;flex:none;min-width:0}
+
+/* Zoom + palette */
+.artinos-gzoom{position:absolute;right:8px;bottom:8px;z-index:4;display:flex;align-items:center;gap:var(--space-1);padding:3px;
+  border:1px solid var(--line);border-radius:var(--radius-card);background:var(--bg-float);backdrop-filter:blur(9px)}
+.artinos-graph-overlay~.artinos-gzoom{right:calc(min(272px,42%) + 16px)}
+.artinos-gzoom button{width:20px;height:20px;border:0;border-radius:var(--radius-control);background:none;color:var(--muted);font-size:11px;line-height:1}
+.artinos-gzoom button:last-child{width:auto;padding:0 7px;font-size:8.5px;letter-spacing:.06em}
+.artinos-gzoom button:hover{background:var(--panel-hi);color:var(--text)}
+.artinos-gzoom output{font:8.5px var(--font-num);color:var(--muted);min-width:30px;text-align:center}
+
+/* Diagnostics + inspector rows */
+.artinos-gdiagnostic{display:flex;align-items:center;gap:var(--space-3);width:100%;padding:4px 6px;border:0;border-radius:var(--radius-control);
+  background:var(--panel-hi);text-align:left;color:var(--text);font-size:9px}
+.artinos-gdiagnostic:hover{background:var(--bg-active)}
+.artinos-gdiagnostic span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The node editor is the panel: no padding, no panel-level scrolling. */
+.artinos-panel-graph .artinos-panel-body{padding:0!important;overflow:hidden!important;display:flex;min-height:0;max-height:none!important}
+.artinos-panel-graph.artinos-panel-float{min-width:420px;min-height:320px}
+.artinos-graph-studio.is-maximized{flex:1;min-width:0}
+.artinos-graph-studio.is-maximized .artinos-gcanvas{background-size:16px 16px}
+
+/* ── Live system graph ───────────────────────────────────────────────────── */
+.artinos-lcanvas{cursor:grab}
+.artinos-lcanvas:active{cursor:grabbing}
+.artinos-lcolumns{position:absolute;left:0;top:-34px;pointer-events:none}
+.artinos-lcolumns span{position:absolute;top:0;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-low);text-align:center}
+.artinos-lwire{fill:none;stroke:var(--sig-live);stroke-width:1.5;transition:stroke .15s,opacity .15s}
+.artinos-lwire.is-dim{stroke:var(--text-low)}
+.artinos-lnode{position:absolute;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:0 10px;
+  border:1px solid var(--line);border-radius:var(--radius-card);background:var(--bg-float);cursor:pointer;
+  transition:border-color .15s,opacity .15s,transform .12s;overflow:hidden}
+.artinos-lnode:hover{border-color:var(--accent);transform:translateY(-1px)}
+.artinos-lnode.is-selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.artinos-lnode.is-dim{opacity:.28}
+.artinos-lnode.is-muted{opacity:.45;border-style:dashed}
+.artinos-lnode-main{min-width:0;display:flex;flex-direction:column;gap:var(--space-1)}
+.artinos-lnode-main b{font-size:10px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.artinos-lnode-main small{font-size:8.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.artinos-lnode-side{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-1)}
+.artinos-lnode-side em{font-style:normal;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-low)}
+.artinos-lnode-side output{font:10px var(--font-num);color:var(--accent)}
+.artinos-lnode::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.artinos-lnode.kind-signal::before{background:#91b9eb}
+.artinos-lnode.kind-binding::before,.artinos-lnode.kind-graph::before{background:var(--sig-live)}
+.artinos-lnode.kind-parameter::before{background:#e8bf67}
+.artinos-lnode.kind-object::before{background:#c896eb}
+.artinos-lnode.kind-pass::before,.artinos-lnode.kind-effect::before{background:#78c8ff}
+.artinos-lnode.kind-output::before{background:#ff7381}
+.artinos-lnode{flex-direction:column;align-items:stretch;justify-content:flex-start;padding:0;gap:0}
+.artinos-lnode-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:0 10px;height:46px;flex:none}
+.artinos-lnode-preview{flex:1;min-height:0;margin:0 8px 8px;border:1px solid var(--line);border-radius:var(--radius-control);overflow:hidden;background:var(--bg-app);display:flex}
+
+/* Live nodes are real nodes: header, inline controls, preview, port dots. */
+.artinos-lnode{flex-direction:column;align-items:stretch;justify-content:flex-start;padding:0;gap:0;cursor:default}
+.artinos-lnode-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);width:100%;height:42px;padding:0 10px;flex:none;
+  border:0;background:none;color:inherit;text-align:left;cursor:pointer}
+.artinos-lnode-head:hover{background:var(--bg-hover)}
+.artinos-lnode-main{display:flex;flex-direction:column;gap:var(--space-1);min-width:0}
+.artinos-lnode-side{display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-1);flex:none}
+.artinos-lnode-control{padding:0 9px;flex:none}
+.artinos-lport{position:absolute;top:20px;width:9px;height:9px;border-radius:50%;border:1px solid var(--line-strong);background:var(--bg-surface)}
+.artinos-lport.side-in{left:-5px}
+.artinos-lport.side-out{right:-5px;background:var(--sig-live);border-color:var(--sig-live-line)}
+}
+
+/* MetaBlock shell (see shell/MetaBlockShell.tsx).
+   MetaBlock sizes every group from its root's measured box, so the root needs a real one —
+   .mb-workspace-root is height:100% and would otherwise collapse to zero inside normal flow. */
+.artinos-metablock-shell{position:absolute;inset:0;background:var(--bg-app);isolation:isolate}
+.artinos-metablock-shell>.mb-workspace-root{position:absolute;inset:0}
+/* The viewport block is a locked backdrop, so its host must fill the group rather than scroll. */
+.artinos-metablock-shell .mb-group[data-role="viewport"]>.mb-group-body,
+.artinos-metablock-shell .mb-group[data-role="viewport"] .mb-panel-host{position:absolute;inset:0;padding:0;overflow:hidden}
+.artinos-metablock-shell .mb-group[data-role="viewport"] .artinos-viewport{position:absolute;inset:0}
+/* The chip is identity over the scene, matching the classic shell's placement. */
+.artinos-metablock-shell>.plate-brand-chip{position:absolute;left:20px;top:16px;z-index:800}
+/* metablock ships `.mb-context-menu{max-height:min(430px,100% - 16px)}`, but its host is an
+   absolutely-positioned 0-height anchor, so the percentage resolves against nothing and collapses
+   the menu to ~12px — every item is present but clipped to invisibility. Size it against the
+   viewport instead so the full panel menu (detach/snap/dock/attach/pin/popout/maximize) shows. */
+.artinos-metablock-shell .mb-context-menu{max-height:min(430px,calc(100vh - 32px))}
+
+/* MetaBlock groups wear the app's glass-panel skin so the docking core is invisible: the dock
+   and any torn-off panel read as the same card the static shell drew (.glass-panel + .plate-dock). */
+.artinos-metablock-shell .mb-group[data-role="dock"],
+.artinos-metablock-shell .mb-group[data-posture="floating"],
+.artinos-metablock-shell .mb-group[data-posture="pinned"],
+.artinos-metablock-shell .mb-group[data-posture="auto-hide"]{
+  background:linear-gradient(180deg,var(--bg-hover),var(--bg-row)),linear-gradient(var(--frost-base),var(--frost-base));
+  backdrop-filter:blur(34px) saturate(82%) brightness(72%);
+  -webkit-backdrop-filter:blur(34px) saturate(82%) brightness(72%);
+  border:1px solid var(--line);
+  border-radius:var(--radius-float);
+  box-shadow:var(--shadow-float);
+}
+/* The chrome is the original toolbar, so give it the original seat at the top of the card. */
+.artinos-metablock-shell .mb-group-chrome{padding:0;background:transparent;border:0}
+.artinos-metablock-shell .mb-group-chrome>.plate-dock-toolbar{border-radius:var(--radius-float) var(--radius-float) 0 0}
+.artinos-metablock-shell .mb-group-body{min-height:0}
+
+/* Panel context menu in the app's language: glass card, caps section labels, quiet rows. */
+.artinos-metablock-shell .mb-context-menu{
+  background:linear-gradient(180deg,var(--bg-hover),var(--bg-row)),linear-gradient(var(--frost-base),var(--frost-base));
+  backdrop-filter:blur(34px) saturate(82%) brightness(72%);
+  -webkit-backdrop-filter:blur(34px) saturate(82%) brightness(72%);
+  border:1px solid var(--line);border-radius:var(--radius-panel);box-shadow:var(--shadow-float);
+  padding:6px;min-width:236px;
+}
+.artinos-metablock-shell .mb-context-head{padding:6px 8px 8px;border-bottom:1px solid var(--line-subtle);margin-bottom:4px}
+.artinos-metablock-shell .mb-context-head b{font-size:12px;letter-spacing:.02em}
+.artinos-metablock-shell .mb-context-head span{font-size:9px;letter-spacing:var(--track-caps);opacity:.55;text-transform:uppercase}
+.artinos-metablock-shell .mb-context-label{
+  font-size:9px;letter-spacing:var(--track-caps);text-transform:uppercase;opacity:.45;padding:8px 8px 4px;
+}
+.artinos-metablock-shell .mb-context-menu button[role="menuitem"]{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+  padding:6px 8px;border:0;border-radius:var(--radius-control);background:transparent;
+  color:var(--text);font-size:11px;text-align:left;cursor:pointer;
+}
+.artinos-metablock-shell .mb-context-menu button[role="menuitem"]:hover:not(:disabled){background:var(--bg-hover)}
+.artinos-metablock-shell .mb-context-menu button[role="menuitem"]:disabled{opacity:.35;cursor:default}
+.artinos-metablock-shell .mb-context-menu button[role="menuitem"].primary{color:var(--accent, #8de0d2)}
+.artinos-metablock-shell .mb-context-menu button[role="menuitem"] span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.artinos-metablock-shell .mb-context-menu button[role="menuitem"] small{font-size:9px;opacity:.5;letter-spacing:.01em}
+.artinos-metablock-shell .mb-context-menu kbd{font-size:9px;opacity:.5;padding:1px 4px;border:1px solid var(--line-subtle);border-radius:3px}
+
+/* Panel content inside a MetaBlock group.
+   metablock already gives .mb-block-scroll a bounded, scrollable box; the panel only needs to
+   fill it rather than grow to content height. Everything below (.artinos-panel-body and the
+   per-panel rules like .artinos-panel-inspector) is the original shell's CSS, untouched. */
+.artinos-metablock-shell .mb-block-scroll>.artinos-panel{height:100%;min-height:0;flex:1 1 auto}
+
+/* Detached panel chrome: its tab stays attached to the window, so a torn-off panel reads as the
+   same object that was in the dock rather than an anonymous floating card. No HUD here — the
+   dock owns the single RuntimeHUD. */
+.artinos-metablock-shell .artinos-metablock-panel-header{
+  display:flex;align-items:center;gap:var(--space-2);
+  min-height:var(--control-h-lg);padding:0 4px 0 6px;
+  border-bottom:1px solid var(--line-subtle);
+  background:color-mix(in srgb,var(--frost-raised) 72%,transparent);
+  border-radius:var(--radius-float) var(--radius-float) 0 0;
+  cursor:grab;
+}
+.artinos-metablock-shell .artinos-metablock-panel-header:active{cursor:grabbing}
+.artinos-metablock-shell .artinos-metablock-panel-tabs{flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.artinos-metablock-shell .artinos-metablock-panel-tabs::-webkit-scrollbar{display:none}
+.artinos-metablock-shell .artinos-metablock-panel-header .artinos-panel-toolbar{padding-right:2px;flex:0 0 auto}
+.artinos-metablock-shell .artinos-metablock-panel-header .artinos-panel-toolbar button{
+  display:flex;align-items:center;justify-content:center;
+  height:var(--control-h-sm);width:24px;border:0;border-radius:var(--radius-control);
+  background:transparent;color:var(--text-secondary);cursor:pointer;
+}
+.artinos-metablock-shell .artinos-metablock-panel-header .artinos-panel-toolbar button:hover{background:var(--bg-hover);color:var(--text-hi)}
+
+/* The viewport must never depend on MetaBlock's measured size.
+   MetaBlockWorkspaceView starts at size {1,1} and sizes groups from React state, so on first
+   paint the viewport group is ~1px. R3F mounts the canvas at the HTML default 300x150 and the
+   WebGPU renderer builds a 300x150 depth buffer that never resizes, throwing a GPUValidationError
+   every frame ("depthBuffer size (300,150) does not match ... (3174,1604)"): black scene, one
+   error per frame, saturated main thread, frozen renderer. It is lockedFullscreen anyway, so pin
+   it to the shell and let the canvas initialise at the true size. */
+.artinos-metablock-shell .mb-group[data-role="viewport"]{
+  left:0!important;top:0!important;width:100%!important;height:100%!important;
+}
+
+/* ---- Responsive dock chrome & panel toolbars -------------------------------------------------
+   The chrome stays ONE row at every width, exactly like the original. When the tabs no longer fit
+   they scroll inside their own track rather than wrapping the row or pushing search/HUD away
+   (measured: 11 tabs need 808px). Only the panel toolbar below is allowed to wrap, because it
+   otherwise clipped its trailing actions (CAPTURE -> CA at a 900px window). */
+.artinos-metablock-shell .plate-dock-toolbar{flex-wrap:nowrap;min-width:0}
+.artinos-metablock-shell .plate-dock-tabs{flex:1 1 0%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.artinos-metablock-shell .plate-dock-tabs::-webkit-scrollbar{display:none}
+.artinos-metablock-shell .plate-dock-tabs>button{flex:0 0 auto}
+/* Search and HUD give up width before the tabs do, and never shrink below usefulness. */
+.artinos-metablock-shell .plate-search-entry{flex:0 1 auto;min-width:92px}
+.artinos-metablock-shell .plate-toolbar-cluster{flex:0 1 auto;min-width:0}
+
+/* HUD progressive disclosure.
+   Embedded in the dock strip the HUD costs ~375px (backend 50, fps 35, CPU/GPU 94, sparkline 48,
+   quality 62, chevron 11) which starved the tab strip down to a single visible tab at 767px.
+   It now sheds least-important detail first as the dock narrows, so it stays informative and the
+   tabs keep their room. Everything dropped here remains available in the Telemetry panel and by
+   expanding the HUD itself. Queries resolve against .plate-dock-toolbar (container-type set). */
+@container (max-width:1180px){
+  .artinos-metablock-shell .artinos-hud-summary>svg:not(:last-of-type){display:none}
+}
+@container (max-width:1040px){
+  .artinos-metablock-shell .artinos-hud-quality{display:none}
+}
+@container (max-width:560px){
+  .artinos-metablock-shell .artinos-hud-backend{display:none}
+}
+
+/* Console is Toolbar + virtualised log. The virtual list needs a real viewport height, so the
+   panel body must be a column flex box that lets the log fill what the toolbar leaves. */
+.artinos-metablock-shell .artinos-panel-console .artinos-panel-body{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.artinos-metablock-shell .artinos-console{flex:1;min-height:0;display:flex;flex-direction:column}
+
+/* ---- Workspace backdrop -----------------------------------------------------------------------
+   The reference art sits behind a transparent canvas, so the 3D scene composites over real colour
+   instead of flat black. No scrim over it: the panels carry their own glass fill, so the image
+   stays at full brightness. */
+.artinos-metablock-shell{background:var(--bg-app)}
+/* Two layers so the art is never cropped AND never letterboxed: a blurred, over-scaled `cover`
+   copy paints what `contain` leaves empty, the crisp `contain` copy sits on top at full fidelity. */
+.artinos-metablock-shell::before,
+.artinos-metablock-shell::after{content:'';position:absolute;inset:0;pointer-events:none}
+.artinos-metablock-shell::before{
+  z-index:-2;
+  /* Same framing as the crisp layer, just blown up and blurred: the pixels either side of the
+     letterbox edge come from the same place in the picture, so the seam reads as depth of field
+     rather than as a cut. */
+  background:url('/backgrounds/persian-garden.png') center/contain no-repeat;
+  filter:blur(60px) saturate(112%);
+  transform:scale(1.75);
+}
+.artinos-metablock-shell::after{
+  z-index:-1;
+  background:url('/backgrounds/persian-garden.png') center/contain no-repeat;
+}
+
+
+/* ---- Glass, not grey --------------------------------------------------------------------------
+   The dock and panels were painted with opaque grey fills (--bg-row / --bg-well / metablock's own
+   rgba(18,21,22,.58)), which flattened the backdrop into sludge. They are now true glass: colour
+   passes through, blur and saturation carry the tint, and only text keeps full contrast. */
+.artinos-metablock-shell .mb-group[data-role="dock"],
+.artinos-metablock-shell .mb-group[data-posture="floating"],
+.artinos-metablock-shell .mb-group[data-posture="pinned"],
+.artinos-metablock-shell .mb-group[data-posture="auto-hide"]{
+  /* Darkened enough for text contrast over a bright backdrop, while saturation keeps the colour
+     coming through — the legibility scrim belongs on the panel, not over the artwork. */
+  background:linear-gradient(180deg,rgba(10,12,12,.62),rgba(10,12,12,.72));
+  backdrop-filter:blur(26px) saturate(160%) brightness(.5);
+  -webkit-backdrop-filter:blur(26px) saturate(160%) brightness(.5);
+  border:1px solid rgba(255,255,255,.11);
+  box-shadow:inset 0 1px rgba(255,255,255,.09),0 26px 70px -34px rgba(0,0,0,.85);
+}
+/* Panel surfaces inside the card stay transparent so one sheet of glass reads, not stacked greys. */
+.artinos-metablock-shell .artinos-panel,
+.artinos-metablock-shell .artinos-panel-body,
+.artinos-metablock-shell .plate-dock-toolbar,
+.artinos-metablock-shell .mb-group-chrome,
+.artinos-metablock-shell .mb-group-footer{background:transparent}
+/* Wells and rows get a faint dark tint only — enough to group controls, not enough to go grey. */
+.artinos-metablock-shell .artinos-panel-header{background:rgba(255,255,255,.06)}
+
+/* The viewport wrapper paints --bg-app opaque (theme.css: .plate-workspace>.artinos-viewport).
+   In the MetaBlock shell the canvas is transparent and the workspace art sits behind it, so that
+   fill would hide the backdrop entirely. Everything behind the canvas must stay see-through. */
+.artinos-metablock-shell .artinos-viewport{background:transparent}
+.artinos-metablock-shell .mb-group[data-role="viewport"],
+.artinos-metablock-shell .mb-group[data-role="viewport"] .mb-block-scroll,
+.artinos-metablock-shell .mb-group[data-role="viewport"] .mb-panel-host{background:transparent}
+}
+
+@layer artinos.instrument {
+/* ── AS.01  PANEL CARD ─────────────────────────────────────────────────────
+   Inset card. Hairline inside, never between two of them (rule 04).
+
+   The header runs on --control-h (28px), not --panel-header-h (36px): at 36
+   it read as dead weight over a name and a collapse glyph. 28 is still one
+   of the three token heights (rule 06), just the smaller of them. */
+
+.plate-workspace .artinos-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--control-h);
+  min-height: var(--control-h);
+  padding: 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--line-subtle);
+  background: transparent;
+}
+.plate-workspace .artinos-panel-header > button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: var(--type-panel);
+  letter-spacing: var(--track-panel);
+  text-transform: uppercase;
+  color: var(--text-hi);
+  text-align: left;
+}
+.plate-workspace .artinos-panel-header > button:hover { background: transparent; color: var(--text-hi); }
+/* the count rides the name, quieter */
+.plate-workspace .artinos-panel-header > button span:last-child {
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+}
+
+.plate-workspace .artinos-panel-body {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-5) var(--space-5) 13px;
+  background: transparent;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+/* ── PL.05  FIELDS ────────────────────────────────────────────────────────
+   Recessed means editable (rule 02). */
+.plate-workspace input::placeholder { color: var(--text-low); }
+
+/* ── PL.08  MENU · TOOLTIP · TOAST ────────────────────────────────────────
+   Floating layer: strong edge, tightest shadow. */
+
+.plate-workspace .artinos-panel-menu {
+  padding: 5px;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--bg-float);
+  box-shadow: var(--e3-float);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+}
+.plate-workspace .artinos-panel-menu button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  height: 27px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  font: var(--type-label);
+  font-size: 11.5px;
+  color: var(--text-mid);
+  text-align: left;
+}
+.plate-workspace .artinos-panel-menu button:hover { background: var(--bg-hover); color: var(--text-hi); }
+
+/* SH.01 — the dock is one frosted card, inset from the shell edges. */
+
+.plate-workspace .plate-dock-toolbar {
+  height: var(--tab-strip-h);
+  min-height: var(--tab-strip-h);
+  /* Matches .plate-dock-content's inset. At 13px the strip sat 7px inboard of
+     the panel column beneath it, so the tab strip and the first panel edge
+     disagreed about where the dock starts. */
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--line-subtle);
+  background: transparent;
+}
+/* AS.01 — a docked panel is a group card, not a window: drag-to-move and
+   float chrome belong to a floating panel, where there is actually a window
+   to reposition. Close stays — hiding a panel is not a windowing action,
+   it's how you get the space back, and that's needed docked or not. */
+.plate-workspace .artinos-panel.artinos-panel-float .artinos-panel-close,
+.plate-workspace .artinos-panel.artinos-panel-float .artinos-panel-float,
+.plate-workspace .artinos-panel.artinos-panel-float .artinos-panel-float-move {
+  display: grid !important;
+}
+
+/* ── MONITOR BAR ──────────────────────────────────────────────────────────
+   The strip's status cluster: backend, fps, load, micrograph, quality. The
+   frame-time readout is dropped — fps already says the same thing, and the
+   reference's cluster carries backend · fps · sparkline · load, not a
+   millisecond figure. */
+
+.plate-workspace .plate-toolbar-status .artinos-hud {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-summary {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  height: 27px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--bg-row);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-backend {
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--sig-live-hi);
+}
+
+/* Brand chip — the mark and the name. Nothing after it: the tab strip already
+   says which panel is showing (reference SH.01). */
+.plate-workspace .plate-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.plate-workspace .plate-brand b {
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  color: var(--text-hi);
+}
+
+/* ── CONSOLE TOAST ────────────────────────────────────────────────────────
+   The console has something to say only when something happens, so it floats
+   bottom-right beneath the dock and fades out when activity stops. */
+
+.plate-workspace .plate-console-toast {
+  position: absolute;
+  right: var(--space-8);
+  bottom: calc(var(--bottom-height, 276px) + var(--space-7));
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 420px;
+  padding: 9px 11px;
+  border-radius: 3px;
+  background: var(--bg-float);
+  box-shadow: var(--e3-float);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+  font: var(--type-label);
+  color: var(--text-mid);
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity var(--dur-surface) var(--ease-enter), transform var(--dur-surface) var(--ease-enter);
+}
+.plate-workspace .plate-console-toast[data-visible] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.plate-workspace .plate-console-toast > i {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--sig-live);
+}
+.plate-workspace .plate-console-toast[data-level='warn'] > i { background: var(--sig-warn); }
+.plate-workspace .plate-console-toast[data-level='error'] > i { background: var(--sig-fault); }
+.plate-workspace .plate-console-toast-message {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plate-workspace .plate-console-toast-open {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 3px;
+  padding: 2px 6px;
+  background: transparent;
+  font-family: var(--font-num);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+.plate-workspace .plate-console-toast-open:hover { background: var(--bg-hover); color: var(--text-hi); }
+.plate-workspace .plate-console-toast-open:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ── SH.01  TAB STRIP ─────────────────────────────────────────────────────
+   Flush text on a shared hairline (reference PL.02 `tabsA`), not pills. Every
+   open panel is bright with an underline; the rest sit dim on the same line.
+   No background, no per-tab border — a filled pill per open panel is what
+   made three simultaneously-open tabs read as noise. */
+
+.plate-workspace .plate-dock-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-7);
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.plate-workspace .plate-dock-tabs::-webkit-scrollbar { display: none; }
+
+.plate-workspace .plate-dock-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .plate-dock-tabs button:hover { color: var(--text-mid); }
+.plate-workspace .plate-dock-tabs button.is-active {
+  color: var(--text-hi);
+  font-weight: 500;
+}
+.plate-workspace .plate-dock-tabs button em {
+  font-style: normal;
+  font-weight: 300;
+  color: var(--text-faint);
+}
+.plate-workspace .plate-dock-tabs button.is-active em { color: var(--text-low); }
+.plate-workspace .plate-dock-tabs button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* strip regions: tabs yield first, search shrinks to a floor, the cluster holds */
+.plate-workspace .plate-dock-toolbar { gap: var(--space-5); min-width: 0; }
+.plate-workspace .plate-search-entry { flex: 1 1 180px; min-width: 108px; max-width: 272px; }
+.plate-workspace .plate-toolbar-cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* ── SH.01  BRAND CHIP ────────────────────────────────────────────────────
+   Floats over the canvas, top-left. Not part of the dock: the strip is for
+   panel selection, search and controls. */
+
+.plate-workspace .plate-brand-chip {
+  position: absolute;
+  left: var(--space-8);
+  top: 22px;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  height: var(--control-h-lg);
+  padding: 0 13px;
+  border-radius: var(--radius-card);
+  background: var(--frost-sheen), var(--frost-tint);
+  backdrop-filter: var(--blur-float);
+  -webkit-backdrop-filter: var(--blur-float);
+  box-shadow: inset 0 0 0 1px var(--line), inset 0 1px 0 var(--line-subtle);
+  pointer-events: none;
+}
+.plate-workspace .plate-brand-chip b {
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  color: var(--text-hi);
+}
+.plate-workspace .plate-brand-chip > i {
+  width: 1px;
+  height: 11px;
+  background: var(--line);
+}
+.plate-workspace .plate-brand-chip .plate-brand-context {
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+
+/* ── THREE INSPECTOR ──────────────────────────────────────────────────────
+   Sanctioned third-party UI (AGENTS.md rule 2). We do not restyle its markup;
+   we feed it our roles through the variables it already exposes, and we pin it
+   inside its panel so its `position-bottom` mode cannot span the shell. */
+
+.plate-workspace .three-inspector {
+  --font-family: var(--font-ui);
+  --font-mono: var(--font-num);
+
+  --profiler-background: transparent;
+  --profiler-header-background: transparent;
+  --profiler-header: var(--text-hi);
+  --profiler-border: var(--line-subtle);
+
+  --color-accent: var(--sig-live);
+  --color-green: var(--sig-live);
+  --color-yellow: var(--sig-warn);
+  --color-red: var(--sig-fault);
+  --color-fps: var(--sig-live-hi);
+}
+
+/* its panels are absolutely positioned; keep them in the card that hosts them */
+.plate-workspace .artinos-panel .three-inspector,
+.plate-workspace .artinos-panel .profiler-panel {
+  position: absolute;
+  inset: 0;
+  max-width: 100%;
+  overflow: auto;
+}
+/* the floating toggle and mini-panel are ours to suppress — the panel *is* the surface */
+.plate-workspace .profiler-toggle,
+.plate-workspace .profiler-mini-panel {
+  display: none !important;
+}
+
+.plate-workspace .three-inspector .tab-btn {
+  border-radius: 3px;
+  font-family: var(--font-num);
+  font-size: 9px;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.plate-workspace .three-inspector .tab-btn.active,
+.plate-workspace .three-inspector .tab-btn[aria-selected='true'] {
+  background: var(--bg-active);
+  color: var(--text-hi);
+}
+
+/* --text-faint is reserved for units, counts and timestamps. These three are
+   none of those: a collapse affordance, a zoom control and empty-state prose.
+   Interactive glyphs and instructions must stay legible. */
+.plate-workspace .artinos-panel-header .artinos-panel-drag > span { color: var(--text-low); }
+.plate-workspace .artinos-gzoom button { color: var(--text-low); }
+.plate-workspace .artinos-gzoom button:hover { color: var(--text-hi); }
+
+/* ── SH.01  SEARCH ────────────────────────────────────────────────────────
+   Fixed 272×27 with a 20px lead gap, exactly as the reference's command bar.
+   It does not stretch: a search field that resizes with the window reads as
+   layout, not as a control. */
+.plate-workspace .plate-search-entry {
+  flex: 0 0 auto;
+  width: 272px;
+  min-width: 0;
+  max-width: none;
+  height: 27px;
+  margin-left: var(--space-7);
+  padding: 0 11px;
+  border-radius: 11px;
+  background: var(--bg-well);
+  box-shadow: var(--e0-well);
+  color: var(--text-low);
+  transition: box-shadow var(--dur-state) var(--ease-std), color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .plate-search-entry:hover { color: var(--text-mid); }
+.plate-workspace .plate-search-entry:active { box-shadow: var(--e0-well), inset 0 0 0 1px var(--sig-live-line); }
+.plate-workspace .plate-search-entry:focus-visible,
+.plate-workspace .plate-search-entry:focus {
+  outline: none;
+  box-shadow: var(--e0-well), var(--focus-ring);
+  color: var(--text-hi);
+}
+@media (max-width: 1100px) {
+  .plate-workspace .plate-search-entry { width: 180px; margin-left: var(--space-5); }
+}
+
+/* the split handle between two panels */
+.plate-workspace .artinos-panel-split-resizer {
+  position: relative;
+  flex: 0 0 var(--space-5);
+  align-self: stretch;
+  cursor: ew-resize;
+  z-index: 6;
+}
+.plate-workspace .artinos-panel-split-resizer.split-left,
+.plate-workspace .artinos-panel-split-resizer.split-right { cursor: ns-resize; }
+.plate-workspace .artinos-panel-split-resizer::after {
+  content: '';
+  position: absolute;
+  inset: 20% 50% 20% 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 999px;
+  background: var(--line);
+  opacity: 0;
+  transition: opacity var(--dur-state) var(--ease-std), background-color var(--dur-state) var(--ease-std);
+}
+.plate-workspace .artinos-panel-split-resizer:hover::after { opacity: 1; }
+.plate-workspace .artinos-panel-split-resizer:active::after { opacity: 1; background: var(--sig-live); }
+
+/* AS.01 — the panel card's footer line */
+.plate-workspace .artinos-panel-footer {
+  margin-top: auto;
+  padding: var(--space-4) 11px 0;
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ── TAB SLOT INDICATOR ───────────────────────────────────────────────────
+   The rule sits *on* the tab's bottom edge at hairline weight — the same 1px
+   as a border — and thickens by exactly 1px when a segment is live or aimed at.
+   No glow, no scaling: the only thing that changes is the weight, so the strip
+   stays quiet and the change still reads. */
+
+.plate-workspace .plate-dock-tabs button { position: relative; }
+
+/* ── THIRD-PARTY CONSOLE ──────────────────────────────────────────────────
+   The Three Inspector renders its own console markup inside our panel with no
+   layout of its own, so the rows collapsed onto each other. Give it flow. */
+
+.plate-workspace .console-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  font-family: var(--font-num);
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+.plate-workspace .console-log > * {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 18px;
+  padding: 2px var(--space-2);
+  border-radius: 3px;
+  color: var(--text-mid);
+  word-break: break-word;
+}
+.plate-workspace .log-message { flex: 1; min-width: 0; }
+.plate-workspace .log-icon { flex: 0 0 auto; opacity: 0.75; }
+.plate-workspace .log-count-badge {
+  flex: 0 0 auto;
+  min-height: 0;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--bg-active);
+  font-size: 8.5px;
+  color: var(--text-low);
+}
+.plate-workspace .log-message.info { color: var(--text-mid); }
+.plate-workspace .log-message.warn { color: var(--sig-warn); }
+.plate-workspace .log-message.error { color: var(--sig-fault); }
+
+/* ── EXIT MOTION ──────────────────────────────────────────────────────────
+   Arriving decelerates; leaving accelerates away in less time. Applied to the
+   layers that come and go. */
+.plate-workspace .plate-console-toast {
+  transition: opacity var(--dur-exit) var(--ease-exit), transform var(--dur-exit) var(--ease-exit);
+}
+.plate-workspace .plate-console-toast[data-visible] {
+  transition: opacity var(--dur-surface) var(--ease-enter), transform var(--dur-surface) var(--ease-enter);
+}
+
+/* ── SH.01  STATUS CLUSTER ────────────────────────────────────────────────
+   Transcribed from the reference's command bar: one quiet pill holding
+   backend · fps · sparkline · load · ⋯ on a single baseline at 13px gaps.
+
+   The reference keeps every figure calm — the backend name is the only teal,
+   fps is plain, and the load reads as one dim string rather than four coloured
+   values. A status bar that shouts has nothing left for an actual fault. */
+
+.plate-workspace .plate-toolbar-cluster {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  height: 27px;
+  padding: 0 12px;
+  margin-left: auto;
+  border-radius: var(--radius-control);
+  background: var(--bg-well);
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+}
+.plate-workspace .plate-toolbar-status { display: flex; align-items: center; }
+
+.plate-workspace .plate-toolbar-status .artinos-hud { background: none; border: 0; box-shadow: none; padding: 0; }
+.plate-workspace .plate-toolbar-status .artinos-hud-summary {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  height: 27px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-variant-numeric: tabular-nums;
+}
+.plate-workspace .plate-toolbar-status .artinos-hud-summary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* A legacy rule pills backend/fps/quality (24px, padded) while load, the
+   micrograph and the chevron stay flush — three of seven items floating at
+   a different rhythm than the rest. Every item here is plain text: none of
+   them carry a pill. */
+.plate-workspace .plate-toolbar-status .artinos-hud-backend,
+.plate-workspace .plate-toolbar-status .artinos-hud-quality {
+  height: auto;
+  padding: 0;
+}
+
+/* backend — the one teal element */
+.plate-workspace .artinos-hud-backend { display: flex; align-items: center; gap: var(--space-3); }
+.plate-workspace .artinos-hud-backend i {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--sig-live);
+  box-shadow: 0 0 6px var(--sig-live-line);
+}
+.plate-workspace .artinos-hud-backend b {
+  font: 500 8.5px/1 var(--font-num);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sig-live-hi);
+}
+
+/* load — one dim string: CPU 41 · GPU 63 */
+
+.plate-workspace .artinos-hud-micrograph { width: 48px; height: 13px; opacity: 0.9; }
+.plate-workspace .artinos-hud-micrograph .is-cpu { stroke: var(--sig-live); stroke-width: 0.9; }
+
+.plate-workspace .artinos-hud-quality {
+  display: flex; align-items: baseline; gap: 5px;
+  font: 300 8.5px/1 var(--font-num);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.plate-workspace .artinos-hud-quality b { font-weight: 500; color: var(--text-mid); }
+.plate-workspace .artinos-hud-chevron { color: var(--text-faint); }
+
+/* reference gap between the tab strip and the search field */
+.plate-workspace .plate-search-entry { margin-left: 20px; }
+
+/* ── SH.01 CORRECTIONS ────────────────────────────────────────────────────
+   Measured against the reference's command bar. --bg-well is a .42 recess,
+   but the strip's own wells are far lighter: the status cluster sits at .14
+   and the search at .2. Using the full well made both read as holes. */
+
+.plate-workspace .plate-toolbar-cluster {
+  background: color-mix(in srgb, var(--bg-well) 40%, transparent);   /* ≈ .14 */
+  box-shadow: inset 0 0 0 1px var(--line-subtle);
+  border-radius: 6px;
+}
+.plate-workspace .plate-search-entry {
+  background: color-mix(in srgb, var(--bg-well) 58%, transparent);   /* ≈ .2  */
+  box-shadow: inset 0 1px 2px var(--shadow-well), inset 0 0 0 1px var(--line-subtle);
+  font-size: 11px;
+  color: var(--text-low);
+}
+.plate-workspace .plate-search-entry span { font-size: 11px; }
+.plate-workspace .plate-search-entry kbd { font-size: 9px; letter-spacing: 0.08em; color: var(--text-faint); }
+
+/* ── POSTFX STACK ─────────────────────────────────────────────────────────
+   44 effects in a single 669px-wide column inside a 190px window: a 12x
+   overflow, and the panel's own width doing nothing. The stack is a list of
+   independent cards of varying height, which is what multi-column flow is
+   for — it packs them instead of leaving ragged rows the way a grid would,
+   and the column count follows the width, so the same rule serves a wide
+   bottom dock and a narrow side dock. */
+.plate-workspace .artinos-effect {
+  break-inside: avoid;
+  margin: 0 0 var(--space-2);
+}
+
+/* ── PANEL POLISH ─────────────────────────────────────────────────────────
+   The density pass bought the space; this spends a little of it back so the
+   result reads as a designed surface rather than a packed one. Controls get
+   the reference's row treatment (PL.03): a rest wash, a radius and real
+   horizontal padding, so a parameter is an object you can point at instead
+   of text lying on the card. */
+
+.plate-workspace .artinos-panel-body { padding: 10px 12px 12px; }
+
+/* ── STRIP EDGE FIXES ─────────────────────────────────────────────────────
+   The status cluster drew its edge twice: a legacy 0.8px transparent border
+   on top of the inset 1px ring it already had. Two edges a fraction of a
+   pixel apart on a 6px radius is the doubled, fuzzy corner — one ring only. */
+.plate-workspace .plate-toolbar-cluster { border: 0; }
+
+/* The HUD and its summary carried their own radii inside that pill, so the
+   corner was drawn three times over. The cluster is the only box here. */
+.plate-workspace .plate-toolbar-status .artinos-hud,
+.plate-workspace .plate-toolbar-status .artinos-hud-summary {
+  border-radius: 0;
+  border: 0;
+  /* The legacy standalone `.artinos-hud` (a floating pill elsewhere) carries
+     backdrop-filter: blur(18px). Its own background was already zeroed here,
+     but the blur was never included in that reset, so it stayed live with
+     nothing behind it to blur — a stray filter drawing a visible seam under
+     the readout, distinct from the dock's own frost. Embedded in the toolbar
+     the HUD isn't its own glass surface; the dock already is. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* The strip's first tab sat hard against the dock edge. 12px gives it the
+   same air the panels have, and the content inset follows so the tab strip
+   and the first panel still start on the same line. */
+.plate-workspace .plate-dock-toolbar { padding: 0 12px; }
+
+/* the status cluster is a group of readouts, not a container */
+.plate-workspace .plate-toolbar-cluster {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+.plate-workspace .plate-dock-toolbar { border-bottom: 0; }
+
+/* A panel is a region of the dock, not a card on it: no fill of its own, so
+   the frost reads straight through, and a hairline to bound the region.
+   Reference rule 04 — gutters separate, strokes only weight. It also runs no
+   backdrop-filter; nesting one inside the dock's re-blurs an already-blurred
+   surface and leaves a seam at every panel edge. */
+.plate-workspace .artinos-panel-footer {
+  border-top: 0;
+  background: transparent;
+}
+}

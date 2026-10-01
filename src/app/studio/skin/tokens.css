@@ -1,26 +1,4 @@
-/* ARTINOS UI — tokens
-   ==========================================================================
-   Source of truth: packages/ui/VISUAL_REFERENCES/artinos-core-ui.html
-
-     PRIMITIVES → SEMANTIC ROLES → MATERIAL ROLES → COMPONENT TOKENS
-     → STATE TOKENS → THEME WORLD
-
-   Every token keeps its reference name behind a `--ui-` prefix — `--sig`
-   becomes `--ui-sig`, `--body-in` becomes `--ui-body-in` — so the package can
-   sit on any page without claiming generic names like `--ink` or `--glass`,
-   which the legacy layer and host apps already use.
-
-     1. core      signal, ink, geometry, density, type, motion (this file)
-     2. material  glass, edge, depth, body, active, seam, well (worlds.css —
-                  frost is the attribute-less default, like the reference)
-     3. aliases   the component vocabulary the rest of the kit already reads
-                  (--ui-text-*, --ui-pane-*, --ui-range-* …), derived from 1+2
-     4. roles     the older --bg-* / --text-* / --sig-* names, derived from 3
-
-   Aliases and roles re-derive on every [data-world] and [data-theme] scope. A
-   custom property inherits its COMPUTED value, so an alias resolved once on
-   :root would freeze the default world into every re-themed subtree.
-   ========================================================================== */
+/* Studio skin · tokens — the --ui-* core tokens, the Frost material they default to, the dock glass for the two ARTINOS UI frost themes (data-ar-theme), and the state and accessibility overrides. */
 
 /* 1 — CORE ---------------------------------------------------------------- */
 :root {
@@ -77,9 +55,7 @@
 }
 
 /* 3 — ALIASES ------------------------------------------------------------- */
-:root,
-[data-world],
-[data-theme] {
+:root {
   /* type */
   --ui-font: var(--ui-face);
   --ui-font-size: 12px;
@@ -272,9 +248,7 @@
 }
 
 /* 4 — ROLES --------------------------------------------------------------- */
-:root,
-[data-world],
-[data-theme] {
+:root {
   --font-ui: var(--ui-face);
   --font-num: var(--ui-num);
 
@@ -379,4 +353,82 @@
   --dur-layout: var(--ui-t-slow);
   --dur-exit: var(--ui-t-fast);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* 02 · FROST GLASS — the canonical ARTINOS surface */
+:root {
+  --ui-glass: rgba(255, 255, 255, 0.1);
+  --ui-glass-top: rgba(255, 255, 255, 0.19);
+  --ui-blur: 26px;
+  --ui-sat: 1.24;
+  --ui-grain: 0.05;
+  --ui-edge: rgba(255, 255, 255, 0.17);
+  --ui-edge-lit: rgba(255, 255, 255, 0.55);
+  --ui-depth: 0 26px 64px rgba(0, 0, 0, 0.34), 0 3px 10px rgba(0, 0, 0, 0.18);
+  --ui-body: rgba(255, 255, 255, 0.085);
+  --ui-body-in: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+  --ui-active-a: rgba(255, 255, 255, 0.74);
+  --ui-active-b: rgba(255, 255, 255, 0.5);
+  --ui-active-lit: rgba(255, 255, 255, 0.92);
+  --ui-ink-active: rgba(16, 20, 22, 0.82);
+  --ui-seam: rgba(16, 20, 22, 0.6);
+  --ui-well: rgba(0, 0, 0, 0.16);
+  --ui-mass: 1;
+  --ui-spring: 210;
+  --ui-damp: 22;
+}
+
+/* The dock glass for the two ARTINOS UI frost themes.
+   `data-ar-theme` sits on <html> (DockShell) next to the kit's own tokens; these
+   rules retune the studio's frost world to match. Both frosts are untinted: the
+   glass diffuses the scene but never shifts its hue, so saturation stays at 1.
+   Imported after worlds.css — same specificity, so the later block wins. */
+
+[data-ar-theme='frost-deep'] {
+  --ui-glass: rgba(255, 255, 255, 0.06);
+  --ui-glass-top: rgba(255, 255, 255, 0.12);
+  --ui-blur: 72px;
+  --ui-sat: 1;
+  --ui-edge: rgba(255, 255, 255, 0.2);
+  --ui-edge-lit: rgba(255, 255, 255, 0.28);
+  --ui-depth: 0 18px 44px -24px rgba(0, 0, 0, 0.38);
+}
+
+[data-ar-theme='frost-etched'] {
+  --ui-glass: rgba(255, 255, 255, 0.07);
+  --ui-glass-top: rgba(255, 255, 255, 0.16);
+  --ui-blur: 24px;
+  --ui-sat: 1;
+  --ui-edge: rgba(255, 255, 255, 0.2);
+  --ui-edge-lit: rgba(255, 255, 255, 0.32);
+  --ui-depth: 0 18px 44px -24px rgba(0, 0, 0, 0.22);
+}
+
+/* Contrast is pinned while a pointer gesture is live, so a dragged value never
+   loses legibility against a moving scene. useControl sets this attribute. */
+[data-interacting='true'] {
+  --ui-pane-tint: #1b2423a6;
+}
+
+[data-density='compact'] {
+  --ui-row: 24px;
+  --ui-range-h: 20px;
+  --ui-control-h: 21px;
+  --ui-range-seam-top: 5px;
+}
+
+@media (forced-colors: active) {
+  :root {
+    --ui-text: CanvasText;
+    --ui-text-label: CanvasText;
+    --ui-text-muted: GrayText;
+    --ui-line: ButtonBorder;
+    --ui-line-strong: CanvasText;
+    --ui-pane-border: CanvasText;
+    --ui-pane-tint: Canvas;
+    --ui-pane-sheen: linear-gradient(Canvas, Canvas);
+    --ui-accent: Highlight;
+    --ui-focus: Highlight;
+    --ui-blur: 0px;
+  }
 }

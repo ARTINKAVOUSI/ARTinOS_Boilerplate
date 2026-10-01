@@ -136,8 +136,7 @@
   text-transform: uppercase;
   color: var(--ui-text-meta);
 }
-.plate-toolbar-status .artinos-hud-readout,
-.plate-toolbar-status .artinos-hud-load {
+.plate-toolbar-status .artinos-hud-readout {
   display: flex;
   align-items: baseline;
   gap: 3px;
@@ -150,9 +149,7 @@
   font-variant-numeric: tabular-nums;
   color: var(--ui-text);
 }
-.plate-toolbar-status .artinos-hud-readout small,
-.plate-toolbar-status .artinos-hud-load small,
-.plate-toolbar-status .artinos-hud-load b {
+.plate-toolbar-status .artinos-hud-readout small {
   font-family: inherit;
   font-size: 8px;
   font-weight: 400;
@@ -160,11 +157,9 @@
   text-transform: uppercase;
   color: var(--ui-text-meta);
 }
-.plate-toolbar-status .artinos-hud-load b,
 .plate-toolbar-status .artinos-hud-quality b {
   font-weight: 500;
   color: var(--ui-text-body);
 }
 .plate-toolbar-status .artinos-hud-micrograph .is-cpu { stroke: var(--ui-range-seam); }
-.plate-toolbar-status .artinos-hud-micrograph .is-gpu { stroke: var(--ui-text-meta); }
 .plate-toolbar-status .artinos-hud-chevron { color: var(--ui-icon); }
